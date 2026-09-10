@@ -306,7 +306,7 @@ SetupPage {
 
                             QGCRadioButton {
                                 id:             apmFlightStack
-                                text:           qsTr("ArduPilot")
+                                text:           qsTr("ArduPilotccccccccc")
                                 font.bold:      !_defaultFirmwareIsPX4
                                 checked:        !_defaultFirmwareIsPX4
 

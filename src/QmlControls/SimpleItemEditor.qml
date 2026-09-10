@@ -13,7 +13,8 @@ import QGroundControl.FactControls
 Rectangle {
     width:  availableWidth
     height: editorColumn.height + (_margin * 2)
-    color:  qgcPal.windowShadeDark
+    //color:  qgcPal.windowShadeDark
+    color: "#3D3B3B"
     radius: _radius
 
     property bool _specifiesAltitude:       missionItem.specifiesAltitude
@@ -23,6 +24,9 @@ Rectangle {
     property int  _globalAltMode:           missionItem.masterController.missionController.globalAltitudeMode
     property bool _globalAltModeIsMixed:    _globalAltMode == QGroundControl.AltitudeModeMixed
     property real _radius:                  ScreenTools.defaultFontPixelWidth / 2
+
+    // Sağdakı dəyər sahələrinin eni — etiket solda, dəyər sağda eyni xətt üzrə
+    readonly property real _fieldW: Math.max(90, Math.min(150, availableWidth * 0.42))
 
     function updateAltitudeModeText() {
         if (missionItem.altitudeMode === QGroundControl.AltitudeModeRelative) {
@@ -61,7 +65,7 @@ Rectangle {
             wrapMode:       Text.WordWrap
             font.pointSize: ScreenTools.smallFontPointSize
             text:           missionItem.rawEdit ?
-                                qsTr("Provides advanced access to all commands/parameters. Be very careful!") :
+                                qsTr("Bütün əmrlərə/parametrlərə təkmil girişi təmin edir. Çox diqqətli olun!") :
                                 missionItem.commandDescription
         }
 
@@ -76,14 +80,14 @@ Rectangle {
                 .arg(_controllerVehicle.vtol ? qsTr("T") : qsTr("T"))
                 .arg(_controllerVehicle.vtol ? qsTr("Transition Direction") : qsTr("Takeoff"))
                 .arg(_controllerVehicle.vtol ? qsTr("desired") : qsTr("climbout"))
-                .arg(_controllerVehicle.vtol ? (qsTr("Ensure distance from launch to transition direction is far enough to complete transition.")) : "")
+                .arg(_controllerVehicle.vtol ? (qsTr("Başlamadan keçid istiqamətinə qədər olan məsafənin keçidi başa çatdırmaq üçün kifayət qədər uzaq olduğundan əmin olun.")) : "")
                 Layout.fillWidth:   true
                 wrapMode:           Text.WordWrap
                 visible:            !initialClickLabel.visible
             }
 
             QGCLabel {
-                text:               qsTr("Ensure clear of obstacles and into the wind.")
+                text:               qsTr("Maneələrdən uzaq durun və küləyə doğru gedin.")
                 Layout.fillWidth:   true
                 wrapMode:           Text.WordWrap
                 visible:            !initialClickLabel.visible
@@ -101,8 +105,8 @@ Rectangle {
             QGCLabel {
                 id:                 initialClickLabel
                 text:               missionItem.launchTakeoffAtSameLocation ?
-                                        qsTr("Click in map to set planned Takeoff location.") :
-                                        qsTr("Click in map to set planned Launch location.")
+                                        qsTr("Planlaşdırılan uçuş yerini təyin etmək üçün xəritədə klikləyin.") :
+                                        qsTr("Planlaşdırılmış Başlama yerini təyin etmək üçün xəritədə klikləyin.")
                 Layout.fillWidth:   true
                 wrapMode:           Text.WordWrap
                 visible:            missionItem.isTakeoffItem && !missionItem.launchCoordinate.isValid
@@ -125,56 +129,77 @@ Rectangle {
                     Layout.fillWidth:   true
                     wrapMode:           Text.WordWrap
                     font.pointSize:     ScreenTools.smallFontPointSize
-                    text:               qsTr("Altitude below specifies the approximate altitude of the ground. Normally 0 for landing back at original launch location.")
+                    text:               qsTr("Aşağıdakı hündürlük yerin təxmini hündürlüyünü göstərir. Normal olaraq, orijinal işə salınma yerinə enmək üçün 0-dır.")
                     visible:            missionItem.isLandCommand
                 }
 
-                MouseArea {
-                    Layout.preferredWidth:  childrenRect.width
-                    Layout.preferredHeight: childrenRect.height
-
-                    onClicked: {
-                        if (_globalAltModeIsMixed) {
-                            var removeModes = []
-                            var updateFunction = function(altMode){ missionItem.altitudeMode = altMode }
-                            if (!_controllerVehicle.supportsTerrainFrame) {
-                                removeModes.push(QGroundControl.AltitudeModeTerrainFrame)
-                            }
-                            if (!QGroundControl.corePlugin.options.showMissionAbsoluteAltitude && missionItem.altitudeMode !== QGroundControl.AltitudeModeAbsolute) {
-                                removeModes.push(QGroundControl.AltitudeModeAbsolute)
-                            }
-                            removeModes.push(QGroundControl.AltitudeModeMixed)
-                            altModeDialogComponent.createObject(mainWindow, { rgRemoveModes: removeModes, updateAltModeFn: updateFunction }).open()
-                        }
-                    }
-
-                    RowLayout {
-                        spacing: _altRectMargin
-
-                        QGCLabel {
-                            Layout.alignment:   Qt.AlignBaseline
-                            text:               qsTr("Altitude")
-                            font.pointSize:     ScreenTools.smallFontPointSize
-                        }
-                        QGCLabel {
-                            id:                 altModeLabel
-                            Layout.alignment:   Qt.AlignBaseline
-                            visible:            _globalAltMode !== QGroundControl.AltitudeModeRelative
-                        }
-                        QGCColoredImage {
-                            height:     ScreenTools.defaultFontPixelHeight / 2
-                            width:      height
-                            source:     "/res/DropArrow.svg"
-                            color:      qgcPal.text
-                            visible:    _globalAltModeIsMixed
-                        }
-                    }
-                }
-
-                FactTextField {
-                    id:                 altField
+                // Etiket solda, dəyər sahəsi sağda — eyni sətirdə
+                RowLayout {
                     Layout.fillWidth:   true
-                    fact:               missionItem.altitude
+                    Layout.topMargin:   _altRectMargin
+                    spacing:            _altRectMargin
+
+                    MouseArea {
+                        Layout.fillWidth:       true
+                        Layout.minimumWidth:    0
+                        Layout.preferredHeight: altLabelRow.implicitHeight
+                        Layout.alignment:       Qt.AlignVCenter
+                        cursorShape:            _globalAltModeIsMixed ? Qt.PointingHandCursor : Qt.ArrowCursor
+
+                        onClicked: {
+                            if (_globalAltModeIsMixed) {
+                                var removeModes = []
+                                var updateFunction = function(altMode){ missionItem.altitudeMode = altMode }
+                                if (!_controllerVehicle.supportsTerrainFrame) {
+                                    removeModes.push(QGroundControl.AltitudeModeTerrainFrame)
+                                }
+                                if (!QGroundControl.corePlugin.options.showMissionAbsoluteAltitude && missionItem.altitudeMode !== QGroundControl.AltitudeModeAbsolute) {
+                                    removeModes.push(QGroundControl.AltitudeModeAbsolute)
+                                }
+                                removeModes.push(QGroundControl.AltitudeModeMixed)
+                                altModeDialogComponent.createObject(mainWindow, { rgRemoveModes: removeModes, updateAltModeFn: updateFunction }).open()
+                            }
+                        }
+
+                        RowLayout {
+                            id:             altLabelRow
+                            anchors.left:   parent.left
+                            anchors.right:  parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing:        _altRectMargin * 0.8
+
+                            QGCLabel {
+                                text:               qsTr("Hündürlük")
+                                font.pointSize:     ScreenTools.smallFontPointSize
+                                Layout.alignment:   Qt.AlignVCenter
+                            }
+                            QGCLabel {
+                                id:                 altModeLabel
+                                Layout.fillWidth:   true
+                                Layout.minimumWidth: 0
+                                Layout.alignment:   Qt.AlignVCenter
+                                elide:              Text.ElideRight
+                                font.pointSize:     ScreenTools.smallFontPointSize
+                                visible:            _globalAltMode !== QGroundControl.AltitudeModeRelative
+                            }
+                            QGCColoredImage {
+                                height:             ScreenTools.defaultFontPixelHeight / 2
+                                width:              height
+                                Layout.alignment:   Qt.AlignVCenter
+                                source:             "/res/DropArrow.svg"
+                                color:              qgcPal.text
+                                visible:            _globalAltModeIsMixed
+                            }
+                        }
+                    }
+
+                    FactTextField {
+                        id:                     altField
+                        Layout.preferredWidth:  _fieldW
+                        Layout.minimumWidth:    0
+                        Layout.alignment:       Qt.AlignRight | Qt.AlignVCenter
+                        fact:                   missionItem.altitude
+                    }
                 }
 
                 QGCLabel {
@@ -197,13 +222,18 @@ Rectangle {
                         spacing:            0
 
                         QGCLabel {
-                            font.pointSize: ScreenTools.smallFontPointSize
-                            text:           object.name
-                            visible:        object.name !== ""
+                            font.pointSize:      ScreenTools.smallFontPointSize
+                            text:                object.name
+                            visible:             object.name !== ""
+                            Layout.fillWidth:    true
+                            Layout.minimumWidth: 0
+                            elide:               Text.ElideRight
                         }
 
                         FactComboBox {
                             Layout.fillWidth:   true
+                            Layout.minimumWidth: 0
+                            sizeToContents:     false
                             indexModel:         false
                             model:              object.enumStrings
                             fact:               object
@@ -224,7 +254,13 @@ Rectangle {
                 Repeater {
                     model: missionItem.textFieldFacts
 
-                    QGCLabel { text: object.name }
+                    QGCLabel {
+                        text:                object.name
+                        Layout.fillWidth:    true
+                        Layout.minimumWidth: 0
+                        Layout.alignment:    Qt.AlignVCenter
+                        elide:               Text.ElideRight
+                    }
                 }
 
                 Repeater {
@@ -250,10 +286,12 @@ Rectangle {
                     model: missionItem.textFieldFacts
 
                     FactTextField {
-                        showUnits:          true
-                        fact:               object
-                        Layout.fillWidth:   true
-                        enabled:            !object.readOnly
+                        showUnits:              true
+                        fact:                   object
+                        Layout.preferredWidth:  _fieldW
+                        Layout.minimumWidth:    0
+                        Layout.alignment:       Qt.AlignRight | Qt.AlignVCenter
+                        enabled:                !object.readOnly
                     }
                 }
 
@@ -261,17 +299,21 @@ Rectangle {
                     model: missionItem.nanFacts
 
                     FactTextField {
-                        showUnits:          true
-                        fact:               object
-                        Layout.fillWidth:   true
-                        enabled:            !isNaN(object.rawValue)
+                        showUnits:              true
+                        fact:                   object
+                        Layout.preferredWidth:  _fieldW
+                        Layout.minimumWidth:    0
+                        Layout.alignment:       Qt.AlignRight | Qt.AlignVCenter
+                        enabled:                !isNaN(object.rawValue)
                     }
                 }
 
                 FactTextField {
-                    fact:               missionItem.speedSection.flightSpeed
-                    Layout.fillWidth:   true
-                    enabled:            flightSpeedCheckbox.checked
+                    fact:                   missionItem.speedSection.flightSpeed
+                    Layout.preferredWidth:  _fieldW
+                    Layout.minimumWidth:    0
+                    Layout.alignment:       Qt.AlignRight | Qt.AlignVCenter
+                    enabled:                flightSpeedCheckbox.checked
                     visible:            missionItem.speedSection.available
                 }
             }

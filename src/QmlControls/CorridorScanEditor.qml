@@ -13,7 +13,7 @@ import QGroundControl.FlightMap
 
 TransectStyleComplexItemEditor {
     transectAreaDefinitionComplete: _missionItem.corridorPolyline.isValid
-    transectAreaDefinitionHelp:     qsTr("Use the Polyline Tools to create the polyline which defines the corridor.")
+    transectAreaDefinitionHelp:     qsTr("Dəhlizi müəyyən edən çoxlu xətt yaratmaq üçün Polyline Tools-dan istifadə edin.")
     transectValuesHeaderName:       qsTr("Corridor")
     transectValuesComponent:        _transectValuesComponent
     presetsTransectValuesComponent: _transectValuesComponent
@@ -33,14 +33,14 @@ TransectStyleComplexItemEditor {
             rowSpacing:     _margin
             columns:        2
 
-            QGCLabel { text: qsTr("Width") }
+            QGCLabel { text: qsTr("En") }
             FactTextField {
                 fact:               _missionItem.corridorWidth
                 Layout.fillWidth:   true
             }
 
             QGCLabel {
-                text:       qsTr("Turnaround dist")
+                text:       qsTr("Dönmə məsafəsi")
                 visible:    !forPresets
             }
             FactTextField {
@@ -51,7 +51,7 @@ TransectStyleComplexItemEditor {
 
             FactCheckBox {
                 Layout.columnSpan:  2
-                text:               qsTr("Images in turnarounds")
+                text:               qsTr("Dönüşlərdə şəkillər")
                 fact:               _missionItem.cameraTriggerInTurnAround
                 enabled:            _missionItem.hoverAndCaptureAllowed ? !_missionItem.hoverAndCapture.rawValue : true
                 visible:            !forPresets

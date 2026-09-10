@@ -347,7 +347,10 @@ void SerialWorker::_onPortBytesWritten(qint64 bytes) const
 void SerialWorker::_onPortErrorOccurred(QSerialPort::SerialPortError portError)
 {
     const QString errorString = _port->errorString();
-    qCWarning(SerialLinkLog) << "Port error:" << portError << errorString;
+    // QSerialPort can emit errorOccurred with NoError; don't log a bogus warning for it.
+    if (portError != QSerialPort::NoError) {
+        qCWarning(SerialLinkLog) << "Port error:" << portError << errorString;
+    }
 
     switch (portError) {
     case QSerialPort::NoError:

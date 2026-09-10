@@ -231,8 +231,13 @@ void GstVideoReceiver::stop()
         return;
     }
 
-    if (_uri.isEmpty()) {
-        qCWarning(GstVideoReceiverLog) << "Stop called on empty URI";
+    // NOTE: an empty URI is not a reason to refuse stopping. When the video source is
+    // switched off the URI is cleared while the pipeline is still up; bailing out here
+    // left the pipeline alive, so the 1s watchdog kept calling stop() and logging
+    // forever. Only refuse when there is genuinely nothing to tear down.
+    if (!_pipeline) {
+        qCDebug(GstVideoReceiverLog) << "Stop called but no pipeline is running" << _uri;
+        _dispatchSignal([this]() { emit onStopComplete(STATUS_INVALID_STATE); });
         return;
     }
 

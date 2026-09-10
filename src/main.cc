@@ -76,6 +76,12 @@ int main(int argc, char *argv[])
     // Early platform setup before Qt app construction
     Platform::setupPreApp(args);
 
+#ifdef Q_OS_ANDROID
+    qputenv("QSG_INFO", "1");                 // (müvəqqəti) hansı backend seçildiyini loga yazsın
+    qputenv("QSG_RHI_BACKEND", "opengl");     // Vulkan əvəzinə OpenGL məcburi
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+#endif
+
     QGCApplication app(argc, argv, args);
 
     QGCLogging::installHandler();
@@ -99,3 +105,124 @@ int main(int argc, char *argv[])
     qDebug() << "Exiting main";
     return exitCode;
 }
+
+
+// /****************************************************************************
+//  *
+//  * (c) 2009-2024 QGROUNDCONTROL PROJECT <http://www.qgroundcontrol.org>
+//  *
+//  * QGroundControl is licensed according to the terms in the file
+//  * COPYING.md in the root of the source code directory.
+//  *
+//  ****************************************************************************/
+
+// #include <QtQuick/QQuickWindow>
+// #include <QtWidgets/QApplication>
+// #include <QCoreApplication>
+// #include <QDir>
+
+// #include "QGCApplication.h"
+// #include "QGCCommandLineParser.h"
+// #include "QGCLogging.h"
+// #include "Platform.h"
+
+// #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+// #include <QtWidgets/QMessageBox>
+// #include "RunGuard.h"
+// #endif
+
+// #ifdef Q_OS_LINUX
+// #include <unistd.h>
+// #include <sys/types.h>
+// #endif
+
+// #ifdef QGC_UNITTEST_BUILD
+// #include "UnitTestList.h"
+// #endif
+
+// int main(int argc, char *argv[])
+// {
+// #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+//     if (::getuid() == 0) {
+//         const QApplication errorApp(argc, argv);
+//         // QErrorMessage
+//         (void) QMessageBox::critical(nullptr,
+//                                     QCoreApplication::translate("main", "Error"),
+//                                     QCoreApplication::translate("main", "You are running %1 as root. "
+//                                                                 "You should not do this since it will cause other issues with %1. "
+//                                                                 "%1 will now exit.<br/><br/>").arg(QGC_APP_NAME));
+//         return -1;
+//     }
+// #endif
+
+//     QGCCommandLineParser::CommandLineParseResult args;
+//     {
+//         const QCoreApplication pre(argc, argv);
+//         QCoreApplication::setApplicationName(QStringLiteral(QGC_APP_NAME));
+//         QCoreApplication::setApplicationVersion(QStringLiteral(QGC_APP_VERSION_STR));
+//         args = QGCCommandLineParser::parseCommandLine();
+//         if (args.statusCode == QGCCommandLineParser::CommandLineParseResult::Status::Error) {
+//             const QString errorMessage = args.errorString.value_or(QStringLiteral("Unknown error occurred"));
+//             qCritical() << qPrintable(errorMessage);
+//             // TODO: QCommandLineParser::showMessageAndExit(QCommandLineParser::MessageType::Error) - Qt6.9
+//             return 1;
+//         }
+//     }
+
+// #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+//     const QString runguardString = QStringLiteral("%1 RunGuardKey").arg(QStringLiteral(QGC_APP_NAME));
+//     RunGuard guard(runguardString);
+//     if (!args.allowMultiple) {
+//         if (!guard.tryToRun()) {
+//             const QApplication errorApp(argc, argv);
+//             (void) QMessageBox::critical(nullptr,
+//                                         QCoreApplication::translate("main", "Error"),
+//                                         QCoreApplication::translate("main", "A second instance of %1 is already running. "
+//                                                                     "Please close the other instance and try again.").arg(QStringLiteral(QGC_APP_NAME)));
+//             return -1;
+//         }
+//     }
+// #endif
+
+//             // Early platform setup before Qt app construction
+//     Platform::setupPreApp(args);
+
+// #ifdef Q_OS_ANDROID
+//     qputenv("QSG_INFO", "1");                  // (müvəqqəti) hansı backend seçildiyini loga yazsın
+//     qputenv("QSG_RHI_BACKEND", "opengl");      // Vulkan əvəzinə OpenGL məcburi
+//     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+// #endif
+
+//         // --- AZSHIELD GST SETUP START ---
+// #ifdef Q_OS_WIN
+//     // Windows platformasında GStreamer-in öz pluginlərini tapması üçün mühit dəyişənlərini .exe-nin olduğu yerə yönləndiririk.
+//     // Bu, sistemdəki digər GStreamer (MinGW və s.) versiyaları ilə toqquşmanın qarşısını alır.
+//     QString appDir = QCoreApplication::applicationDirPath();
+//     qputenv("GST_PLUGIN_PATH", QString(QDir::toNativeSeparators(appDir + "/gstreamer-1.0")).toUtf8());
+//     qputenv("GST_PLUGIN_SCANNER", QString(QDir::toNativeSeparators(appDir + "/gst-plugin-scanner.exe")).toUtf8());
+// #endif
+//     // --- AZSHIELD GST SETUP END ---
+
+//     QGCApplication app(argc, argv, args);
+
+//     QGCLogging::installHandler();
+
+//             // Late platform setup after app and logging exist
+//     Platform::setupPostApp();
+
+//     app.init();
+
+//     int exitCode = 0;
+//     if (args.runningUnitTests) {
+// #ifdef QGC_UNITTEST_BUILD
+//         exitCode = QGCUnitTest::runTests(args.stressUnitTests, args.unitTests);
+// #endif
+//     } else if (!args.simpleBootTest) {
+//         exitCode = app.exec();
+//     }
+
+//     app.shutdown();
+
+//     qDebug() << "Exiting main";
+//     return exitCode;
+// }

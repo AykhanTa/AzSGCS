@@ -9,7 +9,7 @@
             "id":                   95,
             "rawName":              "HomeRaw",
             "friendlyName":         "Home Position",
-            "description":          "Planned home position for mission.",
+            "description":          "Missiya üçün planlaşdırılmış ev mövqeyi.",
             "specifiesCoordinate":  true,
             "friendlyEdit":         true,
             "category":             "Basic",
@@ -28,7 +28,7 @@
             "id":                   16,
             "rawName":              "MAV_CMD_NAV_WAYPOINT",
             "friendlyName":         "Waypoint",
-            "description":          "Travel to a position in 3D space.",
+            "description":          "3D məkanında bir mövqeyə səyahət edin.",
             "specifiesCoordinate":  true,
             "friendlyEdit":         true,
             "category":             "Basic",
@@ -64,7 +64,7 @@
             "id":                   17,
             "rawName":              "MAV_CMD_NAV_LOITER_UNLIM",
             "friendlyName":         "Loiter",
-            "description":          "Travel to a position and Loiter around the specified position indefinitely.",
+            "description":          "Bir mövqeyə səyahət edin və qeyri-müəyyən müddətə müəyyən edilmiş mövqe ətrafında Loiter.",
             "specifiesCoordinate":  true,
             "isLoiterCommand":      true,
             "friendlyEdit":         true,
@@ -87,7 +87,7 @@
             "id":                   18,
             "rawName":              "MAV_CMD_NAV_LOITER_TURNS",
             "friendlyName":         "Loiter (turns)",
-            "description":          "Travel to a position and Loiter around the specified position for a number of turns.",
+            "description":          "Bir mövqeyə səyahət edin və bir neçə növbə üçün müəyyən edilmiş mövqe ətrafında Loiter edin.",
             "specifiesCoordinate":  true,
             "isLoiterCommand":      true,
             "friendlyEdit":         true,
@@ -100,7 +100,7 @@
             },
             "param2": {
                 "label":            "Leave Loiter",
-                "enumStrings":      "Direction of next waypoint,Any direction",
+                "enumStrings":      "Növbəti keçid nöqtəsinin istiqaməti, İstənilən istiqamət",
                 "enumValues":       "1,0",
                 "default":          1,
                 "decimalPlaces":    0
@@ -122,22 +122,22 @@
         {
             "id":                   19,
             "rawName":              "MAV_CMD_NAV_LOITER_TIME",
-            "friendlyName":         "Loiter (time)",
-            "description":          "Travel to a position and Loiter around the specified position for an amount of time.",
+            "friendlyName":         "Loiter (vaxt)",
+            "description":          "Bir mövqeyə səyahət edin və müəyyən bir müddət ərzində müəyyən edilmiş mövqe ətrafında Loiter edin.",
             "specifiesCoordinate":  true,
             "isLoiterCommand":      true,
             "friendlyEdit":         true,
             "category":             "Loiter",
             "param1": {
-                "label":            "Loiter Time",
+                "label":            "Loiter Vaxtı",
                 "units":            "secs",
                 "default":          30,
                 "decimalPlaces":    0,
                 "min":              0
             },
             "param2": {
-                "label":            "Leave Loiter",
-                "enumStrings":      "Direction of next waypoint,Current direction",
+                "label":            "Loiteri tərk edin",
+                "enumStrings":      "Növbəti keçid nöqtəsinin istiqaməti, Cari istiqamət",
                 "enumValues":       "1,0",
                 "default":          1,
                 "decimalPlaces":    0
@@ -149,8 +149,8 @@
                 "decimalPlaces":    2
             },
             "param4": {
-                "label":            "Exit loiter from",
-                "enumStrings":      "Center,Tangent",
+                "label":            "Loiter-dən çıxın",
+                "enumStrings":      "Mərkəz,Tangent",
                 "enumValues":       "0,1",
                 "default":          1,
                 "decimalPlaces":    0
@@ -160,7 +160,7 @@
             "id":           20,
             "rawName":      "MAV_CMD_NAV_RETURN_TO_LAUNCH",
             "friendlyName": "Return To Launch",
-            "description":  "Send the vehicle back to the launch position.",
+            "description":  "Təyyarəni başlama vəziyyətinə qaytarın.",
             "friendlyEdit": true,
             "category":     "Basic"
         },
@@ -168,7 +168,7 @@
             "id":                   21,
             "rawName":              "MAV_CMD_NAV_LAND",
             "friendlyName":         "Land",
-            "description":          "Land vehicle at the specified location.",
+            "description":          "Müəyyən edilmiş ərazidə təyyarəni endirin.",
             "specifiesCoordinate":  true,
             "isLandCommand":        true,
             "friendlyEdit":         true,
@@ -199,7 +199,7 @@
             "id":                   22,
             "rawName":              "MAV_CMD_NAV_TAKEOFF",
             "friendlyName":         "Takeoff",
-            "description":          "Launch from the ground and travel towards the specified takeoff position.",
+            "description":          "Yerdən qalxın və müəyyən edilmiş uçuş mövqeyinə doğru hərəkət edin.",
             "specifiesCoordinate":  true,
             "isTakeoffCommand":     true,
             "friendlyEdit":         true,
@@ -212,7 +212,7 @@
             "id":                       30,
             "rawName":                  "MAV_CMD_NAV_CONTINUE_AND_CHANGE_ALT",
             "friendlyName":             "Change Altitude",
-            "description":              "Continue on the current course and climb/descend to specified altitude. When the altitude is reached continue to the next command.",
+            "description":              "Cari kursla davam edin və müəyyən edilmiş hündürlüyə qalxın/enin. Hündürlüyə çatdıqda növbəti əmrə davam edin.",
             "specifiesCoordinate":      false,
             "specifiesAltitudeOnly":    true,
             "friendlyEdit":             true,
@@ -228,15 +228,15 @@
         {
             "id":                   31,
             "rawName":              "MAV_CMD_NAV_LOITER_TO_ALT",
-            "friendlyName":         "Loiter (altitude)",
-            "description":          "Loiter at specified position until altitude reached.",
+            "friendlyName":         "Loiter (hündürlük)",
+            "description":          "Hündürlüyə çatana qədər müəyyən edilmiş mövqedə gəzin.",
             "specifiesCoordinate":  true,
             "isLoiterCommand":      true,
             "friendlyEdit":         true,
             "category":             "Loiter",
             "param1": {
-                "label":            "Leave Loiter",
-                "enumStrings":      "Direction of next waypoint,Any direction",
+                "label":            "Loiteri tərk edin",
+                "enumStrings":      "Növbəti waypoint istiqaməti,İstənilən istiqamət",
                 "enumValues":       "1,0",
                 "default":          1,
                 "decimalPlaces":    0
@@ -248,8 +248,8 @@
                 "decimalPlaces":    2
             },
             "param4": {
-                "label":            "Exit loiter from",
-                "enumStrings":      "Center,Tangent",
+                "label":            "Loiter-dən çıxın",
+                "enumStrings":      "Mərkəz,Tangent",
                 "enumValues":       "0,1",
                 "default":          1,
                 "decimalPlaces":    0
@@ -368,31 +368,31 @@
         {
             "id":           93,
             "rawName":      "MAV_CMD_NAV_DELAY",
-            "friendlyName": "Delay until",
-            "description":  "Delay until the specified time is reached.",
+            "friendlyName": "Gecikmə tarixi",
+            "description":  "Göstərilən vaxta çatana qədər gecikdirin.",
             "param1": {
-                "label":            "Hold",
+                "label":            "Tutun",
                 "units":            "secs",
                 "default":          30,
                 "decimalPlaces":    0,
                 "min":              -1
             },
             "param2": {
-                "label":            "Hour (utc)",
+                "label":            "Saat (utc)",
                 "default":          0,
                 "decimalPlaces":    0,
                 "min":              -1,
                 "max":              23
             },
             "param3": {
-                "label":            "Min (utc)",
+                "label":            "Dəqiqə (utc)",
                 "default":          0,
                 "decimalPlaces":    0,
                 "min":              -1,
                 "max":              59
             },
             "param4": {
-                "label":            "Sec (utc)",
+                "label":            "Saniyə (utc)",
                 "default":          0,
                 "decimalPlaces":    0,
                 "min":              -1,
@@ -446,8 +446,8 @@
         {
             "id":           115,
             "rawName":      "MAV_CMD_CONDITION_YAW",
-            "friendlyName": "Wait for Yaw",
-            "description":  "Delay the mission until the specified heading is reached.",
+            "friendlyName": "Gözləyin Yaw",
+            "description":  "Göstərilən başlığa çatana qədər missiyanı təxirə salın.",
             "category":     "Conditionals",
             "param1": {
                 "label":            "Heading",
@@ -500,18 +500,18 @@
         {
             "id":           177,
             "rawName":      "MAV_CMD_DO_JUMP",
-            "friendlyName": "Jump to item",
-            "description":  "Mission will continue at the specified item.",
+            "friendlyName": "Elementə keçin",
+            "description":  "Missiya göstərilən maddədə davam edəcək.",
             "friendlyEdit": true,
             "category":     "Advanced",
             "param1": {
-                "label":            "Item #",
+                "label":            "Element #",
                 "default":          1,
                 "decimalPlaces":    0,
                 "min":              0
             },
             "param2": {
-                "label":            "Repeat",
+                "label":            "Təkrar et",
                 "default":          10,
                 "decimalPlaces":    0,
                 "min":              0
@@ -520,17 +520,17 @@
         {
             "id":           178,
             "rawName":      "MAV_CMD_DO_CHANGE_SPEED",
-            "friendlyName": "Change speed",
-            "description":  "Change speed and/or throttle set points.",
+            "friendlyName": "Sürəti dəyişdirin",
+            "description":  "Sürəti və/və ya tənzimləmə nöqtələrini dəyişdirin.",
             "category":     "Flight control",
             "param1": {
-                "label":            "Type",
-                "enumStrings":      "Airspeed,Ground Speed,Ascend Speed,Descend Speed",
+                "label":            "Tip",
+                "enumStrings":      "Hava sürəti,Yer sürəti,Yüksəlmə sürəti,Eniş Sürəti",
                 "enumValues":       "0,1,2,3",
                 "default":          0
             },
             "param2": {
-                "label":            "Speed",
+                "label":            "Sürət",
                 "units":            "m/s",
                 "default":          0,
                 "min":              -2
@@ -551,15 +551,15 @@
         {
             "id":                   179,
             "rawName":              "MAV_CMD_DO_SET_HOME",
-            "friendlyName":         "Set launch location",
-            "description":          "Changes the launch location either to the current location or a specified location.",
+            "friendlyName":         "Başlama yerini təyin edin",
+            "description":          "Başlama yerini cari yerə və ya müəyyən bir yerə dəyişir.",
             "specifiesCoordinate":  true,
             "standaloneCoordinate": true,
             "friendlyEdit":         true,
             "category":             "Advanced",
             "param1": {
-                "label":            "Mode",
-                "enumStrings":      "Vehicle position,Specified position",
+                "label":            "Mod",
+                "enumStrings":      "Təyyarənin mövqeyi,Müəyyən edilmiş mövqe",
                 "enumValues":       "1,0",
                 "default":          0
             }
@@ -610,8 +610,8 @@
         {
             "id":           183,
             "rawName":      "MAV_CMD_DO_SET_SERVO",
-            "friendlyName": "Set servo",
-            "description":  "Set servo to specified PWM value.",
+            "friendlyName": "Servo təyin edin",
+            "description":  "Servoyu müəyyən edilmiş PWM dəyərinə təyin edin..",
             "friendlyEdit": true,
             "param1": {
                 "label":            "Servo",
@@ -661,29 +661,29 @@
         {
             "id":           187,
             "rawName":      "MAV_CMD_DO_SET_ACTUATOR",
-            "friendlyName": "Set actuator",
-            "description":  "Set actuator to specified output value (range [-1, 1]).",
+            "friendlyName": "Aktuator təyin edin",
+            "description":  "Aktuatoru müəyyən edilmiş çıxış dəyərinə təyin edin (aralıq [-1, 1]).",
             "friendlyEdit": true,
             "param1": {
-                "label":            "Actuator 1",
+                "label":            "Aktuator 1",
                 "default":          null,
                 "nanUnchanged":     true,
                 "decimalPlaces":    2
             },
             "param2": {
-                "label":            "Actuator 2",
+                "label":            "Aktuator 2",
                 "default":          null,
                 "nanUnchanged":     true,
                 "decimalPlaces":    2
             },
             "param3": {
-                "label":            "Actuator 3",
+                "label":            "Aktuator 3",
                 "default":          null,
                 "nanUnchanged":     true,
                 "decimalPlaces":    2
             },
             "param4": {
-                "label":            "Actuator 4",
+                "label":            "Aktuator 4",
                 "default":          null,
                 "nanUnchanged":     true,
                 "decimalPlaces":    2
@@ -694,7 +694,7 @@
             "id":                   189,
             "rawName":              "MAV_CMD_DO_LAND_START",
             "friendlyName":         "Land start",
-            "description":          "Marker to indicate start of landing sequence.",
+            "description":          "Eniş ardıcıllığının başlanğıcını göstərən marker.",
             "specifiesCoordinate":  true,
             "standaloneCoordinate": true,
             "friendlyEdit":         true,
@@ -722,7 +722,7 @@
             "id":                   195,
             "rawName":              "MAV_CMD_DO_SET_ROI_LOCATION",
             "friendlyName":         "Region of interest (ROI)" ,
-            "description":          "Sets the region of interest for cameras.",
+            "description":          "Kameralar üçün maraq dairəsini təyin edir.",
             "specifiesCoordinate":  true,
             "standaloneCoordinate": true,
             "friendlyEdit":         true,
@@ -731,8 +731,8 @@
         {
             "id":                   196,
             "rawName":              "MAV_CMD_DO_SET_ROI_WPNEXT_OFFSET",
-            "friendlyName":         "ROI to next waypoint" ,
-            "description":          "Sets the region of interest to point towards the next waypoint with optional offsets.",
+            "friendlyName":         "Növbəti waypoint üçün ROI" ,
+            "description":          "Maraq bölgəsini növbəti yol nöqtəsinə doğru yönəldir, istəyə bağlı olaraq əlavə yerdəyişmələrlə.",
             "specifiesCoordinate":  false,
             "standaloneCoordinate": true,
             "friendlyEdit":         true,
@@ -759,8 +759,8 @@
         {
             "id":                   197,
             "rawName":              "MAV_CMD_DO_SET_ROI_NONE",
-            "friendlyName":         "Cancel ROI" ,
-            "description":          "Cancels the region of interest.",
+            "friendlyName":         "ROI ləğv edin" ,
+            "description":          "Maraq bölgəsini ləğv edir.",
             "specifiesCoordinate":  false,
             "friendlyEdit":         true,
             "category":             "Camera"
@@ -841,12 +841,12 @@
         },
         {
             "id":           203,
-            "friendlyName": "Camera control",
+            "friendlyName": "Kamera nəzarəti",
             "rawName":      "MAV_CMD_DO_DIGICAM_CONTROL",
-            "description":  "Control onboard camera.",
+            "description":  "Bort kamerasına nəzarət edin.",
             "category":     "Camera",
             "param1": {
-                "label":            "Session",
+                "label":            "Sessiya",
                 "default":          0,
                 "decimalPlaces":    0
             },
@@ -856,17 +856,17 @@
                 "decimalPlaces":    3
             },
             "param3": {
-                "label":            "Step",
+                "label":            "Addım",
                 "default":          0,
                 "decimalPlaces":    3
             },
             "param4": {
-                "label":            "Focus lock",
+                "label":            "Fokus kilidi",
                 "default":          0,
                 "decimalPlaces":    0
             },
             "param5": {
-                "label":            "Command",
+                "label":            "Əmr",
                 "default":          0,
                 "decimalPlaces":    0
             },
@@ -879,43 +879,43 @@
         {
             "id":           204,
             "rawName":      "MAV_CMD_DO_MOUNT_CONFIGURE",
-            "friendlyName": "Configure Mount",
-            "description":  "Configure the vehicle mount (e.g. gimbal).",
+            "friendlyName": "Montajı konfiqurasiya edin",
+            "description":  "Təyyarənin montajını konfiqurasiya edin (məsələn, gimbal).",
             "category":     "Advanced",
             "param1": {
-                "label":            "Mode",
+                "label":            "Mod",
                 "default":          0,
                 "decimalPlaces":    0,
-                "enumStrings":      "Retract,Neutral,Mavlink Targeting,RC Targeting,GPS Point",
+                "enumStrings":      "Geri çəkin,Neytral,Mavlink Hədəfləmə,RC Hədəfləmə,GPS nöqtəsi",
                 "enumValues":       "0,1,2,3,4"
             },
             "param2": {
-                "label":            "Stabilize Roll",
+                "label":            "Sabitləşdirin Roll",
                 "default":          0,
                 "decimalPlaces":    0,
-                "enumStrings":      "No,Yes",
+                "enumStrings":      "Xeyr,Bəli",
                 "enumValues":       "0,1"
             },
             "param3": {
-                "label":            "Stabilize Pitch",
+                "label":            "Sabitləşdirin Pitch",
                 "default":          0,
                 "decimalPlaces":    0,
-                "enumStrings":      "No,Yes",
+                "enumStrings":      "Xeyr,Bəli",
                 "enumValues":       "0,1"
             },
             "param4": {
-                "label":            "Stabilize Yaw",
+                "label":            "Sabitləşdirin Yaw",
                 "default":          0,
                 "decimalPlaces":    0,
-                "enumStrings":      "No,Yes",
+                "enumStrings":      "Xeyr,Bəli",
                 "enumValues":       "0,1"
             }
         },
         {
             "id":           205,
             "rawName":      "MAV_CMD_DO_MOUNT_CONTROL",
-            "friendlyName": "Control Mount",
-            "description":  "Control the vehicle mount (e.g. gimbal).",
+            "friendlyName": "Nəzarət montajı",
+            "description":  "Təyyarənin montajını idarə edin (məsələn, gimbal).",
             "category":     "Advanced",
             "param1": {
                 "label":            "Lat/Pitch",
@@ -935,10 +935,10 @@
                 "decimalPlaces":    7
             },
             "param7": {
-                "label":            "Mode",
+                "label":            "Mod",
                 "default":          0,
                 "decimalPlaces":    0,
-                "enumStrings":      "Retract,Neutral,Mavlink Targeting,RC Targeting,GPS Point",
+                "enumStrings":      "Geri çəkin,Neytral,Mavlink Hədəfləmə,RC Hədəfləmə,GPS Nöqtəsi",
                 "enumValues":       "0,1,2,3,4"
             }
         },
@@ -990,11 +990,11 @@
         {
             "id":                   206,
             "rawName":              "MAV_CMD_DO_SET_CAM_TRIGG_DIST",
-            "friendlyName":         "Camera trigger distance",
-            "description":          "Set camera trigger distance.",
+            "friendlyName":         "Kamera tətik məsafəsi",
+            "description":          "Kamera tətik məsafəsini təyin edin.",
             "category":             "Camera",
             "param1": {
-                "label":            "Distance",
+                "label":            "Məsafə",
                 "default":          25,
                 "units":            "m",
                 "decimalPlaces":    2,
@@ -1009,7 +1009,7 @@
             },
             "param3": {
                 "label":            "Trigger",
-                "enumStrings":      "No Trigger,Once Immediately",
+                "enumStrings":      "Tətik yoxdur,Bir dəfə Dərhal",
                 "enumValues":       "0,1",
                 "default":          0,
                 "decimalPlaces":    0
@@ -1066,19 +1066,19 @@
         {
             "id":                   211,
             "rawName":              "MAV_CMD_DO_GRIPPER",
-            "friendlyName":         "Gripper Mechanism",
-            "description":          "Control a gripper mechanism.",
+            "friendlyName":         "Tutucu Mexanizm",
+            "description":          "Bir tutucu mexanizmi idarə edin.",
             "specifiesCoordinate":  false,
             "friendlyEdit":         true,
-            "category":             "Advanced",
+            "category":             "Qabaqcıl",
             "param1": {
-                "label":            "Gripper id",
+                "label":            "Tutucu id",
                 "default":          1,
                 "decimalPlaces":    0
             },
             "param2": {
-                "label":            "Action",
-                "enumStrings":      "Release,Grab",
+                "label":            "Fəaliyyət",
+                "enumStrings":      "Sərbəst burax,Tut",
                 "enumValues":       "0,1",
                 "default":          0
             }
@@ -1150,12 +1150,12 @@
         {
             "id":           530,
             "rawName":      "MAV_CMD_SET_CAMERA_MODE",
-            "friendlyName": "Set camera modes" ,
-            "description":  "Set camera photo, video modes.",
+            "friendlyName": "Kamera rejimlərini təyin edin" ,
+            "description":  "Kamera foto, video rejimlərini təyin edin.",
             "category":     "Camera",
             "param2": {
-                "label":            "Mode",
-                "enumStrings":      "Take photos,Record video,Survey photo mode",
+                "label":            "Rejim",
+                "enumStrings":      "Şəkillər çəkin,Videonu qeyd edin,Fotoşəkil sorğu rejimi",
                 "enumValues":       "0,1,2",
                 "default":          0
             }
@@ -1163,8 +1163,8 @@
         {
             "id":           2000,
             "rawName":      "MAV_CMD_IMAGE_START_CAPTURE",
-            "friendlyName": "Start image capture" ,
-            "description":  "Start taking one or more photos.",
+            "friendlyName": "Şəkil çəkməni başlat" ,
+            "description":  "Bir və ya bir neçə fotoşəkil çəkməyə başla",
             "category":     "Camera",
             "param2": {
                 "label":            "Interval",
@@ -1174,7 +1174,7 @@
                 "min":              0
             },
             "param3": {
-                "label":            "Photo count",
+                "label":            "Foto sayı",
                 "default":          1,
                 "decimalPlaces":    0,
                 "min":              0
@@ -1183,8 +1183,8 @@
         {
             "id": 2001,
             "rawName": "MAV_CMD_IMAGE_STOP_CAPTURE",
-            "friendlyName": "Stop image capture",
-            "description":  "Stop taking photos.",
+            "friendlyName": "Şəkil çəkməni dayandırın",
+            "description":  "Şəkil çəkməyi dayandırın.",
             "category":     "Camera",
             "friendlyEdit": true
         },
@@ -1192,8 +1192,8 @@
         {
             "id":           2500,
             "rawName":      "MAV_CMD_VIDEO_START_CAPTURE",
-            "friendlyName": "Start video capture",
-            "description":  "Start video capture.",
+            "friendlyName": "Video çəkməyə başlayın",
+            "description":  "Video çəkməyə başlayın.",
             "category":     "Camera",
             "param2": {
                 "label":            "Status Frequency",
@@ -1206,8 +1206,8 @@
         {
             "id":           2501,
             "rawName":      "MAV_CMD_VIDEO_STOP_CAPTURE",
-            "friendlyName": "Stop video capture",
-            "description":  "Stop video capture.",
+            "friendlyName": "Video çəkilişini dayandırın",
+            "description":  "Video çəkilişini dayandırın.",
             "category":     "Camera",
             "friendlyEdit": true
         },

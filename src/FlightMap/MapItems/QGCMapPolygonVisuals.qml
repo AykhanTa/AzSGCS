@@ -47,8 +47,8 @@ Item {
     property real _zorderSplitHandle:   QGroundControl.zOrderMapItems + 2
     property real _zorderCenterHandle:  QGroundControl.zOrderMapItems + 1   // Lowest such that drag or split takes precedence
 
-    readonly property string _polygonToolsText: qsTr("Polygon Tools")
-    readonly property string _traceText:        qsTr("Click in the map to add vertices. Click 'Done Tracing' when finished.")
+    readonly property string _polygonToolsText: qsTr("Polygon Alətləri")
+    readonly property string _traceText:        qsTr("Təpə nöqtələrini əlavə etmək üçün xəritədə klikləyin. Bitirdikdən sonra 'I' üzərinə klikləyin.")
 
     function addCommonVisuals() {
         if (_objMgrCommonVisuals.empty) {
@@ -220,7 +220,7 @@ Item {
 
     KMLOrSHPFileDialog {
         id:             kmlOrSHPLoadDialog
-        title:          qsTr("Select Polygon File")
+        title:          qsTr("Polygon Faylı seçin")
 
         onAcceptedForLoad: (file) => {
             mapPolygon.loadKMLOrSHPFile(file)
@@ -247,7 +247,7 @@ Item {
         QGCMenuItem {
             id:             removeVertexItem
             visible:        !_circleMode
-            text:           qsTr("Remove vertex")
+            text:           qsTr("Təpə nöqtəsini çıxarın")
             onTriggered: {
                 if (menu._editingVertexIndex >= 0) {
                     mapPolygon.removeVertex(menu._editingVertexIndex)
@@ -260,19 +260,19 @@ Item {
         }
 
         QGCMenuItem {
-            text:           qsTr("Set radius..." )
+            text:           qsTr("Radius təyin edin..." )
             visible:        _circleMode
             onTriggered:    _editCircleRadius = true
         }
 
         QGCMenuItem {
-            text:           qsTr("Edit position..." )
+            text:           qsTr("Mövqeyi redaktə edin..." )
             visible:        _circleMode
             onTriggered:    editCenterPositionDialog.createObject(mainWindow).open()
         }
 
         QGCMenuItem {
-            text:           qsTr("Edit position..." )
+            text:           qsTr("Mövqeyi redaktə edin..." )
             visible:        !_circleMode && menu._editingVertexIndex >= 0
             onTriggered:    editVertexPositionDialog.createObject(mainWindow).open()
         }
@@ -520,7 +520,7 @@ Item {
         id: editCenterPositionDialog
 
         EditPositionDialog {
-            title:      qsTr("Edit Center Position")
+            title:      qsTr("Mərkəz mövqeyini redaktə edin")
             coordinate: mapPolygon.center
             onCoordinateChanged: {
                 // Prevent spamming signals on vertex changes by setting centerDrag = true when changing center position.
@@ -536,7 +536,7 @@ Item {
         id: editVertexPositionDialog
 
         EditPositionDialog {
-            title:      qsTr("Edit Vertex Position")
+            title:      qsTr("Təpə nöqtəsi mövqeyini redaktə edin")
             coordinate: mapPolygon.vertexCoordinate(menu._editingVertexIndex)
             onCoordinateChanged: {
                 mapPolygon.adjustVertex(menu._editingVertexIndex, coordinate)
@@ -577,56 +577,183 @@ Item {
             }
         }
     }
-
     Component {
         id: toolbarComponent
 
-        PlanEditToolbar {
-            anchors.horizontalCenter:       mapControl.left
-            anchors.horizontalCenterOffset: mapControl.centerViewport.left + (mapControl.centerViewport.width / 2)
-            y:                              mapControl.centerViewport.top
-            availableWidth:                 mapControl.centerViewport.width
+        Rectangle {
+            id: polygonToolbar
 
-            QGCButton {
-                _horizontalPadding: 0
-                text:               qsTr("Basic")
-                visible:            !mapPolygon.traceMode
-                onClicked:          _resetPolygon()
-            }
+            readonly property real pad: Math.max(10, ScreenTools.defaultFontPixelWidth)
+            readonly property real gap: Math.max(6,  ScreenTools.defaultFontPixelWidth * 0.6)
 
-            QGCButton {
-                _horizontalPadding: 0
-                text:               qsTr("Circular")
-                visible:            !mapPolygon.traceMode
-                onClicked:          _resetCircle()
-            }
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top:              parent.top
+            anchors.topMargin:        20
 
-            QGCButton {
-                _horizontalPadding: 0
-                text:               mapPolygon.traceMode ? qsTr("Done Tracing") : qsTr("Trace")
-                onClicked: {
-                    if (mapPolygon.traceMode) {
-                        if (mapPolygon.count < 3) {
-                            _restorePreviousVertices()
-                        }
-                        mapPolygon.traceMode = false
-                    } else {
-                        _saveCurrentVertices()
-                        _circleMode = false
-                        mapPolygon.traceMode = true
-                        mapPolygon.clear();
-                    }
+            // Ölçülər məzmundan hesablanır — düymələr gizlənəndə boşluq qalmır
+            width:  toolbarColumn.implicitWidth + pad * 2
+            height: toolbarColumn.implicitHeight + pad * 2
+            color:  "#2A2A2A"
+            radius: 12
+            border.width: 1
+            border.color: "#6E6E6E"
+
+            /// Panel düyməsi — hover-də açılır, yaşıl kontur alır
+            component ToolbarButton: Button {
+                id: tbtn
+
+                property real pad: 10
+
+                implicitHeight: Math.max(34, ScreenTools.defaultFontPixelHeight * 1.9)
+                implicitWidth:  Math.max(70, tbtnLabel.implicitWidth + pad * 2)
+                padding:        0
+
+                HoverHandler { id: tbtnHover; enabled: tbtn.enabled }
+
+                background: Rectangle {
+                    radius: 8
+                    color:  tbtn.down ? "#565454"
+                                      : (tbtnHover.hovered ? "#4A4848" : "#3D3B3B")
+                    border.width: 1
+                    border.color: tbtnHover.hovered ? "#00C853" : "#4A4A4A"
+
+                    Behavior on color        { ColorAnimation { duration: 110 } }
+                    Behavior on border.color { ColorAnimation { duration: 110 } }
+                }
+
+                contentItem: QGCLabel {
+                    id:                  tbtnLabel
+                    text:                tbtn.text
+                    color:               "#FFFFFF"
+                    font.pointSize:      ScreenTools.defaultFontPointSize
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment:   Text.AlignVCenter
+                    leftPadding:         tbtn.pad
+                    rightPadding:        tbtn.pad
                 }
             }
 
-            QGCButton {
-                _horizontalPadding: 0
-                text:               qsTr("Load KML/SHP...")
-                onClicked:          kmlOrSHPLoadDialog.openForLoad()
-                visible:            !mapPolygon.traceMode
+            Column {
+                id:                 toolbarColumn
+                anchors.left:       parent.left
+                anchors.right:      parent.right
+                anchors.top:        parent.top
+                anchors.margins:    polygonToolbar.pad
+                spacing:            polygonToolbar.gap
+
+                QGCLabel {
+                    width:               parent.width
+                    text:                qsTr("Polygon Alətləri")
+                    color:               "#FFFFFF"
+                    font.bold:           true
+                    font.pointSize:      ScreenTools.defaultFontPointSize
+                    horizontalAlignment: Text.AlignHCenter
+                    bottomPadding:       polygonToolbar.gap * 0.5
+                }
+
+                Rectangle {
+                    width:  parent.width
+                    height: 1
+                    color:  "#4A4A4A"
+                }
+
+                Item { width: 1; height: polygonToolbar.gap * 0.5 }
+
+                Row {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: polygonToolbar.gap
+
+                    ToolbarButton {
+                        pad:        polygonToolbar.pad
+                        text:       qsTr("Əsas")
+                        visible:    !mapPolygon.traceMode
+                        onClicked:  _resetPolygon()
+                    }
+
+                    ToolbarButton {
+                        pad:        polygonToolbar.pad
+                        text:       qsTr("Dairəvi")
+                        visible:    !mapPolygon.traceMode
+                        onClicked:  _resetCircle()
+                    }
+
+                    ToolbarButton {
+                        pad:  polygonToolbar.pad
+                        text: mapPolygon.traceMode ? qsTr("İzləmə tamamlandı") : qsTr("İz")
+                        onClicked: {
+                            if (mapPolygon.traceMode) {
+                                if (mapPolygon.count < 3) {
+                                    _restorePreviousVertices()
+                                }
+                                mapPolygon.traceMode = false
+                            } else {
+                                _saveCurrentVertices()
+                                _circleMode = false
+                                mapPolygon.traceMode = true
+                                mapPolygon.clear();
+                            }
+                        }
+                    }
+
+                    ToolbarButton {
+                        pad:        polygonToolbar.pad
+                        text:       qsTr("Yüklə KML/SHP...")
+                        visible:    !mapPolygon.traceMode
+                        onClicked:  kmlOrSHPLoadDialog.openForLoad()
+                    }
+                }
             }
         }
     }
+    // Component {
+    //     id: toolbarComponent
+
+    //     PlanEditToolbar {
+    //         anchors.horizontalCenter:       mapControl.left
+    //         anchors.horizontalCenterOffset: mapControl.centerViewport.left + (mapControl.centerViewport.width / 2)
+    //         y:                              mapControl.centerViewport.top
+    //         availableWidth:                 mapControl.centerViewport.width
+
+    //         QGCButton {
+    //             _horizontalPadding: 0
+    //             text:               qsTr("Basic")
+    //             visible:            !mapPolygon.traceMode
+    //             onClicked:          _resetPolygon()
+    //         }
+
+    //         QGCButton {
+    //             _horizontalPadding: 0
+    //             text:               qsTr("Circular")
+    //             visible:            !mapPolygon.traceMode
+    //             onClicked:          _resetCircle()
+    //         }
+
+    //         QGCButton {
+    //             _horizontalPadding: 0
+    //             text:               mapPolygon.traceMode ? qsTr("Done Tracing") : qsTr("Trace")
+    //             onClicked: {
+    //                 if (mapPolygon.traceMode) {
+    //                     if (mapPolygon.count < 3) {
+    //                         _restorePreviousVertices()
+    //                     }
+    //                     mapPolygon.traceMode = false
+    //                 } else {
+    //                     _saveCurrentVertices()
+    //                     _circleMode = false
+    //                     mapPolygon.traceMode = true
+    //                     mapPolygon.clear();
+    //                 }
+    //             }
+    //         }
+
+    //         QGCButton {
+    //             _horizontalPadding: 0
+    //             text:               qsTr("Load KML/SHP...")
+    //             onClicked:          kmlOrSHPLoadDialog.openForLoad()
+    //             visible:            !mapPolygon.traceMode
+    //         }
+    //     }
+    // }
 
     // Mouse area to capture clicks for tracing a polygon
     Component {

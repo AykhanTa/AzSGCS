@@ -11,12 +11,21 @@ Loader {
 	property var fact
 	id:                     loader
 
+	// Loader daxildəki elementin ölçüsünü layout-a ötürsün — əks halda combo
+	// çox dar render olunub (PWM/DShot) yazıları oxunmurdu.
+	implicitWidth:  item ? item.implicitWidth  : 0
+	implicitHeight: item ? item.implicitHeight : 0
+
 	Component {
 		id: factComboBox
 		FactComboBox {
 			fact:           loader.fact
 			indexModel:     false
 			sizeToContents: true
+			// Qısa dəyərlərdə (PWM) belə rahat oxunsun deyə minimum en
+			implicitWidth:  Math.max(ScreenTools.defaultFontPixelWidth * 12,
+			                         contentItem.implicitWidth + leftPadding + rightPadding + padding
+			                         + ScreenTools.defaultFontPixelWidth)
 		}
 	}
 	Component {
@@ -44,6 +53,8 @@ Loader {
 		id: notAvailable
 		QGCLabel {
 			text:           qsTr("(Param not available)")
+			font.pointSize: 7
+
 		}
 	}
 	sourceComponent: fact ? 

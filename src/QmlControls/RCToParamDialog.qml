@@ -38,13 +38,13 @@ QGCPopupDialog {
             Layout.preferredWidth:  mainGrid.width
             Layout.fillWidth:       true
             wrapMode:               Text.WordWrap
-            text:                   qsTr("Bind an RC Channel to a parameter value. Tuning IDs can be mapped to an RC Channel from Radio Setup page.")
+            text:                   qsTr("RC Kanalını parametr dəyərinə bağlayın. Sazlama identifikatorları Radio Quraşdırma səhifəsindən RC Kanalına uyğunlaşdırıla bilər.")
         }
 
         QGCLabel {
             Layout.preferredWidth:  mainGrid.width
             Layout.fillWidth:       true
-            text:                   qsTr("Waiting on parameter update from Vehicle.")
+            text:                   qsTr("Təyyarıdən parametr yeniləməsi gözlənilir.")
             visible:                !controller.ready
         }
 
@@ -95,7 +95,7 @@ QGCPopupDialog {
             Layout.preferredWidth:  mainGrid.width
             Layout.fillWidth:       true
             wrapMode:               Text.WordWrap
-            text:                   qsTr("Double check that all values are correct prior to confirming dialog.")
+            text:                   qsTr("Dialoq qutusunu təsdiqləməzdən əvvəl bütün dəyərlərin düzgün olub olmadığını iki dəfə yoxlayın.")
         }
     }
 }

@@ -15,7 +15,7 @@
 
 SafetyComponent::SafetyComponent(Vehicle* vehicle, AutoPilotPlugin* autopilot, QObject* parent) :
     VehicleComponent(vehicle, autopilot, AutoPilotPlugin::KnownSafetyVehicleComponent, parent),
-    _name(tr("Safety"))
+    _name(tr("Təhlükəsizlik"))
 {
 }
 

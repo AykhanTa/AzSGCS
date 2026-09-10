@@ -102,6 +102,7 @@ Item {
         QGCLabel {
             Layout.columnSpan:  parent.columns
             text:               qsTr("Channel Monitor")
+            color:"white"
         }
 
         Connections {

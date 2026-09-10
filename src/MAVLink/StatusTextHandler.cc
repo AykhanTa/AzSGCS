@@ -7,6 +7,8 @@
  *
  ****************************************************************************/
 
+#include "Audio/SpeechLocalizer.h"  // <<< ADDED
+
 #include "StatusTextHandler.h"
 #include <QGCLoggingCategory.h>
 
@@ -17,10 +19,10 @@ QGC_LOGGING_CATEGORY(StatusTextHandlerLog, "qgc.mavlink.statustexthandler")
 
 StatusText::StatusText(MAV_COMPONENT componentid, MAV_SEVERITY severity, const QString &text)
     : m_compId(componentid)
-    , m_severity(severity)
-    , m_text(text)
+      , m_severity(severity)
+      , m_text(text)
 {
-    // qCDebug(StatusTextHandlerLog) << Q_FUNC_INFO << this;
+   // qCDebug(StatusTextHandlerLog) << Q_FUNC_INFO << this;
 }
 
 bool StatusText::severityIsError() const
@@ -39,7 +41,7 @@ bool StatusText::severityIsError() const
 
 StatusTextHandler::StatusTextHandler(QObject *parent)
     : QObject(parent)
-    , m_chunkedStatusTextTimer(new QTimer(this))
+      , m_chunkedStatusTextTimer(new QTimer(this))
 {
     // qCDebug(StatusTextHandlerLog) << Q_FUNC_INFO << this;
 
@@ -52,7 +54,7 @@ StatusTextHandler::~StatusTextHandler()
 {
     clearMessages();
 
-    // qCDebug(StatusTextHandlerLog) << Q_FUNC_INFO << this;
+            // qCDebug(StatusTextHandlerLog) << Q_FUNC_INFO << this;
 }
 
 QString StatusTextHandler::getMessageText(const mavlink_message_t &message)
@@ -62,7 +64,7 @@ QString StatusTextHandler::getMessageText(const mavlink_message_t &message)
     b.resize(MAVLINK_MSG_STATUSTEXT_FIELD_TEXT_LEN + 1);
     (void) mavlink_msg_statustext_get_text(&message, b.data());
 
-    // Ensure NUL-termination
+            // Ensure NUL-termination
     b[b.length()-1] = '\0';
 
     const QString text = QString::fromLocal8Bit(b.constData(), std::strlen(b.constData()));
@@ -139,13 +141,16 @@ void StatusTextHandler::resetErrorLevelMessages()
 
 void StatusTextHandler::handleHTMLEscapedTextMessage(MAV_COMPONENT compId, MAV_SEVERITY severity, const QString &text, const QString &description)
 {
-    QString htmlText(text);
-
+    // --- LOCALIZE BEFORE FORMATTING ---  // <<< ADDED
+    QString locText = SpeechLocalizer::instance().localize(text);
+    QString locDescr = description.isEmpty() ? QString() : SpeechLocalizer::instance().localize(description);
+    // -----------------------------------
+    QString htmlText(locText);        // <<< CHANGED (was: text)
     (void) htmlText.replace("\n", "<br/>");
 
-    // TODO: handle text + description separately in the UI
-    if (!description.isEmpty()) {
-        QString htmlDescription(description);
+            // TODO: handle text + description separately in the UI
+    if (!locDescr.isEmpty()) {        // <<< CHANGED (was: description)
+        QString htmlDescription(locDescr);
         (void) htmlDescription.replace("\n", "<br/>");
         (void) htmlText.append(QStringLiteral("<br/><small><small>"));
         (void) htmlText.append(htmlDescription);
@@ -162,10 +167,7 @@ void StatusTextHandler::handleHTMLEscapedTextMessage(MAV_COMPONENT compId, MAV_S
 
     MessageType messageType = MessageType::MessageNone;
 
-    // Color the output depending on the message severity. We have 3 distinct cases:
-    // 1: If we have an ERROR or worse, make it bigger, bolder, and highlight it red.
-    // 2: If we have a warning or notice, just make it bold and color it orange.
-    // 3: Otherwise color it the standard color, white.
+            // Color the output depending on the message severity...
     QString style;
     switch (severity) {
         case MAV_SEVERITY_EMERGENCY:
@@ -236,7 +238,7 @@ void StatusTextHandler::handleHTMLEscapedTextMessage(MAV_COMPONENT compId, MAV_S
 
     const QString formatText = QString("<font style=\"%1\">[%2 %3] %4: %5</font><br/>").arg(style, dateString, compString, severityText, htmlText);
 
-    StatusText* const message = new StatusText(compId, severity, text);
+    StatusText* const message = new StatusText(compId, severity, text); // raw orijinal saxlanır
     message->setFormatedText(formatText);
 
     emit newFormattedMessage(formatText);
@@ -337,7 +339,11 @@ void StatusTextHandler::_chunkedStatusTextCompleted(MAV_COMPONENT compId)
 
     (void) m_chunkedStatusTextInfoMap.remove(compId);
 
-    emit textMessageReceived(compId, severity, messageText, "");
+            // --- LOCALIZE BEFORE EMIT ---  // <<< ADDED
+    const QString displayText = SpeechLocalizer::instance().localize(messageText);
+    // -----------------------------
+
+    emit textMessageReceived(compId, severity, displayText, "");
 }
 
 void StatusTextHandler::_handleTextMessage(uint32_t newCount, MessageType messageType)
@@ -373,7 +379,7 @@ void StatusTextHandler::_handleTextMessage(uint32_t newCount, MessageType messag
         emit messageCountChanged(messageCount());
     }
 
-    // messageType represents the worst message which hasn't been viewed yet
+            // messageType represents the worst message which hasn't been viewed yet
     MessageType newMessageType = MessageType::MessageNone;
     if (getErrorCount() > 0) {
         newMessageType = MessageType::MessageError;

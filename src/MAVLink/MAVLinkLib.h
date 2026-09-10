@@ -68,6 +68,7 @@ typedef enum : uint8_t {
 #endif
 
 #include <mavlink.h>
+#include <intercept/mavlink_msg_intercept.h>
 
 #ifdef __GNUC__
 #	pragma GCC diagnostic pop

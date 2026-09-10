@@ -742,9 +742,9 @@ void Fact::_checkForRebootMessaging()
     if (qgcApp()) {
         if (!qgcApp()->runningUnitTests()) {
             if (vehicleRebootRequired()) {
-                qgcApp()->showRebootAppMessage(tr("Reboot vehicle for changes to take effect."));
+                qgcApp()->showRebootAppMessage(tr("Dəyişikliklərin qüvvəyə minməsi üçün təyyarəni yenidən başladın."));
             } else if (qgcRebootRequired()) {
-                qgcApp()->showRebootAppMessage(tr("Restart application for changes to take effect."));
+                qgcApp()->showRebootAppMessage(tr("Dəyişikliklərin qüvvəyə minməsi üçün tətbiqi yenidən başladın."));
             }
         }
     }

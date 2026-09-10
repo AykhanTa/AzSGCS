@@ -60,7 +60,7 @@ private:
 
     static QMap<QString, FactMetaData*> _metaDataMap;
 
-    static constexpr const char* _longitudeFactName =    "Longitude";
-    static constexpr const char* _latitudeFactName =     "Latitude";
-    static constexpr const char* _altitudeFactName =     "RelativeAltitude";
+    static constexpr const char* _longitudeFactName =    "Uzunluq";
+    static constexpr const char* _latitudeFactName =     "Enlik";
+    static constexpr const char* _altitudeFactName =     "Nisbi Hündürlük";
 };

@@ -51,17 +51,17 @@ JoystickConfigController::~JoystickConfigController()
 /// @brief Returns the state machine entry for the specified state.
 const JoystickConfigController::stateMachineEntry* JoystickConfigController::_getStateMachineEntry(int step)
 {
-    static constexpr const char* msgBegin =               "Allow all sticks to center as shown in diagram.\nClick Next to continue";
-    static constexpr const char* msgThrottleUp =          "Move the Throttle stick all the way up and hold it there...";
-    static constexpr const char* msgThrottleDown =        "Move the Throttle stick all the way down and hold it there...";
-    static constexpr const char* msgYawLeft =             "Move the Yaw stick all the way to the left and hold it there...";
-    static constexpr const char* msgYawRight =            "Move the Yaw stick all the way to the right and hold it there...";
-    static constexpr const char* msgRollLeft =            "Move the Roll stick all the way to the left and hold it there...";
-    static constexpr const char* msgRollRight =           "Move the Roll stick all the way to the right and hold it there...";
-    static constexpr const char* msgPitchDown =           "Move the Pitch stick all the way down and hold it there...";
-    static constexpr const char* msgPitchUp =             "Move the Pitch stick all the way up and hold it there...";
-    static constexpr const char* msgPitchCenter =         "Allow the Pitch stick to move back to center...";
-    static constexpr const char* msgComplete =            "All settings have been captured.\nClick Next to enable the joystick.";
+    static constexpr const char* msgBegin =               "Bütün idarəetmə qollarını şəkildə göstərildiyi kimi mərkəzi vəziyyətə gətirin.\n'Sonrakı' düyməsinə basın.";
+    static constexpr const char* msgThrottleUp =          "Sürət qolunu tam irəli itələyin və bu vəziyyətdə saxlayın...";
+    static constexpr const char* msgThrottleDown =        "Sürət qolunu tam aşağı itələyin və bu vəziyyətdə saxlayın...";
+    static constexpr const char* msgYawLeft =             "Yaw (fırlanma) qolunu tam sola çevirin və bu vəziyyətdə saxlayın..";
+    static constexpr const char* msgYawRight =            "Yaw (fırlanma) qolunu tam sağa çevirin və bu vəziyyətdə saxlayın...";
+    static constexpr const char* msgRollLeft =            "Roll (yan fırlanma) qolunu tam sola çevirin və bu vəziyyətdə saxlayın...";
+    static constexpr const char* msgRollRight =           "Roll (yan fırlanma) qolunu tam sağa çevirin və bu vəziyyətdə saxlayın...";
+    static constexpr const char* msgPitchDown =           "Pitch (meyil) qolunu tam aşağı itələyin və bu vəziyyətdə saxlayın...";
+    static constexpr const char* msgPitchUp =             "Pitch (meyil) qolunu tam yuxarı itələyin və bu vəziyyətdə saxlayın...";
+    static constexpr const char* msgPitchCenter =         "Pitch (meyil) qolunun mərkəzə qayıtmasına icazə verin...";
+    static constexpr const char* msgComplete =            "Bütün parametrlər qeydə alındı.\nJoysticki aktivləşdirmək üçün 'Sonrakı' düyməsinə basın.";
 
     static const stateMachineEntry rgStateMachine[] = {
         //Function

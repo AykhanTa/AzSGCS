@@ -18,7 +18,7 @@ import QGroundControl.Controls
 /// Popup container for preflight checklists
 QGCPopupDialog {
     id:         _root
-    title:      qsTr("Pre-Flight Checklist")
+    title:      qsTr("Uçuşdan əvvəl yoxlama siyahısı")
     buttons:    Dialog.Close
 
     property var    _activeVehicle:     QGroundControl.multiVehicleManager.activeVehicle

@@ -406,7 +406,7 @@ void UDPWorker::writeData(const QByteArray &data)
 
 void UDPWorker::_onSocketConnected()
 {
-    qCDebug(UDPLinkLog) << "UDP connected to" << _udpConfig->localPort();
+    qCDebug(UDPLinkLog) << "UDP qoşuldu" << _udpConfig->localPort();
     _isConnected = true;
     _errorEmitted = false;
     emit connected();
@@ -414,7 +414,7 @@ void UDPWorker::_onSocketConnected()
 
 void UDPWorker::_onSocketDisconnected()
 {
-    qCDebug(UDPLinkLog) << "UDP disconnected from" << _udpConfig->localPort();
+    qCDebug(UDPLinkLog) << "UDP ilə əlaqə kəsildi" << _udpConfig->localPort();
     _isConnected = false;
     _errorEmitted = false;
     emit disconnected();
@@ -423,13 +423,13 @@ void UDPWorker::_onSocketDisconnected()
 void UDPWorker::_onSocketReadyRead()
 {
     if (!isConnected()) {
-        emit errorOccurred(tr("Could Not Read Data - Link is Disconnected!"));
+        emit errorOccurred(tr("Məlumatı Oxumaq Mümkün olmadı - Əlaqə kəsildi!"));
         return;
     }
 
     const qint64 byteCount = _socket->pendingDatagramSize();
     if (byteCount <= 0) {
-        emit errorOccurred(tr("Could Not Read Data - No Data Available!"));
+        emit errorOccurred(tr("Məlumatı Oxumaq Mümkün olmadı - Məlumat yoxdur!"));
         return;
     }
 
@@ -480,7 +480,7 @@ void UDPWorker::_onSocketBytesWritten(qint64 bytes)
 void UDPWorker::_onSocketErrorOccurred(QUdpSocket::SocketError error)
 {
     const QString errorString = _socket->errorString();
-    qCWarning(UDPLinkLog) << "UDP Link error:" << error << _socket->errorString();
+    qCWarning(UDPLinkLog) << "UDP Əlaqə xətası:" << error << _socket->errorString();
 
     if (!_errorEmitted) {
         emit errorOccurred(errorString);
@@ -622,7 +622,7 @@ void UDPLink::_onDisconnected()
 void UDPLink::_onErrorOccurred(const QString &errorString)
 {
     qCWarning(UDPLinkLog) << "Communication error:" << errorString;
-    emit communicationError(tr("UDP Link Error"), tr("Link %1: %2").arg(_udpConfig->name(), errorString));
+    emit communicationError(tr("UDP Əlaqə Xətası"), tr("Link %1: %2").arg(_udpConfig->name(), errorString));
 }
 
 void UDPLink::_onDataReceived(const QByteArray &data)

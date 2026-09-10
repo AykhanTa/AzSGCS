@@ -22,7 +22,7 @@ ComboBox {
     id:         control
     padding:    ScreenTools.comboBoxPadding
 
-    property string labelText:  qsTr("Options")
+    property string labelText:  qsTr("Seçimlər")
 
     signal itemClicked(int index)
 

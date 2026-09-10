@@ -16,11 +16,17 @@ import QGroundControl.FactControls
 Rectangle {
     id:             _root
     height:         _currentItem ? (editorLoader.y + editorLoader.height + _innerMargin) : (topRowLayout.y + topRowLayout.height + _margin)
-    color:          _currentItem ? qgcPal.missionItemEditor : qgcPal.windowShade
+    // Kartlar xəritənin üstündə oturduğu üçün fon tam qeyri-şəffafdır —
+    // əks halda altdakı xəritə mətni oxunmaz edir.
+    color:          _currentItem ? "#3D3B3B" : (_hoverHandler.hovered ? "#343434" : "#2B2B2B")
     radius:         _radius
-    opacity:        _currentItem ? 1.0 : 0.7
-    border.width:   _readyForSave ? 0 : 2
-    border.color:   qgcPal.warningText
+    opacity:        1.0
+    border.width:   _readyForSave ? 1 : 2
+    border.color:   _readyForSave ? (_currentItem ? "#00C853" : "#5A5A5A") : qgcPal.warningText
+
+    Behavior on color { ColorAnimation { duration: 130 } }
+
+    HoverHandler { id: _hoverHandler }
 
     property var    map                 ///< Map control
     property var    masterController
@@ -41,9 +47,9 @@ Rectangle {
     property bool   _readyForSave:              missionItem.readyForSaveState === VisualMissionItem.ReadyForSave
 
     readonly property real  _editFieldWidth:    Math.min(width - _innerMargin * 2, ScreenTools.defaultFontPixelWidth * 12)
-    readonly property real  _margin:            ScreenTools.defaultFontPixelWidth / 2
+    readonly property real  _margin:            ScreenTools.defaultFontPixelWidth * 0.7
     readonly property real  _innerMargin:       2
-    readonly property real  _radius:            ScreenTools.defaultFontPixelWidth / 2
+    readonly property real  _radius:            10
     readonly property real  _hamburgerSize:     commandPicker.height * 0.75
     readonly property real  _trashSize:         commandPicker.height * 0.75
     readonly property bool  _waypointsOnlyMode: QGroundControl.corePlugin.options.missionWaypointsOnly
@@ -81,13 +87,36 @@ Rectangle {
         id:                 topRowLayout
         anchors.margins:    _margin
         anchors.left:       parent.left
+        anchors.right:      rightButtonRow.left
+        anchors.rightMargin: _margin * 0.5
         anchors.top:        parent.top
         spacing:            _margin
+
+        // Sıra nömrəsi nişanı — hansı elementin neçənci olduğu dərhal görünsün
+        Rectangle {
+            id:                     sequenceBadge
+            anchors.verticalCenter: parent.verticalCenter
+            width:                  Math.max(20, ScreenTools.defaultFontPixelHeight * 1.35)
+            height:                 width
+            radius:                 width / 2
+            color:                  _currentItem ? "#00C853" : "#4A4A4A"
+            visible:                _readyForSave
+
+            Behavior on color { ColorAnimation { duration: 130 } }
+
+            QGCLabel {
+                anchors.centerIn:   parent
+                text:               missionItem.sequenceNumber === 0 ? "S" : missionItem.sequenceNumber
+                color:              _currentItem ? "#0E0E0E" : "#E4E4E4"
+                font.bold:          true
+                font.pointSize:     ScreenTools.smallFontPointSize
+            }
+        }
 
         Rectangle {
             id:                     notReadyForSaveIndicator
             anchors.verticalCenter: parent.verticalCenter
-            width:                  _hamburgerSize
+            width:                  Math.max(20, ScreenTools.defaultFontPixelHeight * 1.35)
             height:                 width
             border.width:           1
             border.color:           qgcPal.warningText
@@ -101,26 +130,8 @@ Rectangle {
                 //: Indicator in Plan view to show mission item is not ready for save/send
                 text:               qsTr("?")
                 color:              qgcPal.warningText
+                font.bold:          true
                 font.pointSize:     ScreenTools.smallFontPointSize
-            }
-        }
-
-        QGCColoredImage {
-            id:                     deleteButton
-            anchors.verticalCenter: parent.verticalCenter
-            height:                 _hamburgerSize
-            width:                  height
-            sourceSize.height:      height
-            fillMode:               Image.PreserveAspectFit
-            mipmap:                 true
-            smooth:                 true
-            color:                  qgcPal.text
-            visible:                _currentItem && missionItem.sequenceNumber !== 0
-            source:                 "/res/TrashDelete.svg"
-
-            QGCMouseArea {
-                fillItem:   parent
-                onClicked:  remove()
             }
         }
 
@@ -138,7 +149,12 @@ Rectangle {
 
                 property real _padding: ScreenTools.comboBoxPadding
 
-                QGCLabel { text: missionItem.commandName }
+                QGCLabel {
+                    text:           missionItem.commandName
+                    font.bold:      true
+                    font.pointSize: ScreenTools.defaultFontPointSize
+                    color:          _outerTextColor
+                }
 
                 QGCColoredImage {
                     height:             ScreenTools.defaultFontPixelWidth
@@ -163,7 +179,6 @@ Rectangle {
                     vehicle:                    masterController.controllerVehicle
                     missionItem:                _root.missionItem
                     map:                        _root.map
-                    // FIXME: Disabling fly through commands doesn't work since you may need to change from an RTL to something else
                     flyThroughCommandsAllowed:  true //_missionController.flyThroughCommandsAllowed
                 }
             }
@@ -172,12 +187,71 @@ Rectangle {
         QGCLabel {
             id:                     commandLabel
             anchors.verticalCenter: parent.verticalCenter
-            width:                  commandPicker.width
-            height:                 commandPicker.height
+            height:                 ScreenTools.implicitComboBoxHeight
             visible:                !missionItem.isCurrentItem || !missionItem.isSimpleItem || _waypointsOnlyMode || missionItem.isTakeoffItem
             verticalAlignment:      Text.AlignVCenter
             text:                   missionItem.commandName
             color:                  _outerTextColor
+            font.bold:              true
+            font.pointSize:         ScreenTools.defaultFontPointSize
+            elide:                  Text.ElideRight
+        }
+    }
+
+    // Sağ tərəfdəki əməliyyat düymələri
+    Row {
+        id:                     rightButtonRow
+        anchors.margins:        _margin
+        anchors.right:          parent.right
+        anchors.verticalCenter: topRowLayout.verticalCenter
+        spacing:                _margin * 0.8
+
+        QGCColoredImage {
+            id:                     deleteButton
+            anchors.verticalCenter: parent.verticalCenter
+            height:                 _hamburgerSize
+            width:                  height
+            sourceSize.height:      height
+            fillMode:               Image.PreserveAspectFit
+            mipmap:                 true
+            smooth:                 true
+            color:                  deleteMouse.containsMouse ? qgcPal.warningText : qgcPal.text
+            visible:                _currentItem && missionItem.sequenceNumber !== 0
+            source:                 "/res/TrashDelete.svg"
+
+            MouseArea {
+                id:             deleteMouse
+                anchors.fill:   parent
+                hoverEnabled:   true
+                cursorShape:    Qt.PointingHandCursor
+                onClicked:      remove()
+            }
+        }
+
+        QGCColoredImage {
+            id:                     hamburger
+            anchors.verticalCenter: parent.verticalCenter
+            width:                  _hamburgerSize
+            height:                 _hamburgerSize
+            sourceSize.height:      _hamburgerSize
+            source:                 "qrc:/qmlimages/Hamburger.svg"
+            visible:                missionItem.isCurrentItem && missionItem.sequenceNumber !== 0
+            color:                  hamburgerMouse.containsMouse ? "#00C853" : qgcPal.text
+
+            MouseArea {
+                id:             hamburgerMouse
+                anchors.fill:   parent
+                hoverEnabled:   true
+                cursorShape:    Qt.PointingHandCursor
+                onClicked: {
+                    currentItemScope.focus = true
+                    var position = Qt.point(width / 2, height / 2)
+                    // For some strange reason using mainWindow in mapToItem doesn't work, so we use globals.parent instead which also gets us mainWindow
+                    position = mapToItem(globals.parent, position)
+                    var dropPanel = hamburgerMenuDropPanelComponent.createObject(mainWindow, { clickRect: Qt.rect(position.x, position.y, 0, 0) })
+                    dropPanel.open()
+                }
+            }
         }
     }
 
@@ -189,12 +263,56 @@ Rectangle {
 
             sourceComponent: Component {
                 ColumnLayout {
-                    spacing: ScreenTools.defaultFontPixelHeight / 2
+                    id:      menuColumn
+                    spacing: Math.max(4, ScreenTools.defaultFontPixelHeight * 0.28)
 
-                    QGCButton {
+                    // Ən uzun bənd ("Əvvəlki element mövqeyinə keçin") kəsilməsin deyə
+                    readonly property real _menuW: Math.max(260, ScreenTools.defaultFontPixelWidth * 32)
+                    readonly property real _itemH: Math.max(34, ScreenTools.defaultFontPixelHeight * 1.9)
+
+                    // Menyu başlığı — hansı elementə aid olduğu görünsün
+                    RowLayout {
                         Layout.fillWidth:   true
-                        text:               qsTr("Move to vehicle position")
-                        enabled:            _activeVehicle && missionItem.specifiesCoordinate
+                        Layout.bottomMargin: 2
+                        spacing:            8
+
+                        Rectangle {
+                            width:  Math.max(20, ScreenTools.defaultFontPixelHeight * 1.35)
+                            height: width
+                            radius: width / 2
+                            color:  "#00C853"
+
+                            QGCLabel {
+                                anchors.centerIn:   parent
+                                text:               missionItem.sequenceNumber
+                                color:              "#0E0E0E"
+                                font.bold:          true
+                                font.pointSize:     ScreenTools.smallFontPointSize
+                            }
+                        }
+
+                        QGCLabel {
+                            Layout.fillWidth:   true
+                            text:               missionItem.commandName
+                            color:              "#FFFFFF"
+                            font.bold:          true
+                            font.pointSize:     ScreenTools.defaultFontPointSize
+                            elide:              Text.ElideRight
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth:       true
+                        Layout.preferredHeight: 1
+                        color:                  "#4A4A4A"
+                    }
+
+                    MissionMenuButton {
+                        Layout.fillWidth:       true
+                        Layout.minimumWidth:    menuColumn._menuW
+                        Layout.preferredHeight: menuColumn._itemH
+                        text:                   qsTr("Təyyarə mövqeyinə keçin")
+                        enabled:                _activeVehicle && missionItem.specifiesCoordinate
 
                         onClicked: {
                             missionItem.coordinate = _activeVehicle.coordinate
@@ -204,20 +322,24 @@ Rectangle {
                         property var _activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
                     }
 
-                    QGCButton {
-                        Layout.fillWidth:   true
-                        text:               qsTr("Move to previous item position")
-                        enabled:            _missionController.previousCoordinate.isValid
+                    MissionMenuButton {
+                        Layout.fillWidth:       true
+                        Layout.minimumWidth:    menuColumn._menuW
+                        Layout.preferredHeight: menuColumn._itemH
+                        text:                   qsTr("Əvvəlki element mövqeyinə keçin")
+                        enabled:                _missionController.previousCoordinate.isValid
                         onClicked: {
                             missionItem.coordinate = _missionController.previousCoordinate
                             hamburgerMenuDropPanel.close()
                         }
                     }
 
-                    QGCButton {
-                        Layout.fillWidth:   true
-                        text:               qsTr("Edit position...")
-                        enabled:            missionItem.specifiesCoordinate
+                    MissionMenuButton {
+                        Layout.fillWidth:       true
+                        Layout.minimumWidth:    menuColumn._menuW
+                        Layout.preferredHeight: menuColumn._itemH
+                        text:                   qsTr("Mövqeyi redaktə edin...")
+                        enabled:                missionItem.specifiesCoordinate
                         onClicked: {
                             editPositionDialog.createObject(mainWindow).open()
                             hamburgerMenuDropPanel.close()
@@ -227,12 +349,13 @@ Rectangle {
                     Rectangle {
                         Layout.fillWidth:       true
                         Layout.preferredHeight: 1
-                        color:                  qgcPal.groupBorder
+                        color:                  "#4A4A4A"
+                        visible:                QGroundControl.corePlugin.showAdvancedUI
                     }
 
                     QGCCheckBoxSlider {
                         Layout.fillWidth:   true
-                        text:               qsTr("Show all values")
+                        text:               qsTr("Bütün dəyərləri göstərin")
                         visible:            QGroundControl.corePlugin.showAdvancedUI
                         checked:            missionItem.isSimpleItem ? missionItem.rawEdit : false
                         enabled:            missionItem.isSimpleItem && !_waypointsOnlyMode
@@ -242,52 +365,16 @@ Rectangle {
                             if (missionItem.rawEdit && !missionItem.friendlyEditAllowed) {
                                 missionItem.rawEdit = false
                                 checked = false
-                                mainWindow.showMessageDialog(qsTr("Mission Edit"), qsTr("You have made changes to the mission item which cannot be shown in Simple Mode"))
+                                mainWindow.showMessageDialog(qsTr("Missiya redaktəsi"), qsTr("Siz Sadə Rejimdə göstərilə bilməyən missiya elementinə dəyişikliklər etdiniz"))
                             }
                             hamburgerMenuDropPanel.close()
                         }
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth:       true
-                        Layout.preferredHeight: 1
-                        color:                  qgcPal.groupBorder
-                    }
-
-                    QGCLabel { 
-                        text:       qsTr("Item #%1").arg(missionItem.sequenceNumber) 
-                        enabled:    false
                     }
                 }
             }
         }
     }
 
-
-    QGCColoredImage {
-        id:                     hamburger
-        anchors.margins:        _margin
-        anchors.right:          parent.right
-        anchors.verticalCenter: topRowLayout.verticalCenter
-        width:                  _hamburgerSize
-        height:                 _hamburgerSize
-        sourceSize.height:      _hamburgerSize
-        source:                 "qrc:/qmlimages/Hamburger.svg"
-        visible:                missionItem.isCurrentItem && missionItem.sequenceNumber !== 0
-        color:                  qgcPal.text
-
-        QGCMouseArea {
-            fillItem:   hamburger
-            onClicked: (position) => {
-                currentItemScope.focus = true
-                position = Qt.point(position.x, position.y)
-                // For some strange reason using mainWindow in mapToItem doesn't work, so we use globals.parent instead which also gets us mainWindow
-                position = mapToItem(globals.parent, position)
-                var dropPanel = hamburgerMenuDropPanelComponent.createObject(mainWindow, { clickRect: Qt.rect(position.x, position.y, 0, 0) })
-                dropPanel.open()
-            }
-        }
-    }
 
     /*
     QGCLabel {

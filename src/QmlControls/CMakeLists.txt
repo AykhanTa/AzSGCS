@@ -234,6 +234,9 @@ qt_add_qml_module(QGroundControlControlsModule
 
         ScreenTools.qml
     NO_PLUGIN
+    QML_FILES Mission_Panel.qml
+    QML_FILES MissionMenuButton.qml
+    QML_FILES MissionStats.qml
 )
 
 # Add JSON files

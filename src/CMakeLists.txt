@@ -2,15 +2,97 @@ qt_add_library(QGroundControlModule STATIC)
 
 set_source_files_properties(UI/MainWindow.qml PROPERTIES QT_RESOURCE_ALIAS MainWindow.qml)
 
+target_link_libraries(QGroundControlModule PRIVATE Qt6::Core)
+
 qt_add_qml_module(QGroundControlModule
     URI QGroundControl
     VERSION 1.0
     RESOURCE_PREFIX /qml
     QML_FILES
-        UI/MainWindow.qml
+
     IMPORTS
         QGC
     NO_PLUGIN
+    SOURCES Utilities/Audio/SpeechLocalizer.h
+    SOURCES Utilities/Audio/SpeechLocalizer.h Utilities/Audio/speechlocalizer.cpp
+    QML_FILES
+    QML_FILES UI/TopStatusPanel.qml
+    QML_FILES UI/SideMenu.qml
+    QML_FILES UI/SideMenu_AparatQurgusu.qml
+    QML_FILES UI/SideMenu_Cercive.qml
+    QML_FILES UI/SideMenu_Motors.qml
+    QML_FILES UI/SideMenu_Sensors_Level.qml
+    QML_FILES UI/MainWindow.qml
+    QML_FILES UI/TopStatusPanel_GPS.qml
+    QML_FILES UI/Side_Parameter.qml
+    QML_FILES UI/Side_Proqram_Teminati.qml
+    QML_FILES UI/SideMenu_Enerji.qml
+    QML_FILES UI/SideMenu_FlightMode.qml
+    QML_FILES UI/SideMenu_Joystick.qml
+    QML_FILES UI/SideMenu_Radio.qml
+    QML_FILES UI/SideMenu_Sensors.qml
+    QML_FILES UI/SideMenu_Sensors_Accelerometer.qml
+    QML_FILES UI/SideMenu_Sensors_Barometr.qml
+    QML_FILES UI/SideMenu_Sensors_Compass.qml
+    QML_FILES UI/SideMenu_Sensors_CompassMot.qml
+    QML_FILES UI/SideMenu_Sensors_Settings.qml
+    QML_FILES UI/SideMenu_Tehlukesizlik.qml
+    QML_FILES UI/TopStatusMessage.qml
+    QML_FILES UI/TopStatusPanel_Battery.qml
+    QML_FILES UI/TopStatusPanel_Battery_Settings.qml
+    QML_FILES UI/TopStatusPanel_GPS_Settings.qml
+    QML_FILES UI/TopStatusPanel_RCSignal.qml
+    QML_FILES UI/TopStatusPanel_RCSignal_Settings.qml
+    QML_FILES UI/TopStatusPanel_UcusRejimi.qml
+    QML_FILES UI/TopStatusPanel_UcusRejimi_Settings.qml
+    QML_FILES
+    QML_FILES UI/SideMenu_Summary.qml
+    QML_FILES UI/SideMenu_PIDTuning.qml
+    QML_FILES UI/General_Settings.qml
+    QML_FILES UI/Tenzimlemeler.qml
+    QML_FILES UI/Comm_links.qml
+    QML_FILES UI/SettingsPage.qml
+    QML_FILES UI/Fly_ViewSettings.qml
+    QML_FILES
+    QML_FILES UI/SerialSettings.qml
+    QML_FILES UI/Telemetry_Settings.qml
+    QML_FILES UI/PX4LogTransfer_Settings.qml
+    QML_FILES UI/ADSBServer.qml
+    QML_FILES UI/Console.qml
+    QML_FILES UI/AppSetting_VideoSettings.qml
+    QML_FILES UI/AppSettings_MapSettings.qml
+    QML_FILES UI/AppSettings_RemoteIdSettings.qml
+    QML_FILES UI/AppSettings_PlanView.qml
+    QML_FILES UI/AppHelp.qml
+    QML_FILES UI/Qeyd_Analizi.qml
+    QML_FILES UI/GeoTag.qml
+    QML_FILES UI/Log_Download.qml
+    QML_FILES UI/MAXLink_Console.qml
+    QML_FILES UI/MAXLink_Inspector.qml
+    QML_FILES UI/Vibration.qml
+    QML_FILES
+    QML_FILES UI/TopStatusPanel_Telemetry.qml
+    QML_FILES
+    QML_FILES UI/CheckList.qml
+    QML_FILES
+    QML_FILES
+    QML_FILES
+    QML_FILES
+    QML_FILES
+    QML_FILES
+    QML_FILES UI/BottomCenterStatusPanel.qml
+    QML_FILES UI/TopStatusPanel_UDPPosition.qml
+    QML_FILES UI/TopStatusPanel_VehicleSelector.qml
+)
+
+target_include_directories(QGroundControlModule PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/src/MAVLink
+    ${CMAKE_SOURCE_DIR}/src/MAVLink/LibEvents
+    ${CMAKE_SOURCE_DIR}/src/Vehicle
+    ${CMAKE_SOURCE_DIR}/src/Comms
+    ${CMAKE_BINARY_DIR}/_deps/mavlink-src
+    ${CMAKE_BINARY_DIR}/_deps/mavlink-src/intercept
 )
 
 add_subdirectory(ADSB)
@@ -51,6 +133,17 @@ target_sources(${CMAKE_PROJECT_NAME}
         QGCApplication.h
 )
 
+if(WIN32)
+    set(APP_ICON_RC "${CMAKE_CURRENT_BINARY_DIR}/appicon.rc")
+    configure_file(
+        "${CMAKE_SOURCE_DIR}/deploy/windows/appicon.rc.in"
+        "${APP_ICON_RC}"
+        @ONLY
+    )
+    target_sources(${CMAKE_PROJECT_NAME} PRIVATE "${APP_ICON_RC}")
+endif()
+
+
 if(NOT ANDROID AND NOT IOS)
     target_sources(${CMAKE_PROJECT_NAME}
         PRIVATE
@@ -60,6 +153,15 @@ if(NOT ANDROID AND NOT IOS)
 endif()
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/src/MAVLink
+    ${CMAKE_BINARY_DIR}/_deps/mavlink-src
+    ${CMAKE_BINARY_DIR}/_deps/mavlink-src/ardupilotmega
+    ${CMAKE_BINARY_DIR}/_deps/mavlink-src/intercept
+)
+
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
     PRIVATE
@@ -141,16 +243,33 @@ else()
     )
 endif()
 
+# set_target_properties(${CMAKE_PROJECT_NAME}
+#     PROPERTIES
+#         QT_RESOURCE_PREFIX "/qml"
+#         OUTPUT_NAME ${CMAKE_PROJECT_NAME}
+# )
+
+
 set_target_properties(${CMAKE_PROJECT_NAME}
     PROPERTIES
         QT_RESOURCE_PREFIX "/qml"
-        OUTPUT_NAME ${CMAKE_PROJECT_NAME}
+        OUTPUT_NAME "AzShieldGCS"
 )
+
+# Android üçün QGC-nin öz android/ template-ni məcburi istifadə et
+if(ANDROID)
+    set_property(TARGET ${CMAKE_PROJECT_NAME}
+        PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+        "${CMAKE_SOURCE_DIR}/android"
+    )
+endif()
+
 
 target_precompile_headers(${CMAKE_PROJECT_NAME} PRIVATE pch.h)
 
 if(QGC_CUSTOM_BUILD)
     find_package(Qt6 REQUIRED COMPONENTS ${CUSTOM_QT_COMPONENTS})
+    find_package(Qt6 REQUIRED COMPONENTS Core)
     target_sources(${CMAKE_PROJECT_NAME} PRIVATE ${CUSTOM_SOURCES})
     target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${CUSTOM_LIBRARIES})
     target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${CUSTOM_INCLUDE_DIRECTORIES})

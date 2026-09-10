@@ -21,25 +21,19 @@
 #include <QtCore/QDir>
 #include <QtCore/QSettings>
 
-// Release languages are 90%+ complete
+// Bu quruluşda yalnız iki dil dəstəklənir: Azərbaycan və İngilis.
 QList<QLocale::Language> AppSettings::_rgReleaseLanguages = {
+    QLocale::Azerbaijani,
     QLocale::English,
-    QLocale::Azerbaijani,    
-    QLocale::Chinese,
-    QLocale::Japanese,
-    QLocale::Korean,
-    QLocale::Portuguese,
-    QLocale::Russian,
 };
 
-// Partial languages are 40%+ complete
+// Qismən tərcümə olunmuş dil yoxdur
 QList<QLocale::Language> AppSettings::_rgPartialLanguages = {
-    QLocale::Ukrainian,
 };
 
 AppSettings::LanguageInfo_t AppSettings::_rgLanguageInfo[] = {
-    { QLocale::AnyLanguage,     "System" },                     // Must be first
-    { QLocale::Azerbaijani,     "Azerbaijani (Azerbaijani)" },
+    { QLocale::AnyLanguage,     "Sistem" },                     // Must be first
+    { QLocale::Azerbaijani,     "Azərbaycan dili" },
     { QLocale::Bulgarian,       "български (Bulgarian)" },
     { QLocale::Chinese,         "中文 (Chinese)" },
     { QLocale::Dutch,           "Nederlands (Dutch)" },
@@ -203,15 +197,8 @@ DECLARE_SETTINGSFACT_NO_FUNC(AppSettings, qLocaleLanguage)
                 rgEnumValues.append(languageInfo.languageId);
             }
         }
-#ifdef QGC_DAILY_BUILD
-        // Only daily builds include full set of languages for testing purposes
-        for (const auto& languageInfo: _rgLanguageInfo) {
-            if (!_rgReleaseLanguages.contains(languageInfo.languageId) && !_rgPartialLanguages.contains(languageInfo.languageId)) {
-                rgEnumStrings.append(QString(languageInfo.languageName) + AppSettings::tr(" (Test Only)"));
-                rgEnumValues.append(languageInfo.languageId);
-            }
-        }
-#endif
+        // NOTE: upstream adds every remaining language on daily builds. We ship only
+        // Azerbaijani and English, so that list is intentionally not extended here.
         metaData->setEnumInfo(rgEnumStrings, rgEnumValues);
 
         if (_qLocaleLanguageFact->enumIndex() == -1) {

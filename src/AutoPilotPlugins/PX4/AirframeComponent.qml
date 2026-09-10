@@ -124,7 +124,6 @@ SetupPage {
                                                                         Your vehicle will also be restarted in order to complete the process."),
                                                                  Dialog.Apply | Dialog.Cancel,
                                                                  function() { controller.changeAutostart() })
-
                 }
             }
 

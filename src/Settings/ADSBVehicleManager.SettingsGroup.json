@@ -5,20 +5,20 @@
 [
 {
     "name":         "adsbServerConnectEnabled",
-    "shortDesc":    "Connect to ADSB SBS server",
-    "longDesc":     "Connect to ADSB SBS-1 server using specified address/port",
+    "shortDesc":    "ADSB SBS serverinə qoşulun",
+    "longDesc":     "Göstərilən ünvan/portdan istifadə edərək ADSB SBS-1 serverinə qoşulun",
     "type":         "bool",
     "default":      false
 },
 {
     "name":         "adsbServerHostAddress",
-    "shortDesc":    "Host address",
+    "shortDesc":    "Host ünvanı",
     "type":         "string",
     "default":      "127.0.0.1"
 },
 {
     "name":         "adsbServerPort",
-    "shortDesc":    "Server port",
+    "shortDesc":    "Server portu",
     "type":         "string",
     "default":      30003
 }

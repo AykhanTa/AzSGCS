@@ -14,7 +14,7 @@ import QGroundControl.FlightMap
 
 TransectStyleComplexItemEditor {
     transectAreaDefinitionComplete: missionItem.surveyAreaPolygon.isValid
-    transectAreaDefinitionHelp:     qsTr("Use the Polygon Tools to create the polygon which outlines your survey area.")
+    transectAreaDefinitionHelp:     qsTr("Sorğunuzun ərazisini təsvir edən çoxbucaqlı yaratmaq üçün Poliqon Alətlərindən istifadə edin.")
     transectValuesHeaderName:       qsTr("Transects")
     transectValuesComponent:        _transectValuesComponent
     presetsTransectValuesComponent: _transectValuesComponent
@@ -35,7 +35,7 @@ TransectStyleComplexItemEditor {
             rowSpacing:         _margin
             columns:            2
 
-            QGCLabel { text: qsTr("Angle") }
+            QGCLabel { text: qsTr("Bucaq") }
             FactTextField {
                 fact:                   missionItem.gridAngle
                 Layout.fillWidth:       true
@@ -57,7 +57,7 @@ TransectStyleComplexItemEditor {
             }
 
             QGCLabel {
-                text:       qsTr("Turnaround dist")
+                text:       qsTr("Dönmə məsafəsi")
                 visible:    !forPresets
             }
             FactTextField {
@@ -73,25 +73,25 @@ TransectStyleComplexItemEditor {
 
                 model: [
                     {
-                        text:       qsTr("Hover and capture image"),
+                        text:       qsTr("Üzərinə sürüşdürün və şəkil çəkin"),
                         fact:       missionItem.hoverAndCapture,
                         enabled:    missionItem.cameraCalc.distanceMode === QGroundControl.AltitudeModeRelative || missionItem.cameraCalc.distanceMode === QGroundControl.AltitudeModeAbsolute,
                         visible:    missionItem.hoverAndCaptureAllowed
                     },
                     {
-                        text:       qsTr("Refly at 90 deg offset"),
+                        text:       qsTr("90 dərəcə ofsetlə geri qaytarın"),
                         fact:       missionItem.refly90Degrees,
                         enabled:    missionItem.cameraCalc.distanceMode !== QGroundControl.AltitudeModeCalcAboveTerrain,
                         visible:    true
                     },
                     {
-                        text:       qsTr("Images in turnarounds"),
+                        text:       qsTr("Şəkillər dönüşlərdə"),
                         fact:       missionItem.cameraTriggerInTurnAround,
                         enabled:    missionItem.hoverAndCaptureAllowed ? !missionItem.hoverAndCapture.rawValue : true,
                         visible:    true
                     },
                     {
-                        text:       qsTr("Fly alternate transects"),
+                        text:       qsTr("Alternativ transektlər halında uçun"),
                         fact:       missionItem.flyAlternateTransects,
                         enabled:    true,
                         visible:    _vehicle ? (_vehicle.fixedWing || _vehicle.vtol) : false
@@ -103,7 +103,7 @@ TransectStyleComplexItemEditor {
 
     KMLOrSHPFileDialog {
         id:             kmlOrSHPLoadDialog
-        title:          qsTr("Select Polygon File")
+        title:          qsTr("Polygon faylı seçin")
 
         onAcceptedForLoad: (file) => {
             missionItem.surveyAreaPolygon.loadKMLOrSHPFile(file)

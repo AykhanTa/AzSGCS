@@ -48,6 +48,8 @@ public:
     /// Initialize the Singleton
     void init(Fact *mutedFact);
 
+    void _playBeepSound();
+
     /// Checks if the audio output is muted.
     ///     @return True if muted, false otherwise.
     bool isMuted() const { return _muted; }

@@ -43,8 +43,11 @@
 
 QGC_LOGGING_CATEGORY(GuidedActionsControllerLog, "GuidedActionsControllerLog")
 
-QGeoCoordinate QGroundControlQmlGlobal::_coord = QGeoCoordinate(0.0,0.0);
-double QGroundControlQmlGlobal::_zoom = 2;
+// QGeoCoordinate QGroundControlQmlGlobal::_coord = QGeoCoordinate(0.0,0.0);
+// double QGroundControlQmlGlobal::_zoom = 2;
+
+QGeoCoordinate QGroundControlQmlGlobal::_coord = QGeoCoordinate(40.409264, 49.867092);
+double QGroundControlQmlGlobal::_zoom = 11;
 
 QGroundControlQmlGlobal::QGroundControlQmlGlobal(QObject *parent)
     : QObject(parent)
@@ -72,11 +75,13 @@ QGroundControlQmlGlobal::QGroundControlQmlGlobal(QObject *parent)
     // setParent(nullptr);
 
     // Load last coordinates and zoom from config file
-    QSettings settings;
-    settings.beginGroup(_flightMapPositionSettingsGroup);
-    _coord.setLatitude(settings.value(_flightMapPositionLatitudeSettingsKey,    _coord.latitude()).toDouble());
-    _coord.setLongitude(settings.value(_flightMapPositionLongitudeSettingsKey,  _coord.longitude()).toDouble());
-    _zoom = settings.value(_flightMapZoomSettingsKey, _zoom).toDouble();
+    // QSettings settings;
+    // settings.beginGroup(_flightMapPositionSettingsGroup);
+    // _coord.setLatitude(settings.value(_flightMapPositionLatitudeSettingsKey,    _coord.latitude()).toDouble());
+    // _coord.setLongitude(settings.value(_flightMapPositionLongitudeSettingsKey,  _coord.longitude()).toDouble());
+    // _zoom = settings.value(_flightMapZoomSettingsKey, _zoom).toDouble();
+
+
     _flightMapPositionSettledTimer.setSingleShot(true);
     _flightMapPositionSettledTimer.setInterval(1000);
     (void) connect(&_flightMapPositionSettledTimer, &QTimer::timeout, this, []() {
@@ -295,15 +300,15 @@ QString QGroundControlQmlGlobal::altitudeModeShortDescription(AltMode altMode)
     case AltitudeModeNone:
         return QString();
     case AltitudeModeRelative:
-        return tr("Relative To Launch");
+        return tr("Başlamaq üçün Nisbi");
     case AltitudeModeAbsolute:
         return tr("AMSL");
     case AltitudeModeCalcAboveTerrain:
-        return tr("Calc Above Terrain");
+        return tr("Yerdən yuxarıda hesablama");
     case AltitudeModeTerrainFrame:
-        return tr("Terrain Frame");
+        return tr("Ərazi çərçivəsi");
     case AltitudeModeMixed:
-        return tr("Mixed Modes");
+        return tr("Qarışıq rejimlər");
     }
 
     // Should never get here but makes some compilers happy

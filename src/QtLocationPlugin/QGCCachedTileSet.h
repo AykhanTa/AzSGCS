@@ -152,6 +152,10 @@ private:
     void _prepareDownload();
     void _doneWithDownload();
 
+    /// If this tile is an elevation tile fully covered by embedded local DTED data,
+    /// generate + cache it directly (no network) and return true.
+    bool _serveLocalElevationTile(const QGCTile *tile);
+
     QString _name;
     QString _mapTypeStr;
     QString _type = QStringLiteral("Invalid");
@@ -184,4 +188,5 @@ private:
     QNetworkAccessManager *_networkManager = nullptr;
 
     static constexpr uint32_t kTileBatchSize = 256;
+    static constexpr int kLocalElevationBatch = 64; ///< Max local (no-network) elevation tiles served per pump cycle
 };

@@ -41,6 +41,14 @@ FactPanelController::~FactPanelController()
 
 void FactPanelController::_reportMissingParameter(int componentId, const QString &name) const
 {
+    // Real (qoşulu) avtopilot yoxdursa offline editing vehicle işlədilir və onun
+    // parametrləri olmur. Bu halda hər səhifə açılışında istifadəçiyə "çatışmayan
+    // parametr" dialoqu göstərmək mənasızdır — yalnız debug log-a yazırıq.
+    if (!_vehicle || _vehicle->isOfflineEditingVehicle()) {
+        qCDebug(FactPanelControllerLog) << "Missing parameter ignored (no connected vehicle):" << name;
+        return;
+    }
+
     if (componentId == ParameterManager::defaultComponentId) {
         componentId = _vehicle->defaultComponentId();
     }

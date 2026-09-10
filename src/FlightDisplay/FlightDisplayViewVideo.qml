@@ -55,7 +55,7 @@ Item {
         Image {
             id:             noVideo
             anchors.fill:   parent
-            source:         "/res/NoVideoBackground.jpg"
+            source:         "/res/NoVideoBackground.png"
             fillMode:       Image.PreserveAspectCrop
             visible:        !(QGroundControl.videoManager.decoding)
 
@@ -70,7 +70,7 @@ Item {
 
             QGCLabel {
                 id:                 noVideoLabel
-                text:               QGroundControl.settingsManager.videoSettings.streamEnabled.rawValue ? qsTr("WAITING FOR VIDEO") : qsTr("VIDEO DISABLED")
+                text:               QGroundControl.settingsManager.videoSettings.streamEnabled.rawValue ? qsTr("VİDEO GÖZLƏNİLİR") : qsTr("VIDEO DISABLED")
                 font.bold:          true
                 color:              "white"
                 font.pointSize:     useSmallFont ? ScreenTools.smallFontPointSize : ScreenTools.largeFontPointSize
@@ -158,6 +158,29 @@ Item {
                     y:      parent.height * 0.66
                     visible: _showGrid && !QGroundControl.videoManager.fullScreen
                 }
+
+                Item {
+                                    anchors.centerIn: parent
+                                    width: 40   // Nişangahın ümumi eni (zövqə görə dəyişə bilərsiniz)
+                                    height: 40  // Nişangahın ümumi hündürlüyü
+                                    visible: true // Həmişə görünməsi üçün
+
+                                    // Üfüqi xətt
+                                    Rectangle {
+                                        anchors.centerIn: parent
+                                        width: parent.width
+                                        height: 2 // Xəttin qalınlığı
+                                        color: "#00FF00" // Yaşıl rəng (videoda aydın seçilir)
+                                    }
+
+                                    // Şaquli xətt
+                                    Rectangle {
+                                        anchors.centerIn: parent
+                                        width: 2 // Xəttin qalınlığı
+                                        height: parent.height
+                                        color: "#00FF00"
+                                    }
+                                }
             }
         }
         Loader {

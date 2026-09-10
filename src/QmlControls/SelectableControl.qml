@@ -25,7 +25,8 @@ Control {
     bottomInset:    0
     leftInset:      0
     rightInset:     0
-    topPadding:     _showSelectionUI ? selectionUILayout.height : 0
+   // topPadding:     _showSelectionUI ? selectionUILayout.height : 0
+    topPadding:0
     bottomPadding:  0
     leftPadding:    0
     rightPadding:   0
@@ -36,25 +37,25 @@ Control {
 
     property bool _showSelectionUI: false
 
-    background: Item {
-        RowLayout {
-            id:             selectionUILayout
-            anchors.right:  control.selectionUIRightAnchor ? parent.right : undefined
-            spacing:        ScreenTools.defaultFontPixelWidth
-            visible:        _showSelectionUI
+    // background: Item {
+    //     RowLayout {
+    //         id:             selectionUILayout
+    //         anchors.right:  control.selectionUIRightAnchor ? parent.right : undefined
+    //         spacing:        ScreenTools.defaultFontPixelWidth
+    //         visible:        _showSelectionUI
 
-            QGCButton {
-                onClicked:  _showSelectionUI = false
-                iconSource: "qrc:/InstrumentValueIcons/lock-open.svg"
-            }
+    //         QGCButton {
+    //             onClicked:  _showSelectionUI = false
+    //             iconSource: "qrc:/InstrumentValueIcons/lock-open.svg"
+    //         }
 
-            FactComboBox {
-                fact:           selectedControl
-                indexModel:     false
-                sizeToContents: true
-            }
-        }
-    }
+    //         FactComboBox {
+    //             fact:           selectedControl
+    //             indexModel:     false
+    //             sizeToContents: true
+    //         }
+    //     }
+    // }
 
     contentItem: Item {
         implicitWidth:  loader.item.width

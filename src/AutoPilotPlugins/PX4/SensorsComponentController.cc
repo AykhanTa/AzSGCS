@@ -164,7 +164,7 @@ void SensorsComponentController::_stopCalibration(SensorsComponentController::St
     
     switch (code) {
         case StopCalibrationSuccess:
-            _orientationCalAreaHelpText->setProperty("text", tr("Calibration complete"));
+            _orientationCalAreaHelpText->setProperty("text", tr("Kalibrasıya tamamlandı"));
             if (!_airspeedCalInProgress && !_levelCalInProgress) {
                 emit resetStatusTextArea();
             }
@@ -181,7 +181,7 @@ void SensorsComponentController::_stopCalibration(SensorsComponentController::St
         default:
             // Assume failed
             _hideAllCalAreas();
-            qgcApp()->showAppMessage(tr("Calibration failed. Calibration log will be displayed."));
+            qgcApp()->showAppMessage(tr("Kalibrləmə uğursuz oldu. Kalibrləmə logları göstərilir."));
             break;
     }
     
@@ -304,7 +304,7 @@ void SensorsComponentController::_handleUASTextMessage(int uasId, int compId, in
             _orientationCalTailDownSideVisible = false;
             _orientationCalNoseDownSideVisible = false;
             
-            _orientationCalAreaHelpText->setProperty("text", tr("Place your vehicle into one of the Incomplete orientations shown below and hold it still"));
+            _orientationCalAreaHelpText->setProperty("text", tr("Təyyarəni aşağıda göstərilən Natamam istiqamətlərdən birinə qoyun və hərəkətsiz saxlayın"));
             
             if (text == "accel") {
                 _accelCalInProgress = true;
@@ -389,9 +389,9 @@ void SensorsComponentController::_handleUASTextMessage(int uasId, int compId, in
         }
         
         if (_magCalInProgress) {
-            _orientationCalAreaHelpText->setProperty("text", tr("Rotate the vehicle continuously as shown in the diagram until marked as Completed"));
+            _orientationCalAreaHelpText->setProperty("text", tr("Tamamlandı kimi işarələnənə qədər təyyarəni diaqramda göstərildiyi kimi davamlı olaraq fırladın"));
         } else {
-            _orientationCalAreaHelpText->setProperty("text", tr("Hold still in the current orientation"));
+            _orientationCalAreaHelpText->setProperty("text", tr("Cari oriyentasiyada hərəkətsiz saxlayın"));
         }
         
         emit orientationCalSidesInProgressChanged();
@@ -429,7 +429,7 @@ void SensorsComponentController::_handleUASTextMessage(int uasId, int compId, in
             _orientationCalTailDownSideRotate = false;
         }
         
-        _orientationCalAreaHelpText->setProperty("text", tr("Place you vehicle into one of the orientations shown below and hold it still"));
+        _orientationCalAreaHelpText->setProperty("text", tr("Təyyarəni aşağıda göstərilən istiqamətlərdən birinə qoyun və hərəkətsiz saxlayın"));
 
         emit orientationCalSidesInProgressChanged();
         emit orientationCalSidesDoneChanged();
@@ -438,7 +438,7 @@ void SensorsComponentController::_handleUASTextMessage(int uasId, int compId, in
     }
 
     if (text.endsWith("side already completed")) {
-        _orientationCalAreaHelpText->setProperty("text", tr("Orientation already completed, place you vehicle into one of the incomplete orientations shown below and hold it still"));
+        _orientationCalAreaHelpText->setProperty("text", tr("Orientasiya artıq tamamlandı, təyyarəni aşağıda göstərilən natamam istiqamətlərdən birinə qoyun və hərəkətsiz saxlayın"));
         return;
     }
     
@@ -498,14 +498,14 @@ void SensorsComponentController::cancelCalibration(void)
 void SensorsComponentController::_handleParametersReset(bool success)
 {
     if (success) {
-        qgcApp()->showAppMessage(tr("Reset successful"));
+        qgcApp()->showAppMessage(tr("Sıfırlama uğurlu oldu"));
 
         QTimer::singleShot(1000, this, [this]() {
             _refreshParams();
         });
     }
     else {
-        qgcApp()->showAppMessage(tr("Reset failed"));
+        qgcApp()->showAppMessage(tr("Sıfırlama uğursuz oldu"));
     }
 }
 

@@ -65,16 +65,21 @@ Popup {
         _arrowPointPositionY += originalYPos - yPos
     }
 
+    property color panelColor:  "#2A2A2A"
+    property color panelBorder: "#6E6E6E"
+
     background: Item {
         implicitWidth:  contentItem.implicitWidth + _innerMargin * 2 + _arrowPointWidth
         implicitHeight: contentItem.implicitHeight + _innerMargin * 2
 
         Rectangle {
-            x:      _dropRight ? _arrowPointWidth : 0
-            radius: ScreenTools.defaultFontPixelHeight / 2
-            width:  parent.implicitWidth - _arrowPointWidth
-            height: parent.implicitHeight
-            color:  _qgcPal.window
+            x:              _dropRight ? _arrowPointWidth : 0
+            radius:         12
+            width:          parent.implicitWidth - _arrowPointWidth
+            height:         parent.implicitHeight
+            color:          _root.panelColor
+            border.width:   1
+            border.color:   _root.panelBorder
         }
 
         // Arrowhead
@@ -92,8 +97,11 @@ Popup {
                 context.lineTo(_dropRight ? _arrowPointWidth : 0, 0)
                 context.lineTo(_dropRight ? _arrowPointWidth : 0, _arrowPointWidth * 2)
                 context.closePath()
-                context.fillStyle = _qgcPal.window
+                context.fillStyle = _root.panelColor
                 context.fill()
+                context.strokeStyle = _root.panelBorder
+                context.lineWidth = 1
+                context.stroke()
             }
         }
     }

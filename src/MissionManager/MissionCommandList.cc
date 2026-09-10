@@ -54,9 +54,11 @@ void MissionCommandList::_loadMavCmdInfoJson(const QString& jsonFilename, bool b
 
         QString errorString;
         if (!uiInfo->loadJsonInfo(info.toObject(), baseCommandList, errorString)) {
+            // A single malformed entry must not abort the whole file. Aborting left every
+            // remaining command without UI info, which crashed the plan view later on.
             uiInfo->deleteLater();
-            qWarning() << jsonFilename << errorString;
-            return;
+            qWarning() << jsonFilename << "skipping command -" << errorString;
+            continue;
         }
 
         // Update list of known categories

@@ -84,9 +84,8 @@ void AirframeComponentController::changeAutostart(void)
 {
     if (MultiVehicleManager::instance()->vehicles()->count() > 1) {
         qgcApp()->showAppMessage(tr("You cannot change airframe configuration while connected to multiple vehicles."));
-		return;
-	}
-
+                return;
+        }
     QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     
     Fact* sysAutoStartFact  = getParameterFact(-1, "SYS_AUTOSTART");

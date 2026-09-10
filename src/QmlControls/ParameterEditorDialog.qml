@@ -140,7 +140,7 @@ QGCPopupDialog {
 
             QGCButton {
                 visible:    _allowDefaultReset
-                text:       qsTr("Reset To Default")
+                text:       qsTr("Defoltlara sıfırlayın")
 
                 onClicked: {
                     fact.value = fact.defaultValue
@@ -207,31 +207,31 @@ QGCPopupDialog {
 
         QGCLabel {
             visible:    fact.vehicleRebootRequired
-            text:       qsTr("Vehicle reboot required after change")
+            text:       qsTr("Dəyişiklikdən sonra təyyarənin yenidən işə salınması tələb olunur")
         }
 
         QGCLabel {
             visible:    fact.qgcRebootRequired
-            text:       qsTr("Application restart required after change")
+            text:       qsTr("Dəyişiklikdən sonra tətbiqin yenidən başlaması tələb olunur")
         }
 
         QGCLabel {
             Layout.fillWidth:   true
             wrapMode:   Text.WordWrap
-            text:       qsTr("Warning: Modifying values while vehicle is in flight can lead to vehicle instability and possible vehicle loss. ") +
-                        qsTr("Make sure you know what you are doing and double-check your values before Save!")
+            text:       qsTr("Xəbərdarlıq: Təyyarənin uçuşda olduğu zaman dəyərlərin dəyişdirilməsi təyyarənin qeyri-sabitliyinə və mümkün təyyarə itkisinə səbəb ola bilər. ") +
+                        qsTr("Nə etdiyinizi bildiyinizə əmin olun və Saxlamadan əvvəl dəyərlərinizi iki dəfə yoxlayın!")
             visible:    fact.componentId != -1
         }
 
         QGCCheckBox {
             id:         forceSave
             visible:    false
-            text:       qsTr("Force save (dangerous!)")
+            text:       qsTr("Məcburi saxlama (Təhlükəli!)")
         }
 
         QGCCheckBox {
             id:         _advanced
-            text:       qsTr("Advanced settings")
+            text:       qsTr("Qabaqcıl parametrlər")
             visible:    showRCToParam || factCombo.visible || bitmaskColumn.visible
         }
 
@@ -239,7 +239,7 @@ QGCPopupDialog {
         QGCCheckBox {
             id:         manualEntry
             visible:    _advanced.checked && (factCombo.visible || bitmaskColumn.visible)
-            text:       qsTr("Manual Entry")
+            text:       qsTr("Manual Giriş")
 
             onClicked: {
                 valueField.text = fact.valueString

@@ -59,7 +59,7 @@ Rectangle {
                 Layout.fillWidth:   true
                 wrapMode:           Text.WordWrap
                 horizontalAlignment:    Text.AlignHCenter
-                text:               qsTr("Use the Polygon Tools to create the polygon which outlines the structure.")
+                text:               qsTr("Strukturu təsvir edən çoxbucaqlı yaratmaq üçün Poliqon Alətlərindən istifadə edin.")
                 visible:        !missionItem.structurePolygon.isValid || missionItem.wizardMode
             }
 
@@ -85,14 +85,14 @@ Rectangle {
 
                 QGCLabel {
                     Layout.fillWidth:   true
-                    text:           qsTr("Note: Polygon respresents structure surface not vehicle flight path.")
+                    text:           qsTr("Qeyd: Poliqon təyyarənin uçuş yolunu deyil, strukturun səthini təmsil edir.")
                     wrapMode:       Text.WordWrap
                     font.pointSize: ScreenTools.smallFontPointSize
                 }
 
                 QGCLabel {
                     Layout.fillWidth:   true
-                    text:           qsTr("WARNING: Photo interval is below minimum interval (%1 secs) supported by camera.").arg(_cameraMinTriggerInterval.toFixed(1))
+                    text:           qsTr("XƏBƏRDARLIQ: Foto interval kamera tərəfindən dəstəklənən minimum intervaldan (%1 saniyə) aşağıdır.").arg(_cameraMinTriggerInterval.toFixed(1))
                     wrapMode:       Text.WordWrap
                     color:          qgcPal.warningText
                     visible:        missionItem.cameraShots > 0 && _cameraMinTriggerInterval !== 0 && _cameraMinTriggerInterval > missionItem.timeBetweenShots
@@ -102,15 +102,15 @@ Rectangle {
                     Layout.fillWidth:   true
                     cameraCalc:                     missionItem.cameraCalc
                     vehicleFlightIsFrontal:         false
-                    distanceToSurfaceLabel:         qsTr("Scan Distance")
-                    frontalDistanceLabel:           qsTr("Layer Height")
-                    sideDistanceLabel:              qsTr("Trigger Distance")
+                    distanceToSurfaceLabel:         qsTr("Skan məsafəsi")
+                    frontalDistanceLabel:           qsTr("Layer Hündürlüyü")
+                    sideDistanceLabel:              qsTr("Tətik məsafəsi")
                 }
 
                 SectionHeader {
                     id:             scanHeader
                     Layout.fillWidth:   true
-                    text:           qsTr("Scan")
+                    text:           qsTr("Skan edin")
                 }
 
                 ColumnLayout {
@@ -127,13 +127,13 @@ Rectangle {
                         FactComboBox {
                             fact:               missionItem.startFromTop
                             indexModel:         true
-                            model:              [ qsTr("Start Scan From Bottom"), qsTr("Start Scan From Top") ]
+                            model:              [ qsTr("Skanı Aşağıdan Başlayın"), qsTr("Skanı yuxarıdan başlayın") ]
                             Layout.columnSpan:  2
                             Layout.fillWidth:   true
                         }
 
                         QGCLabel {
-                            text:       qsTr("Structure Height")
+                            text:       qsTr("Struktur Hündürlüyü")
                         }
                         FactTextField {
                             fact:               missionItem.structureHeight
@@ -147,7 +147,7 @@ Rectangle {
                             Layout.fillWidth:   true
                         }
 
-                        QGCLabel { text: qsTr("Entrance/Exit Alt") }
+                        QGCLabel { text: qsTr("Giriş/Çıxış Alt") }
                         AltitudeFactTextField {
                             fact:               missionItem.entranceAlt
                             altitudeMode:       QGroundControl.AltitudeModeRelative
@@ -171,7 +171,7 @@ Rectangle {
                     }
 
                     QGCButton {
-                        text:       qsTr("Rotate entry point")
+                        text:       qsTr("Giriş nöqtəsini çevirin")
                         onClicked:  missionItem.rotateEntryPoint()
                     }
                 } // Column - Scan
@@ -179,7 +179,7 @@ Rectangle {
                 SectionHeader {
                     id:             statsHeader
                     Layout.fillWidth:   true
-                    text:           qsTr("Statistics")
+                    text:           qsTr("Statistika")
                 }
 
                 Grid {
@@ -199,13 +199,13 @@ Rectangle {
                     QGCLabel { text: qsTr("Bottom Layer Alt") }
                     QGCLabel { text: QGroundControl.unitsConversion.metersToAppSettingsVerticalDistanceUnits(missionItem.bottomFlightAlt).toFixed(1) + " " + QGroundControl.unitsConversion.appSettingsHorizontalDistanceUnitsString }
 
-                    QGCLabel { text: qsTr("Photo Count") }
+                    QGCLabel { text: qsTr("Foto sayı") }
                     QGCLabel { text: missionItem.cameraShots }
 
-                    QGCLabel { text: qsTr("Photo Interval") }
+                    QGCLabel { text: qsTr("Foto interval") }
                     QGCLabel { text: missionItem.timeBetweenShots.toFixed(1) + " " + qsTr("secs") }
 
-                    QGCLabel { text: qsTr("Trigger Distance") }
+                    QGCLabel { text: qsTr("Tətik məsafəsi") }
                     QGCLabel { text: missionItem.cameraCalc.adjustedFootprintSide.valueString + " " + QGroundControl.unitsConversion.appSettingsHorizontalDistanceUnitsString }
                 }
             } // Grid Column

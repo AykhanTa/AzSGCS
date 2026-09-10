@@ -26,6 +26,14 @@ static QtMessageHandler defaultHandler = nullptr;
 
 static void msgHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+    // Suppress a benign, high-volume Qt Quick warning. Many custom QGCLabel-based
+    // controls intentionally set font.pixelSize while QGCLabel's base already sets
+    // font.pointSize. Qt does exactly the right thing here ("Using pixel size"), so the
+    // warning is pure noise emitted once per such control while the UI is built.
+    if (msg.contains(QLatin1String("Both point size and pixel size set"))) {
+        return;
+    }
+
     // Format the message using Qt's pattern
     const QString message = qFormatLogMessage(type, context, msg);
 

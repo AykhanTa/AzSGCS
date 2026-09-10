@@ -334,7 +334,7 @@ private:
     static constexpr const char *_vtolTXModeSettingsKey =          "TXMode_VTOL";
     static constexpr const char *_submarineTXModeSettingsKey =     "TXMode_Submarine";
 
-    static constexpr const char *_buttonActionNone =               QT_TR_NOOP("No Action");
+    static constexpr const char *_buttonActionNone =               QT_TR_NOOP("Fəaliyyət yoxdur");
     static constexpr const char *_buttonActionArm =                QT_TR_NOOP("Arm");
     static constexpr const char *_buttonActionDisarm =             QT_TR_NOOP("Disarm");
     static constexpr const char *_buttonActionToggleArm =          QT_TR_NOOP("Toggle Arm");

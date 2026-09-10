@@ -24,7 +24,7 @@ Item {
         anchors.fill:       parent
 
         VehicleSummaryRow {
-            labelText: qsTr("Compass:")
+            labelText: qsTr("Kompas:")
             valueText: mag0IdFact ? (mag0IdFact.value  === 0 ? qsTr("Setup required") : qsTr("Ready")) : ""
         }
 
@@ -34,7 +34,7 @@ Item {
         }
 
         VehicleSummaryRow {
-            labelText: qsTr("Accelerometer:")
+            labelText: qsTr("Akselerometr:")
             valueText: accel0IdFact ? (accel0IdFact.value === 0 ? qsTr("Setup required") : qsTr("Ready")) : ""
         }
 

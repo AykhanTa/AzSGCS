@@ -83,6 +83,7 @@ void VehicleLinkManager::_commRegainedOnLink(LinkInterface *link)
         primarySwitchMessage = tr("%1Switching communication to new primary link").arg(_vehicle->_vehicleIdSpeech());
     }
 
+    //audio seslenmesi
     if (!commRegainedMessage.isEmpty()) {
         AudioOutput::instance()->say(commRegainedMessage.toLower());
     }

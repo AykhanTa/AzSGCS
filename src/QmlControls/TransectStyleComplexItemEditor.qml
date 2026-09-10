@@ -25,14 +25,14 @@ Rectangle {
     property var    transectValuesComponent:        undefined
     property var    presetsTransectValuesComponent: undefined
 
-    readonly property string _internalError: "Internal Error"
+    readonly property string _internalError: qsTr("Daxili xəta!")
 
     property var    _missionItem:               missionItem
     property real   _margin:                    ScreenTools.defaultFontPixelWidth / 2
     property real   _fieldWidth:                ScreenTools.defaultFontPixelWidth * 10.5
     property var    _vehicle:                   QGroundControl.multiVehicleManager.activeVehicle ? QGroundControl.multiVehicleManager.activeVehicle : QGroundControl.multiVehicleManager.offlineEditingVehicle
     property real   _cameraMinTriggerInterval:  _missionItem.cameraCalc.minTriggerInterval.rawValue
-    property string _doneAdjusting:             qsTr("Done")
+    property string _doneAdjusting:             qsTr("Bitdi")
     property bool   _presetsAvailable:          _missionItem.presetNames.length !== 0
 
     function polygonCaptureStarted() {
@@ -88,7 +88,7 @@ Rectangle {
 
                 QGCLabel {
                     Layout.fillWidth:   true
-                    text:               qsTr("WARNING: Photo interval is below minimum interval (%1 secs) supported by camera.").arg(_cameraMinTriggerInterval.toFixed(1))
+                    text:               qsTr("XƏBƏRDARLIQ: Foto interval kamera tərəfindən dəstəklənən minimum intervaldan (%1 saniyə) aşağıdır.").arg(_cameraMinTriggerInterval.toFixed(1))
                     wrapMode:           Text.WordWrap
                     color:              qgcPal.warningText
                     visible:            _missionItem.cameraShots > 0 && _cameraMinTriggerInterval !== 0 && _cameraMinTriggerInterval > _missionItem.timeBetweenShots
@@ -98,9 +98,9 @@ Rectangle {
                     Layout.fillWidth:               true
                     cameraCalc:                     _missionItem.cameraCalc
                     vehicleFlightIsFrontal:         true
-                    distanceToSurfaceLabel:         qsTr("Altitude")
-                    frontalDistanceLabel:           qsTr("Trigger Dist")
-                    sideDistanceLabel:              qsTr("Spacing")
+                    distanceToSurfaceLabel:         qsTr("Hündürlük")
+                    frontalDistanceLabel:           qsTr("Tətik məsafəsi")
+                    sideDistanceLabel:              qsTr("Aralıq")
                 }
 
                 SectionHeader {
@@ -119,7 +119,7 @@ Rectangle {
 
                 QGCButton {
                     Layout.alignment:   Qt.AlignHCenter
-                    text:               qsTr("Rotate Entry Point")
+                    text:               qsTr("Giriş nöqtəsini çevirin")
                     onClicked:          _missionItem.rotateEntryPoint()
                     visible:            transectValuesHeader.checked
                 }
@@ -127,7 +127,7 @@ Rectangle {
                 SectionHeader {
                     id:                 statsHeader
                     Layout.fillWidth:   true
-                    text:               qsTr("Statistics")
+                    text:               qsTr("Statistika")
                 }
 
                 TransectStyleComplexItemStats {
@@ -159,7 +159,7 @@ Rectangle {
 
                 QGCLabel {
                     Layout.fillWidth:   true
-                    text:               qsTr("Presets")
+                    text:               qsTr("Presetlər")
                     wrapMode:           Text.WordWrap
                 }
 
@@ -174,14 +174,14 @@ Rectangle {
 
                     QGCButton {
                         Layout.fillWidth:   true
-                        text:               qsTr("Apply Preset")
+                        text:               qsTr("Preset tətbiq edin")
                         enabled:            _missionItem.presetNames.length != 0
                         onClicked:          _missionItem.loadPreset(presetCombo.textAt(presetCombo.currentIndex))
                     }
 
                     QGCButton {
                         Layout.fillWidth:   true
-                        text:               qsTr("Delete Preset")
+                        text:               qsTr("Preset təyinatı silin")
                         enabled:            _missionItem.presetNames.length != 0
                         onClicked:          deletePresetDialog.createObject(mainWindow, { presetName: presetCombo.textAt(presetCombo.currentIndex) }).open()
 
@@ -189,8 +189,8 @@ Rectangle {
                             id: deletePresetDialog
 
                             QGCSimpleMessageDialog {
-                                title:      qsTr("Delete Preset")
-                                text:       qsTr("Are you sure you want to delete '%1' preset?").arg(presetName)
+                                title:      qsTr("Preset təyinatı silin")
+                                text:       qsTr("'%1' əvvəlcədən təyinini silmək istədiyinizə əminsiniz?").arg(presetName)
                                 buttons:    Dialog.Yes | Dialog.No
 
                                 property string presetName
@@ -206,7 +206,7 @@ Rectangle {
                 QGCButton {
                     Layout.alignment:   Qt.AlignCenter
                     Layout.fillWidth:   true
-                    text:               qsTr("Save Settings As New Preset")
+                    text:               qsTr("Parametrləri Yeni Preset kimi Saxlayın")
                     onClicked:          savePresetDialog.createObject(mainWindow).open()
                 }
 
@@ -228,7 +228,7 @@ Rectangle {
                 SectionHeader {
                     id:                 presetsStatsHeader
                     Layout.fillWidth:   true
-                    text:               qsTr("Statistics")
+                    text:               qsTr("Statistika")
                 }
 
                 TransectStyleComplexItemStats {
@@ -243,7 +243,7 @@ Rectangle {
 
             QGCPopupDialog {
                 id:         popupDialog
-                title:      qsTr("Save Preset")
+                title:      qsTr("Saxla Preset")
                 buttons:    Dialog.Save | Dialog.Cancel
 
                 onAccepted: {
@@ -260,28 +260,28 @@ Rectangle {
 
                     QGCLabel {
                         Layout.fillWidth:   true
-                        text:               qsTr("Save the current settings as a named preset.")
+                        text:               qsTr("Cari parametrləri preset olaraq yadda saxlayın.")
                         wrapMode:           Text.WordWrap
                     }
 
                     QGCLabel {
-                        text: qsTr("Preset Name")
+                        text: qsTr("Preset Adı")
                     }
 
                     QGCTextField {
                         id:                 presetNameField
                         Layout.fillWidth:   true
-                        placeholderText:    qsTr("Enter preset name")
+                        placeholderText:    qsTr("Preset adı daxil edin")
 
                         Component.onCompleted:  validateText(presetNameField.text)
                         onTextChanged:          validateText(text)
 
                         function validateText(text) {
                             if (text.trim() === "") {
-                                nameError.text = qsTr("Preset name cannot be blank.")
+                                nameError.text = qsTr("Preset adı boş ola bilməz.")
                                 popupDialog.acceptButtonEnabled = false
                             } else if (text.includes("/")) {
-                                nameError.text = qsTr("Preset name cannot include the \"/\" character.")
+                                nameError.text = qsTr("Preset adında \"/\" simvolları ola bilməz.")
                                 popupDialog.acceptButtonEnabled = false
                             } else {
                                 nameError.text = ""

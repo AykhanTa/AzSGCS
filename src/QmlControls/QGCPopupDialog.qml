@@ -68,13 +68,29 @@ Popup {
     property bool   _rejectAllowed:     rejectButton.visible
     property int    _previousValidationErrorCount: 0
 
-    background: QGCMouseArea {
+    // Dialoq dizaynı
+    property color dialogColor:     "#2A2A2A"
+    property color dialogBorder:    "#6E6E6E"
+    property color dialogContentBg: "#1E1E1E"
+
+    background: Item {
         width:  mainWindow.width
         height: mainWindow.height
 
-        onClicked: {
-            if (closePolicy & Popup.CloseOnPressOutside) {
-                _reject()
+        // Arxa fonu qaraldan qat — dialoq xəritənin üstündə itməsin
+        Rectangle {
+            anchors.fill:   parent
+            color:          "#000000"
+            opacity:        0.45
+        }
+
+        QGCMouseArea {
+            anchors.fill: parent
+
+            onClicked: {
+                if (closePolicy & Popup.CloseOnPressOutside) {
+                    _reject()
+                }
             }
         }
     }
@@ -128,58 +144,58 @@ Popup {
         rejectButton.visible = false
         // Accept role buttons
         if (buttons & Dialog.Ok) {
-            acceptButton.text = qsTr("Ok")
+            acceptButton.text = qsTr("Bəli")
             acceptButton.visible = true
         } else if (buttons & Dialog.Open) {
-            acceptButton.text = qsTr("Open")
+            acceptButton.text = qsTr("Aç")
             acceptButton.visible = true
         } else if (buttons & Dialog.Save) {
-            acceptButton.text = qsTr("Save")
+            acceptButton.text = qsTr("Yadda saxla")
             acceptButton.visible = true
         } else if (buttons & Dialog.Apply) {
-            acceptButton.text = qsTr("Apply")
+            acceptButton.text = qsTr("Tətbiq et")
             acceptButton.visible = true
         } else if (buttons & Dialog.Open) {
-            acceptButton.text = qsTr("Open")
+            acceptButton.text = qsTr("Aç")
             acceptButton.visible = true
         } else if (buttons & Dialog.SaveAll) {
-            acceptButton.text = qsTr("Save All")
+            acceptButton.text = qsTr("Hamısını Saxla")
             acceptButton.visible = true
         } else if (buttons & Dialog.Yes) {
-            acceptButton.text = qsTr("Yes")
+            acceptButton.text = qsTr("Bəli")
             acceptButton.visible = true
         } else if (buttons & Dialog.YesToAll) {
-            acceptButton.text = qsTr("Yes to All")
+            acceptButton.text = qsTr("Hamıya Bəli")
             acceptButton.visible = true
         } else if (buttons & Dialog.Retry) {
-            acceptButton.text = qsTr("Retry")
+            acceptButton.text = qsTr("Təkrarla")
             acceptButton.visible = true
         } else if (buttons & Dialog.Reset) {
-            acceptButton.text = qsTr("Reset")
+            acceptButton.text = qsTr("Sıfırla")
             acceptButton.visible = true
         } else if (buttons & Dialog.RestoreToDefaults) {
-            acceptButton.text = qsTr("Restore to Defaults")
+            acceptButton.text = qsTr("Defoltlara bərpa et")
             acceptButton.visible = true
         } else if (buttons & Dialog.Ignore) {
-            acceptButton.text = qsTr("Ignore")
+            acceptButton.text = qsTr("Nəzərə alma")
             acceptButton.visible = true
         }
 
         // Reject role buttons
         if (buttons & Dialog.Cancel) {
-            rejectButton.text = qsTr("Cancel")
+            rejectButton.text = qsTr("Ləğv et")
             rejectButton.visible = true
         } else if (buttons & Dialog.Close) {
-            rejectButton.text = qsTr("Close")
+            rejectButton.text = qsTr("Bağla")
             rejectButton.visible = true
         } else if (buttons & Dialog.No) {
-            rejectButton.text = qsTr("No")
+            rejectButton.text = qsTr("Xeyr")
             rejectButton.visible = true
         } else if (buttons & Dialog.NoToAll) {
-            rejectButton.text = qsTr("No to All")
+            rejectButton.text = qsTr("Hamıya yox")
             rejectButton.visible = true
         } else if (buttons & Dialog.Abort) {
-            rejectButton.text = qsTr("Abort")
+            rejectButton.text = qsTr("İptal et")
             rejectButton.visible = true
         }
 
@@ -194,14 +210,14 @@ Popup {
     }
 
     Rectangle {
-        x:              mainLayout.x - _contentMargin
-        y:              mainLayout.y - _contentMargin
-        width:          mainLayout.width + _contentMargin * 2
-        height:         mainLayout.height + _contentMargin * 2
-        color:          _qgcPal.windowShade
-        radius:         root.padding / 2
+        x:              mainLayout.x - _contentMargin * 1.5
+        y:              mainLayout.y - _contentMargin * 1.5
+        width:          mainLayout.width + _contentMargin * 3
+        height:         mainLayout.height + _contentMargin * 3
+        color:          root.dialogColor
+        radius:         14
         border.width:   1
-        border.color:   _qgcPal.windowShadeLight
+        border.color:   root.dialogBorder
     }
 
     ColumnLayout {
@@ -221,31 +237,41 @@ Popup {
                 Layout.fillWidth:   true
                 text:               root.title
                 font.pointSize:     ScreenTools.mediumFontPointSize
+                font.bold:          true
+                color:              "#FFFFFF"
                 verticalAlignment:	Text.AlignVCenter
             }
 
             QGCButton {
                 id:                     rejectButton
                 onClicked:              _reject()
-                Layout.minimumWidth:    height * 1.5
+                Layout.minimumWidth:    height * 1.8
             }
 
             QGCButton {
                 id:                     acceptButton
                 primary:                true
                 onClicked:              _accept()
-                Layout.minimumWidth:    height * 1.5
+                Layout.minimumWidth:    height * 1.8
             }
+        }
+
+        // Başlığı məzmundan ayıran xətt
+        Rectangle {
+            Layout.fillWidth:       true
+            Layout.preferredHeight: 1
+            color:                  "#4A4A4A"
         }
 
         Rectangle {
             Layout.fillWidth:       true
             Layout.preferredWidth:  Math.min(maxAvailableWidth, totalContentWidth)
             Layout.preferredHeight: Math.min(maxAvailableHeight, totalContentHeight)
-            color:                  _qgcPal.window
+            color:                  root.dialogContentBg
+            radius:                 10
 
             property real maxAvailableWidth:    mainWindow.width - _contentMargin * 4
-            property real maxAvailableHeight:   mainWindow.height - titleRowLayout.height - _contentMargin * 5
+            property real maxAvailableHeight:   mainWindow.height - titleRowLayout.height - _contentMargin * 6
             property real totalContentWidth:    dialogContentParent.childrenRect.width + _contentMargin * 2
             property real totalContentHeight:   dialogContentParent.childrenRect.height + _contentMargin * 2
 

@@ -26,7 +26,11 @@ Rectangle {
     height:         Math.max(contentHeight, minimumHeight)
     color:          qgcPal.toolbarBackground
     radius:         ScreenTools.defaultFontPixelHeight / 2
-    visible:        !QGroundControl.videoManager.fullScreen && _multipleVehicles && _settingEnableMVPanel
+    visible:        !QGroundControl.videoManager.fullScreen && _multipleVehicles && _settingEnableMVPanel && _userVisible
+
+    property bool _userVisible: (typeof mainWindow !== "undefined" && mainWindow && mainWindow.showMultiVehiclePanel !== undefined)
+                                ? mainWindow.showMultiVehiclePanel
+                                : true
     clip:           true
 
     property bool _settingEnableMVPanel:    QGroundControl.settingsManager.appSettings.enableMultiVehiclePanel.value
@@ -41,7 +45,7 @@ Rectangle {
                                                 maximumHeight,
                                                 topRightPanelColumnLayout.implicitHeight + topRightPanelColumnLayout.spacing * ( topRightPanelColumnLayout.children.length - 1)
                                             )
-    property real  minimumHeight:           selectedVehiclesLabel.height + swipeViewContainer.height
+    property real  minimumHeight:           selectedVehiclesLabel.implicitHeight + swipeViewContainer.implicitHeight
     property real  maximumHeight
 
     QGCPalette { id: qgcPal }

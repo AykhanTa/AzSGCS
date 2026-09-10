@@ -247,6 +247,34 @@ void Vehicle::stopTrackingFirmwareVehicleTypeChanges(void)
     disconnect(SettingsManager::instance()->appSettings()->offlineEditingVehicleClass(),  &Fact::rawValueChanged, this, &Vehicle::_offlineVehicleTypeSettingChanged);
 }
 
+void Vehicle::_setGoToTarget(const QGeoCoordinate& coord)
+{
+    const bool newActive = coord.isValid();
+
+    if (_goToActive != newActive) {
+        _goToActive = newActive;
+        emit goToActiveChanged(_goToActive);
+    }
+
+    if (_goToCoordinate != coord) {
+        _goToCoordinate = coord;
+        emit goToCoordinateChanged(_goToCoordinate);
+    }
+}
+void Vehicle::clearGoTo()
+{
+    if (!_goToActive && !_goToCoordinate.isValid()) {
+        return;
+    }
+
+    _goToActive = false;
+    emit goToActiveChanged(_goToActive);
+
+    _goToCoordinate = QGeoCoordinate(); // invalid
+    emit goToCoordinateChanged(_goToCoordinate);
+}
+
+
 void Vehicle::_commonInit()
 {
     _firmwarePlugin = FirmwarePluginManager::instance()->firmwarePluginForAutopilot(_firmwareType, _vehicleType);
@@ -2142,11 +2170,18 @@ void Vehicle::guidedModeGotoLocation(const QGeoCoordinate& gotoCoord, double for
     if (!coordinate().isValid()) {
         return;
     }
+
     double maxDistance = SettingsManager::instance()->flyViewSettings()->maxGoToLocationDistance()->rawValue().toDouble();
     if (coordinate().distanceTo(gotoCoord) > maxDistance) {
-        qgcApp()->showAppMessage(QString("New location is too far. Must be less than %1 %2.").arg(qRound(FactMetaData::metersToAppSettingsHorizontalDistanceUnits(maxDistance).toDouble())).arg(FactMetaData::appSettingsHorizontalDistanceUnitsString()));
+        qgcApp()->showAppMessage(QString("New location is too far. Must be less than %1 %2.")
+                                     .arg(qRound(FactMetaData::metersToAppSettingsHorizontalDistanceUnits(maxDistance).toDouble()))
+                                     .arg(FactMetaData::appSettingsHorizontalDistanceUnitsString()));
         return;
     }
+
+            // ✅ UI üçün: GoTo target-i saxla
+    _setGoToTarget(gotoCoord);
+
     _firmwarePlugin->guidedModeGotoLocation(this, gotoCoord, forwardFlightLoiterRadius);
 }
 
@@ -2644,7 +2679,7 @@ void Vehicle::_sendMavCommandWorker(
             emit mavCommandResult(_id, targetCompId, command, MAV_RESULT_FAILED, failureCode);
         }
         if (showError) {
-            qgcApp()->showAppMessage(tr("Unable to send command: %1.").arg(compIdAll ? tr("Internal error - MAV_COMP_ID_ALL not supported") : tr("Waiting on previous response to same command.")));
+            qgcApp()->showAppMessage(tr("Komanda göndərmək mümkün deyil: %1.").arg(compIdAll ? tr("Internal error - MAV_COMP_ID_ALL not supported") : tr("Komanda göndərmək mümkün deyil.")));
         }
 
         return;

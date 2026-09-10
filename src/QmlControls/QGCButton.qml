@@ -28,6 +28,10 @@ Button {
     property real   fontWeight:     Font.Normal // default for qml Text
     property real   pointSize:      ScreenTools.defaultFontPointSize
 
+    property bool  forceTextColor: false
+    property color forcedTextColor: "white"
+
+
     property alias wrapMode:            text.wrapMode
     property alias horizontalAlignment: text.horizontalAlignment
     property alias backgroundColor:     backRect.color
@@ -39,7 +43,6 @@ Button {
     property int _verticalPadding:      Math.round(ScreenTools.defaultFontPixelHeight * heightFactor)
 
     QGCPalette { id: qgcPal; colorGroupEnabled: enabled }
-
     background: Rectangle {
         id:             backRect
         radius:         backRadius
@@ -79,8 +82,15 @@ Button {
                 font.pointSize:         control.pointSize
                 font.family:            control.font.family
                 font.weight:            fontWeight
-                color:                  _showHighlight ? qgcPal.buttonHighlightText : (primary ? qgcPal.primaryButtonText : qgcPal.buttonText)
-                visible:                control.text !== "" 
+              //  color:                  _showHighlight ? qgcPal.buttonHighlightText : (primary ? qgcPal.primaryButtonText : qgcPal.buttonText)
+                color: _showHighlight
+                       ? qgcPal.buttonHighlightText
+                       : (control.forceTextColor
+                            ? control.forcedTextColor
+                            : (primary ? qgcPal.primaryButtonText : qgcPal.buttonText))
+
+
+                visible:                control.text !== ""
             }
     }
 }

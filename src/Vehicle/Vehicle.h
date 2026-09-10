@@ -136,6 +136,11 @@ public:
     };
     Q_ENUM(CheckList)
 
+
+    Q_PROPERTY(bool          goToActive      READ goToActive      NOTIFY goToActiveChanged)
+    Q_PROPERTY(QGeoCoordinate goToCoordinate READ goToCoordinate  NOTIFY goToCoordinateChanged)
+
+
     Q_PROPERTY(int                  id                          READ id                                                             CONSTANT)
     Q_PROPERTY(AutoPilotPlugin*     autopilotPlugin             MEMBER _autopilotPlugin                                             CONSTANT)
     Q_PROPERTY(QGeoCoordinate       coordinate                  READ coordinate                                                     NOTIFY coordinateChanged)
@@ -468,6 +473,13 @@ public:
 
     /// Provides access to the Firmware Plugin for this Vehicle
     FirmwarePlugin* firmwarePlugin() { return _firmwarePlugin; }
+
+
+    //elave etdiyim
+    bool          goToActive     () const { return _goToActive; }
+    QGeoCoordinate goToCoordinate() const { return _goToCoordinate; }
+
+    Q_INVOKABLE void clearGoTo();
 
 
     QGeoCoordinate homePosition();
@@ -825,6 +837,9 @@ public slots:
     void _offlineVehicleTypeSettingChanged  (QVariant varVehicleType);  // Should only be used by MissionController to set vehicle type from Plan file
 
 signals:
+    void goToActiveChanged(bool goToActive);
+    void goToCoordinateChanged(const QGeoCoordinate& goToCoordinate);
+
     void coordinateChanged              (QGeoCoordinate coordinate);
     void joystickEnabledChanged         (bool enabled);
     void mavlinkMessageReceived         (const mavlink_message_t& message);
@@ -949,6 +964,12 @@ private slots:
     void _altitudeAboveTerrainReceived      (bool sucess, QList<double> heights);
 
 private:
+
+    void _setGoToTarget(const QGeoCoordinate& coord);
+
+    bool          _goToActive = false;
+    QGeoCoordinate _goToCoordinate;
+
     void _loadJoystickSettings          ();
     void _activeVehicleChanged          (Vehicle* newActiveVehicle);
     void _captureJoystick               ();

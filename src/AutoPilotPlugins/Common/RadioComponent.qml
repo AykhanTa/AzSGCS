@@ -17,9 +17,6 @@ import QGroundControl
 import QGroundControl.FactControls
 import QGroundControl.Controls
 
-
-
-
 SetupPage {
     id:             radioPage
     pageComponent:  pageComponent

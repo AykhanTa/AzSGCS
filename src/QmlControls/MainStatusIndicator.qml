@@ -42,10 +42,10 @@ RowLayout {
         text:               mainStatusText()
         font.pointSize:     ScreenTools.largeFontPointSize
 
-        property string _commLostText:      qsTr("Comms Lost")
-        property string _readyToFlyText:    qsTr("Ready To Fly")
-        property string _notReadyToFlyText: qsTr("Not Ready")
-        property string _disconnectedText:  qsTr("Disconnected - Click to manually connect")
+        property string _commLostText:      qsTr("Əlaqələr İtirildi")
+        property string _readyToFlyText:    qsTr("Uçmağa Hazır")
+        property string _notReadyToFlyText: qsTr("Hazır deyil")
+        property string _disconnectedText:  qsTr("Bağlantı kəsildi - Əl ilə qoşulmaq üçün klikləyin")
         property string _armedText:         qsTr("Armed")
         property string _flyingText:        qsTr("Flying")
         property string _landingText:       qsTr("Landing")
@@ -218,7 +218,7 @@ RowLayout {
                 heading:            qsTr("Vehicle Messages")
                 visible:            !vehicleMessageList.noMessages
 
-                VehicleMessageList { 
+                VehicleMessageList {
                     id: vehicleMessageList
                 }
             }

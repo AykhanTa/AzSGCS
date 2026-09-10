@@ -55,7 +55,7 @@ Rectangle {
             horizontalAlignment:    Text.AlignHCenter
             verticalAlignment:      Text.AlignBottom
             font.pointSize:         ScreenTools.mediumFontPointSize
-            text:                   calInProgress ? calInProgressText : (calValid ? qsTr("Completed") : qsTr("Incomplete"))
+            text:                   calInProgress ? calInProgressText : (calValid ? qsTr("Tamamlandı") : qsTr("Tamamlanmayıb"))
         }
     }
 }

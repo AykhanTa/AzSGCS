@@ -12,6 +12,8 @@ qt_add_plugin(QGCLocation
     Providers/GenericMapProvider.h
     Providers/GoogleMapProvider.cpp
     Providers/GoogleMapProvider.h
+    Providers/LocalDtedElevation.cc
+    Providers/LocalDtedElevation.h
     Providers/MapboxMapProvider.cpp
     Providers/MapboxMapProvider.h
     Providers/MapProvider.cpp

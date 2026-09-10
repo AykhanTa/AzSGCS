@@ -26399,7 +26399,7 @@
       <short_desc>Reinitialize the target module's values into the PX4 parameters</short_desc>
       <long_desc>Setting this value to true will reinitialize PX4's IQUART connected parameters to the value stored on the currently targeted motor. This is especially useful if your flight controller powered on before your connected modules</long_desc>
     </parameter>
-    <parameter name="VTQ_TELEM_IDS_1" default="0" type="INT32">
+    <parameter name="VTQ_TELEM_IDS_1" default="0" type="UINT32">
       <short_desc>Module IDs [0, 31] that you would like to request telemetry from</short_desc>
       <long_desc>The module IDs [0, 31] that should be asked for telemetry. The data received from these IDs will be published via the esc_status topic.</long_desc>
       <min>0</min>
@@ -26440,7 +26440,7 @@
         <bit index="31">Module ID 31</bit>
       </bitmask>
     </parameter>
-    <parameter name="VTQ_TELEM_IDS_2" default="0" type="INT32">
+    <parameter name="VTQ_TELEM_IDS_2" default="0" type="UINT32">
       <short_desc>Module IDs [32, 62] that you would like to request telemetry from</short_desc>
       <long_desc>The module IDs [32, 62] that should be asked for telemetry. The data received from these IDs will be published via the esc_status topic.</long_desc>
       <min>0</min>

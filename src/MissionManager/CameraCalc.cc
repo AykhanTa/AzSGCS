@@ -283,23 +283,23 @@ bool CameraCalc::load(const QJsonObject& originalJson, bool deprecatedFollowTerr
 QString CameraCalc::canonicalCustomCameraName(void)
 {
     // This string should NOT be translated
-    return "Custom Camera";
+    return "Xüsusi Kamera";
 }
 
 QString CameraCalc::canonicalManualCameraName(void)
 {
     // This string should NOT be translated
-    return "Manual (no camera specs)";
+    return "Manual (kamera xüsusiyyətləri yoxdur)";
 }
 
 QString CameraCalc::xlatCustomCameraName(void)
 {
-    return tr("Custom Camera");
+    return tr("Xüsusi Kamera");
 }
 
 QString CameraCalc::xlatManualCameraName(void)
 {
-    return tr("Manual (no camera specs)");
+    return tr("Manual (kamera xüsusiyyətləri yoxdur)");
 }
 
 void CameraCalc::setDistanceMode(QGroundControlQmlGlobal::AltMode altMode)

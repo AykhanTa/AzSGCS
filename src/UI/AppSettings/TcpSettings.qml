@@ -19,6 +19,12 @@ GridLayout {
     rowSpacing:     _rowSpacing
     columnSpacing:  _colSpacing
 
+    // Fallback values if not provided by the parent Loader (Qt 6 QML scope safety)
+    property int _firstColumnWidth:     ScreenTools.defaultFontPixelWidth * 12
+    property int _secondColumnWidth:    ScreenTools.defaultFontPixelWidth * 30
+    property int _rowSpacing:           ScreenTools.defaultFontPixelHeight / 2
+    property int _colSpacing:           ScreenTools.defaultFontPixelWidth / 2
+
     function saveSettings() {
         subEditConfig.host = hostField.text.trim()
         subEditConfig.port = parseInt(portField.text)

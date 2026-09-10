@@ -71,7 +71,7 @@
       <translatorcomment>Only use english comma &apos;,&apos; to separate strings</translatorcomment>
       <location filename="../src/FirmwarePlugin/APM/APM-MavCmdInfoCommon.json"/>
       <source>On,Off</source>
-      <translation>Aç/Qapat</translation>
+      <translation>Aç,Qapat</translation>
     </message>
     <message>
       <extracomment>.mavCmdInfo[MAV_CMD_DO_MOUNT_CONTROL].param1.label, </extracomment>
@@ -102,7 +102,7 @@
       <translatorcomment>Only use english comma &apos;,&apos; to separate strings</translatorcomment>
       <location filename="../src/FirmwarePlugin/APM/APM-MavCmdInfoCommon.json"/>
       <source>Enable,Disable</source>
-      <translation>Aktiv/Deaktiv</translation>
+      <translation>Aktiv et,Deaktiv et</translation>
     </message>
   </context>
   <context>
@@ -945,7 +945,7 @@
       <translatorcomment>Only use english comma &apos;,&apos; to separate strings</translatorcomment>
       <location filename="../src/MissionManager/MavCmdInfoCommon.json"/>
       <source>Disable,Enable,Enable+reset,Enable+reset route only</source>
-      <translation>Deaktiv et,Aktiv et,Aktiv et və sıfırla,Yalnız marşrutu deaktiv et, </translation>
+      <translation>Deaktiv et,Aktiv et,Aktiv et və sıfırla,Yalnız marşrutu deaktiv et</translation>
     </message>
     <message>
       <extracomment>.mavCmdInfo[MAV_CMD_NAV_PATHPLANNING].param4.label, </extracomment>

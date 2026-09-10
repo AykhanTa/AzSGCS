@@ -180,6 +180,21 @@ list(APPEND QGC_RESOURCES
     ${CMAKE_SOURCE_DIR}/resources/InstrumentValueIcons/InstrumentValueIcons.qrc
 )
 
+# Embed local DTED (.dt2) elevation tiles directly into the executable so that
+# offline elevation works with no external Python server, no localhost service and
+# no separate data files (a release build only needs to ship the .exe + Qt DLLs).
+# The tiles are large binary blobs, so we use qt_add_big_resources (compiles the
+# data straight to an object file) with -no-compress to keep random-access reads fast.
+option(QGC_EMBED_DTED "Embed local DTED (.dt2) elevation tiles into the executable" ON)
+if(QGC_EMBED_DTED AND EXISTS "${CMAKE_SOURCE_DIR}/resources/dted/dted.qrc")
+    qt_add_big_resources(QGC_DTED_RESOURCES
+        "${CMAKE_SOURCE_DIR}/resources/dted/dted.qrc"
+        OPTIONS -no-compress
+    )
+    list(APPEND QGC_RESOURCES ${QGC_DTED_RESOURCES})
+    message(STATUS "QGC: embedding local DTED elevation tiles from resources/dted")
+endif()
+
 #######################################################
 #               QGroundControl Target
 #######################################################

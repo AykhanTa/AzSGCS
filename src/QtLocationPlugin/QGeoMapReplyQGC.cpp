@@ -16,12 +16,14 @@
 
 #include "DeviceInfo.h"
 #include "ElevationMapProvider.h"
+#include "LocalDtedElevation.h"
 #include "MapProvider.h"
 #include "QGCFileDownload.h"
 #include "QGCLoggingCategory.h"
 #include "QGCMapEngine.h"
 #include "QGCMapUrlEngine.h"
 #include "QGeoFileTileCacheQGC.h"
+#include "TerrainTileCopernicus.h"
 
 QGC_LOGGING_CATEGORY(QGeoTiledMapReplyQGCLog, "qgc.qtlocationplugin.qgeomapreplyqgc")
 
@@ -197,6 +199,11 @@ void QGeoTiledMapReplyQGC::_cacheError(QGCMapTask::TaskType type, QStringView er
 
     Q_ASSERT(type == QGCMapTask::TaskType::taskFetchTile);
 
+    // Serve offline elevation from embedded DTED data before falling back to network.
+    if (_serveLocalElevation()) {
+        return;
+    }
+
     if (!QGCDeviceInfo::isInternetAvailable()) {
         setError(QGeoTiledMapReply::CommunicationError, tr("Network Not Available"));
         return;
@@ -212,6 +219,56 @@ void QGeoTiledMapReplyQGC::_cacheError(QGCMapTask::TaskType type, QStringView er
     (void) connect(reply, &QNetworkReply::errorOccurred, this, &QGeoTiledMapReplyQGC::_networkReplyError);
     (void) connect(reply, &QNetworkReply::sslErrors, this, &QGeoTiledMapReplyQGC::_networkReplySslErrors);
     (void) connect(this, &QGeoTiledMapReplyQGC::aborted, reply, &QNetworkReply::abort);
+}
+
+bool QGeoTiledMapReplyQGC::_serveLocalElevation()
+{
+    const SharedMapProvider mapProvider = UrlFactory::getMapProviderFromQtMapId(tileSpec().mapId());
+    if (!mapProvider || !mapProvider->isElevationProvider()) {
+        return false;
+    }
+
+    LocalDtedElevation* const local = LocalDtedElevation::instance();
+    if (!local->hasData()) {
+        return false;
+    }
+
+    // Tile -> bounding box (matches CopernicusElevationProvider tile math).
+    const int x = tileSpec().x();
+    const int y = tileSpec().y();
+    const double latMin = (y * TerrainTileCopernicus::kTileSizeDegrees) - 90.0;
+    const double lonMin = (x * TerrainTileCopernicus::kTileSizeDegrees) - 180.0;
+    const double latMax = ((y + 1) * TerrainTileCopernicus::kTileSizeDegrees) - 90.0;
+    const double lonMax = ((x + 1) * TerrainTileCopernicus::kTileSizeDegrees) - 180.0;
+
+    if (!local->coversBbox(latMin, lonMin, latMax, lonMax)) {
+        return false;
+    }
+
+    const QByteArray carpetJson = local->carpetJson(latMin, lonMin, latMax, lonMax);
+    if (carpetJson.isEmpty()) {
+        return false;
+    }
+
+    const SharedElevationProvider elevationProvider = std::dynamic_pointer_cast<const ElevationProvider>(mapProvider);
+    const QByteArray image = elevationProvider->serialize(carpetJson);
+    if (image.isEmpty()) {
+        return false;
+    }
+
+    const QString format = mapProvider->getImageFormat(image);
+    if (format.isEmpty()) {
+        return false;
+    }
+
+    qCDebug(QGeoTiledMapReplyQGCLog) << "Serving elevation tile from embedded DTED" << x << y << tileSpec().zoom();
+
+    setMapImageData(image);
+    setMapImageFormat(format);
+    setCached(false);
+    QGeoFileTileCacheQGC::cacheTile(mapProvider->getMapName(), x, y, tileSpec().zoom(), image, format);
+    setFinished(true);
+    return true;
 }
 
 void QGeoTiledMapReplyQGC::abort()

@@ -56,13 +56,13 @@
 },
 {
     "name":         "LoiterClockwise",
-    "shortDesc":    "Loiter clockwise around the final approach point.",
+    "shortDesc":    "Son yaxınlaşma nöqtəsi ətrafında saat əqrəbi istiqamətində hərəkət edin.",
     "type":         "bool",
     "default":      true
 },
 {
     "name":             "LandingAltitude",
-    "shortDesc":        "Altitude for landing point.",
+    "shortDesc":        "Eniş nöqtəsi üçün hündürlük.",
     "type":             "double",
     "units":            "m",
     "decimalPlaces":    1,
@@ -70,7 +70,7 @@
 },
 {
     "name":             "GlideSlope",
-    "shortDesc":        "The glide slope between the loiter and landing point.",
+    "shortDesc":        "Loiter və enmə nöqtəsi arasındakı sürüşmə yamacı.",
     "type":             "double",
     "units":            "deg",
     "min":              0.1,
@@ -80,25 +80,25 @@
 },
 {
     "name":         "ValueSetIsDistance",
-    "shortDesc":    "Value controller approach point is distance",
+    "shortDesc":    "Dəyər nəzarətçisinin yaxınlaşma nöqtəsi məsafədir",
     "type":         "bool",
     "default":      false
 },
 {
     "name":         "UseLoiterToAlt",
-    "shortDesc":    "Use a loiter to altitude item for final appoach. Otherwise use a regular waypoint.",
+    "shortDesc":    "Son yaxınlaşma üçün hündürlüyə qalxmaq üçün loiter istifadə edin. Əks halda adi waypoint istifadə edin.",
     "type":         "bool",
     "default":      true
 },
 {
     "name":         "StopTakingPhotos",
-    "shortDesc":    "Stop taking photos",
+    "shortDesc":    "Şəkil çəkməyi dayandırın",
     "type":         "bool",
     "default":      true
 },
 {
     "name":         "StopTakingVideo",
-    "shortDesc":    "Stop taking video",
+    "shortDesc":    "Video çəkməyi dayandırın",
     "type":         "bool",
     "default":      true
 }

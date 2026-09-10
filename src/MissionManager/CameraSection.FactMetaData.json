@@ -5,9 +5,9 @@
 [
 {
     "name":             "CameraAction",
-    "shortDesc": "Specify whether the camera should take photos or video",
+    "shortDesc": "Kameranın foto və ya video çəkməsini müəyyənləşdirin",
     "type":             "uint32",
-    "enumStrings":      "No change,Take photo,Take photos (time),Take photos (distance),Stop taking photos,Start recording video,Stop recording video",
+    "enumStrings":      "Dəyişiklik yoxdur,Şəkil çəkin,Şəkil çəkin(zaman),Şəkil çəkin(məsafə),Şəkil çəkməyi dayandırın,Video yazmağa başlayın,Video yazmağı dayandırın",
     "enumValues":       "0,6,1,2,3,4,5",
     "default":     0
 },

@@ -12,6 +12,7 @@
 #include <QtNetwork/QNetworkProxy>
 
 #include "ElevationMapProvider.h"
+#include "LocalDtedElevation.h"
 #include "QGCApplication.h"
 #include "QGCFileDownload.h"
 #include "QGCLoggingCategory.h"
@@ -19,8 +20,10 @@
 #include "QGCMapEngineManager.h"
 #include "QGCMapTasks.h"
 #include "QGCMapUrlEngine.h"
+#include "QGCTile.h"
 #include "QGeoFileTileCacheQGC.h"
 #include "QGeoTileFetcherQGC.h"
+#include "TerrainTileCopernicus.h"
 
 QGC_LOGGING_CATEGORY(QGCCachedTileSetLog, "qgc.qtlocation.qgccachedtileset")
 
@@ -151,12 +154,26 @@ void QGCCachedTileSet::_prepareDownload()
         return;
     }
 
-    for (qsizetype i = _replies.count(); i < QGeoTileFetcherQGC::concurrentDownloads(_type); i++) {
+    int localServed = 0;
+    for (qsizetype i = _replies.count(); i < QGeoTileFetcherQGC::concurrentDownloads(_type); /* i advanced below */) {
         if (_tilesToDownload.isEmpty()) {
             break;
         }
 
         QGCTile* const tile = _tilesToDownload.dequeue();
+
+        // Serve offline elevation from embedded DTED data without any network request.
+        if (_serveLocalElevationTile(tile)) {
+            delete tile;
+            if (!_batchRequested && !_noMoreTiles && (_tilesToDownload.count() < (QGeoTileFetcherQGC::concurrentDownloads(_type) * 10))) {
+                createDownloadTask();
+            }
+            if (++localServed >= kLocalElevationBatch) {
+                break;
+            }
+            continue; // local tiles are instant; do not consume a concurrent network slot
+        }
+
         const int mapId = UrlFactory::getQtMapIdFromProviderType(tile->type);
         QNetworkRequest request = QGeoTileFetcherQGC::getNetworkRequest(mapId, tile->x, tile->y, tile->z);
         request.setOriginatingObject(this);
@@ -173,7 +190,80 @@ void QGCCachedTileSet::_prepareDownload()
         if (!_batchRequested && !_noMoreTiles && (_tilesToDownload.count() < (QGeoTileFetcherQGC::concurrentDownloads(_type) * 10))) {
             createDownloadTask();
         }
+        i++;
     }
+
+    // Local (no-network) tiles don't produce reply callbacks, so keep the pump going
+    // via the event loop; also finish/refill when only local tiles remain.
+    if (!_cancelPending) {
+        if (_tilesToDownload.isEmpty()) {
+            if (_noMoreTiles && _replies.isEmpty()) {
+                _doneWithDownload();
+            } else if (!_noMoreTiles && !_batchRequested) {
+                createDownloadTask();
+            }
+        } else if (_replies.isEmpty()) {
+            QMetaObject::invokeMethod(this, &QGCCachedTileSet::_prepareDownload, Qt::QueuedConnection);
+        }
+    }
+}
+
+bool QGCCachedTileSet::_serveLocalElevationTile(const QGCTile *tile)
+{
+    const SharedMapProvider mapProvider = UrlFactory::getMapProviderFromProviderType(tile->type);
+    if (!mapProvider || !mapProvider->isElevationProvider()) {
+        return false;
+    }
+
+    LocalDtedElevation* const local = LocalDtedElevation::instance();
+    if (!local->hasData()) {
+        return false;
+    }
+
+    // Tile -> bounding box (matches CopernicusElevationProvider tile math).
+    const double latMin = (tile->y * TerrainTileCopernicus::kTileSizeDegrees) - 90.0;
+    const double lonMin = (tile->x * TerrainTileCopernicus::kTileSizeDegrees) - 180.0;
+    const double latMax = ((tile->y + 1) * TerrainTileCopernicus::kTileSizeDegrees) - 90.0;
+    const double lonMax = ((tile->x + 1) * TerrainTileCopernicus::kTileSizeDegrees) - 180.0;
+
+    if (!local->coversBbox(latMin, lonMin, latMax, lonMax)) {
+        return false;
+    }
+
+    const QByteArray carpetJson = local->carpetJson(latMin, lonMin, latMax, lonMax);
+    if (carpetJson.isEmpty()) {
+        return false;
+    }
+
+    const SharedElevationProvider elevationProvider = std::dynamic_pointer_cast<const ElevationProvider>(mapProvider);
+    const QByteArray image = elevationProvider->serialize(carpetJson);
+    if (image.isEmpty()) {
+        return false;
+    }
+
+    const QString format = mapProvider->getImageFormat(image);
+    if (format.isEmpty()) {
+        return false;
+    }
+
+    QGeoFileTileCacheQGC::cacheTile(tile->type, tile->hash, image, format, _id);
+
+    QGCUpdateTileDownloadStateTask *task = new QGCUpdateTileDownloadStateTask(_id, QGCTile::StateComplete, tile->hash);
+    if (!getQGCMapEngine()->addTask(task)) {
+        task->deleteLater();
+    }
+
+    setSavedTileSize(_savedTileSize + image.size());
+    setSavedTileCount(_savedTileCount + 1);
+
+    if ((_savedTileCount % 10) == 0) {
+        const quint32 avg = _savedTileSize / _savedTileCount;
+        setTotalTileSize(avg * _totalTileCount);
+        setUniqueTileSize(avg * _uniqueTileCount);
+    }
+
+    qCDebug(QGCCachedTileSetLog) << "Served elevation tile from embedded DTED:" << tile->hash;
+    return true;
 }
 
 void QGCCachedTileSet::_networkReplyFinished()

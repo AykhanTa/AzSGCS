@@ -59,13 +59,13 @@ ColumnLayout {
             Layout.fillWidth:   true
         }
 
-        QGCLabel { text: qsTr("Max Climb Rate") }
+        QGCLabel { text: qsTr("Maksimum qalxma sürəti") }
         FactTextField {
             fact:               missionItem.terrainAdjustMaxClimbRate
             Layout.fillWidth:   true
         }
 
-        QGCLabel { text: qsTr("Max Descent Rate") }
+        QGCLabel { text: qsTr("Maksimum enmə sürəti") }
         FactTextField {
             fact:               missionItem.terrainAdjustMaxDescentRate
             Layout.fillWidth:   true

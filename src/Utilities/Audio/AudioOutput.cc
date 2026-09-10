@@ -6,6 +6,9 @@
  * COPYING.md in the root of the source code directory.
  *
  ****************************************************************************/
+#include "SpeechLocalizer.h"   // Lokalizasiya üçün
+
+#include <QSoundEffect>
 
 #include "AudioOutput.h"
 #include "Fact.h"
@@ -16,7 +19,7 @@
 #include <QtCore/QApplicationStatic>
 #include <QtTextToSpeech/QTextToSpeech>
 
-QGC_LOGGING_CATEGORY(AudioOutputLog, "qgc.audio.audiooutput");
+        QGC_LOGGING_CATEGORY(AudioOutputLog, "qgc.audio.audiooutput");
 // qt.speech.tts.flite
 // qt.speech.tts.android
 
@@ -39,20 +42,20 @@ const QHash<QString, QString> AudioOutput::_textHash = {
     { "PREARM",         "pre arm" },
     { "PITOT",          "pee toe" },
     { "SERVOX_FUNCTION","Servo X Function" },
-};
+    };
 
 Q_APPLICATION_STATIC(AudioOutput, _audioOutput);
 
 AudioOutput::AudioOutput(QObject *parent)
     : QObject(parent)
-    , _engine(new QTextToSpeech(QStringLiteral("none"), this))
+      , _engine(new QTextToSpeech(QStringLiteral("none"), this))
 {
-    // qCDebug(AudioOutputLog) << this;
+   // qCDebug(AudioOutputLog) << this;
 }
 
 AudioOutput::~AudioOutput()
 {
-    // qCDebug(AudioOutputLog) << this;
+   // qCDebug(AudioOutputLog) << this;
 }
 
 AudioOutput *AudioOutput::instance()
@@ -73,19 +76,46 @@ void AudioOutput::init(Fact *mutedFact)
         return;
     }
 
-    // Autoselect engine by priority
+            // Autoselect engine by priority
     if (!_engine->setEngine(QString())) {
         qCWarning(AudioOutputLog) << "Failed to set the TTS engine.";
         return;
     }
 
-    (void) connect(_engine, &QTextToSpeech::engineChanged, this, [this](const QString &engine) {
-        qCDebug(AudioOutputLog) << "TTS Engine set to:" << engine;
-        const QLocale defaultLocale = QLocale("en_US");
-        if (_engine->availableLocales().contains(defaultLocale)) {
-            _engine->setLocale(defaultLocale);
+            // --- Hard-coded dil seçimi üçün util (Variant A) ---
+    auto applyDesiredLocale = [this]() {
+        using L = SpeechLocalizer::Locale;
+
+                // === DİL SEÇİMİ (HARD-CODED) ===
+                // 1) TÜRKÇE:
+        SpeechLocalizer::instance().setLocale(L::Turkish);
+        QLocale desiredLocale("tr_TR");
+
+                // 2) AZƏRBAYCAN DİLİ (yuxarıdakı 2 sətri şərhə alıb, bunları açın):
+        // SpeechLocalizer::instance().setLocale(L::Azerbaijani);
+        // QLocale desiredLocale("az_AZ");
+
+                // Əgər istəyə görə EN istifadə etmək istəsən:
+                // SpeechLocalizer::instance().setLocale(L::English);
+                // QLocale desiredLocale("en_US");
+
+        if (_engine->availableLocales().contains(desiredLocale)) {
+            _engine->setLocale(desiredLocale);
+            qCDebug(AudioOutputLog) << "TTS locale set to:" << desiredLocale.name();
+        } else {
+            qCWarning(AudioOutputLog) << "Desired locale not available. Falling back to en_US.";
+            _engine->setLocale(QLocale("en_US"));
         }
+    };
+
+            // Engine dəyişəndə də eyni seçimi tətbiq et (bəzən platforma engine-i yenidən qura bilər)
+    (void) connect(_engine, &QTextToSpeech::engineChanged, this, [this, applyDesiredLocale](const QString &engine) {
+        qCDebug(AudioOutputLog) << "TTS Engine set to:" << engine;
+        applyDesiredLocale();
     });
+
+            // İlk init zamanı da dərhal tətbiq et
+    applyDesiredLocale();
 
     (void) connect(_engine, &QTextToSpeech::aboutToSynthesize, this, [this](qsizetype id) {
         qCDebug(AudioOutputLog) << "TTS About To Synthesize ID:" << id;
@@ -129,45 +159,68 @@ void AudioOutput::setMuted(bool muted)
     }
 }
 
+//sistemin oz bildirim sesi ile
+void AudioOutput::_playBeepSound()
+{
+    if (!_muted) {
+        // Sistem beep səsi (səs faylı olmadıqda)
+        QApplication::beep();
+        qCDebug(AudioOutputLog) << "System beep played";
+    }
+}
+
+
 void AudioOutput::say(const QString &text, TextMods textMods)
 {
-    if (!_initialized) {
-        if (!qgcApp()->runningUnitTests()) {
-            qCWarning(AudioOutputLog) << "AudioOutput not initialized. Call init() before using say().";
-        }
+
+    if (!_initialized || _muted) {
         return;
     }
+    _playBeepSound();
+    qCDebug(AudioOutputLog) << "Beep sound played for:" << text;
 
-    if (_muted) {
-        return;
-    }
+    return;
+    // if (!_initialized) {
+    //     if (!qgcApp()->runningUnitTests()) {
+    //         qCWarning(AudioOutputLog) << "AudioOutput not initialized. Call init() before using say().";
+    //     }
+    //     return;
+    // }
 
-    if (!_engine->engineCapabilities().testFlag(QTextToSpeech::Capability::Speak)) {
-        qCWarning(AudioOutputLog) << "Speech Not Supported:" << text;
-        return;
-    }
+    // if (_muted) {
+    //     return;
+    // }
 
-    if (_textQueueSize >= kMaxTextQueueSize) {
-        (void) QMetaObject::invokeMethod(_engine, "stop", Qt::AutoConnection, QTextToSpeech::BoundaryHint::Default);
-        _textQueueSize = 0;
-        qCWarning(AudioOutputLog) << "Text queue exceeded maximum size. Stopped current speech.";
-    }
+    // if (!_engine->engineCapabilities().testFlag(QTextToSpeech::Capability::Speak)) {
+    //     qCWarning(AudioOutputLog) << "Speech Not Supported:" << text;
+    //     return;
+    // }
 
-    QString outText = _fixTextMessageForAudio(text);
+    // if (_textQueueSize >= kMaxTextQueueSize) {
+    //     (void) QMetaObject::invokeMethod(_engine, "stop", Qt::AutoConnection, QTextToSpeech::BoundaryHint::Default);
+    //     _textQueueSize = 0;
+    //     qCWarning(AudioOutputLog) << "Text queue exceeded maximum size. Stopped current speech.";
+    // }
 
-    if (textMods.testFlag(TextMod::Translate)) {
-        outText = tr("%1").arg(outText);
-    }
+    // QString outText = _fixTextMessageForAudio(text);
 
-    qsizetype index;
-    if (QMetaObject::invokeMethod(_engine, "enqueue", Qt::AutoConnection, qReturnArg(index), outText)) {
-        if (index != -1) {
-            _textQueueSize++;
-            qCDebug(AudioOutputLog) << "Enqueued text with index:" << index << ", Queue Size:" << _textQueueSize;
-        }
-    } else {
-        qCWarning(AudioOutputLog) << "Failed to invoke Enqueue method.";
-    }
+    //         // --- Lokalizasiyanı TTS-ə verməzdən əvvəl et ---
+    // outText = SpeechLocalizer::instance().localize(outText);
+
+    // if (textMods.testFlag(TextMod::Translate)) {
+    //     // QGC-nin tr() mexanizmini saxlayırıq; localizer-dən sonra da işləyə bilər.
+    //     outText = tr("%1").arg(outText);
+    // }
+
+    // qsizetype index;
+    // if (QMetaObject::invokeMethod(_engine, "enqueue", Qt::AutoConnection, qReturnArg(index), outText)) {
+    //     if (index != -1) {
+    //         _textQueueSize++;
+    //         qCDebug(AudioOutputLog) << "Enqueued text with index:" << index << ", Queue Size:" << _textQueueSize;
+    //     }
+    // } else {
+    //     qCWarning(AudioOutputLog) << "Failed to invoke Enqueue method.";
+    // }
 }
 
 QString AudioOutput::_fixTextMessageForAudio(const QString &string)

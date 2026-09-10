@@ -1,5 +1,11 @@
 target_sources(${CMAKE_PROJECT_NAME}
     PRIVATE
+     ExternalPositionWorker.h
+     ExternalPositionWorker.cpp
+     ExternalPositionManager.h
+     ExternalPositionManager.cpp
+     ExternalTrajectoryPoints.h
+     ExternalTrajectoryPoints.cpp
         LinkConfiguration.cc
         LinkConfiguration.h
         LinkInterface.cc
@@ -25,6 +31,14 @@ qt_add_resources(${CMAKE_PROJECT_NAME} json_comm
 )
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/src/MAVLink
+    ${CMAKE_BINARY_DIR}/_deps/mavlink-src
+    ${CMAKE_BINARY_DIR}/_deps/mavlink-src/ardupilotmega
+    ${CMAKE_BINARY_DIR}/_deps/mavlink-src/intercept
+)
 
 # target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE QABSTRACTSOCKET_DEBUG)
 

@@ -57,6 +57,7 @@ QGCPopupDialog {
                     LabelledComboBox {
                         id:                     factGroupCombo
                         label:                  qsTr("Group")
+                        comboBoxPreferredWidth: ScreenTools.defaultFontPixelWidth * 16
                         model:                  instrumentValueData.factGroupNames
                         currentIndex:           instrumentValueData.factGroupNames.indexOf(instrumentValueData.factGroupName)
                         onActivated: (index) => {
@@ -73,6 +74,7 @@ QGCPopupDialog {
                     LabelledComboBox {
                         id:                     factNamesCombo
                         label:                  qsTr("Value")
+                        comboBoxPreferredWidth: ScreenTools.defaultFontPixelWidth * 16
                         model:                  instrumentValueData.factValueNames
                         currentIndex:           instrumentValueData.factValueNames.indexOf(instrumentValueData.factName)
                         onActivated: (index) => {
@@ -170,7 +172,8 @@ QGCPopupDialog {
                     }
 
                     LabelledComboBox {
-                        label:          qsTr("Size") 
+                        label:                  qsTr("Size")
+                        comboBoxPreferredWidth: ScreenTools.defaultFontPixelWidth * 16
                         model:          instrumentValueData.factValueGrid.fontSizeNames
                         currentIndex:   instrumentValueData.factValueGrid.fontSize
                         onActivated:    (index) => { instrumentValueData.factValueGrid.fontSize = index }
@@ -206,6 +209,9 @@ QGCPopupDialog {
                             model:              instrumentValueData.rangeTypeNames
                             currentIndex:       instrumentValueData.rangeType
                             sizeToContents:     true
+                            Layout.preferredWidth: ScreenTools.defaultFontPixelWidth * 14
+                            // Seçilmiş dəyər tam görünsün deyə məzmundan dar olmasın
+                            Layout.minimumWidth: implicitWidth
                             onActivated: (index) => { instrumentValueData.rangeType = index }
                         }
                     }

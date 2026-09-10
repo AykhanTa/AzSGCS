@@ -20,7 +20,6 @@ import QGroundControl.Controls
 
 
 
-
 Item {
     id: root
 

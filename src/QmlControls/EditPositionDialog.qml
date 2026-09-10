@@ -1,12 +1,3 @@
-/****************************************************************************
- *
- * (c) 2009-2020 QGROUNDCONTROL PROJECT <http://www.qgroundcontrol.org>
- *
- * QGroundControl is licensed according to the terms in the file
- * COPYING.md in the root of the source code directory.
- *
- ****************************************************************************/
-
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -21,7 +12,7 @@ import QGroundControl.FactControls
 
 QGCPopupDialog {
     id:         root
-    title:      qsTr("Edit Position")
+    title:      qsTr("Mövqeyi redaktə edin")
     buttons:    Dialog.Close
 
     property alias coordinate:                  controller.coordinate
@@ -46,10 +37,10 @@ QGCPopupDialog {
         LabelledComboBox {
             id:                 coordinateSystemCombo
             Layout.fillWidth:   true
-            label:              qsTr("Coordinate System")
+            label:              qsTr("Koordinat sistemi")
             model:              showSetPositionFromVehicle && globals.activeVehicle ? 
-                                    [ qsTr("Geographic"), qsTr("Universal Transverse Mercator"), qsTr("Military Grid Reference"), qsTr("Vehicle Position") ] :
-                                    [ qsTr("Geographic"), qsTr("Universal Transverse Mercator"), qsTr("Military Grid Reference") ]
+                                    [ qsTr("Coğrafi"), qsTr("Universal Transverse Mercator"), qsTr("Hərbi şəbəkəyə istinad"), qsTr("Təyyarənin yeri") ] :
+                                    [ qsTr("Coğrafi"), qsTr("Universal Transverse Mercator"), qsTr("Hərbi şəbəkəyə istinad") ]
         }
 
         LabelledFactTextField {
@@ -69,8 +60,8 @@ QGCPopupDialog {
         }
 
         LabelledButton {
-            label:               qsTr("Set position")
-            buttonText:          qsTr("Move")
+            label:               qsTr("Mövqeyi təyin edin")
+            buttonText:          qsTr("Hərəkət edin")
             visible:             _showGeographic
             onClicked: {
                 controller.setFromGeo()
@@ -111,8 +102,8 @@ QGCPopupDialog {
         }
 
         LabelledButton {
-            label:               qsTr("Set position")
-            buttonText:          qsTr("Move")
+            label:               qsTr("Mövqeyi təyin edin")
+            buttonText:          qsTr("Hərəkət edin")
             visible:             _showUTM
             onClicked: {
                 controller.setFromUTM()
@@ -129,8 +120,8 @@ QGCPopupDialog {
         }
 
         LabelledButton {
-            label:               qsTr("Set position")
-            buttonText:          qsTr("Move")
+            label:               qsTr("Mövqeyi təyin edin")
+            buttonText:          qsTr("Hərəkət edin")
             visible:             _showMGRS
             onClicked: {
                 controller.setFromMGRS()
@@ -139,8 +130,8 @@ QGCPopupDialog {
         }
 
         LabelledButton {
-            label:               qsTr("Set position")
-            buttonText:          qsTr("Move")
+            label:               qsTr("Mövqeyi təyin edin")
+            buttonText:          qsTr("Hərəkət edin")
             visible:             _showVehicle
             onClicked: {
                 controller.setFromVehicle()

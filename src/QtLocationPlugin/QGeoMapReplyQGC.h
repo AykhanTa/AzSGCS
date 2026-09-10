@@ -42,6 +42,10 @@ private slots:
 private:
     static void _initDataFromResources();
 
+    /// If this tile is an elevation tile fully covered by embedded local DTED data,
+    /// serve it directly (no network) and return true.
+    bool _serveLocalElevation();
+
     QNetworkAccessManager *_networkManager = nullptr;
     QNetworkRequest _request;
     bool m_initialized = false;

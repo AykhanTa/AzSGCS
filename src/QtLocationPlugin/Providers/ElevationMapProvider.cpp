@@ -30,6 +30,11 @@ int CopernicusElevationProvider::lat2tileY(double lat, int z) const
     return static_cast<int>(floor((lat + 90.0) / TerrainTileCopernicus::kTileSizeDegrees));
 }
 
+// Offline elevation for locally-covered areas (Azerbaijan and surroundings) is served
+// natively from embedded DTED tiles (see LocalDtedElevation, plus the local injection in
+// QGCCachedTileSet::_serveLocalElevationTile for the offline-map download path and
+// QGeoTiledMapReplyQGC::_serveLocalElevation for the map display path) BEFORE any network
+// access. This URL is only used as the online fallback for areas not covered by local DTED.
 QString CopernicusElevationProvider::_getURL(int x, int y, int zoom) const
 {
     Q_UNUSED(zoom)

@@ -23,3 +23,12 @@ set(QGC_DISABLE_APM_PLUGIN_FACTORY ON CACHE BOOL "Disable APM Plugin Factory" FO
 
 # We implement our own PX4 plugin factory
 set(QGC_DISABLE_PX4_PLUGIN_FACTORY ON CACHE BOOL "Disable PX4 Plugin Factory" FORCE)
+
+# Köhnə sətirləri dəyiş
+set(QGC_MAVLINK_GIT_REPO
+    "https://github.com/AykhanTaghizada/c_library_v2.git"
+    CACHE STRING "MAVLink Git Repo" FORCE)
+
+set(QGC_MAVLINK_GIT_TAG
+    "main"
+    CACHE STRING "MAVLink Git Tag" FORCE)

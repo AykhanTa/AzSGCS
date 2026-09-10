@@ -271,6 +271,92 @@ FlightMap {
         }
     }
 
+    // UDP xarici pozisiya — göy trayektoriya xətti
+    MapPolyline {
+        id:         extTrajectoryPolyline
+        line.width: 3
+        line.color: "#2196F3"
+        z:          QGroundControl.zOrderTrajectoryLines
+        visible:    !pipMode && (typeof externalPositionManager !== "undefined") && externalPositionManager.extActive
+
+        Component.onCompleted: {
+            if (typeof externalPositionManager !== "undefined" && externalPositionManager.trajectoryPoints) {
+                extTrajectoryPolyline.path = externalPositionManager.trajectoryPoints.list()
+            }
+        }
+
+        Connections {
+            target: (typeof externalPositionManager !== "undefined") ? externalPositionManager.trajectoryPoints : null
+            function onPointAdded(coordinate)      { extTrajectoryPolyline.addCoordinate(coordinate) }
+            function onUpdateLastPoint(coordinate) { extTrajectoryPolyline.replaceCoordinate(extTrajectoryPolyline.pathLength() - 1, coordinate) }
+            function onPointsCleared()             { extTrajectoryPolyline.path = [] }
+        }
+    }
+
+    // UDP xarici pozisiya — göy üçbucaq marker
+    MapQuickItem {
+        id:            extPositionMarker
+        visible:       !pipMode && (typeof externalPositionManager !== "undefined") && externalPositionManager.extActive
+        z:             QGroundControl.zOrderVehicles
+        coordinate:    (typeof externalPositionManager !== "undefined")
+                           ? QtPositioning.coordinate(externalPositionManager.extLat, externalPositionManager.extLon)
+                           : QtPositioning.coordinate()
+        anchorPoint.x: sourceItem.width  / 2
+        anchorPoint.y: sourceItem.height / 2
+
+        property real _heading: 0
+        property var  _prevCoord: null
+
+        Connections {
+            target: (typeof externalPositionManager !== "undefined") ? externalPositionManager : null
+            function onPositionUpdated(lat, lon, alt, spd) {
+                var current = QtPositioning.coordinate(lat, lon)
+                if (extPositionMarker._prevCoord) {
+                    if (extPositionMarker._prevCoord.distanceTo(current) > 1.0) {
+                        extPositionMarker._heading   = extPositionMarker._prevCoord.azimuthTo(current)
+                        extPositionMarker._prevCoord = current
+                    }
+                } else {
+                    extPositionMarker._prevCoord = current
+                }
+            }
+        }
+
+        sourceItem: Item {
+            width:  ScreenTools.defaultFontPixelHeight * 1.8
+            height: width
+
+            Canvas {
+                id:           extMarkerCanvas
+                anchors.fill: parent
+                antialiasing: true
+                onPaint: {
+                    var ctx = getContext("2d")
+                    ctx.reset()
+                    var w = width, h = height
+                    // Üçbucaq bounding box-un MƏRKƏZİNDƏ — iti uc yuxarı
+                    ctx.beginPath()
+                    ctx.moveTo(w * 0.50, h * 0.10)
+                    ctx.lineTo(w * 0.88, h * 0.88)
+                    ctx.lineTo(w * 0.50, h * 0.68)
+                    ctx.lineTo(w * 0.12, h * 0.88)
+                    ctx.closePath()
+                    ctx.fillStyle   = "#2196F3"
+                    ctx.strokeStyle = "white"
+                    ctx.lineWidth   = 1.5
+                    ctx.fill()
+                    ctx.stroke()
+                }
+                transform: Rotation {
+                    origin.x: extMarkerCanvas.width  / 2
+                    origin.y: extMarkerCanvas.height / 2
+                    angle:    extPositionMarker._heading
+                    Behavior on angle { RotationAnimation { duration: 150; direction: RotationAnimation.Shortest } }
+                }
+            }
+        }
+    }
+
     // Add the vehicles to the map
     MapItemView {
         model: QGroundControl.multiVehicleManager.vehicles

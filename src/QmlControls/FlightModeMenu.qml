@@ -71,6 +71,8 @@ QGCLabel {
         visible:            currentVehicle && currentVehicle.flightModeSetAvailable
         anchors.leftMargin: mouseAreaLeftMargin
         anchors.fill:       parent
+        preventStealing:    true
+        cursorShape:        Qt.PointingHandCursor
         onClicked:          flightModesMenu.popup((_root.width - flightModesMenu.width) / 2, _root.height)
     }
 }

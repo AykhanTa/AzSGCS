@@ -417,11 +417,17 @@ bool MissionCommandUIInfo::loadJsonInfo(const QJsonObject& jsonObject, bool requ
                 paramInfo->_enumValues << QVariant(value);
             }
             if (paramInfo->_enumValues.count() != paramInfo->_enumStrings.count()) {
-                internalError = QStringLiteral("Enum strings/values count mismatch - label: '%1' strings: '%2'[%3] values: '%4'[%5]")
-                                    .arg(paramInfo->_label).arg(paramObject.value(_enumStringsJsonKey).toString()).arg(paramInfo->_enumStrings.count())
-                                    .arg(paramObject.value(_enumValuesJsonKey).toString()).arg(paramInfo->_enumValues.count());
-                errorString = _loadErrorString(internalError);
-                return false;
+                // NOTE: enumStrings are run through the json translator, so a bad translation
+                // (wrong separator, trailing comma, ...) can break the string/value pairing.
+                // That must not invalidate the whole command - and by extension the whole json
+                // file - otherwise mission items end up with no UI info at all. Drop the enum
+                // instead: the param stays editable as a plain numeric value.
+                qCWarning(MissionCommandsLog) << "Enum strings/values count mismatch, dropping enum for param"
+                                              << paramInfo->_label
+                                              << "strings:" << paramObject.value(_enumStringsJsonKey).toString()
+                                              << "values:"  << paramObject.value(_enumValuesJsonKey).toString();
+                paramInfo->_enumStrings.clear();
+                paramInfo->_enumValues.clear();
             }
 
             qCDebug(MissionCommandsLog) << "Param"

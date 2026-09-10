@@ -39,7 +39,7 @@ QGCTextField {
         id: helpDialogComponent
 
         ParameterEditorDialog {
-            title:          qsTr("Value Details")
+            title:          qsTr("Dəyər Təfərrüatları")
             fact:           control.fact
         }
     }

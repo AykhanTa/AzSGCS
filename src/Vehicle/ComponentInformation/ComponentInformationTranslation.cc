@@ -62,7 +62,13 @@ QString ComponentInformationTranslation::getUrlFromSummaryJson(const QString &su
 
     QJsonObject localeObj = jsonObj[locale].toObject();
     if (localeObj.isEmpty()) {
-        qCWarning(ComponentInformationTranslationLog) << "Locale " << locale << " not found in json";
+        // Component metadata is authored in English, so an English locale simply has
+        // nothing to download - that is not a problem worth warning about.
+        if (locale.startsWith(QStringLiteral("en"), Qt::CaseInsensitive)) {
+            qCDebug(ComponentInformationTranslationLog) << "No metadata translation needed for locale" << locale;
+        } else {
+            qCWarning(ComponentInformationTranslationLog) << "Locale " << locale << " not found in json";
+        }
         return "";
     }
 

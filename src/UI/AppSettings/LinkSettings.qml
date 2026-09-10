@@ -166,8 +166,8 @@ SettingsPage {
                     QGCMouseArea {
                         fillItem:   parent
                         onClicked:  mainWindow.showMessageDialog(
-                                        qsTr("Delete Link"), 
-                                        qsTr("Are you sure you want to delete '%1'?").arg(object.name), 
+                                        qsTr("Linki silin"),
+                                        qsTr("'%1' silmək istədiyinizə əminsiniz?").arg(object.name),
                                         Dialog.Ok | Dialog.Cancel, 
                                         function () {
                                             _linkManager.removeConfiguration(object)
@@ -175,7 +175,7 @@ SettingsPage {
                     }
                 }
                 QGCButton {
-                    text:       object.link ? qsTr("Disconnect") : qsTr("Connect")
+                    text:       object.link ? qsTr("Bağlantını kəsin") : qsTr("Əlaqəni qoşun")
                     onClicked: {
                         if (object.link) {
                             object.link.disconnect()
@@ -188,8 +188,8 @@ SettingsPage {
         }
 
         LabelledButton {
-            label:      qsTr("Add New Link")
-            buttonText: qsTr("Add")
+            label:      qsTr("Yeni Link əlavə edin")
+            buttonText: qsTr("Əlavə et")
 
             onClicked: {
                 var editingConfig = _linkManager.createConfiguration(ScreenTools.isSerialAvailable ? LinkConfiguration.TypeSerial : LinkConfiguration.TypeUdp, "")

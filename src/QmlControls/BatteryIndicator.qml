@@ -39,7 +39,7 @@ Item {
 
     // Properties to hold the thresholds
     property int threshold1: _batterySettings.threshold1.rawValue
-    property int threshold2: _batterySettings.threshold2.rawValue   
+    property int threshold2: _batterySettings.threshold2.rawValue
 
     Row {
         id:             batteryIndicatorRow
@@ -88,11 +88,11 @@ Item {
                     case MAVLink.MAV_BATTERY_CHARGE_STATE_OK:
                         if (!isNaN(battery.percentRemaining.rawValue)) {
                             if (battery.percentRemaining.rawValue > threshold1) {
-                                return qgcPal.colorGreen 
+                                return qgcPal.colorGreen
                             } else if (battery.percentRemaining.rawValue > threshold2) {
-                                return qgcPal.colorYellowGreen 
+                                return qgcPal.colorYellowGreen
                             } else {
-                                return qgcPal.colorYellow 
+                                return qgcPal.colorYellow
                             }
                         } else {
                             return qgcPal.text
@@ -107,7 +107,7 @@ Item {
                     default:
                         return qgcPal.text
                 }
-            }    
+            }
 
             function getBatterySvgSource() {
                 switch (battery.chargeState.rawValue) {
@@ -118,8 +118,8 @@ Item {
                             } else if (battery.percentRemaining.rawValue > threshold2) {
                                 return "/qmlimages/BatteryYellowGreen.svg"
                             } else {
-                                return "/qmlimages/BatteryYellow.svg"    
-                            } 
+                                return "/qmlimages/BatteryYellow.svg"
+                            }
                         }
                     case MAVLink.MAV_BATTERY_CHARGE_STATE_LOW:
                         return "/qmlimages/BatteryOrange.svg" // Low with orange svg
@@ -357,7 +357,7 @@ Item {
                                 enabled: fact.visible
                                 onEditingFinished: {
                                     // Validate and set the new threshold value
-                                    _batterySettings.setThreshold2(parseInt(text));                                
+                                    _batterySettings.setThreshold2(parseInt(text));
                                 }
                             }
                         }
@@ -408,7 +408,7 @@ Item {
                         mainWindow.showKnownVehicleComponentConfigPage(AutoPilotPlugin.KnownPowerVehicleComponent)
                         mainWindow.closeIndicatorDrawer()
                     }
-                }                
+                }
             }
         }
     }

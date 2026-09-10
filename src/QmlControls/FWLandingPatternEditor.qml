@@ -37,8 +37,8 @@ Rectangle {
     property var    _missionVehicle:            _masterControler.controllerVehicle
     property real   _margin:                    ScreenTools.defaultFontPixelWidth / 2
     property real   _spacer:                    ScreenTools.defaultFontPixelWidth / 2
-    property string _setToVehicleHeadingStr:    qsTr("Set to vehicle heading")
-    property string _setToVehicleLocationStr:   qsTr("Set to vehicle location")
+    property string _setToVehicleHeadingStr:    qsTr("Təyyarənin istiqamətinə təyin edin")
+    property string _setToVehicleLocationStr:   qsTr("Təyyarənin yerini təyin edin")
     property bool   _showCameraSection:         !_missionVehicle.apmFirmware
     property int    _altitudeMode:              missionItem.altitudesAreRelative ? QGroundControl.AltitudeModeRelative : QGroundControl.AltitudeModeAbsolute
 
@@ -55,7 +55,7 @@ Rectangle {
             id:             finalApproachSection
             anchors.left:   parent.left
             anchors.right:  parent.right
-            text:           qsTr("Final approach")
+            text:           qsTr("Son yanaşma")
         }
 
         Column {
@@ -67,7 +67,7 @@ Rectangle {
             Item { width: 1; height: _spacer }
 
             FactCheckBox {
-                text:       qsTr("Use loiter to altitude")
+                text:       qsTr("Hündürlük üzrə naviqasiyadan istifadə edin")
                 fact:       missionItem.useLoiterToAlt
             }
 
@@ -76,7 +76,7 @@ Rectangle {
                 anchors.right:   parent.right
                 columns:         2
 
-                QGCLabel { text: qsTr("Altitude") }
+                QGCLabel { text: qsTr("Hündürlük") }
 
                 AltitudeFactTextField {
                     Layout.fillWidth:   true
@@ -86,7 +86,7 @@ Rectangle {
 
                 FactCheckBox {
                     id:         flightSpeedCheckbox
-                    text:       qsTr("Flight Speed")
+                    text:       qsTr("Uçuş Sürəti")
                     fact:       missionItem.useDoChangeSpeed
                 }
 
@@ -111,7 +111,7 @@ Rectangle {
             Item { width: 1; height: _spacer }
 
             FactCheckBox {
-                text:       qsTr("Loiter clockwise")
+                text:       qsTr("Saat əqrəbi istiqamətində hərəkət edin")
                 fact:       missionItem.loiterClockwise
                 visible:    missionItem.useLoiterToAlt.rawValue
             }
@@ -127,7 +127,7 @@ Rectangle {
             id:             landingPointSection
             anchors.left:   parent.left
             anchors.right:  parent.right
-            text:           qsTr("Landing point")
+            text:           qsTr("Eniş nöqtəsi")
         }
 
         Column {
@@ -143,14 +143,14 @@ Rectangle {
                 anchors.right:   parent.right
                 columns:         2
 
-                QGCLabel { text: qsTr("Heading") }
+                QGCLabel { text: qsTr("Başlıq") }
 
                 FactTextField {
                     Layout.fillWidth:   true
                     fact:               missionItem.landingHeading
                 }
 
-                QGCLabel { text: qsTr("Altitude") }
+                QGCLabel { text: qsTr("Hündürlük") }
 
                 AltitudeFactTextField {
                     Layout.fillWidth:   true
@@ -160,7 +160,7 @@ Rectangle {
 
                 QGCRadioButton {
                     id:                 specifyLandingDistance
-                    text:               qsTr("Distance")
+                    text:               qsTr("Məsafə")
                     checked:            missionItem.valueSetIsDistance.rawValue
                     onClicked:          missionItem.valueSetIsDistance.rawValue = checked
                     Layout.fillWidth:   true
@@ -174,7 +174,7 @@ Rectangle {
 
                 QGCRadioButton {
                     id:                 specifyGlideSlope
-                    text:               qsTr("Glide Slope")
+                    text:               qsTr("Sürüşmə Yamacı")
                     checked:            !missionItem.valueSetIsDistance.rawValue
                     onClicked:          missionItem.valueSetIsDistance.rawValue = !checked
                     Layout.fillWidth:   true
@@ -199,7 +199,7 @@ Rectangle {
 
         QGCCheckBox {
             anchors.right:  parent.right
-            text:           qsTr("Altitudes relative to launch")
+            text:           qsTr("Başlama nöqtəsinə nəzərən yüksəkliklər")
             checked:        missionItem.altitudesAreRelative
             visible:        QGroundControl.corePlugin.options.showMissionAbsoluteAltitude || !missionItem.altitudesAreRelative
             onClicked:      missionItem.altitudesAreRelative = checked
@@ -209,7 +209,7 @@ Rectangle {
             id:             cameraSection
             anchors.left:   parent.left
             anchors.right:  parent.right
-            text:           qsTr("Camera")
+            text:           qsTr("Kamera")
             visible:        _showCameraSection
         }
 
@@ -247,7 +247,7 @@ Rectangle {
                 wrapMode:               Text.WordWrap
                 color:                  qgcPal.warningText
                 font.pointSize:         ScreenTools.smallFontPointSize
-                text:                   qsTr("* Approximate glide slope altitudes.")
+                text:                   qsTr("* Təxmini sürüşmə yamac yüksəklikləri.")
             }
 
             QGCLabel {
@@ -256,7 +256,7 @@ Rectangle {
                 wrapMode:               Text.WordWrap
                 color:                  qgcPal.warningText
                 font.pointSize:         ScreenTools.smallFontPointSize
-                text:                   qsTr("* Actual flight path will vary.")
+                text:                   qsTr("* Həqiqi uçuş yolu fərqli olacaq.")
             }
 
             QGCLabel {
@@ -265,7 +265,7 @@ Rectangle {
                 wrapMode:               Text.WordWrap
                 color:                  qgcPal.warningText
                 font.pointSize:         ScreenTools.smallFontPointSize
-                text:                   qsTr("* Avoid tailwind on landing.")
+                text:                   qsTr("* Eniş zamanı quyruq küləyindən çəkinin.")
             }
         }
     }
@@ -291,14 +291,14 @@ Rectangle {
                 anchors.right:          parent.right
                 wrapMode:               Text.WordWrap
                 horizontalAlignment:    Text.AlignHCenter
-                text:                   qsTr("Click in map to set landing point.")
+                text:                   qsTr("Eniş nöqtəsini təyin etmək üçün xəritədə klikləyin.")
             }
 
             QGCLabel {
                 anchors.left:           parent.left
                 anchors.right:          parent.right
                 horizontalAlignment:    Text.AlignHCenter
-                text:                   qsTr("- or -")
+                text:                   qsTr("- və ya -")
                 visible:                globals.activeVehicle
             }
 
@@ -330,17 +330,17 @@ Rectangle {
             QGCLabel {
                 Layout.fillWidth:   true
                 wrapMode:           Text.WordWrap
-                text:               qsTr("Drag the loiter point to adjust landing direction for wind and obstacles.")
+                text:               qsTr("Külək və maneələr üçün enmə istiqamətini tənzimləmək üçün loiter nöqtəsini dartın.")
             }
 
             FactCheckBox {
-                text:       qsTr("Loiter clockwise")
+                text:       qsTr("Saat əqrəbi istiqamətində hərəkət edin")
                 fact:       missionItem.loiterClockwise
                 visible:    missionItem.useLoiterToAlt.rawValue
             }
 
             QGCButton {
-                text:               qsTr("Done")
+                text:               qsTr("Bitdi")
                 Layout.fillWidth:   true
                 onClicked: {
                     missionItem.wizardMode = false

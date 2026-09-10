@@ -52,7 +52,7 @@ RowLayout {
         id:                     divider
         Layout.preferredWidth:  visible ? 1 : -1
         Layout.fillHeight:      true
-        color:                  QGroundControl.globalPalette.groupBorder
+        color:                  QGroundControl.globalPalette.colorOrange
         visible:                expanded
     }
     

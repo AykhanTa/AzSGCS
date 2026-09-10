@@ -44,6 +44,10 @@ Item {
     property real mediumFontPixelHeight:    defaultFontPixelHeight * mediumFontPointRatio
     property real smallFontPixelHeight:     defaultFontPixelHeight * smallFontPointRatio
 
+    /// Standart kənar yuvarlaqlığı (upstream QGC-də mövcuddur, burada əlavə edildi
+    /// ki, PlanView.qml və s. "undefined" binding warning verməsin).
+    readonly property real defaultBorderRadius: Math.round(defaultFontPixelHeight * 0.5)
+
     /// You can use these properties to position ui elements in a screen resolution independent manner. Using fixed positioning values should not
     /// be done. All positioning should be done using anchors or a ratio of the defaultFontPixelHeight and defaultFontPixelWidth values. This way
     /// your ui elements will reposition themselves appropriately on varying screen sizes and resolutions.

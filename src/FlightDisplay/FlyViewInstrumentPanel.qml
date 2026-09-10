@@ -1,11 +1,32 @@
-/****************************************************************************
- *
- * (c) 2009-2020 QGROUNDCONTROL PROJECT <http://www.qgroundcontrol.org>
- *
- * QGroundControl is licensed according to the terms in the file
- * COPYING.md in the root of the source code directory.
- *
- ****************************************************************************/
+// /****************************************************************************
+//  *
+//  * (c) 2009-2020 QGROUNDCONTROL PROJECT <http://www.qgroundcontrol.org>
+//  *
+//  * QGroundControl is licensed according to the terms in the file
+//  * COPYING.md in the root of the source code directory.
+//  *
+//  ****************************************************************************/
+
+// import QtQuick
+
+// import QGroundControl
+// import QGroundControl.Controls
+
+// SelectableControl {
+//     z:                      QGroundControl.zOrderWidgets
+//     selectionUIRightAnchor: true
+//     selectedControl:        QGroundControl.settingsManager.flyViewSettings.instrumentQmlFile2
+
+//     property var  missionController:    _missionController
+//     property real extraInset:           innerControl.extraInset
+//     property real extraValuesWidth:     innerControl.extraValuesWidth
+// }
+
+
+
+
+
+
 
 import QtQuick
 
@@ -17,7 +38,9 @@ SelectableControl {
     selectionUIRightAnchor: true
     selectedControl:        QGroundControl.settingsManager.flyViewSettings.instrumentQmlFile2
 
-    property var  missionController:    _missionController
-    property real extraInset:           innerControl.extraInset
-    property real extraValuesWidth:     innerControl.extraValuesWidth
+    property var  missionController: _missionController
+
+    // ✅ innerControl hələ yoxdursa undefined yazılmasın
+    property real extraInset:       (innerControl && innerControl.extraInset       !== undefined) ? innerControl.extraInset       : 0
+    property real extraValuesWidth: (innerControl && innerControl.extraValuesWidth !== undefined) ? innerControl.extraValuesWidth : 0
 }

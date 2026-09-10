@@ -36,8 +36,8 @@ Item {
     property real   _zorderSplitHandle:     QGroundControl.zOrderMapItems + 2
     property var    _savedVertices:         [ ]
 
-    readonly property string _corridorToolsText:    qsTr("Polyline Tools")
-    readonly property string _traceText:            qsTr("Click in the map to add vertices. Click 'Done Tracing' when finished.")
+    readonly property string _corridorToolsText:    qsTr("Polyline Alətləri")
+    readonly property string _traceText:            qsTr("Təpələri əlavə etmək üçün xəritədə klikləyin. Bitirdikdən sonra 'İzləmə tamamlandı' üzərinə klikləyin.")
 
     function _addCommonVisuals() {
         if (_objMgrCommonVisuals.empty) {
@@ -123,7 +123,7 @@ Item {
 
     KMLOrSHPFileDialog {
         id:             kmlOrSHPLoadDialog
-        title:          qsTr("Select Polyline File")
+        title:          qsTr("Polyline Faylı seçin")
 
         onAcceptedForLoad: (file) => {
             mapPolyline.loadKMLOrSHPFile(file)
@@ -144,12 +144,12 @@ Item {
 
         QGCMenuItem {
             id:             removeVertexItem
-            text:           qsTr("Remove vertex" )
+            text:           qsTr("Təpə nöqtəsini silin" )
             onTriggered:    mapPolyline.removeVertex(menu._removeVertexIndex)
         }
 
         QGCMenuItem {
-            text:           qsTr("Edit position..." )
+            text:           qsTr("Mövqeyi redaktə edin..." )
             onTriggered:    editPositionDialog.createObject(mainWindow, { coordinate: mapPolyline.path[menu._removeVertexIndex] }).open()
         }
     }
@@ -316,48 +316,161 @@ Item {
         }
     }
 
+
     Component {
         id: toolbarComponent
 
-        PlanEditToolbar {
-            anchors.horizontalCenter:       mapControl.left
-            anchors.horizontalCenterOffset: mapControl.centerViewport.left + (mapControl.centerViewport.width / 2)
-            y:                              mapControl.centerViewport.top
-            z:                              QGroundControl.zOrderMapItems + 2
-            availableWidth:                 mapControl.centerViewport.width
+        Rectangle {
+            width: 385
+            height: 112
+            color: "#2A2A2A"
+            radius: 6
+            z: QGroundControl.zOrderMapItems + 2
 
-            QGCButton {
-                _horizontalPadding: 0
-                text:               qsTr("Basic")
-                visible:            !mapPolyline.traceMode
-                onClicked:          _resetPolyline()
-            }
+            // Orijinal pozisyonlama
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: 20
 
-            QGCButton {
-                _horizontalPadding: 0
-                text:               mapPolyline.traceMode ? qsTr("Done Tracing") : qsTr("Trace")
-                onClicked: {
-                    if (mapPolyline.traceMode) {
-                        if (mapPolyline.count < 2) {
-                            _restorePreviousVertices()
+            Column {
+                anchors.fill: parent
+                spacing: 9  // Üst bölüm ile alt bölüm arası 9px mesafe
+
+                // Üst bölüm - Polyline Tools yazısı
+                Rectangle {
+                    width: 385
+                    height: 39
+                    color: "#3D3B3B"
+                    topLeftRadius: 6
+                    topRightRadius: 6
+
+                    QGCLabel {
+                        text: qsTr("Polyline Alətləri")
+                        anchors.centerIn: parent
+                        color: "white"
+                        font.pointSize: ScreenTools.mediumFontPointSize
+                        font.bold: true
+                    }
+
+                    Rectangle {
+                        width: parent.width
+                        height: 0.5
+                        color: "#8F8F8F"
+                        anchors.bottom: parent.bottom
+                    }
+                }
+
+
+                Rectangle {
+                    width: 385
+                    height: 55
+                    color: "#3D3B3B"
+                    bottomRightRadius: 6
+                    bottomLeftRadius: 6
+
+
+                    QGCButton {
+                        _horizontalPadding: 0
+                        text: qsTr("Əsas")
+                        visible: !mapPolyline.traceMode
+                        onClicked: _resetPolyline()
+                        anchors.verticalCenter: parent.verticalCenter
+                        x: 45
+                        pointSize:ScreenTools.mediumFontPointSize
+
+                        background: Rectangle {
+                            color: "#3D3B3B"
+                            radius: 4
                         }
-                        mapPolyline.traceMode = false
-                    } else {
-                        _saveCurrentVertices()
-                        mapPolyline.traceMode = true
-                        mapPolyline.clear();
+                    }
+
+                    QGCButton {
+                        _horizontalPadding: 0
+                        text: mapPolyline.traceMode ? qsTr("İzləmə tamamlandı") : qsTr("İz")
+                        onClicked: {
+                            if (mapPolyline.traceMode) {
+                                if (mapPolyline.count < 2) {
+                                    _restorePreviousVertices()
+                                }
+                                mapPolyline.traceMode = false
+                            } else {
+                                _saveCurrentVertices()
+                                mapPolyline.traceMode = true
+                                mapPolyline.clear();
+                            }
+                        }
+                        anchors.verticalCenter: parent.verticalCenter
+                        x: mapPolyline.traceMode ? 135 :165
+                        pointSize:ScreenTools.mediumFontPointSize
+
+                        background: Rectangle {
+                            color: "#3D3B3B"
+                            radius: 4
+                        }
+                    }
+
+                    QGCButton {
+                        _horizontalPadding: 0
+                        text: qsTr("Yüklə KML/SHP...")
+                        onClicked: kmlOrSHPLoadDialog.openForLoad()
+                        visible: !mapPolyline.traceMode
+                        anchors.verticalCenter: parent.verticalCenter
+                        x: 250  // Son buton
+                        pointSize:ScreenTools.mediumFontPointSize
+
+                        background: Rectangle {
+                            color: "#3D3B3B"
+                            radius: 4
+                        }
                     }
                 }
             }
-
-            QGCButton {
-                _horizontalPadding: 0
-                text:               qsTr("Load KML/SHP...")
-                onClicked:          kmlOrSHPLoadDialog.openForLoad()
-                visible:            !mapPolyline.traceMode
-            }
         }
     }
+
+
+    // Component {
+    //     id: toolbarComponent
+
+    //     PlanEditToolbar {
+    //         anchors.horizontalCenter:       mapControl.left
+    //         anchors.horizontalCenterOffset: mapControl.centerViewport.left + (mapControl.centerViewport.width / 2)
+    //         y:                              mapControl.centerViewport.top
+    //         z:                              QGroundControl.zOrderMapItems + 2
+    //         availableWidth:                 mapControl.centerViewport.width
+
+    //         QGCButton {
+    //             _horizontalPadding: 0
+    //             text:               qsTr("Basic")
+    //             visible:            !mapPolyline.traceMode
+    //             onClicked:          _resetPolyline()
+    //         }
+
+    //         QGCButton {
+    //             _horizontalPadding: 0
+    //             text:               mapPolyline.traceMode ? qsTr("Done Tracing") : qsTr("Trace")
+    //             onClicked: {
+    //                 if (mapPolyline.traceMode) {
+    //                     if (mapPolyline.count < 2) {
+    //                         _restorePreviousVertices()
+    //                     }
+    //                     mapPolyline.traceMode = false
+    //                 } else {
+    //                     _saveCurrentVertices()
+    //                     mapPolyline.traceMode = true
+    //                     mapPolyline.clear();
+    //                 }
+    //             }
+    //         }
+
+    //         QGCButton {
+    //             _horizontalPadding: 0
+    //             text:               qsTr("Load KML/SHP...")
+    //             onClicked:          kmlOrSHPLoadDialog.openForLoad()
+    //             visible:            !mapPolyline.traceMode
+    //         }
+    //     }
+    // }
 
     // Mouse area to capture clicks for tracing a polyline
     Component {

@@ -75,10 +75,19 @@ FlightMap {
         resetMapToDefaults()
         updateMap()
         savedCenter = _map.toCoordinate(Qt.point(_map.width / 2, _map.height / 2), false /* clipToViewPort */)
-        settingsPage.enabled = false // Prevent mouse events from bleeding through to the settings page which is below this in hierarchy
+        // "settingsPage" yaradıldığı faylın leksik scope-undan gəlir (bax MapSettings.qml).
+        // Bəzi səhifələr bu editoru həmin kontekst olmadan yaradır — o halda ReferenceError
+        // olmasın deyə typeof ilə yoxlayırıq.
+        if (typeof settingsPage !== "undefined" && settingsPage) {
+            settingsPage.enabled = false // Prevent mouse events from bleeding through to the settings page which is below this in hierarchy
+        }
     }
 
-    Component.onDestruction: settingsPage.enabled = true
+    Component.onDestruction: {
+        if (typeof settingsPage !== "undefined" && settingsPage) {
+            settingsPage.enabled = true
+        }
+    }
 
     Connections {
         target:                 QGroundControl.mapEngineManager

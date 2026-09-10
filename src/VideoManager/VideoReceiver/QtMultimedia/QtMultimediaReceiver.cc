@@ -182,10 +182,10 @@ void QtMultimediaReceiver::stop()
         return;
     }
 
+    // Boş URI dayandırmamaq üçün səbəb deyil — pleyer oynayırsa onu bağlamaq lazımdır,
+    // əks halda hər saniyə təkrarlanan dayandırma cəhdləri log-u doldurur.
     if (_mediaPlayer->source().isEmpty()) {
-        qCWarning(QtMultimediaReceiverLog) << "Stop called on empty URI";
-        emit onStopComplete(STATUS_FAIL);
-        return;
+        qCDebug(QtMultimediaReceiverLog) << "Stopping player with an empty source";
     }
 
     _mediaPlayer->stop();

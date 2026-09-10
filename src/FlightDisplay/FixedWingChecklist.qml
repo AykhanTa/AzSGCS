@@ -22,11 +22,11 @@ Item {
     PreFlightCheckModel {
         id:     listModel
         PreFlightCheckGroup {
-            name: qsTr("Fixed Wing Initial Checks")
+            name: qsTr("Sabit Qanadın İlkin Yoxlamaları")
 
             PreFlightCheckButton {
-                name:           qsTr("Hardware")
-                manualText:     qsTr("Props mounted? Wings secured? Tail secured?")
+                name:           qsTr("Aparat")
+                manualText:     qsTr("Pərvanələr bərkidildimi? Qanadlar sabitlənirmi? Quyruq sabitləndimi?")
             }
 
             PreFlightBatteryCheck {
@@ -47,44 +47,44 @@ Item {
         }
 
         PreFlightCheckGroup {
-            name: qsTr("Please arm the vehicle here")
+            name: qsTr("Zəhmət olmasa təyyarəni arm vəziyyətinə gətirin")
 
             PreFlightCheckButton {
-                name:            qsTr("Actuators")
-                manualText:      qsTr("Move all control surfaces. Did they work properly?")
-            }
-
-            PreFlightCheckButton {
-                name:            qsTr("Motors")
-                manualText:      qsTr("Propellers free? Then throttle up gently. Working properly?")
+                name:            qsTr("Aktuatorlar")
+                manualText:      qsTr("Bütün nəzarət səthlərini hərəkət etdirin. Düzgün işlədilərmi?")
             }
 
             PreFlightCheckButton {
-                name:           qsTr("Mission")
-                manualText:     qsTr("Please confirm mission is valid (waypoints valid, no terrain collision).")
+                name:            qsTr("Motorlar")
+                manualText:      qsTr("Pərvanələr sərbəstdirmi? O zaman yavaşca throttle artırın. Düzgün işləyirmi?")
             }
 
-            PreFlightSoundCheck {
+            PreFlightCheckButton {
+                name:           qsTr("Missiya")
+                manualText:     qsTr("Lütfən, missiyanın etibarlı olduğunu təsdiqləyin (yol nöqtələri etibarlıdır, ərazi toqquşması yoxdur).")
             }
+
+            // PreFlightSoundCheck {
+            // }
         }
 
         PreFlightCheckGroup {
-            name: qsTr("Last preparations before launch")
+            name: qsTr("Başlamadan əvvəl son hazırlıqlar")
 
             // Check list item group 2 - Final checks before launch
             PreFlightCheckButton {
                 name:           qsTr("Payload")
-                manualText:     qsTr("Configured and started? Payload lid closed?")
+                manualText:     qsTr("Konfiqurasiya edildi və başladı? Yük qapağı bağlanıb?")
             }
 
             PreFlightCheckButton {
-                name:           qsTr("Wind & weather")
-                manualText:     qsTr("OK for your platform? Lauching into the wind?")
+                name:           qsTr("Külək və hava")
+                manualText:     qsTr("Platformanız üçün yaxşıdır? Küləkdə atılır?")
             }
 
             PreFlightCheckButton {
-                name:           qsTr("Flight area")
-                manualText:     qsTr("Launch area and path free of obstacles/people?")
+                name:           qsTr("Uçuş sahəsi")
+                manualText:     qsTr("Maneələrdən/insanlardan azad olan sahə və yolu işə salın?")
             }
         }
     }

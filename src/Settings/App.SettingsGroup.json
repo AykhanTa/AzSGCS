@@ -218,7 +218,7 @@
     "name":             "followTarget",
     "shortDesc": "Stream GCS' coordinates to Autopilot",
     "type":             "uint32",
-    "enumStrings":      "Never,Always,When in Follow Me Flight Mode",
+    "enumStrings":      "Heç vaxt,Həmişə,Uçuş rejimində olduqda məni izlə",
     "enumValues":       "0,1,2",
     "default":     2
 },

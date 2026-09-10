@@ -27,6 +27,10 @@ Item {
     property var    _activeVehicle:       QGroundControl.multiVehicleManager.activeVehicle
     property var    selectedVehicles:     QGroundControl.multiVehicleManager.selectedVehicles
 
+    // Kart üçün lazımi minimum en — TelemetryValuesBar (_minW: 240) + select button + margins.
+    // FlyViewTopRightPanel öz contentWidth-ini bu implicitWidth ilə hesablayır, beləliklə
+    // panel yetəri qədər geniş açılır və telemetry bar kart daxilinə yerləşir, kənara çıxmır.
+    implicitWidth:  ScreenTools.defaultFontPixelHeight * 28
     implicitHeight: vehicleList.contentHeight
 
     function armAvailable() {
@@ -126,29 +130,40 @@ Item {
         property real _cacheBuffer:     height * 2
 
         delegate: Rectangle {
+            id:             vehicleCard
             width:          vehicleList.width
             height:         innerColumn.height + _margin * 2
             color:          QGroundControl.multiVehicleManager.activeVehicle == _vehicle ? _activeVehicleColor : qgcPal.button
             radius:         _margin
-            border.width:   _vehicle && vehicleSelected(_vehicle.id) ? 2 : 0
-            border.color:   qgcPal.text
+            border.width:   _vehicle && vehicleSelected(_vehicle.id) ? 2 : 1
+            border.color:   _vehicle && vehicleSelected(_vehicle.id)
+                            ? qgcPal.text
+                            : Qt.rgba(qgcPal.text.r, qgcPal.text.g, qgcPal.text.b, 0.25)
 
-            property var    _vehicle:   object
+            property var  _vehicle:  object
+            property bool _selected: _vehicle ? vehicleSelected(_vehicle.id) : false
 
+            // 1) Boş sahə üçün klik — qardaş şəkildə ən altda, üstdəki uşaq MouseArea-ları
+            //    accept etməyəndə klik bura düşür və seçim toggle olur.
             QGCMouseArea {
-                anchors.fill:       parent
-                onClicked:          toggleSelect(_vehicle.id)
+                anchors.fill:    parent
+                preventStealing: true
+                onClicked:       { if (_vehicle) toggleSelect(_vehicle.id) }
             }
 
             Column {
                 id:                         innerColumn
-                anchors.centerIn:           parent
+                anchors.left:               parent.left
+                anchors.right:              selectButton.left
+                anchors.verticalCenter:     parent.verticalCenter
+                anchors.leftMargin:         _margin * 2
+                anchors.rightMargin:        _margin
                 spacing:                    _margin
 
                 RowLayout {
                     anchors.horizontalCenter:   parent.horizontalCenter
-                    anchors.margins:    _margin
-                    spacing:            _margin
+                    width:                      Math.min(implicitWidth, parent.width)
+                    spacing:                    _margin
 
                     IntegratedCompassAttitude {
                         id: compassWidget
@@ -183,7 +198,6 @@ Item {
 
                     ColumnLayout {
                         spacing:              _margin
-                        Layout.rightMargin:   compassWidget.width / 4
                         Layout.alignment:     Qt.AlignCenter
 
                         FlightModeMenu {
@@ -202,17 +216,61 @@ Item {
                 }
 
                 QGCFlickable {
+                    id:                         telemetryFlickable
                     anchors.horizontalCenter:   parent.horizontalCenter
-                    width:          Math.min(contentWidth, vehicleList.width)
-                    height:         control.height
-                    contentWidth:   control.width
-                    contentHeight:  control.height
+                    width:                      Math.min(contentWidth, parent.width)
+                    height:                     control.height
+                    contentWidth:               control.width
+                    contentHeight:              control.height
+                    clip:                       true
+                    flickableDirection:         Flickable.HorizontalFlick
+                    boundsBehavior:             Flickable.StopAtBounds
+                    interactive:                contentWidth > width
 
                     TelemetryValuesBar {
                         id:                     control
                         settingsGroup:          factValueGrid.vehicleCardSettingsGroup
                         specificVehicleForCard: _vehicle
                     }
+                }
+            }
+
+            // 2) Hər zaman görünən və hər zaman kliklənəbilən "Seç" düyməsi
+            //    Sağ kənarda, child MouseArea-ların üstündə (z:10) — istənilən
+            //    kart düzümündə işləyir.
+            Rectangle {
+                id:                 selectButton
+                width:              ScreenTools.defaultFontPixelHeight * 1.6
+                height:             width
+                radius:             width / 2
+                anchors.right:      parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.rightMargin: _margin
+                z:                  10
+
+                color:  vehicleCard._selected
+                        ? qgcPal.text
+                        : (selectButtonMouse.containsMouse
+                           ? Qt.rgba(qgcPal.text.r, qgcPal.text.g, qgcPal.text.b, 0.30)
+                           : Qt.rgba(qgcPal.text.r, qgcPal.text.g, qgcPal.text.b, 0.12))
+                border.color: qgcPal.text
+                border.width: 1
+
+                QGCLabel {
+                    anchors.centerIn: parent
+                    text:             vehicleCard._selected ? "✓" : ""
+                    color:            vehicleCard._selected ? qgcPal.button : qgcPal.text
+                    font.pointSize:   ScreenTools.mediumFontPointSize
+                    font.bold:        true
+                }
+
+                QGCMouseArea {
+                    id:              selectButtonMouse
+                    anchors.fill:    parent
+                    hoverEnabled:    true
+                    preventStealing: true
+                    cursorShape:     Qt.PointingHandCursor
+                    onClicked:       { if (_vehicle) toggleSelect(_vehicle.id) }
                 }
             }
         }

@@ -1,12 +1,3 @@
-/****************************************************************************
- *
- * (c) 2009-2020 QGROUNDCONTROL PROJECT <http://www.qgroundcontrol.org>
- *
- * QGroundControl is licensed according to the terms in the file
- * COPYING.md in the root of the source code directory.
- *
- ****************************************************************************/
-
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
@@ -26,8 +17,14 @@ Item {
     enabled:        !_disableDueToArmed && !_disableDueToFlying
 
     property alias  pageComponent:          pageLoader.sourceComponent
-    property string pageName:               vehicleComponent ? vehicleComponent.name : ""
-    property string pageDescription:        vehicleComponent ? vehicleComponent.description : ""
+
+    // "vehicleComponent" SetupView-in panelLoader-indən (creation context) gəlir.
+    // Bəzi səhifələr SetupPage-i bu kontekst olmadan yükləyir — həmin halda birbaşa
+    // istinad ReferenceError verir. typeof yoxlaması ilə təhlükəsiz null-a düşürük.
+    readonly property var _vehicleComponent: (typeof vehicleComponent !== "undefined") ? vehicleComponent : null
+
+    property string pageName:               _vehicleComponent ? _vehicleComponent.name : ""
+    property string pageDescription:        _vehicleComponent ? _vehicleComponent.description : ""
     property real   availableWidth:         width - pageLoader.x
     property real   availableHeight:        height - pageLoader.y
     property bool   showAdvanced:           false
@@ -36,9 +33,9 @@ Item {
     property bool   _vehicleIsRover:        globals.activeVehicle ? globals.activeVehicle.rover : false
     property bool   _vehicleArmed:          globals.activeVehicle ? globals.activeVehicle.armed : false
     property bool   _vehicleFlying:         globals.activeVehicle ? globals.activeVehicle.flying : false
-    property bool   _disableDueToArmed:     vehicleComponent ? (!vehicleComponent.allowSetupWhileArmed && _vehicleArmed) : false
+    property bool   _disableDueToArmed:     _vehicleComponent ? (!_vehicleComponent.allowSetupWhileArmed && _vehicleArmed) : false
     // FIXME: The _vehicleIsRover checkl is a hack to work around https://github.com/PX4/Firmware/issues/10969
-    property bool   _disableDueToFlying:    vehicleComponent ? (!_vehicleIsRover && !vehicleComponent.allowSetupWhileFlying && _vehicleFlying) : false
+    property bool   _disableDueToFlying:    _vehicleComponent ? (!_vehicleIsRover && !_vehicleComponent.allowSetupWhileFlying && _vehicleFlying) : false
     property string _disableReason:         _disableDueToArmed ? qsTr("armed") : qsTr("flying")
     property real   _margins:               ScreenTools.defaultFontPixelHeight * 0.5
     property string _pageTitle:             qsTr("%1 Config").arg(pageName)
