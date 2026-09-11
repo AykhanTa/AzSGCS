@@ -1,0 +1,29 @@
+target_sources(${CMAKE_PROJECT_NAME}
+    PRIVATE
+        GpsTest.cc
+        GpsTest.h
+        GpsTestHelpers.h
+        MockNTRIPTransport.h
+        NTRIPConnectionStatsTest.cc
+        NTRIPConnectionStatsTest.h
+        NTRIPGgaProviderTest.cc
+        NTRIPGgaProviderTest.h
+        NTRIPHttpTransportTest.cc
+        NTRIPHttpTransportTest.h
+        NTRIPManagerTest.cc
+        NTRIPManagerTest.h
+        NTRIPSourceTableControllerTest.cc
+        NTRIPSourceTableControllerTest.h
+        NTRIPSourceTableTest.cc
+        NTRIPSourceTableTest.h
+        RTCMMavlinkTest.cc
+        RTCMMavlinkTest.h
+        RTCMParserTest.cc
+        RTCMParserTest.h
+        RTCMUdpInputTest.cc
+        RTCMUdpInputTest.h
+        UdpForwarderTest.cc
+        UdpForwarderTest.h
+)
+
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

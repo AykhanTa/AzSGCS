@@ -1,0 +1,26 @@
+{
+    "version": 1,
+    "fileType": "FactMetaData",
+    "QGC.MetaData.Facts":
+[
+{
+    "name":         "adsbServerConnectEnabled",
+    "shortDesc":    "ADSB SBS serverinə qoşulun",
+    "longDesc":     "Göstərilən ünvan/portdan istifadə edərək ADSB SBS-1 serverinə qoşulun",
+    "type":         "bool",
+    "default":      false
+},
+{
+    "name":         "adsbServerHostAddress",
+    "shortDesc":    "Host ünvanı",
+    "type":         "string",
+    "default":      "127.0.0.1"
+},
+{
+    "name":         "adsbServerPort",
+    "shortDesc":    "Server portu",
+    "type":         "string",
+    "default":      30003
+}
+]
+}

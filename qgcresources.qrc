@@ -1,0 +1,292 @@
+<RCC>
+    <qresource prefix="/fonts">
+        <file alias="opensans">resources/fonts/OpenSans-Regular.ttf</file>
+        <file alias="opensans-demibold">resources/fonts/OpenSans-Semibold.ttf</file>
+        <file alias="NanumGothic-Regular">resources/fonts/NanumGothic-Regular.ttf</file>
+        <file alias="NanumGothic-Bold">resources/fonts/NanumGothic-Bold.ttf</file>
+    </qresource>
+
+    <qresource prefix="/res">
+        <file alias="action.svg">resources/action.svg</file>
+        <file alias="AntennaRC.svg">resources/Antenna_RC.svg</file>
+        <file alias="AntennaT.svg">resources/Antenna_T.svg</file>
+        <file alias="ArrowDown.svg">resources/ArrowDown.svg</file>
+        <file alias="ArrowRight.svg">resources/ArrowRight.svg</file>
+        <file alias="buttonLeft.svg">resources/buttonLeft.svg</file>
+        <file alias="buttonRight.svg">resources/buttonRight.svg</file>
+        <file alias="cancel.svg">resources/cancel.svg</file>
+        <file alias="clockwise-arrow.svg">resources/clockwise-arrow.svg</file>
+        <file alias="counter-clockwise-arrow.svg">resources/counter-clockwise-arrow.svg</file>
+        <file alias="chevron-down.svg">resources/chevron-down.svg</file>
+        <file alias="chevron-up.svg">resources/chevron-up.svg</file>
+        <file alias="DropArrow.svg">resources/DropArrow.svg</file>
+        <file alias="gear-black.svg">resources/gear-black.svg</file>
+        <file alias="gear-white.svg">resources/gear-white.svg</file>
+        <file alias="helicoptericon.svg">resources/helicoptericon.svg</file>
+        <file alias="BingNoTileBytes.dat">resources/BingNoTileBytes.dat</file>
+        <file alias="JoystickBezel.png">resources/JoystickBezel.png</file>
+        <file alias="JoystickBezelLight.png">resources/JoystickBezelLight.png</file>
+        <file alias="land.svg">resources/land.svg</file>
+        <file alias="layout-bottom.svg">resources/layout-bottom.svg</file>
+        <file alias="layout-right.svg">resources/layout-right.svg</file>
+        <file alias="LockClosed.svg">resources/LockClosed.svg</file>
+        <file alias="LockOpen.svg">resources/LockOpen.svg</file>
+        <file alias="notile.png">resources/notile.png</file>
+        <file alias="NoVideoBackground.png">resources/NoVideoBackground.png</file>
+        <file alias="Pause.svg">resources/Pause.svg</file>
+        <file alias="pause-mission.svg">resources/pause-mission.svg</file>
+        <file alias="pencil.svg">resources/pencil.svg</file>
+        <file alias="Play.svg">resources/Play.svg</file>
+        <file alias="PowerButton.svg">resources/PowerButton.svg</file>
+        <file alias="QGCLogoBlack.svg">resources/QGCLogoBlack.svg</file>
+        <file alias="QGCLogoFull.svg">resources/QGCLogoFull.svg</file>
+        <file alias="QGCLogoWhite.svg">resources/QGCLogoWhite.svg</file>
+        <file alias="QGCLogoArrow.svg">resources/QGCLogoArrow.svg</file>
+        <file alias="QGroundControlConnect.svg">resources/QGroundControlConnect.svg</file>
+        <file alias="rtl.svg">resources/rtl.svg</file>
+        <file alias="SplashScreen">resources/SplashScreen.png</file>
+        <file alias="Stop.svg">resources/Stop.svg</file>
+        <file alias="takeoff.svg">resources/takeoff.svg</file>
+        <file alias="terrain.svg">resources/terrain.svg</file>
+        <file alias="TrashDelete.svg">resources/TrashDelete.svg</file>
+        <file alias="VehicleMessages.png">resources/VehicleMessages.png</file>
+        <file alias="waves.svg">resources/waves.svg</file>
+        <file alias="wind-guru.svg">resources/wind-guru.svg</file>
+        <file alias="wind-rose.svg">resources/wind-rose.svg</file>
+        <file alias="wind-roseBlack.svg">resources/wind-roseBlack.svg</file>
+        <file alias="wind-rose-arrow.svg">resources/wind-rose-arrow.svg</file>
+        <file alias="XDelete.svg">resources/XDelete.svg</file>
+        <file alias="XDeleteBlack.svg">resources/XDeleteBlack.svg</file>
+        <file alias="waypoint.svg">resources/waypoint.svg</file>
+        <file alias="Gripper.svg">resources/Gripper.svg</file>
+        <file alias="GripperRelease.svg">resources/GripperRelease.svg</file>
+        <file alias="GripperGrab.svg">resources/GripperGrab.svg</file>
+        <file alias="qgroundcontrol.ico">resources/icons/qgroundcontrol.ico</file>
+
+        <!-- AZSHIELD ICONS (əvvəlkilər) -->
+        <file alias="AZSHIELD_ICON/Logo.svg">resources/AZSHIELD_ICON/Logo.svg</file>
+        <file alias="AZSHIELD_ICON/Logo2.svg">resources/AZSHIELD_ICON/Logo2.svg</file>
+        <file alias="AZSHIELD_ICON/Home.svg">resources/AZSHIELD_ICON/Home.svg</file>
+
+        <file alias="AZSHIELD_ICON/Mission_Planner.svg">resources/AZSHIELD_ICON/Mission Planner.svg</file>
+        <file alias="AZSHIELD_ICON/Vehicle_Setup.svg">resources/AZSHIELD_ICON/Vehicle Setup.svg</file>
+        <file alias="AZSHIELD_ICON/Log_Analysis.svg">resources/AZSHIELD_ICON/Log Analysis.svg</file>
+
+        <file alias="AZSHIELD_ICON/Settings.svg">resources/AZSHIELD_ICON/Settings.svg</file>
+        <file alias="AZSHIELD_ICON/manual.svg">resources/AZSHIELD_ICON/manual.svg</file>
+        <file alias="AZSHIELD_ICON/disconnect.svg">resources/AZSHIELD_ICON/disconnect.svg</file>
+
+
+    <!-- AZSHIELD ICONS (ToolStrip üçün əlavə olunanlar) -->
+        <file alias="AZSHIELD_ICON/Hold.svg">resources/AZSHIELD_ICON/Hold.svg</file>
+        <file alias="AZSHIELD_ICON/Altitude.svg">resources/AZSHIELD_ICON/Altitude.svg</file>
+        <file alias="AZSHIELD_ICON/Speed.svg">resources/AZSHIELD_ICON/Speed.svg</file>
+
+        <!-- Altitude/Speed panelində istifadə olunursa -->
+        <file alias="AZSHIELD_ICON/arrow-up.svg">resources/AZSHIELD_ICON/arrow-up.svg</file>
+        <file alias="AZSHIELD_ICON/arrow-down.svg">resources/AZSHIELD_ICON/arrow-down.svg</file>
+
+<!-- ✅ TopStatusPanel üçün lazım olanlar -->
+        <file alias="AZSHIELD_ICON/Status.svg">resources/AZSHIELD_ICON/Status.svg</file>
+        <file alias="AZSHIELD_ICON/Checklist.svg">resources/AZSHIELD_ICON/Checklist.svg</file>
+        <!-- Fayl adı səndə "Flight Mode.svg" idisə belə qalmalıdır -->
+        <file alias="AZSHIELD_ICON/FlightMode.svg">resources/AZSHIELD_ICON/Flight Mode.svg</file>
+
+	<file alias="AZSHIELD_ICON/TopStatusPanel_Cixis.svg">resources/AZSHIELD_ICON/TopStatusPanel_Cixis.svg</file>
+	<file alias="AZSHIELD_ICON/TopStatusPanel_Settings.svg">resources/AZSHIELD_ICON/TopStatusPanel_Settings.svg</file>
+
+<file alias="AZSHIELD_ICON/main_logo.svg">resources/AZSHIELD_ICON/main_logo.svg</file>
+
+<file alias="AZSHIELD_ICON/chevron-double-right.svg">resources/AZSHIELD_ICON/chevron-double-right.svg</file>
+<file alias="AZSHIELD_ICON/sliders.svg">resources/AZSHIELD_ICON/sliders.svg</file>
+<file alias="AZSHIELD_ICON/chevron-double-left.svg">resources/AZSHIELD_ICON/chevron-double-left.svg</file>
+<file alias="AZSHIELD_ICON/Home.svg">resources/AZSHIELD_ICON/Home.svg</file>
+<file alias="AZSHIELD_ICON/SaveToDisk.svg">resources/AZSHIELD_ICON/SaveToDisk.svg</file>
+<file alias="AZSHIELD_ICON/UploadToVehicle.svg">resources/AZSHIELD_ICON/UploadToVehicle.svg</file>
+<file alias="AZSHIELD_ICON/TrashCan.svg">resources/AZSHIELD_ICON/TrashCan.svg</file>
+
+<file alias="AZSHIELD_ICON/appSet.svg">resources/AZSHIELD_ICON/appSet.svg</file>
+<file alias="AZSHIELD_ICON/appFly.svg">resources/AZSHIELD_ICON/appFly.svg</file>
+<file alias="AZSHIELD_ICON/appPlan.svg">resources/AZSHIELD_ICON/appPlan.svg</file>
+<file alias="AZSHIELD_ICON/appVideo.svg">resources/AZSHIELD_ICON/appVideo.svg</file>
+<file alias="AZSHIELD_ICON/appTelemetr.svg">resources/AZSHIELD_ICON/appTelemetr.svg</file>
+
+        <!-- Telemetry ikonları -->
+        <file alias="AZSHIELD_ICON/Telemetri.svg">resources/AZSHIELD_ICON/Telemetri.svg</file>
+        <file alias="AZSHIELD_ICON/TelemetriRed.svg">resources/AZSHIELD_ICON/TelemetriRed.svg</file>
+        <file alias="AZSHIELD_ICON/TelemetriOrange.svg">resources/AZSHIELD_ICON/TelemetriOrange.svg</file>
+        <file alias="AZSHIELD_ICON/TelemetriGreen.svg">resources/AZSHIELD_ICON/TelemetriGreen.svg</file>
+
+        <file alias="AZSHIELD_ICON/GPS.svg">resources/AZSHIELD_ICON/GPS.svg</file>
+        <file alias="AZSHIELD_ICON/GPSgirmizi.svg">resources/AZSHIELD_ICON/GPSgirmizi.svg</file>
+        <file alias="AZSHIELD_ICON/GPSyasil.svg">resources/AZSHIELD_ICON/GPSyasil.svg</file>
+
+        <!-- RC ikonları: fayl adları səndə boşluqludursa belə qalır -->
+        <file alias="AZSHIELD_ICON/RCSignal.svg">resources/AZSHIELD_ICON/RC Signal.svg</file>
+        <file alias="AZSHIELD_ICON/RCSignalRed.svg">resources/AZSHIELD_ICON/RC Signalred.svg</file>
+        <file alias="AZSHIELD_ICON/RCSignalYellow.svg">resources/AZSHIELD_ICON/RC Signalyellow.svg</file>
+        <file alias="AZSHIELD_ICON/RCSignalGreen.svg">resources/AZSHIELD_ICON/RC Signalgreen.svg</file>
+        <file alias="AZSHIELD_ICON/RCSignalOrange.svg">resources/AZSHIELD_ICON/RC Signalorange.svg</file>
+
+        <file alias="AZSHIELD_ICON/exit.svg">resources/AZSHIELD_ICON/exit.svg</file>
+
+        <!-- AZSHIELD ICONS (SideMenu_AparatQurgusu + Summary üçün əlavə olunanlar) -->
+        <file alias="AZSHIELD_ICON/Back.svg">resources/AZSHIELD_ICON/Back.svg</file>
+
+
+
+<file alias="AZSHIELD_ICON/appSet.svg">resources/AZSHIELD_ICON/appSet.svg</file>
+<file alias="AZSHIELD_ICON/appFly.svg">resources/AZSHIELD_ICON/appFly.svg</file>
+<file alias="AZSHIELD_ICON/appPlan.svg">resources/AZSHIELD_ICON/appPlan.svg</file>
+<file alias="AZSHIELD_ICON/appVideo.svg">resources/AZSHIELD_ICON/appVideo.svg</file>
+<file alias="AZSHIELD_ICON/appTelemetr.svg">resources/AZSHIELD_ICON/appTelemetr.svg</file>
+<file alias="AZSHIELD_ICON/appADSB.svg">resources/AZSHIELD_ICON/appADSB.svg</file>
+<file alias="AZSHIELD_ICON/appLink.svg">resources/AZSHIELD_ICON/appLink.svg</file>
+<file alias="AZSHIELD_ICON/appMap.svg">resources/AZSHIELD_ICON/appMap.svg</file>
+<file alias="AZSHIELD_ICON/appPX4.svg">resources/AZSHIELD_ICON/appPX4.svg</file>
+<file alias="AZSHIELD_ICON/appRemote.svg">resources/AZSHIELD_ICON/appRemote.svg</file>
+<file alias="AZSHIELD_ICON/appConsole.svg">resources/AZSHIELD_ICON/appConsole.svg</file>
+<file alias="AZSHIELD_ICON/appHelp.svg">resources/AZSHIELD_ICON/appHelp.svg</file>
+
+        <file alias="AZSHIELD_ICON/Summary.svg">resources/AZSHIELD_ICON/Summary.svg</file>
+        <file alias="AZSHIELD_ICON/Frame.svg">resources/AZSHIELD_ICON/Frame.svg</file>
+        <file alias="AZSHIELD_ICON/Radio.svg">resources/AZSHIELD_ICON/Radio.svg</file>
+        <file alias="AZSHIELD_ICON/joystick.svg">resources/AZSHIELD_ICON/joystick.svg</file>
+        <file alias="AZSHIELD_ICON/FlightModes.svg">resources/AZSHIELD_ICON/FlightModes.svg</file>
+        <file alias="AZSHIELD_ICON/hazirliq.svg">resources/AZSHIELD_ICON/hazirliq.svg</file>
+        <file alias="AZSHIELD_ICON/Power.svg">resources/AZSHIELD_ICON/Power.svg</file>
+        <file alias="AZSHIELD_ICON/Motors.svg">resources/AZSHIELD_ICON/Motors.svg</file>
+        <file alias="AZSHIELD_ICON/Safety.svg">resources/AZSHIELD_ICON/Safety.svg</file>
+        <file alias="AZSHIELD_ICON/PID.svg">resources/AZSHIELD_ICON/PID.svg</file>
+        <file alias="AZSHIELD_ICON/Parameters.svg">resources/AZSHIELD_ICON/Parameters.svg</file>
+        <file alias="AZSHIELD_ICON/Firmware.svg">resources/AZSHIELD_ICON/Firmware.svg</file>
+
+        <!-- Summary-də istifadə edirsənsə -->
+        <file alias="AZSHIELD_ICON/bx_error.svg">resources/AZSHIELD_ICON/bx_error.svg</file>
+    </qresource>
+
+    <qresource prefix="/res/firmware">
+        <file alias="3drradio.png">resources/firmware/3drradio.png</file>
+        <file alias="apm.png">resources/firmware/apm.png</file>
+        <file alias="px4.png">resources/firmware/px4.png</file>
+    </qresource>
+
+    <qresource prefix="/res/calibration">
+        <file alias="accel_back.png">resources/calibration/accel_back.png</file>
+        <file alias="accel_down.png">resources/calibration/accel_down.png</file>
+        <file alias="accel_front.png">resources/calibration/accel_front.png</file>
+        <file alias="accel_left.png">resources/calibration/accel_left.png</file>
+        <file alias="accel_right.png">resources/calibration/accel_right.png</file>
+        <file alias="accel_up.png">resources/calibration/accel_up.png</file>
+    </qresource>
+
+    <qresource prefix="/qml/QGroundControl/AutoPilotPlugins/Common/calibration/mode1">
+        <file alias="radioCenter.png">resources/calibration/mode1/radioCenter.png</file>
+        <file alias="radioHome.png">resources/calibration/mode1/radioHome.png</file>
+        <file alias="radioPitchDown.png">resources/calibration/mode1/radioPitchDown.png</file>
+        <file alias="radioPitchUp.png">resources/calibration/mode1/radioPitchUp.png</file>
+        <file alias="radioRollLeft.png">resources/calibration/mode1/radioRollLeft.png</file>
+        <file alias="radioRollRight.png">resources/calibration/mode1/radioRollRight.png</file>
+        <file alias="radioSwitchMinMax.png">resources/calibration/mode1/radioSwitchMinMax.png</file>
+        <file alias="radioThrottleDown.png">resources/calibration/mode1/radioThrottleDown.png</file>
+        <file alias="radioThrottleUp.png">resources/calibration/mode1/radioThrottleUp.png</file>
+        <file alias="radioYawLeft.png">resources/calibration/mode1/radioYawLeft.png</file>
+        <file alias="radioYawRight.png">resources/calibration/mode1/radioYawRight.png</file>
+    </qresource>
+
+    <qresource prefix="/qml/QGroundControl/AutoPilotPlugins/Common/calibration/mode2">
+        <file alias="radioCenter.png">resources/calibration/mode2/radioCenter.png</file>
+        <file alias="radioHome.png">resources/calibration/mode2/radioHome.png</file>
+        <file alias="radioPitchDown.png">resources/calibration/mode2/radioPitchDown.png</file>
+        <file alias="radioPitchUp.png">resources/calibration/mode2/radioPitchUp.png</file>
+        <file alias="radioRollLeft.png">resources/calibration/mode2/radioRollLeft.png</file>
+        <file alias="radioRollRight.png">resources/calibration/mode2/radioRollRight.png</file>
+        <file alias="radioSwitchMinMax.png">resources/calibration/mode2/radioSwitchMinMax.png</file>
+        <file alias="radioThrottleDown.png">resources/calibration/mode2/radioThrottleDown.png</file>
+        <file alias="radioThrottleUp.png">resources/calibration/mode2/radioThrottleUp.png</file>
+        <file alias="radioYawLeft.png">resources/calibration/mode2/radioYawLeft.png</file>
+        <file alias="radioYawRight.png">resources/calibration/mode2/radioYawRight.png</file>
+    </qresource>
+
+    <qresource prefix="/res/audio">
+        <file alias="Alert">resources/audio/alert.wav</file>
+    </qresource>
+
+    <qresource prefix="/opengl">
+        <file>resources/opengl/buglist.json</file>
+    </qresource>
+
+    <qresource prefix="/qml">
+        <!-- Custom pages for SideMenu -->
+        <file alias="QGroundControl/Tenzimlemeler.qml">src/UI/Tenzimlemeler.qml</file>
+        <file alias="QGroundControl/Qeyd_Analizi.qml">src/UI/Qeyd_Analizi.qml</file>
+
+        <!-- Əsas container -->
+        <file alias="QGroundControl/SideMenu_AparatQurgusu.qml">src/UI/SideMenu_AparatQurgusu.qml</file>
+
+        <!-- SideMenu içi səhifələr (Android-də "No such file" olmasın deyə mütləq əlavə olunmalıdır) -->
+        <file alias="QGroundControl/SideMenu_Summary.qml">src/UI/SideMenu_Summary.qml</file>
+        <file alias="QGroundControl/SideMenu_Cercive.qml">src/UI/SideMenu_Cercive.qml</file>
+        <file alias="QGroundControl/SideMenu_Radio.qml">src/UI/SideMenu_Radio.qml</file>
+        <file alias="QGroundControl/SideMenu_Joystick.qml">src/UI/SideMenu_Joystick.qml</file>
+        <file alias="QGroundControl/SideMenu_FlightMode.qml">src/UI/SideMenu_FlightMode.qml</file>
+        <file alias="QGroundControl/SideMenu_Sensors.qml">src/UI/SideMenu_Sensors.qml</file>
+        <file alias="QGroundControl/SideMenu_Enerji.qml">src/UI/SideMenu_Enerji.qml</file>
+        <file alias="QGroundControl/SideMenu_Motors.qml">src/UI/SideMenu_Motors.qml</file>
+        <file alias="QGroundControl/SideMenu_Tehlukesizlik.qml">src/UI/SideMenu_Tehlukesizlik.qml</file>
+        <file alias="QGroundControl/SideMenu_PIDTuning.qml">src/UI/SideMenu_PIDTuning.qml</file>
+        <file alias="QGroundControl/Side_Parameter.qml">src/UI/Side_Parameter.qml</file>
+        <file alias="QGroundControl/Side_Proqram_Teminati.qml">src/UI/Side_Proqram_Teminati.qml</file>
+
+<file alias="QGroundControl/SerialSettings.qml">src/UI/SerialSettings.qml</file>
+
+
+<file>src/UI/Qeyd_Analizi.qml</file>
+<file>src/UI/Log_Download.qml</file>
+<file>src/UI/GeoTag.qml</file>
+<file>src/UI/MAXLink_Console.qml</file>
+<file>src/UI/MAXLink_Inspector.qml</file>
+<file>src/UI/Vibration.qml</file>
+
+<file alias="QGroundControl/UI/TopStatusPanel_Battery_Settings.qml">src/UI/TopStatusPanel_Battery_Settings.qml</file>
+
+
+
+
+<file alias="QGroundControl/UI/TopStatusPanel_Telemetry.qml">src/UI/TopStatusPanel_Telemetry.qml</file>
+    <file alias="QGroundControl/UI/TopStatusPanel_GPS.qml">src/UI/TopStatusPanel_GPS.qml</file>
+    <file alias="QGroundControl/UI/TopStatusPanel_Battery.qml">src/UI/TopStatusPanel_Battery.qml</file>
+    <file alias="QGroundControl/UI/TopStatusPanel_RCSignal.qml">src/UI/TopStatusPanel_RCSignal.qml</file>
+    <file alias="QGroundControl/UI/TopStatusPanel_UcusRejimi.qml">src/UI/TopStatusPanel_UcusRejimi.qml</file>
+
+<file alias="QGroundControl/UI/TopStatusMessage.qml">src/UI/TopStatusMessage.qml</file>
+
+
+
+<!-- Tenzimlemeler içi səhifələr -->
+<file alias="QGroundControl/General_Settings.qml">src/UI/General_Settings.qml</file>
+<file alias="QGroundControl/Fly_ViewSettings.qml">src/UI/Fly_ViewSettings.qml</file>
+<file alias="QGroundControl/AppSettings_PlanView.qml">src/UI/AppSettings_PlanView.qml</file>
+<file alias="QGroundControl/AppSetting_VideoSettings.qml">src/UI/AppSetting_VideoSettings.qml</file>
+<file alias="QGroundControl/NTRIP_Settings.qml">src/UI/NTRIP_Settings.qml</file>
+<file alias="QGroundControl/Telemetry_Settings.qml">src/UI/Telemetry_Settings.qml</file>
+<file alias="QGroundControl/ADSBServer.qml">src/UI/ADSBServer.qml</file>
+<file alias="QGroundControl/Comm_links.qml">src/UI/Comm_links.qml</file>
+<file alias="QGroundControl/AppSettings_MapSettings.qml">src/UI/AppSettings_MapSettings.qml</file>
+<file alias="QGroundControl/PX4LogTransfer_Settings.qml">src/UI/PX4LogTransfer_Settings.qml</file>
+<file alias="QGroundControl/AppSettings_RemoteIdSettings.qml">src/UI/AppSettings_RemoteIdSettings.qml</file>
+<file alias="QGroundControl/Console.qml">src/UI/Console.qml</file>
+<file alias="QGroundControl/AppHelp.qml">src/UI/AppHelp.qml</file>
+
+    </qresource>
+
+    <qresource prefix="/gimbal">
+        <file alias="payload.svg">resources/gimbal/payload.svg</file>
+    </qresource>
+
+    <qresource prefix="/gcscontrolIndicator">
+        <file alias="gcscontrol_device.svg">resources/gcscontrolIndicator/gcscontrol_device.svg</file>
+        <file alias="gcscontrol_gcs.svg">resources/gcscontrolIndicator/gcscontrol_gcs.svg</file>
+        <file alias="gcscontrol_line.svg">resources/gcscontrolIndicator/gcscontrol_line.svg</file>
+    </qresource>
+</RCC>

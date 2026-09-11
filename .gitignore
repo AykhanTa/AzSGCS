@@ -1,0 +1,11 @@
+build/
+build-*/
+.cache/
+.ccache/
+.qtcreator/
+*.user
+*.user.*
+android/.gradle/
+*.autosave
+*.ninja_deps
+*.ninja_log

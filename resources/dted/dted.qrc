@@ -1,0 +1,29 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/dted">
+    <file>E44_N38.dt2</file>
+    <file>E44_N39.dt2</file>
+    <file>E44_N40.dt2</file>
+    <file>E44_N41.dt2</file>
+    <file>E45_N38.dt2</file>
+    <file>E45_N39.dt2</file>
+    <file>E45_N40.dt2</file>
+    <file>E45_N41.dt2</file>
+    <file>E46_N38.dt2</file>
+    <file>E46_N39.dt2</file>
+    <file>E46_N40.dt2</file>
+    <file>E46_N41.dt2</file>
+    <file>E47_N38.dt2</file>
+    <file>E47_N39.dt2</file>
+    <file>E47_N40.dt2</file>
+    <file>E47_N41.dt2</file>
+    <file>E48_N38.dt2</file>
+    <file>E48_N39.dt2</file>
+    <file>E48_N40.dt2</file>
+    <file>E48_N41.dt2</file>
+    <file>E49_N38.dt2</file>
+    <file>E49_N39.dt2</file>
+    <file>E49_N40.dt2</file>
+    <file>E49_N41.dt2</file>
+    <file>E50_N40.dt2</file>
+</qresource>
+</RCC>

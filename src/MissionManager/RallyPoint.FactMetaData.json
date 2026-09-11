@@ -1,0 +1,27 @@
+{
+    "version":      1,
+    "fileType":  "FactMetaData",
+    "QGC.MetaData.Facts":
+[
+{
+    "name":             "Enlik",
+    "shortDesc": "Latitude of rally point position",
+    "type":             "double",
+    "decimalPlaces":    7
+},
+{
+    "name":             "Uzunluq",
+    "shortDesc": "Longitude of rally point position",
+    "type":             "double",
+    "decimalPlaces":    7
+},
+{
+    "name":             "Nisbi Hündürlük",
+    "shortDesc": "Altitude of rally point position (home relative)",
+    "type":             "double",
+    "decimalPlaces":    2,
+    "units":            "m",
+    "default":     0.0
+}
+]
+}
