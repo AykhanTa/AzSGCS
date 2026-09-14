@@ -50,6 +50,12 @@ target_include_directories(${CMAKE_PROJECT_NAME}
 
 #===========================================================================#
 
+# DbgHelp backs the symbolised stack trace the Windows unhandled-exception filter
+# prints in Platform.cc.
+if(WIN32)
+    target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE dbghelp)
+endif()
+
 add_subdirectory(Audio)
 add_subdirectory(Compression)
 add_subdirectory(Geo)
