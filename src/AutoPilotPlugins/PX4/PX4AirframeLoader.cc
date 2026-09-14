@@ -188,5 +188,43 @@ void PX4AirframeLoader::loadAirframeMetaData(void)
         xml.readNext();
     }
 
+    _insertCustomAirframes();
+
     _airframeMetaDataLoaded = true;
+}
+
+/// AzShield ships artwork for airframes that fly a stock PX4 configuration under their own name.
+///
+/// They are added here rather than in AirframeFactMetaData.xml because that file is only the
+/// fallback: flashing firmware from within the app caches the firmware's own airframe meta data
+/// (see FirmwareImage) and loadAirframeMetaData() prefers it, which would silently drop anything
+/// we had added to the bundled resource.
+void PX4AirframeLoader::_insertCustomAirframes(void)
+{
+    struct CustomAirframe_t {
+        const char *group;          ///< Card title, and the key AirframeComponentAirframes groups on
+        const char *image;          ///< Basename of the artwork under :/qmlimages/Airframe/
+        const char *name;           ///< Entry shown in the card's combo box
+        int         autostartId;    ///< SYS_AUTOSTART value written to the vehicle
+    };
+
+    // These share the autostart id of the stock configuration they are a variant of, so that
+    // selecting one flashes exactly the same parameters.
+    static const CustomAirframe_t rgCustomAirframes[] = {
+        { "AzShield Wing", "AzShieldWing", "AzShield Flying Wing", 3000 },  // "Generic Flying Wing"
+    };
+
+    for (const CustomAirframe_t &custom : rgCustomAirframes) {
+        QString group = QString::fromLatin1(custom.group);
+        if (AirframeComponentAirframes::get().contains(group)) {
+            // Already supplied by the meta data file
+            continue;
+        }
+
+        QString image = QString::fromLatin1(custom.image);
+        QString name = QString::fromLatin1(custom.name);
+        AirframeComponentAirframes::insert(group, image, name, custom.autostartId);
+
+        qCDebug(PX4AirframeLoaderLog) << "Added custom airframe group:" << group << "id:" << custom.autostartId;
+    }
 }

@@ -336,14 +336,25 @@ Prosesi başa çatdırmaq üçün təyyarəniz də yenidən işə salınacaq."),
                         ButtonGroup { id: airframeTypeExclusive }
 
                         Repeater {
-                            model: {
-                                var filteredModels = []
-                                var allTypes = controller.airframeTypes
+                            // Cards shown on this page, in the order they are listed here.
+                            // controller.airframeTypes is sorted alphabetically, so picking by name
+                            // keeps the layout stable no matter what a new entry is called.
+                            readonly property var _shownAirframeTypes: [
+                                "Flying Wing",
+                                "AzShield Wing",
+                                "Quadrotor x"
+                            ]
 
-                                for (var i = 0; i < allTypes.length; i++) {
-                                    var airframeType = allTypes[i]
-                                    if (airframeType.name && airframeType.name.includes("Flying Wing") || airframeType.name.includes("Quadrotor x")) {
-                                        filteredModels.push(airframeType)
+                            model: {
+                                var allTypes = controller.airframeTypes
+                                var filteredModels = []
+
+                                for (var a = 0; a < _shownAirframeTypes.length; a++) {
+                                    for (var i = 0; i < allTypes.length; i++) {
+                                        if (allTypes[i].name === _shownAirframeTypes[a]) {
+                                            filteredModels.push(allTypes[i])
+                                            break
+                                        }
                                     }
                                 }
                                 return (filteredModels.length > 0) ? filteredModels : allTypes

@@ -39,6 +39,9 @@ public:
     static QString aiframeMetaDataFile(void);
 
 private:
+    /// Adds the branded airframes which are not part of the PX4 firmware meta data
+    static void _insertCustomAirframes(void);
+
     enum {
         XmlStateNone,
         XmlStateFoundAirframes,

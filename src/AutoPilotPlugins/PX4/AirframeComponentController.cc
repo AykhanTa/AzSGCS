@@ -55,7 +55,12 @@ AirframeComponentController::AirframeComponentController(void) :
             Q_CHECK_PTR(pInfo);
 
             if (_autostartId == pInfo->autostartId) {
-                if (autostartFound) {
+                // Branded airframes deliberately share an autostart id with the stock configuration
+                // they are a variant of (see PX4AirframeLoader::_insertCustomAirframes), so a repeat
+                // across groups is expected. Only a repeat within one group is a meta data error.
+                // The vehicle cannot tell us which variant was picked, so the group visited last
+                // wins; group order is alphabetical, which leaves the stock "Flying Wing" selected.
+                if (autostartFound && (_currentAirframeType == pType->name)) {
                     qWarning() << "AirframeComponentController::AirframeComponentController duplicate ids found:" << _autostartId;
                 }
                 autostartFound = true;
