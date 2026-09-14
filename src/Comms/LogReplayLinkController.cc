@@ -63,6 +63,14 @@ void LogReplayLinkController::setLink(LogReplayLink *link)
 
 void LogReplayLinkController::setIsPlaying(bool isPlaying) const
 {
+    // QML writes this property while no replay link is attached -- setLink() emits
+    // isPlayingChanged/percentCompleteChanged as it tears the old link down, and the
+    // bindings watching those write straight back. Without the guard that dereferences
+    // a null _link and takes the process down.
+    if (!_link) {
+        return;
+    }
+
     if (isPlaying) {
         _link->play();
     } else {
@@ -72,6 +80,10 @@ void LogReplayLinkController::setIsPlaying(bool isPlaying) const
 
 void LogReplayLinkController::setPercentComplete(qreal percentComplete) const
 {
+    if (!_link) {
+        return;
+    }
+
     _link->movePlayhead(percentComplete);
 }
 
