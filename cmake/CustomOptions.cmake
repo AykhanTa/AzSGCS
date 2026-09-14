@@ -59,8 +59,12 @@ set(QT_ANDROID_DEPLOYMENT_TYPE "" CACHE STRING "Forces Signing if Set to Release
 option(QT_ANDROID_SIGN_APK "Enable Signing APK" OFF)
 option(QT_ANDROID_SIGN_AAB "Enable Signing AAB" OFF)
 option(QT_USE_TARGET_ANDROID_BUILD_DIR "Use Target Android Build Dir" OFF)
-set(QGC_QT_MINIMUM_VERSION "6.8.3" CACHE STRING "Minimum Supported Qt Version")
-set(QGC_QT_MAXIMUM_VERSION "6.8.3" CACHE STRING "Maximum Supported Qt Version")
+# Qt 6.11 is required by the Log Viewer: its charts use QtGraphs GraphsView::plotArea and
+# per-series axisX/axisY, neither of which exists in 6.8. Building against 6.8 still compiles
+# and links, but leaves the charts broken at runtime -- so this is a hard requirement rather
+# than a floor, to fail loudly at configure time instead of silently in the UI.
+set(QGC_QT_MINIMUM_VERSION "6.11.0" CACHE STRING "Minimum Supported Qt Version")
+set(QGC_QT_MAXIMUM_VERSION "6.11.1" CACHE STRING "Maximum Supported Qt Version")
 set(QGC_QT_ANDROID_MIN_SDK_VERSION "28" CACHE STRING "Android Min SDK Version")
 
 # MacOS

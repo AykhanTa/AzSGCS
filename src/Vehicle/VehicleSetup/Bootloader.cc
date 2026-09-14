@@ -651,7 +651,7 @@ bool Bootloader::_ihxVerifyBytes(const FirmwareImage* image)
             
             for (int i=0; i<bytesToRead; i++) {
                 if ((uint8_t)imageBytes[bytesIndex + i] != readBuf[i]) {
-                    _errorString = tr("Compare failed: expected(0x%1) actual(0x%2) at address: 0x%3").arg(imageBytes[bytesIndex + i], 2, 16, QLatin1Char('0')).arg(readBuf[i], 2, 16, QLatin1Char('0')).arg(readAddress + i, 8, 16, QLatin1Char('0'));
+                    _errorString = tr("Compare failed: expected(0x%1) actual(0x%2) at address: 0x%3").arg(static_cast<uint8_t>(imageBytes[bytesIndex + i]), 2, 16, QLatin1Char('0')).arg(readBuf[i], 2, 16, QLatin1Char('0')).arg(readAddress + i, 8, 16, QLatin1Char('0'));
                     return false;
                 }
             }

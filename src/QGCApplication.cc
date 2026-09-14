@@ -642,13 +642,25 @@ bool QGCApplication::compressEvent(QEvent *event, QObject *receiver, QPostEventL
         return QApplication::compressEvent(event, receiver, postedEvents);
     }
 
+    // QMetaCallEvent::id() was public through Qt 6.10 but removed in 6.11, where the
+    // same values remain reachable through the now-protected Data member.
+#if QT_VERSION >= QT_VERSION_CHECK(6, 11, 0)
+    struct MetaCallHelper : public QMetaCallEvent {
+        int id() const { return d.method_offset_ + d.method_relative_; }
+    };
+    const auto methodId = [](const QMetaCallEvent *e) { return static_cast<const MetaCallHelper*>(e)->id(); };
+#else
+    const auto methodId = [](const QMetaCallEvent *e) { return e->id(); };
+#endif
+
     for (QPostEventList::iterator it = postedEvents->begin(); it != postedEvents->end(); ++it) {
         QPostEvent &cur = *it;
         if (cur.receiver != receiver || cur.event == 0 || cur.event->type() != event->type()) {
             continue;
         }
         const QMetaCallEvent *cur_mce = static_cast<QMetaCallEvent*>(cur.event);
-        if (cur_mce->sender() != mce->sender() || cur_mce->signalId() != mce->signalId() || cur_mce->id() != mce->id()) {
+        if (cur_mce->sender() != mce->sender() || cur_mce->signalId() != mce->signalId() ||
+            methodId(cur_mce) != methodId(mce)) {
             continue;
         }
         /* Keep The Newest Call */

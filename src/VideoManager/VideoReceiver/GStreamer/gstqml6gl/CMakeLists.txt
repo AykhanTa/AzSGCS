@@ -194,3 +194,14 @@ target_compile_definitions(gstqml6gl
         HAVE_QT_QPA_HEADER
         QT_QPA_HEADER=<QtGui/qpa/qplatformnativeinterface.h>
 )
+
+# GStreamer's gstmacros.h does `#define restrict __restrict` on MSVC, and gst/gst.h is
+# force-included here via the precompiled header — so it lands before every Qt header.
+# Qt 6.9+ spells Q_DECL_MALLOCLIKE as __declspec(restrict), which the macro then rewrites
+# to the invalid __declspec(__restrict) (error C2485). Defining `restrict` to itself
+# satisfies gstmacros.h's `!defined(restrict)` guard so it skips its own definition, and
+# leaves __declspec(restrict) intact. Safe on older Qt too: these sources never use
+# `restrict` as a qualifier.
+if(MSVC)
+    target_compile_definitions(gstqml6gl PRIVATE restrict=restrict)
+endif()

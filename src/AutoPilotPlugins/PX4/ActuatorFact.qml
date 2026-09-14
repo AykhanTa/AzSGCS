@@ -13,8 +13,13 @@ Loader {
 
 	// Loader daxildəki elementin ölçüsünü layout-a ötürsün — əks halda combo
 	// çox dar render olunub (PWM/DShot) yazıları oxunmurdu.
-	implicitWidth:  item ? item.implicitWidth  : 0
-	implicitHeight: item ? item.implicitHeight : 0
+	//
+	// Qt 6.11 marked QQuickImplicitSizeItem::implicitWidth/implicitHeight as OVERRIDE,
+	// which finally makes the read-only redeclaration shadow the writable QQuickItem
+	// ones -- assigning them here is a hard error now. Every use site is inside a
+	// Layout, so drive the layout directly instead; that is what it reads anyway.
+	Layout.preferredWidth:  item ? item.implicitWidth  : 0
+	Layout.preferredHeight: item ? item.implicitHeight : 0
 
 	Component {
 		id: factComboBox

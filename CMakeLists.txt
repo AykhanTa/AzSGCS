@@ -113,6 +113,7 @@ find_package(Qt6
         Concurrent
         Core
         Core5Compat
+        Graphs
         Gui
         LinguistTools
         Location
@@ -131,6 +132,7 @@ find_package(Qt6
         Widgets
         Xml
     OPTIONAL_COMPONENTS
+        LocationPrivate
         Bluetooth
         HttpServer
         MultimediaQuickPrivate
