@@ -23,6 +23,7 @@
 #include "FlightModeSettings.h"
 #include "FlyViewSettings.h"
 #include "GimbalControllerSettings.h"
+#include "LogViewerSettings.h"
 #include "MapsSettings.h"
 #include "NTRIPSettings.h"
 #include "OfflineMapsSettings.h"
@@ -77,6 +78,7 @@ void SettingsManager::init()
     _flightModeSettings = new FlightModeSettings(this);
     _flyViewSettings = new FlyViewSettings(this);
     _gimbalControllerSettings = new GimbalControllerSettings(this);
+    _logViewerSettings = new LogViewerSettings(this);
     _mapsSettings = new MapsSettings(this);
     _ntripSettings = new NTRIPSettings(this);
     _offlineMapsSettings = new OfflineMapsSettings(this);
@@ -104,6 +106,7 @@ FlightMapSettings *SettingsManager::flightMapSettings() const { return _flightMa
 FlightModeSettings *SettingsManager::flightModeSettings() const { return _flightModeSettings; }
 FlyViewSettings *SettingsManager::flyViewSettings() const { return _flyViewSettings; }
 GimbalControllerSettings *SettingsManager::gimbalControllerSettings() const { return _gimbalControllerSettings; }
+LogViewerSettings *SettingsManager::logViewerSettings() const { return _logViewerSettings; }
 MapsSettings *SettingsManager::mapsSettings() const { return _mapsSettings; }
 NTRIPSettings *SettingsManager::ntripSettings() const { return _ntripSettings; }
 OfflineMapsSettings *SettingsManager::offlineMapsSettings() const { return _offlineMapsSettings; }

@@ -24,6 +24,7 @@ class FirmwareUpgradeSettings;
 class FlightMapSettings;
 class FlightModeSettings;
 class FlyViewSettings;
+class LogViewerSettings;
 class GimbalControllerSettings;
 class MapsSettings;
 class NTRIPSettings;
@@ -57,6 +58,7 @@ class SettingsManager : public QObject
     Q_MOC_INCLUDE("FlightMapSettings.h")
     Q_MOC_INCLUDE("FlightModeSettings.h")
     Q_MOC_INCLUDE("FlyViewSettings.h")
+    Q_MOC_INCLUDE("LogViewerSettings.h")
     Q_MOC_INCLUDE("GimbalControllerSettings.h")
     Q_MOC_INCLUDE("MapsSettings.h")
     Q_MOC_INCLUDE("NTRIPSettings.h")
@@ -84,6 +86,7 @@ class SettingsManager : public QObject
     Q_PROPERTY(QObject *flightModeSettings              READ flightModeSettings             CONSTANT)
     Q_PROPERTY(QObject *flyViewSettings                 READ flyViewSettings                CONSTANT)
     Q_PROPERTY(QObject *gimbalControllerSettings        READ gimbalControllerSettings       CONSTANT)
+    Q_PROPERTY(QObject *logViewerSettings               READ logViewerSettings              CONSTANT)
     Q_PROPERTY(QObject *mapsSettings                    READ mapsSettings                   CONSTANT)
     Q_PROPERTY(QObject *ntripSettings                   READ ntripSettings                  CONSTANT)
     Q_PROPERTY(QObject *offlineMapsSettings             READ offlineMapsSettings            CONSTANT)
@@ -119,6 +122,7 @@ public:
     FlightModeSettings *flightModeSettings() const;
     FlyViewSettings *flyViewSettings() const;
     GimbalControllerSettings *gimbalControllerSettings() const;
+    LogViewerSettings *logViewerSettings() const;
     MapsSettings *mapsSettings() const;
     NTRIPSettings *ntripSettings() const;
     OfflineMapsSettings *offlineMapsSettings() const;
@@ -147,6 +151,7 @@ private:
     FlightModeSettings *_flightModeSettings = nullptr;
     FlyViewSettings *_flyViewSettings = nullptr;
     GimbalControllerSettings *_gimbalControllerSettings = nullptr;
+    LogViewerSettings *_logViewerSettings = nullptr;
     MapsSettings *_mapsSettings = nullptr;
     NTRIPSettings *_ntripSettings = nullptr;
     OfflineMapsSettings *_offlineMapsSettings = nullptr;

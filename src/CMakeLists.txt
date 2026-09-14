@@ -68,6 +68,7 @@ qt_add_qml_module(QGroundControlModule
     QML_FILES UI/Qeyd_Analizi.qml
     QML_FILES UI/GeoTag.qml
     QML_FILES UI/Log_Download.qml
+    QML_FILES UI/LogViewer_Page.qml
     QML_FILES UI/MAXLink_Console.qml
     QML_FILES UI/MAXLink_Inspector.qml
     QML_FILES UI/Vibration.qml

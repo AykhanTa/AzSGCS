@@ -30,6 +30,8 @@ target_sources(${CMAKE_PROJECT_NAME}
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
+add_subdirectory(LogViewer)
+
 qt_add_library(AnalyzeViewModule STATIC)
 
 qt_add_qml_module(AnalyzeViewModule
@@ -48,10 +50,12 @@ qt_add_qml_module(AnalyzeViewModule
 
 #===========================================================================#
 
+# Pinned rather than tracking main: an upstream change to ulog_cpp would otherwise
+# land in a clean build with no corresponding commit here.
 CPMAddPackage(
     NAME ulog_cpp
     GITHUB_REPOSITORY PX4/ulog_cpp
-    GIT_TAG main
+    GIT_TAG v1.0.1
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")

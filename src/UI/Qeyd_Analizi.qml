@@ -248,9 +248,10 @@ Rectangle {
     ListModel {
         id: menuModel
         ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appSet.svg";       textLabel: qsTr("Log Yükləmə");       page: "Log_Download.qml";      idx: 0 }
-        ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appFly.svg";       textLabel: qsTr("GeoTag Şəkillər");    page: "GeoTag.qml";            idx: 1 }
-        ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appPlan.svg";      textLabel: qsTr("MAVLink Konsol");     page: "MAXLink_Console.qml";   idx: 2 }
-        ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appVideo.svg";     textLabel: qsTr("MAVLink Inspector");  page: "MAXLink_Inspector.qml"; idx: 3 }
-        ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appTelemetr.svg";  textLabel: qsTr("Vibrasiya");          page: "Vibration.qml";         idx: 4 }
+        ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/Log_Analysis.svg"; textLabel: qsTr("Log Baxıcısı");       page: "LogViewer_Page.qml";    idx: 1 }
+        ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appFly.svg";       textLabel: qsTr("GeoTag Şəkillər");    page: "GeoTag.qml";            idx: 2 }
+        ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appPlan.svg";      textLabel: qsTr("MAVLink Konsol");     page: "MAXLink_Console.qml";   idx: 3 }
+        ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appVideo.svg";     textLabel: qsTr("MAVLink Inspector");  page: "MAXLink_Inspector.qml"; idx: 4 }
+        ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appTelemetr.svg";  textLabel: qsTr("Vibrasiya");          page: "Vibration.qml";         idx: 5 }
     }
 }

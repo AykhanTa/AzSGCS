@@ -22,6 +22,8 @@ target_sources(${CMAKE_PROJECT_NAME}
         FlyViewSettings.h
         GimbalControllerSettings.cc
         GimbalControllerSettings.h
+        LogViewerSettings.cc
+        LogViewerSettings.h
         MavlinkSettings.cc
         MavlinkSettings.h
         NTRIPSettings.cc
