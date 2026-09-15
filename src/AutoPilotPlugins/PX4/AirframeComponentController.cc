@@ -50,23 +50,30 @@ AirframeComponentController::AirframeComponentController(void) :
         AirframeType* airframeType = new AirframeType(pType->name, pType->imageResource, this);
         Q_CHECK_PTR(airframeType);
 
+        // Cards deliberately share an autostart id when one airframe flies another's
+        // configuration (see PX4AirframeLoader::_insertCustomAirframes), so a repeat across
+        // groups is expected and the secondary ones yield the selection. Only a repeat within
+        // one group is a meta data error, which is what this counts.
+        int matchesInGroup = 0;
+
         for (int index = 0; index < pType->rgAirframeInfo.count(); index++) {
             const AirframeComponentAirframes::AirframeInfo_t* pInfo = pType->rgAirframeInfo.at(index);
             Q_CHECK_PTR(pInfo);
 
             if (_autostartId == pInfo->autostartId) {
-                // Branded airframes deliberately share an autostart id with the stock configuration
-                // they are a variant of (see PX4AirframeLoader::_insertCustomAirframes), so a repeat
-                // across groups is expected. Only a repeat within one group is a meta data error.
-                // The vehicle cannot tell us which variant was picked, so the group visited last
-                // wins; group order is alphabetical, which leaves the stock "Flying Wing" selected.
-                if (autostartFound && (_currentAirframeType == pType->name)) {
+                matchesInGroup++;
+                if (matchesInGroup > 1) {
                     qWarning() << "AirframeComponentController::AirframeComponentController duplicate ids found:" << _autostartId;
                 }
+
+                const bool claimsSelection = !autostartFound || !pType->secondary;
                 autostartFound = true;
-                _currentAirframeType = pType->name;
-                _currentVehicleName = pInfo->name;
-                _currentVehicleIndex = index;
+
+                if (claimsSelection) {
+                    _currentAirframeType = pType->name;
+                    _currentVehicleName = pInfo->name;
+                    _currentVehicleIndex = index;
+                }
             }
             airframeType->addAirframe(pInfo->name, pInfo->autostartId);
         }

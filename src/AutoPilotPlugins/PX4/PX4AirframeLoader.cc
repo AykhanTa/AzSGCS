@@ -193,38 +193,77 @@ void PX4AirframeLoader::loadAirframeMetaData(void)
     _airframeMetaDataLoaded = true;
 }
 
-/// AzShield ships artwork for airframes that fly a stock PX4 configuration under their own name.
+/// AzShield flies its own airframes on stock PX4 configurations, under their own names
+/// and artwork.
 ///
-/// They are added here rather than in AirframeFactMetaData.xml because that file is only the
-/// fallback: flashing firmware from within the app caches the firmware's own airframe meta data
-/// (see FirmwareImage) and loadAirframeMetaData() prefers it, which would silently drop anything
-/// we had added to the bundled resource.
+/// They are applied here rather than edited into AirframeFactMetaData.xml because that file is
+/// only the fallback: flashing firmware from within the app caches the firmware's own airframe
+/// meta data (see FirmwareImage) and loadAirframeMetaData() prefers it, which would silently
+/// drop anything we had changed in the bundled resource.
 void PX4AirframeLoader::_insertCustomAirframes(void)
 {
-    struct CustomAirframe_t {
-        const char *group;          ///< Card title, and the key AirframeComponentAirframes groups on
-        const char *image;          ///< Basename of the artwork under :/qmlimages/Airframe/
-        const char *name;           ///< Entry shown in the card's combo box
+    /// A stock group shown under an AzShield name. Taking the group over rather than adding a
+    /// new one keeps its autostart id and its list of models, and leaves the id unique -- with
+    /// two groups on one id, AirframeComponentController cannot tell which one a vehicle
+    /// reporting that id is running.
+    struct Rebrand_t {
+        const char *stockGroup;      ///< Group as the firmware meta data names it
+        const char *group;           ///< Name to show instead
+        const char *image;           ///< Artwork basename under :/qmlimages/Airframe/
+        const char *airframeName;    ///< Renames the combo box entry of a single-model group
+        int         keepAutostartId; ///< Narrows a multi-model group to this one; 0 keeps them all
+    };
+
+    static const Rebrand_t rgRebrands[] = {
+        { "Flying Wing",    "Qırat H10", "QiratH10", "Qırat H10", 0 },
+        { "Standard Plane", "Qırat H20", "QiratH20", "Qırat H20", 0 },
+        // Quadrotor x lists 16 models. Only the generic one (4001) is flown here, so the rest
+        // are dropped rather than offered as configurations nobody selects.
+        { "Quadrotor x",    "Boran",          "Boran",    "Quadcopter",     4001 },
+    };
+
+    /// An extra card for an airframe that flies a configuration a rebranded card already covers,
+    /// so the two flash identical parameters. These are registered as secondary: a vehicle
+    /// reports only its autostart id and cannot say which of the airframes sharing it is fitted,
+    /// and the rebranded card owns the selection rather than whichever group is visited last.
+    struct Added_t {
+        const char *group;
+        const char *image;
+        const char *name;
         int         autostartId;    ///< SYS_AUTOSTART value written to the vehicle
     };
 
-    // These share the autostart id of the stock configuration they are a variant of, so that
-    // selecting one flashes exactly the same parameters.
-    static const CustomAirframe_t rgCustomAirframes[] = {
-        { "AzShield Wing", "AzShieldWing", "AzShield Flying Wing", 3000 },  // "Generic Flying Wing"
+    static const Added_t rgAdded[] = {
+        { "Hədəf",   "Hedef",    "Hədəf",   3000 },  // as Qırat H10
+        { "Qırat H30", "QiratH30", "Qırat H30", 2100 },  // as Qırat H20
     };
 
-    for (const CustomAirframe_t &custom : rgCustomAirframes) {
-        QString group = QString::fromLatin1(custom.group);
+    for (const Rebrand_t &rebrand : rgRebrands) {
+        const QString stockGroup = QString::fromUtf8(rebrand.stockGroup);
+        const QString group = QString::fromUtf8(rebrand.group);
+        if (!AirframeComponentAirframes::get().contains(stockGroup)) {
+            qCDebug(PX4AirframeLoaderLog) << "Cannot rebrand missing airframe group:" << stockGroup;
+            continue;
+        }
+
+        AirframeComponentAirframes::rename(stockGroup, group, QString::fromUtf8(rebrand.image),
+                                           rebrand.airframeName ? QString::fromUtf8(rebrand.airframeName) : QString(),
+                                           rebrand.keepAutostartId);
+
+        qCDebug(PX4AirframeLoaderLog) << "Rebranded airframe group:" << stockGroup << "as" << group;
+    }
+
+    for (const Added_t &added : rgAdded) {
+        QString group = QString::fromUtf8(added.group);
         if (AirframeComponentAirframes::get().contains(group)) {
             // Already supplied by the meta data file
             continue;
         }
 
-        QString image = QString::fromLatin1(custom.image);
-        QString name = QString::fromLatin1(custom.name);
-        AirframeComponentAirframes::insert(group, image, name, custom.autostartId);
+        QString image = QString::fromUtf8(added.image);
+        QString name = QString::fromUtf8(added.name);
+        AirframeComponentAirframes::insert(group, image, name, added.autostartId, true /* secondary */);
 
-        qCDebug(PX4AirframeLoaderLog) << "Added custom airframe group:" << group << "id:" << custom.autostartId;
+        qCDebug(PX4AirframeLoaderLog) << "Added airframe group:" << group << "id:" << added.autostartId;
     }
 }

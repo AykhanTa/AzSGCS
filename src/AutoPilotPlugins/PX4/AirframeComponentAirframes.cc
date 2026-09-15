@@ -39,25 +39,35 @@ QMap<QString, AirframeComponentAirframes::AirframeType_t*>& AirframeComponentAir
     return rgAirframeTypes;
 }
 
-void AirframeComponentAirframes::insert(QString& group, QString& image, QString& name, int id)
+/// @return Qml url for the named artwork, falling back to the unknown-airframe image.
+static QString imageResourceForName(const QString &image)
+{
+    QString imageResource;
+
+    if (image.length() > 0) {
+        imageResource = QString(":/qmlimages/Airframe/%1.svg").arg(image);
+        if (!QFile::exists(imageResource)) {
+            imageResource.clear();
+        } else {
+            imageResource.prepend(QStringLiteral("qrc"));
+        }
+    }
+
+    if (imageResource.isEmpty()) {
+        imageResource = QString("qrc:/qmlimages/Airframe/AirframeUnknown.svg");
+    }
+
+    return imageResource;
+}
+
+void AirframeComponentAirframes::insert(QString& group, QString& image, QString& name, int id, bool secondary)
 {
     AirframeType_t *g;
     if (!rgAirframeTypes.contains(group)) {
         g = new AirframeType_t;
         g->name = group;
-
-        if (image.length() > 0) {
-            g->imageResource = QString(":/qmlimages/Airframe/%1.svg").arg(image);
-            if (!QFile::exists(g->imageResource)) {
-                g->imageResource.clear();
-            } else {
-                g->imageResource.prepend(QStringLiteral("qrc"));
-            }
-        }
-
-        if (g->imageResource.isEmpty()) {
-            g->imageResource = QString("qrc:/qmlimages/Airframe/AirframeUnknown.svg");
-        }
+        g->imageResource = imageResourceForName(image);
+        g->secondary = secondary;
 
         rgAirframeTypes.insert(group, g);
     } else {
@@ -69,6 +79,48 @@ void AirframeComponentAirframes::insert(QString& group, QString& image, QString&
     i->autostartId = id;
 
     g->rgAirframeInfo.append(i);
+}
+
+void AirframeComponentAirframes::rename(const QString &oldGroup, const QString &newGroup,
+                                        const QString &image, const QString &singleAirframeName,
+                                        int keepAutostartId)
+{
+    AirframeType_t *type = rgAirframeTypes.take(oldGroup);
+    if (!type) {
+        return;
+    }
+
+    type->name = newGroup;
+    type->imageResource = imageResourceForName(image);
+
+    if (keepAutostartId != 0) {
+        QList<AirframeInfo_t*> rgKeep;
+        QList<AirframeInfo_t*> rgDrop;
+
+        for (int index = 0; index < type->rgAirframeInfo.count(); index++) {
+            AirframeInfo_t *info = type->rgAirframeInfo.at(index);
+            if (info->autostartId == keepAutostartId) {
+                rgKeep.append(info);
+            } else {
+                rgDrop.append(info);
+            }
+        }
+
+        // Nothing is dropped when the id is not in the group, so the card keeps a usable list
+        // instead of an empty combo box.
+        if (!rgKeep.isEmpty()) {
+            for (int index = 0; index < rgDrop.count(); index++) {
+                delete rgDrop.at(index);
+            }
+            type->rgAirframeInfo = rgKeep;
+        }
+    }
+
+    if (!singleAirframeName.isEmpty() && (type->rgAirframeInfo.count() == 1)) {
+        type->rgAirframeInfo.first()->name = singleAirframeName;
+    }
+
+    rgAirframeTypes.insert(newGroup, type);
 }
 
 void AirframeComponentAirframes::clear() {

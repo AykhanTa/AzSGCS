@@ -340,9 +340,11 @@ Prosesi başa çatdırmaq üçün təyyarəniz də yenidən işə salınacaq."),
                             // controller.airframeTypes is sorted alphabetically, so picking by name
                             // keeps the layout stable no matter what a new entry is called.
                             readonly property var _shownAirframeTypes: [
-                                "Flying Wing",
-                                "AzShield Wing",
-                                "Quadrotor x"
+                                "Qırat H10",
+                                "Qırat H20",
+                                "Qırat H30",
+                                "Hədəf",
+                                "Boran"
                             ]
 
                             model: {
@@ -404,13 +406,16 @@ Prosesi başa çatdırmaq üçün təyyarəniz də yenidən işə salınacaq."),
                                     anchors.left: parent.left
                                     anchors.right: parent.right
                                     anchors.margins: 1
-                                    color: airframeCheckBox.checked ? "#557D55" : "gray"
+                                    // Dark, because the airframe artwork is drawn in mid to light
+                                    // greys -- on the light panel this used to be, the aircraft
+                                    // washed out into the background.
+                                    color: airframeCheckBox.checked ? "#2C4430" : "#2E3035"
                                     radius: 8
 
                                     Image {
                                         anchors.centerIn: parent
-                                        width: parent.width * (_compact ? 0.58 : 0.6)
-                                        height: parent.height * (_compact ? 0.78 : 0.8)
+                                        width: parent.width * (_compact ? 0.84 : 0.88)
+                                        height: parent.height * (_compact ? 0.86 : 0.9)
                                         fillMode: Image.PreserveAspectFit
                                         smooth: true
                                         mipmap: true
