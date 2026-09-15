@@ -13,6 +13,8 @@ Item {
     anchors.margins:            ScreenTools.defaultFontPixelWidth
 
     property alias  pageComponent:      pageLoader.sourceComponent
+    /// The instantiated page, so a host can talk to it before popping it out.
+    property alias  pageItem:           pageLoader.item
     property alias  pageName:           pageNameLabel.text
     property alias  pageDescription:    pageDescriptionLabel.text
     property alias  headerComponent:    headerLoader.sourceComponent

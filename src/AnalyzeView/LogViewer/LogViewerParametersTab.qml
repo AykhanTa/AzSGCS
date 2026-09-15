@@ -18,7 +18,9 @@ ColumnLayout {
     // Internal state
     // -------------------------------------------------------------------------
     property string _parameterSearchText: ""
-    property bool _showOnlyChangedParameters: true
+    /// Off by default: a freshly opened log should show everything it contains, and the
+    /// user opts in to the narrower view.
+    property bool _showOnlyChangedParameters: false
     property var _filteredParameters: []
 
     /// True when the log carries default values for at least one parameter.

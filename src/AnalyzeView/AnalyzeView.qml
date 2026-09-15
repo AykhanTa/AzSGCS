@@ -126,7 +126,7 @@ Rectangle {
 
         Connections {
             target:     panelLoader.item
-            function onPopout() { mainWindow.createrWindowedAnalyzePage(panelLoader.title, panelLoader.source) }
+            function onPopout() { mainWindow.createWindowedAnalyzePage(panelLoader.title, panelLoader.source, "") }
         }
     }
 }

@@ -13,7 +13,25 @@ AnalyzePage {
     id: logViewerPage
     pageComponent: pageComponent
     pageDescription: qsTr("DataFlash (.bin), PX4 ULog (.ulg) və telemetriya (.tlog) loglarını vahid iş axınında açır və təhlil edir.")
-    allowPopout: false
+    allowPopout: true
+
+    /// Log to open as soon as the page is up. Set by the host when this page is being
+    /// recreated inside a popout window, so the log follows the window instead of being
+    /// parsed twice or left behind in the panel.
+    property string initialLogPath: ""
+
+    /// Hands the loaded log over to a popout window: returns the path and clears this
+    /// instance, so the two never hold the same log at once.
+    ///
+    /// Returns "" when there is nothing to hand over, and also for .tlog -- a telemetry
+    /// replay owns a link in LinkManager and re-opening it elsewhere would start a second
+    /// one, so a .tlog stays where it is and the new window simply opens empty.
+    function takeLogForPopout() {
+        if (!pageItem || !pageItem.canHandOverLog()) {
+            return ""
+        }
+        return pageItem.takeLog()
+    }
 
     Component {
         id: pageComponent
@@ -35,6 +53,23 @@ AnalyzePage {
             // parseFileFinished) into partially-destroyed QML objects, causing a
             // QQmlData::disconnectNotifiers crash.
             Component.onDestruction: logParser.clear()
+
+            Component.onCompleted: {
+                if (logViewerPage.initialLogPath !== "") {
+                    loadBinFile(logViewerPage.initialLogPath)
+                }
+            }
+
+            /// See LogViewer_Page.takeLogForPopout().
+            function canHandOverLog() {
+                return logViewerController.hasLoadedLog && isFirmwareLog
+            }
+
+            function takeLog() {
+                const path = logViewerController.currentLogPath
+                clearLoadedLogState(true)
+                return path
+            }
 
             function clearLoadedLogState(clearControllerState) {
                 replayController.isPlaying = false
@@ -77,7 +112,7 @@ AnalyzePage {
                     }
 
                     if (!ok) {
-                        mainWindow.showMessageDialog(qsTr("Log Baxıcısı"), errorMessage)
+                        mainWindow.showMessageDialog(qsTr("Log Analizi"), errorMessage)
                         pendingBinFile = ""
                         return
                     }
@@ -129,7 +164,7 @@ AnalyzePage {
                     onClicked: {
                         const activeVehicle = QGroundControl.multiVehicleManager.activeVehicle
                         if (activeVehicle && !activeVehicle.isOfflineEditingVehicle) {
-                            mainWindow.showMessageDialog(qsTr("Log Baxıcısı"), qsTr("Telemetriya təkrar oynatmasından əvvəl aktiv aparat bağlantılarını kəsin."))
+                            mainWindow.showMessageDialog(qsTr("Log Analizi"), qsTr("Telemetriya təkrar oynatmasından əvvəl aktiv aparat bağlantılarını kəsin."))
                             return
                         }
                         openDialog.nameFilters = ["Telemetry Logs (*.tlog *.TLOG)"]
@@ -484,7 +519,7 @@ AnalyzePage {
                         const replayLink = QGroundControl.linkManager.startLogReplay(file)
                         if (!replayLink) {
                             mainWindow.showMessageDialog(
-                                qsTr("Log Baxıcısı"),
+                                qsTr("Log Analizi"),
                                 qsTr("Seçilmiş .tlog faylı üçün telemetriya təkrar oynatması başladıla bilmədi.")
                             )
                             close()

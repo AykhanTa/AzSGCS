@@ -25,6 +25,17 @@ Rectangle {
         }
     }
 
+    /// Menu label of the page currently on the right, used to title its popout window.
+    function currentPageTitle() {
+        for (var i = 0; i < menuModel.count; i++) {
+            var it = menuModel.get(i)
+            if (it.idx === qeydRoot.selectedIndex) {
+                return it.textLabel
+            }
+        }
+        return ""
+    }
+
     function openMenuByIdx(menuIdx) {
         qeydRoot.selectedIndex = menuIdx
 
@@ -241,6 +252,37 @@ Rectangle {
                 // ✅ default page də qrc ilə
                 source: _uiQrcBase + "Log_Download.qml"
             }
+
+            // Pages derived from AnalyzePage can ask to be moved into their own window.
+            // Pages that are not get filtered out by ignoreUnknownSignals.
+            Connections {
+                target: rightPanelLoader.item
+                ignoreUnknownSignals: true
+
+                function onPopout() {
+                    var page = rightPanelLoader.item
+                    if (!page) {
+                        return
+                    }
+
+                    // Capture before anything is torn down.
+                    var pageSource = rightPanelLoader.source
+                    var pageTitle = qeydRoot.currentPageTitle()
+
+                    // The page hands its loaded log over so the two instances never hold the
+                    // same log at once; "" means it kept it (or had none).
+                    var logPath = page.takeLogForPopout ? page.takeLogForPopout() : ""
+
+                    mainWindow.createWindowedAnalyzePage(pageTitle, pageSource, logPath)
+
+                    if (logPath !== "") {
+                        // Rebuild the panel instance so it comes back empty rather than showing
+                        // the remains of a log that now lives in the window.
+                        rightPanelLoader.source = ""
+                        rightPanelLoader.source = pageSource
+                    }
+                }
+            }
         }
     }
 
@@ -248,7 +290,7 @@ Rectangle {
     ListModel {
         id: menuModel
         ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appSet.svg";       textLabel: qsTr("Log Yükləmə");       page: "Log_Download.qml";      idx: 0 }
-        ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/Log_Analysis.svg"; textLabel: qsTr("Log Baxıcısı");       page: "LogViewer_Page.qml";    idx: 1 }
+        ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/Log_Analysis.svg"; textLabel: qsTr("Log Analizi");       page: "LogViewer_Page.qml";    idx: 1 }
         ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appFly.svg";       textLabel: qsTr("GeoTag Şəkillər");    page: "GeoTag.qml";            idx: 2 }
         ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appPlan.svg";      textLabel: qsTr("MAVLink Konsol");     page: "MAXLink_Console.qml";   idx: 3 }
         ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appVideo.svg";     textLabel: qsTr("MAVLink Inspector");  page: "MAXLink_Inspector.qml"; idx: 4 }

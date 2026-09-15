@@ -1403,19 +1403,69 @@ ApplicationWindow {
         }
     }
 
-    function createrWindowedAnalyzePage(title, source) {
-        var windowedPage = windowedAnalyzePage.createObject(mainWindow)
-        windowedPage.title = title
-        windowedPage.source = source
+    /// Opens an Analyze page in its own top-level window.
+    ///
+    /// initialLogPath is forwarded to pages that accept one (the Log Viewer), so a log the
+    /// panel handed over is reopened here. It has to go in as an initial property rather
+    /// than be assigned afterwards: the page opens it from Component.onCompleted, which has
+    /// already run by the time createObject() returns.
+    function createWindowedAnalyzePage(title, source, initialLogPath) {
+        var component = Qt.createComponent(source)
+        if (component.status !== Component.Ready) {
+            console.warn("createWindowedAnalyzePage failed source:", source, "error:", component.errorString())
+            return
+        }
+
+        var windowedPage = windowedAnalyzePage.createObject(mainWindow, { title: title })
+        if (!windowedPage) {
+            console.warn("createWindowedAnalyzePage could not create the window for:", source)
+            return
+        }
+
+        // popped hides the page's own popout affordance -- it is already popped out.
+        var pageProperties = { popped: true }
+        // Only pages that declare it, or QML warns about assigning a missing property.
+        if (initialLogPath) {
+            pageProperties.initialLogPath = initialLogPath
+        }
+
+        var page = component.createObject(windowedPage.contentArea, pageProperties)
+        if (!page) {
+            console.warn("createWindowedAnalyzePage could not create the page:", source)
+            windowedPage.destroy()
+            return
+        }
+
+        windowedPage.visible = true
     }
 
     Component {
         id: windowedAnalyzePage
 
         Window {
-            width: ScreenTools.defaultFontPixelWidth * 100
-            height: ScreenTools.defaultFontPixelHeight * 70
-            // ... (qalan Window xüsusiyyətləri)
+            width:  ScreenTools.defaultFontPixelWidth  * 120
+            height: ScreenTools.defaultFontPixelHeight * 50
+            minimumWidth:  ScreenTools.defaultFontPixelWidth  * 70
+            minimumHeight: ScreenTools.defaultFontPixelHeight * 30
+            visible: false
+            color: qgcPal.window
+
+            property alias contentArea: contentRect
+
+            Rectangle {
+                id: contentRect
+                anchors.fill: parent
+                color: qgcPal.window
+            }
+
+            onClosing: {
+                // The page was parented here by createWindowedAnalyzePage rather than loaded,
+                // so nothing else will tear it down.
+                for (var i = contentRect.children.length - 1; i >= 0; i--) {
+                    contentRect.children[i].destroy()
+                }
+                Qt.callLater(destroy)
+            }
         }
     }
 }
