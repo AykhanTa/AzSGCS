@@ -429,50 +429,6 @@ Item {
     }
 
 
-    // Component {
-    //     id: toolbarComponent
-
-    //     PlanEditToolbar {
-    //         anchors.horizontalCenter:       mapControl.left
-    //         anchors.horizontalCenterOffset: mapControl.centerViewport.left + (mapControl.centerViewport.width / 2)
-    //         y:                              mapControl.centerViewport.top
-    //         z:                              QGroundControl.zOrderMapItems + 2
-    //         availableWidth:                 mapControl.centerViewport.width
-
-    //         QGCButton {
-    //             _horizontalPadding: 0
-    //             text:               qsTr("Basic")
-    //             visible:            !mapPolyline.traceMode
-    //             onClicked:          _resetPolyline()
-    //         }
-
-    //         QGCButton {
-    //             _horizontalPadding: 0
-    //             text:               mapPolyline.traceMode ? qsTr("Done Tracing") : qsTr("Trace")
-    //             onClicked: {
-    //                 if (mapPolyline.traceMode) {
-    //                     if (mapPolyline.count < 2) {
-    //                         _restorePreviousVertices()
-    //                     }
-    //                     mapPolyline.traceMode = false
-    //                 } else {
-    //                     _saveCurrentVertices()
-    //                     mapPolyline.traceMode = true
-    //                     mapPolyline.clear();
-    //                 }
-    //             }
-    //         }
-
-    //         QGCButton {
-    //             _horizontalPadding: 0
-    //             text:               qsTr("Load KML/SHP...")
-    //             onClicked:          kmlOrSHPLoadDialog.openForLoad()
-    //             visible:            !mapPolyline.traceMode
-    //         }
-    //     }
-    // }
-
-    // Mouse area to capture clicks for tracing a polyline
     Component {
         id:  traceMouseAreaComponent
 

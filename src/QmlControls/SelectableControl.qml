@@ -37,26 +37,6 @@ Control {
 
     property bool _showSelectionUI: false
 
-    // background: Item {
-    //     RowLayout {
-    //         id:             selectionUILayout
-    //         anchors.right:  control.selectionUIRightAnchor ? parent.right : undefined
-    //         spacing:        ScreenTools.defaultFontPixelWidth
-    //         visible:        _showSelectionUI
-
-    //         QGCButton {
-    //             onClicked:  _showSelectionUI = false
-    //             iconSource: "qrc:/InstrumentValueIcons/lock-open.svg"
-    //         }
-
-    //         FactComboBox {
-    //             fact:           selectedControl
-    //             indexModel:     false
-    //             sizeToContents: true
-    //         }
-    //     }
-    // }
-
     contentItem: Item {
         implicitWidth:  loader.item.width
         implicitHeight: loader.item.height

@@ -202,29 +202,6 @@ Rectangle {
                 font.bold: true
             }
 
-            // // sol settings
-            // Image {
-            //     source: "qrc:/res/AZSHIELD_ICON/TopStatusPanel_Settings.svg"
-            //     width: Math.max(18, Math.round(overlay._fontH * 1.3))
-            //     height: width
-            //     anchors.verticalCenter: parent.verticalCenter
-            //     anchors.left: parent.left
-            //     anchors.leftMargin: 10
-            //     fillMode: Image.PreserveAspectFit
-            //     visible: true
-
-            //     MouseArea {
-            //         anchors.fill: parent
-            //         cursorShape: Qt.PointingHandCursor
-            //         onClicked: {
-            //             if (overlay._hasSettingsLoader) {
-            //                 settingsLoader.source = "TopStatusPanel_RCSignal_Settings.qml"
-            //             }
-            //         }
-            //     }
-            // }
-
-            // sağ close
             Image {
                 source: "qrc:/res/AZSHIELD_ICON/TopStatusPanel_Cixis.svg"
                 width: Math.max(18, Math.round(overlay._fontH * 1.3))

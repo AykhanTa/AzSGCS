@@ -26,50 +26,6 @@
 
 
 
-// //     anchors.left: parent.left
-// //     anchors.leftMargin: 0
-// //     anchors.top: parent.top
-// //     anchors.topMargin: 50 // Yukarıdan 10px boşluk
-
-// //     property real extraInset:           0
-// //     property real extraValuesWidth:     _outerRadius
-
-// //     property real _outerMargin: (width * 0.05) / 2
-// //     property real _outerRadius: width / 2
-// //     property real _innerRadius: ScreenTools.defaultFontPixelHeight * 5  // 🔥 SABİT DEĞER
-
-// //     DeadMouseArea {
-// //         anchors.fill: parent
-// //     }
-
-// //     QGCAttitudeWidget {
-// //         id:                         attitude
-// //         anchors.horizontalCenter:   parent.horizontalCenter
-// //         anchors.topMargin:          _outerMargin
-// //         anchors.top:                parent.top
-// //         size:                       (_innerRadius * 2.3)+40  // 🔥 SABİT KALACAK
-// //         vehicle:                    globals.activeVehicle
-// //         transform: Translate {
-// //             x:-1
-
-// //             y: 31.5//25
-
-// //         }
-// //     }
-
-// //     QGCCompassWidget {
-// //         id:                         compass
-// //         anchors.horizontalCenter:   parent.horizontalCenter
-// //         anchors.topMargin:          _outerMargin * 2
-// //         anchors.top:                attitude.bottom
-// //         size:                       (_innerRadius * 2)+104  // 🔥 SABİT KALACAK
-// //         vehicle:                    globals.activeVehicle
-// //         transform: Translate {
-// //             y: -249//-260
-// //         }
-// //     }
-// // }
-
 
 
 
@@ -110,70 +66,6 @@
 //     readonly property real _raw: Math.min(1.0, Math.min(mainWindow.width / 1280, mainWindow.height / 720))
 //     readonly property real _shrinkFactor: Math.max(0.85, 0.92 + 0.08 * _raw)
 
-
-//     property real attitudeSize: _baseAttitudeSize * _shrinkFactor
-//     property real compassSize:  attitudeSize * _baseCompassRatio
-
-//     implicitWidth:  compassSize
-//     implicitHeight: compassSize
-//     width:  implicitWidth
-//     height: implicitHeight
-
-//     DeadMouseArea { anchors.fill: parent }
-
-//     readonly property var _v: globals.activeVehicle
-//     readonly property real _heading: _v ? _v.heading.rawValue : NaN
-
-//     QGCAttitudeWidget {
-//         id: attitude
-//         anchors.centerIn: parent
-//         size: root.attitudeSize
-//         vehicle: globals.activeVehicle
-//         z: 1
-//     }
-
-//     QGCCompassWidget {
-//         id: compass
-//         anchors.centerIn: parent
-//         size: root.compassSize
-//         vehicle: globals.activeVehicle
-//         ringOnly: true
-//         z: 2
-//     }
-
-//     // ✅ Sağ yuxarı: yalnız dərəcə (007 yox, 7° kimi)
-//     Rectangle {
-//         id: headingBox
-//         visible: _v !== null
-//         z: 10
-
-//         anchors.top: parent.top
-//         anchors.right: parent.right
-//         anchors.topMargin: Math.max(6, root.compassSize * 0.03)
-//         anchors.rightMargin: Math.max(6, root.compassSize * 0.03)
-
-//         color: "#000000"
-//         opacity: 0.85
-//         radius: 4
-//         border.color: "#FFFFFF"
-//         border.width: 1
-
-//         property string _hText: isNaN(_heading) ? "---" : (Math.round(_heading) + "°")
-
-//         width: headingLabel.contentWidth + Math.max(16, root.compassSize * 0.06)
-//         height: Math.max(26, root.compassSize * 0.10)
-
-//         QGCLabel {
-//             id: headingLabel
-//             anchors.centerIn: parent
-//             text: headingBox._hText
-//             color: "#FFFFFF"
-//             font.bold: true
-//             font.family: "Monospace"
-//             font.pixelSize: Math.max(12, root.compassSize * 0.055)
-//         }
-//     }
-// }
 
 
 

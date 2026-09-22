@@ -758,35 +758,6 @@ Rectangle {
                             implicitHeight: label.contentHeight
                             clip: true
 
-                            // QGCLabel {
-                            //     id: label
-                            //     width: column == 1 ? ScreenTools.defaultFontPixelWidth * 15 : contentWidth
-                            //     text: column == 1 ? col1String() : display
-                            //    color: column == 1 ? col1Color() : qgcPal.text
-                            //     //color:"white"
-                            //     maximumLineCount: 1
-                            //     elide: column == 1 ? Text.ElideRight : Text.ElideNone
-                            //     font.family: "Arial"
-                            //     font.pixelSize: 15
-
-                            //     function col1String() {
-                            //         if (fact.enumStrings.length === 0) {
-                            //             return fact.valueString + " " + fact.units
-                            //         }
-                            //         if (fact.bitmaskStrings.length !== 0) {
-                            //             return fact.selectedBitmaskStrings.join(',')
-                            //         }
-                            //         return fact.enumStringValue
-                            //     }
-
-                            //     function col1Color() {
-                            //         if (fact.defaultValueAvailable) {
-                            //             return fact.valueEqualsDefault ? qgcPal.text : qgcPal.warningText
-                            //         }
-                            //         return qgcPal.text
-                            //     }
-                            // }
-
 
                             QGCLabel {
                                 id: label

@@ -63,26 +63,6 @@ public:
                               idxY,
                               tmpImage);
 
-            // int startByteIdx = idxX * mapHeight + idxY;
-            // startByteIdx = startByteIdx * 4 * 4;
-            // QByteArray tmpImageData =  QByteArray::fromRawData((const char*)tmpImage.bits(), tmpImage.sizeInBytes());
-            // memcpy(mapTextureImageData.data() + startByteIdx, tmpImageData.constData(), tmpImageData.size());
-            // mapTextureImageData.replace(startByteIdx, tmpImageData.size(), tmpImageData);
-
-            // QByteArray tmpImageData =  QByteArray::fromRawData((const char*)tmpImage.bits(), tmpImage.sizeInBytes());
-            // for(int i_x=0; i_x<tmpImageData.size(); i_x+=16){
-            //     mapTextureImageData.replace(startByteIdx, 4, tmpImageData.sliced(i_x, 4));
-            //     startByteIdx+=4;
-            //     mapTextureImageData.replace(startByteIdx, 4, tmpImageData.sliced(i_x+4, 4));
-            //     startByteIdx+=4;
-            //     mapTextureImageData.replace(startByteIdx, 4, tmpImageData.sliced(i_x+8, 4));
-            //     startByteIdx+=4;
-            //     mapTextureImageData.replace(startByteIdx, 4, tmpImageData.sliced(i_x+12, 4));
-            //     startByteIdx+=4;
-            //     // mapTextureImageData.replace(startByteIdx, 4, _alphaCh);
-            //     // startByteIdx+=4;
-            // }
-            // qDebug() << startByteIdx << mapTextureImageData.size();
         }
 
         QByteArray getMapData(){

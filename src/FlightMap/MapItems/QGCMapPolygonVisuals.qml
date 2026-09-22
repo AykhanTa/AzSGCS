@@ -705,57 +705,6 @@ Item {
             }
         }
     }
-    // Component {
-    //     id: toolbarComponent
-
-    //     PlanEditToolbar {
-    //         anchors.horizontalCenter:       mapControl.left
-    //         anchors.horizontalCenterOffset: mapControl.centerViewport.left + (mapControl.centerViewport.width / 2)
-    //         y:                              mapControl.centerViewport.top
-    //         availableWidth:                 mapControl.centerViewport.width
-
-    //         QGCButton {
-    //             _horizontalPadding: 0
-    //             text:               qsTr("Basic")
-    //             visible:            !mapPolygon.traceMode
-    //             onClicked:          _resetPolygon()
-    //         }
-
-    //         QGCButton {
-    //             _horizontalPadding: 0
-    //             text:               qsTr("Circular")
-    //             visible:            !mapPolygon.traceMode
-    //             onClicked:          _resetCircle()
-    //         }
-
-    //         QGCButton {
-    //             _horizontalPadding: 0
-    //             text:               mapPolygon.traceMode ? qsTr("Done Tracing") : qsTr("Trace")
-    //             onClicked: {
-    //                 if (mapPolygon.traceMode) {
-    //                     if (mapPolygon.count < 3) {
-    //                         _restorePreviousVertices()
-    //                     }
-    //                     mapPolygon.traceMode = false
-    //                 } else {
-    //                     _saveCurrentVertices()
-    //                     _circleMode = false
-    //                     mapPolygon.traceMode = true
-    //                     mapPolygon.clear();
-    //                 }
-    //             }
-    //         }
-
-    //         QGCButton {
-    //             _horizontalPadding: 0
-    //             text:               qsTr("Load KML/SHP...")
-    //             onClicked:          kmlOrSHPLoadDialog.openForLoad()
-    //             visible:            !mapPolygon.traceMode
-    //         }
-    //     }
-    // }
-
-    // Mouse area to capture clicks for tracing a polygon
     Component {
         id:  traceMouseAreaComponent
 
