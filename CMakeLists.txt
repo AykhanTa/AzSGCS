@@ -81,7 +81,15 @@ include(Toolchain)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>")
+# Not on Android: Qt writes the app runner wrapper with configure_file, which
+# reads RUNTIME_OUTPUT_DIRECTORY literally and cannot expand $<CONFIG>, so
+# configuring fails on a path with the genex still in it. Android builds an
+# .so rather than an executable, so the per-config directory buys nothing.
+if(ANDROID)
+    set(CMAKE_PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+else()
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>")
+endif()
 
 # https://cmake.org/cmake/help/latest/policy/CMP0168.html#policy:CMP0168
 if(POLICY CMP0168)
