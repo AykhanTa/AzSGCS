@@ -81,23 +81,25 @@ Item {
 
     readonly property real _fontH: ScreenTools.defaultFontPixelHeight
     readonly property real _innerRadius: _fontH * 5
-    // The pad used to be a flat 40px, which is a third of the widget at the
-    // desktop font size and a rounding error at the tablet one, so the dial
-    // changed proportions with the DPI rather than just size.
-    readonly property real _baseAttitudeSize: (_innerRadius * 2.3) + (_fontH * 2.1)
     readonly property real _baseCompassRatio: 1.12
 
-    // Shrink a little in a cramped window. Measured in font heights, not raw
-    // pixels: 1280x720 of a dense display is physically small but read as a full
-    // size window, so the widget stayed large exactly where it had least room.
-    // 67 x 38 font heights is the same window as 1280x720 at the desktop font.
-    readonly property real _raw: Math.min(1.0,
-                                          Math.min(mainWindow.width  / (_fontH * 67),
-                                                   mainWindow.height / (_fontH * 38)))
-    readonly property real _shrinkFactor: 0.92 + 0.08 * _raw
+    // Two sizes, and the smaller wins.
+    //
+    // What the dial wants is tied to the font, so the numbers drawn inside it
+    // stay legible. The pad used to be a flat 40px, which is a sixth of the dial
+    // on a desktop and nothing on a dense display, so the dial changed shape with
+    // the DPI rather than just size.
+    readonly property real _preferredSize: ((_innerRadius * 2.3) + (_fontH * 2.1)) * _baseCompassRatio
 
-    property real attitudeSize: _baseAttitudeSize * _shrinkFactor
-    property real compassSize:  attitudeSize * _baseCompassRatio
+    // What it can have is a share of the window, because the map underneath is
+    // the point of the view. This matters on a tablet, where high density means
+    // few logical pixels to lay out in: the G30 is 1920x1200 at 2.25x, so QML
+    // sees 853x533 and the font-derived size alone took over a third of the
+    // width. On a desktop window there is room to spare and this never binds.
+    readonly property real _maxSize: Math.min(mainWindow.width * 0.28, mainWindow.height * 0.42)
+
+    property real compassSize:  Math.max(_fontH * 6, Math.min(_preferredSize, _maxSize))
+    property real attitudeSize: compassSize / _baseCompassRatio
 
     implicitWidth:  compassSize
     implicitHeight: compassSize

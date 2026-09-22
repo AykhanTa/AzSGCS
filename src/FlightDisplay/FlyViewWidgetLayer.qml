@@ -150,8 +150,11 @@ Item {
         id:                 bottomRightRowLayout
         anchors.right:      parent.right
         anchors.top:        parent.top
-        //anchors.rightMargin:_layoutMargin
-        anchors.rightMargin: 0
+        // The column needs the same margin every other edge element gets, and for
+        // two reasons beyond tidiness: the dial paints its N/E/S/W letters centred
+        // on the rim, so half of each glyph falls outside the ring and the E was
+        // clipped by the screen, and the telemetry bar lost its right border.
+        anchors.rightMargin: _root._layoutMargin
         anchors.topMargin:  (topStatusPanelRef && topStatusPanelRef.visible)
                             ? (topStatusPanelRef.height + _layoutMargin)
                             : _layoutMargin

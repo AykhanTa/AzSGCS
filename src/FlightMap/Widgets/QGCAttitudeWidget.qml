@@ -82,23 +82,30 @@ Item {
 
     QGCPalette { id: qgcPal; colorGroupEnabled: enabled }
 
-    // UI ölçüləri (sənin “evvelki kimi” görünüşə yaxın)
-    readonly property real _titlePx: Math.max(12, size * 0.055)
-    readonly property real _valuePx: Math.max(10, size * 0.045)
+    // Everything below is a plain fraction of size, with no pixel floor.
+    //
+    // The floors used to read Math.max(60, size * 0.21) and so on. Each one
+    // stopped scaling at a different size -- the widest at size 286 -- so below
+    // that the dial kept shrinking while its contents did not, and the speed and
+    // altitude boxes slid out past the ring. The dial is only ever asked for a
+    // size its caller has room for, so the minimum belongs there, once, rather
+    // than here nine times over.
+    readonly property real _titlePx: size * 0.055
+    readonly property real _valuePx: size * 0.045
 
-    readonly property real _scaleW:  Math.max(80, size * 0.30)
-    readonly property real _scaleH:  Math.max(40, size * 0.16)
+    readonly property real _scaleW:  size * 0.30
+    readonly property real _scaleH:  size * 0.16
 
-    readonly property real _boxH:    Math.max(18, size * 0.070)
-    readonly property real _boxWAlt: Math.max(50, size * 0.18)
-    readonly property real _boxWSpd: Math.max(60, size * 0.21)
+    readonly property real _boxH:    size * 0.070
+    readonly property real _boxWAlt: size * 0.18
+    readonly property real _boxWSpd: size * 0.21
 
     // köhnə layout-a bənzər ofsetlər
-    readonly property real _topOfs:  -Math.max(27, size * 0.10)
-    readonly property real _sideOfs: -Math.max(60, size * 0.23)
+    readonly property real _topOfs:  -(size * 0.10)
+    readonly property real _sideOfs: -(size * 0.23)
 
     // ROLL/PITCH ölçüləri
-    readonly property real _rpLabelPx: Math.max(10, size * 0.048)
+    readonly property real _rpLabelPx: size * 0.048
     readonly property real _rpSpacing: size * 0.020
     readonly property real _rpLabelW:  size * 0.19
     readonly property real _rpBoxW:    size * 0.18
