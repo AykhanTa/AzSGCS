@@ -43,9 +43,14 @@ Button {
 
     property color accentColor: "#00C853"
 
+    // From the palette, because the strip behind this sits on qgcPal.toolbarBackground
+    // and that is white under the light theme the Plan view uses. The old #E4E4E4 was
+    // picked for a dark strip and came out invisible there -- so the only icons that
+    // showed were the disabled ones, still painted a darker #7E7E7E.
     property color _currentContentColor:  (checked || pressed)
                                           ? accentColor
-                                          : (control.enabled ? "#E4E4E4" : "#7E7E7E")
+                                          : qgcPal.text   // already dimmed when disabled,
+                                                          // via colorGroupEnabled below
     property color _currentContentColorSecondary:  (checked || pressed) ? "#FFFFFF" : accentColor
 
     signal dropped(int index)
@@ -144,9 +149,11 @@ Button {
     background: Rectangle {
         id:             buttonBkRect
         anchors.fill:   parent
-        color:          control.pressed ? "#4A4A4A"
-                                        : (control.checked ? "#3A3A3A"
-                                                           : ((control.enabled && control.hovered) ? "#333333" : "transparent"))
+        // Tints of the text colour rather than fixed greys, for the same reason: a
+        // #333333 hover behind a dark icon hides it once the strip is light.
+        color:          control.pressed ? Qt.rgba(qgcPal.text.r, qgcPal.text.g, qgcPal.text.b, 0.22)
+                                        : (control.checked ? Qt.rgba(qgcPal.text.r, qgcPal.text.g, qgcPal.text.b, 0.16)
+                                                           : ((control.enabled && control.hovered) ? Qt.rgba(qgcPal.text.r, qgcPal.text.g, qgcPal.text.b, 0.10) : "transparent"))
 
         Behavior on color { ColorAnimation { duration: 120 } }
 

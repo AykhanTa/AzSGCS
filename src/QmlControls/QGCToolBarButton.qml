@@ -41,14 +41,31 @@ Button {
     contentItem: Row {
         spacing:                ScreenTools.defaultFontPixelWidth
         anchors.verticalCenter: button.verticalCenter
-        QGCColoredImage {
-            id:                     _icon
+        // A logo keeps the colours its artwork was drawn with; every other icon is
+        // monochrome and gets tinted to match the toolbar text. These used to be one
+        // QGCColoredImage passed "transparent" for the logo case, but that control
+        // always runs a ColorOverlay, and overlaying transparent paints nothing at
+        // all -- the logo button came out empty. Row skips visible:false children.
+        Image {
+            id:                     _logo
+            visible:                button.logo
             height:                 ScreenTools.defaultFontPixelHeight * 2
             width:                  height
             sourceSize.height:      parent.height
             fillMode:               Image.PreserveAspectFit
-            color:                  logo ? "transparent" : (button.checked ? qgcPal.buttonHighlightText : qgcPal.buttonText)
-            source:                 button.icon.source
+            mipmap:                 true
+            source:                 visible ? button.icon.source : ""
+            anchors.verticalCenter: parent.verticalCenter
+        }
+        QGCColoredImage {
+            id:                     _icon
+            visible:                !button.logo
+            height:                 ScreenTools.defaultFontPixelHeight * 2
+            width:                  height
+            sourceSize.height:      parent.height
+            fillMode:               Image.PreserveAspectFit
+            color:                  button.checked ? qgcPal.buttonHighlightText : qgcPal.buttonText
+            source:                 visible ? button.icon.source : ""
             anchors.verticalCenter: parent.verticalCenter
         }
         Label {
