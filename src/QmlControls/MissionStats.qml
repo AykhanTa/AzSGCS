@@ -47,7 +47,11 @@ Rectangle {
     readonly property real _hSepHeight: _separatorThickness
 
 
-    readonly property real  _fontScale:        ScreenTools.isMobile ? 1.25 : 1.20
+    // The panel draws a little above the app font so it reads at arm's length.
+    // That emphasis costs width and height the layout can spare on a desktop and
+    // cannot on a short screen, where this table is already tight, so drop it
+    // there rather than bumping it further as the mobile case used to.
+    readonly property real  _fontScale:        ScreenTools.isShortScreen ? 1.0 : 1.20
     readonly property real  _headerFontSize:   ScreenTools.defaultFontPointSize * 1.10 * _fontScale
     readonly property real  _labelFontSize:    ScreenTools.defaultFontPointSize * 1.00 * _fontScale
     readonly property real  _valueFontSize:    ScreenTools.defaultFontPointSize * 1.10 * _fontScale

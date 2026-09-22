@@ -245,8 +245,14 @@ Item {
     // artıq boşluq yaratmasın deyə mümkün qədər dar saxlanılır.
     readonly property real _rightPanelHandleWidth: Math.round(ScreenTools.defaultFontPixelHeight * 1.7)
 
-    // Kontentin real ehtiyacı (səndə MissionSettingsEditor içində 300 + x:20 -> 320)
-    readonly property real _rightPanelPreferredContentWidth: 320
+    // What the content would like, and the most the window can spare for it.
+    // 32 font widths is the 320px this used to hard code. The cap matters on a
+    // tablet: the G30 lays out in 853 logical pixels, where a fixed 320 took 40%
+    // of the width for the item list. It does not bind on a desktop window.
+    readonly property real _rightPanelPreferredContentWidth: Math.min(
+                                                                 ScreenTools.defaultFontPixelWidth * 32,
+                                                                 width * 0.26
+                                                             )
 
     // Ekranda sağ panel üçün qalan real yer (ToolStrip + marginlər çıxılır)
     readonly property real _rightPanelAvailableContentWidth: Math.max(
@@ -1270,7 +1276,13 @@ Item {
                 id: terrainStatus
                 Layout.alignment: Qt.AlignBottom
                 Layout.fillWidth: true
-                height: ScreenTools.defaultFontPixelHeight * 11
+                // Capped as well as font relative: 11 font heights suits a desktop
+                // window and is 41% of a short one, which left the map a strip.
+                // Through Layout.preferredHeight rather than height, because
+                // TerrainStatus is a plain Rectangle with no implicit size, so the
+                // row it sits in has nothing else to take its own height from.
+                Layout.preferredHeight: Math.min(ScreenTools.defaultFontPixelHeight * 11,
+                                                 mainWindow.height * 0.32)
                 missionController: _missionController
                 visible: terrainButton.checked
                 onSetCurrentSeqNum: _missionController.setCurrentPlanViewSeqNum(seqNum, true)

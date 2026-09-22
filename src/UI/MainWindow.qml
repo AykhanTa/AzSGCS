@@ -744,11 +744,13 @@ ApplicationWindow {
         id: connectionListPopup
 
         readonly property real _rowHeight: Math.max(50, ScreenTools.defaultFontPixelHeight * 3.1)
-        readonly property real _targetPopupWidth: ScreenTools.isMobile ? mainWindow.width * 0.92 : mainWindow.width * 0.56
-        readonly property real _targetPopupHeight: ScreenTools.isMobile
-                                                   ? mainWindow.height * 0.84
-                                                   : (_rowHeight * Math.max(1, Math.min(_visibleManualConnectionCount(), 6))
-                                                      + ScreenTools.defaultFontPixelHeight * 6.5)
+        // Sized from what is in the list, on every platform. The mobile branch took a
+        // flat 92% by 84% of the window whatever the content, so on a tablet a dialog
+        // holding one row -- or none, which is the usual case -- covered the screen.
+        // The clamps below still widen it on a phone, where 56% would be too narrow.
+        readonly property real _targetPopupWidth: mainWindow.width * 0.56
+        readonly property real _targetPopupHeight: _rowHeight * Math.max(1, Math.min(_visibleManualConnectionCount(), 6))
+                                                   + ScreenTools.defaultFontPixelHeight * 6.5
 
         function _visibleManualConnectionCount() {
             if (!_linkManager || !_linkManager.linkConfigurations) {
