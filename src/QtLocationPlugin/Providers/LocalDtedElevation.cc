@@ -9,12 +9,15 @@
 
 #include "LocalDtedElevation.h"
 
+#include <QtCore/QCoreApplication>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QHash>
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
+#include <QtCore/QSet>
+#include <QtCore/QStandardPaths>
 #include <QtCore/QStringList>
 #include <QtCore/QVector>
 #include <QtCore/QtEndian>
@@ -27,8 +30,39 @@
 QGC_LOGGING_CATEGORY(LocalDtedElevationLog, "qgc.qtlocationplugin.localdtedelevation")
 
 namespace {
-// Directory (Qt resource) that holds the embedded .dt2 tiles.
+// Qt resource holding the tiles compiled in by QGC_EMBED_DTED. Kept as the last
+// resort so a desktop build still works with nothing installed alongside it.
 constexpr const char *kDtedResourceDir = ":/dted";
+
+/// Directories searched for .dt2 tiles, best source first.
+///
+/// The tiles are a few hundred megabytes, which is fine compiled into a desktop
+/// binary but not into an APK, so on Android they are pushed to the app's data
+/// directory instead and found here. Searching rather than hard-coding also lets
+/// a tile dropped next to the app override the compiled-in one without a rebuild.
+QStringList dtedSearchDirs()
+{
+    QStringList dirs;
+
+    // Explicit override wins: points at an SD card or a shared coverage set.
+    const QByteArray envPath = qgetenv("QGC_DTED_PATH");
+    if (!envPath.isEmpty()) {
+        dirs << QString::fromLocal8Bit(envPath);
+    }
+
+    // Writable app data. This is where the tiles land on Android.
+    const QStringList appDataDirs = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
+    for (const QString &base : appDataDirs) {
+        dirs << (base + QStringLiteral("/dted"));
+    }
+
+    // Beside the executable, for a portable install.
+    dirs << (QCoreApplication::applicationDirPath() + QStringLiteral("/dted"));
+
+    dirs << QString::fromLatin1(kDtedResourceDir);
+
+    return dirs;
+}
 
 // DTED header layout (bytes)
 constexpr int kUhlSize = 80;
@@ -217,28 +251,45 @@ bool LocalDtedElevation::_readMeta(const QString &path, TileMeta &meta)
 
 void LocalDtedElevation::_scan()
 {
-    const QDir dir(QString::fromLatin1(kDtedResourceDir));
-    const QStringList files = dir.entryList(QStringList() << QStringLiteral("*.dt2") << QStringLiteral("*.DT2"), QDir::Files);
+    const QStringList searchDirs = dtedSearchDirs();
+    const QStringList nameFilters = QStringList() << QStringLiteral("*.dt2") << QStringLiteral("*.DT2");
 
-    for (const QString &name : files) {
-        const QString path = dir.filePath(name);
-        TileMeta meta;
-        if (_readMeta(path, meta)) {
-            _tiles.append(meta);
-            qCDebug(LocalDtedElevationLog).nospace()
-                << "Found DTED tile: " << name
-                << " SW=(" << meta.originLat << "," << meta.originLon << ")"
-                << " NE=(" << meta.latMax << "," << meta.lonMax << ")"
-                << " grid=" << meta.lonLines << "x" << meta.latPoints;
-        } else {
-            qCWarning(LocalDtedElevationLog) << "Failed to read DTED tile:" << name;
+    // A tile found in an earlier directory shadows the same name later on, so a
+    // pushed or updated tile takes precedence over the compiled-in one.
+    QSet<QString> seen;
+
+    for (const QString &dirPath : searchDirs) {
+        const QDir dir(dirPath);
+        if (!dir.exists()) {
+            continue;
+        }
+
+        const QStringList files = dir.entryList(nameFilters, QDir::Files);
+        for (const QString &name : files) {
+            if (seen.contains(name.toLower())) {
+                continue;
+            }
+
+            const QString path = dir.filePath(name);
+            TileMeta meta;
+            if (_readMeta(path, meta)) {
+                seen.insert(name.toLower());
+                _tiles.append(meta);
+                qCDebug(LocalDtedElevationLog).nospace()
+                    << "Found DTED tile: " << path
+                    << " SW=(" << meta.originLat << "," << meta.originLon << ")"
+                    << " NE=(" << meta.latMax << "," << meta.lonMax << ")"
+                    << " grid=" << meta.lonLines << "x" << meta.latPoints;
+            } else {
+                qCWarning(LocalDtedElevationLog) << "Failed to read DTED tile:" << path;
+            }
         }
     }
 
     if (_tiles.isEmpty()) {
-        qCWarning(LocalDtedElevationLog) << "No embedded DTED (.dt2) tiles found under" << kDtedResourceDir;
+        qCWarning(LocalDtedElevationLog) << "No DTED (.dt2) tiles found. Searched:" << searchDirs;
     } else {
-        qCInfo(LocalDtedElevationLog) << "Loaded" << _tiles.count() << "embedded DTED elevation tiles";
+        qCInfo(LocalDtedElevationLog) << "Loaded" << _tiles.count() << "DTED elevation tiles";
     }
 }
 

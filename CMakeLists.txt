@@ -183,13 +183,21 @@ list(APPEND QGC_RESOURCES
     ${CMAKE_SOURCE_DIR}/resources/InstrumentValueIcons/InstrumentValueIcons.qrc
 )
 
-# Embed local DTED (.dt2) elevation tiles directly into the executable so that
-# offline elevation works with no external Python server, no localhost service and
-# no separate data files (a release build only needs to ship the .exe + Qt DLLs).
-# The tiles are large binary blobs, so we use qt_add_big_resources (compiles the
-# data straight to an object file) with -no-compress to keep random-access reads fast.
+# Offline elevation needs no external Python server and no localhost service: the
+# DTED (.dt2) tiles travel with the app. On desktop they are compiled straight in,
+# so a release build ships nothing but the .exe and the Qt DLLs. They are large
+# binary blobs, hence qt_add_big_resources (data goes to an object file) with
+# -no-compress, which keeps the random-access reads fast.
 option(QGC_EMBED_DTED "Embed local DTED (.dt2) elevation tiles into the executable" ON)
-if(QGC_EMBED_DTED AND EXISTS "${CMAKE_SOURCE_DIR}/resources/dted/dted.qrc")
+if(QGC_EMBED_DTED AND ANDROID)
+    # The tiles are several hundred megabytes uncompressed. That is acceptable in a
+    # desktop binary but not inside an .so the linker has to map, so Android reads
+    # them from the app data directory instead -- see dtedSearchDirs() in
+    # LocalDtedElevation.cc for the search order and deploy/android/README for how
+    # the tiles get onto the device. Offline elevation still works; only the
+    # delivery differs.
+    message(STATUS "QGC: DTED tiles are deployed to the device, not embedded (Android)")
+elseif(QGC_EMBED_DTED AND EXISTS "${CMAKE_SOURCE_DIR}/resources/dted/dted.qrc")
     qt_add_big_resources(QGC_DTED_RESOURCES
         "${CMAKE_SOURCE_DIR}/resources/dted/dted.qrc"
         OPTIONS -no-compress
