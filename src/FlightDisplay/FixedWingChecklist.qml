@@ -63,9 +63,6 @@ Item {
                 name:           qsTr("Missiya")
                 manualText:     qsTr("Lütfən, missiyanın etibarlı olduğunu təsdiqləyin (yol nöqtələri etibarlıdır, ərazi toqquşması yoxdur).")
             }
-
-            // PreFlightSoundCheck {
-            // }
         }
 
         PreFlightCheckGroup {

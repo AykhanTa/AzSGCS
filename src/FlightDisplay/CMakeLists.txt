@@ -53,7 +53,6 @@ qt_add_qml_module(FlightDisplayModule
         PreFlightGPSCheck.qml
         PreFlightRCCheck.qml
         PreFlightSensorsHealthCheck.qml
-        PreFlightSoundCheck.qml
         ProximityRadarValues.qml
         ProximityRadarVideoView.qml
         QGCVideoBackground.qml

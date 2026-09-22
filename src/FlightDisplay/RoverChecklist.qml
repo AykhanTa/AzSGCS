@@ -53,9 +53,6 @@ Item {
                 name:           qsTr("Mission")
                 manualText:     qsTr("Please confirm mission is valid (waypoints valid, no terrain collision).")
             }
-
-            PreFlightSoundCheck {
-            }
         }
 
         PreFlightCheckGroup {
