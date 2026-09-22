@@ -139,8 +139,25 @@ Item {
         _setBasePointSize(defaultFontPointSize)
     }
 
+    /// Everything layout decisions are made from, in one line, because on a new
+    /// screen the question is always which of these came out unexpected. Sizes are
+    /// in logical pixels, which on a high density display is not what the hardware
+    /// reports: a 1920x1200 panel at 2.25x is 853x533 here.
     function printScreenStats() {
-        console.log('ScreenTools: Screen.width: ' + Screen.width + ' Screen.height: ' + Screen.height + ' Screen.pixelDensity: ' + Screen.pixelDensity)
+        console.log('ScreenTools:'
+                    + ' screen ' + Screen.width + 'x' + Screen.height
+                    + ' dpr ' + Screen.devicePixelRatio
+                    + ' pixelDensity ' + Screen.pixelDensity.toFixed(2)
+                    + ' realPixelDensity ' + realPixelDensity.toFixed(2)
+                    + ' physical ' + (Screen.width / realPixelDensity).toFixed(0) + 'x'
+                                   + (Screen.height / realPixelDensity).toFixed(0) + 'mm'
+                    + ' fontPointSize ' + defaultFontPointSize
+                    + ' (platform ' + platformFontPointSize + ')'
+                    + ' fontPixel ' + defaultFontPixelWidth + 'x' + defaultFontPixelHeight
+                    + ' minTouchPixels ' + minTouchPixels
+                    + ' tiny ' + isTinyScreen
+                    + ' short ' + isShortScreen
+                    + ' huge ' + isHugeScreen)
     }
 
     /// Returns the current x position of the mouse in global screen coordinates.
@@ -214,6 +231,7 @@ Item {
             }
             //-- Set size saved in settings
             _screenTools._setBasePointSize(baseSize);
+            _screenTools.printScreenStats();
         }
     }
 }
