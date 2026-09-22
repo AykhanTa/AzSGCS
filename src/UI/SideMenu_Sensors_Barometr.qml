@@ -70,7 +70,7 @@ Item {
             Rectangle {x: 60; y: 992; width:98; height: 48; color: "#3D3B3B"; radius: 5; border.width: 0.5; border.color: "#9D9D9D"
 
                 Row {anchors.centerIn: parent; spacing: 8
-                        Image {source: "file:///C:/Users/user/qgroundcontrol/resources/AZSHIELD_ICON/back_.svg"
+                        Image {source: "qrc:/res/AZSHIELD_ICON/back_.svg"
                             width: 24; height: 24; x: 15; y: 1;fillMode: Image.PreserveAspectFit;smooth: true
                                 }  // -- goBack funksiyasını çağırırıq ki, SideMenu_Sensors.qml açılacaq
 

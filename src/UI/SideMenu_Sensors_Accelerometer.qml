@@ -17,7 +17,7 @@ Item {
     signal nextClicked()
 
     // Fayl yolları (səndəki kimi)
-    property string imageDir: "file:///C:/Users/user/qgroundcontrol/resources/AZSHIELD_ICON/"
+    property string imageDir: "qrc:/res/AZSHIELD_ICON/"
     property string backIconSource: imageDir + "back_.svg"
 
     // Demo progress

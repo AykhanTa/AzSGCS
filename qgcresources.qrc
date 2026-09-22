@@ -163,6 +163,17 @@
 
         <!-- Summary-də istifadə edirsənsə -->
         <file alias="AZSHIELD_ICON/bx_error.svg">resources/AZSHIELD_ICON/bx_error.svg</file>
+
+        <!-- Reached through file:/// absolute paths before, which only resolved on
+             the machine the tree was checked out on. -->
+        <file alias="AZSHIELD_ICON/trash.svg">resources/AZSHIELD_ICON/trash.svg</file>
+        <file alias="AZSHIELD_ICON/back_.svg">resources/AZSHIELD_ICON/back_.svg</file>
+        <file alias="AZSHIELD_ICON/t1.png">resources/AZSHIELD_ICON/t1.png</file>
+        <file alias="AZSHIELD_ICON/t2.png">resources/AZSHIELD_ICON/t2.png</file>
+        <file alias="AZSHIELD_ICON/t3.png">resources/AZSHIELD_ICON/t3.png</file>
+        <file alias="AZSHIELD_ICON/t4.png">resources/AZSHIELD_ICON/t4.png</file>
+        <file alias="AZSHIELD_ICON/t5.png">resources/AZSHIELD_ICON/t5.png</file>
+        <file alias="AZSHIELD_ICON/t6.png">resources/AZSHIELD_ICON/t6.png</file>
     </qresource>
 
     <qresource prefix="/res/firmware">

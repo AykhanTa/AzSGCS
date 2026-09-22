@@ -34,7 +34,7 @@ Rectangle {
             }
 
             Image {
-                source: "file:///C:/Users/user/qgroundcontrol/resources/AZSHIELD_ICON/TopStatusPanel_Cixis.svg"
+                source: "qrc:/res/AZSHIELD_ICON/TopStatusPanel_Cixis.svg"
                 width: 20
                 height: 20
                 anchors.right: parent.right

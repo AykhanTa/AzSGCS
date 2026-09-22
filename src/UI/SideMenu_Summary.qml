@@ -253,7 +253,7 @@ Rectangle {
                 spacing: Math.max(10, ScreenTools.defaultFontPixelWidth)
 
                 Image {
-                    source: "file:///C:/Users/user/qgroundcontrol/resources/AZSHIELD_ICON/bx_error.svg"
+                    source: "qrc:/res/AZSHIELD_ICON/bx_error.svg"
                     Layout.preferredWidth: 22
                     Layout.preferredHeight: 22
                     Layout.alignment: Qt.AlignVCenter

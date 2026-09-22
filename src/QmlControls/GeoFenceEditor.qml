@@ -279,7 +279,7 @@ QGCFlickable {
                                   // Çöp kutusu ikonu
                                   QGCColoredImage {
                                       anchors.centerIn: parent
-                                      source: "file:///C:/Users/user/qgroundcontrol/resources/AZSHIELD_ICON/trash.svg"
+                                      source: "qrc:/res/AZSHIELD_ICON/trash.svg"
                                       width: 20
                                       height: 20
                                       color: "#FFFFFF"
@@ -412,7 +412,7 @@ QGCFlickable {
 
                                 QGCColoredImage {
                                     anchors.centerIn: parent
-                                    source: "file:///C:/Users/user/qgroundcontrol/resources/AZSHIELD_ICON/trash.svg"
+                                    source: "qrc:/res/AZSHIELD_ICON/trash.svg"
                                     width: 20
                                     height: 20
                                     color: "#FFFFFF"
