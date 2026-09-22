@@ -234,7 +234,7 @@ void PX4AirframeLoader::_insertCustomAirframes(void)
     };
 
     static const Added_t rgAdded[] = {
-        { "Hədəf",   "Hedef",    "Hədəf",   3000 },  // as Qırat H10
+        { "Arrow-2",   "Arrow-2",  "Arrow-2",   3000 },  // as Qırat H10
         { "Qırat H30", "QiratH30", "Qırat H30", 2100 },  // as Qırat H20
     };
 

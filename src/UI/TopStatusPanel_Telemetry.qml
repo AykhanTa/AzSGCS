@@ -236,7 +236,7 @@ Rectangle {
                             text: telemetryOverlay._activeVehicle
                                   ? (telemetryOverlay._activeVehicle.telemetryLRSSI !== 0
                                      ? telemetryOverlay._activeVehicle.telemetryLRSSI + " dBm"
-                                     : qsTr("Yoxdur"))
+                                     : qsTr("Əlaqə yoxdur"))
                                   : qsTr("Aktiv aparat yoxdur")
                             color: telemetryOverlay._activeVehicle
                                    ? bodyCol.rssiColor(telemetryOverlay._activeVehicle.telemetryLRSSI)
@@ -269,7 +269,7 @@ Rectangle {
                             text: telemetryOverlay._activeVehicle
                                   ? (telemetryOverlay._activeVehicle.telemetryRRSSI !== 0
                                      ? telemetryOverlay._activeVehicle.telemetryRRSSI + " dBm"
-                                     : qsTr("Yoxdur"))
+                                     : qsTr("Əlaqə yoxdur"))
                                   : qsTr("Aktiv aparat yoxdur")
                             color: telemetryOverlay._activeVehicle
                                    ? bodyCol.rssiColor(telemetryOverlay._activeVehicle.telemetryRRSSI)
@@ -383,7 +383,7 @@ Rectangle {
                             text: telemetryOverlay._activeVehicle
                                   ? (telemetryOverlay._activeVehicle.telemetryLNoise !== 0
                                      ? telemetryOverlay._activeVehicle.telemetryLNoise + " dBm"
-                                     : qsTr("Yoxdur"))
+                                     : qsTr("Əlaqə yoxdur"))
                                   : qsTr("Aktiv aparat yoxdur")
                             color: "#CCCCCC"
                             font.bold: true
@@ -414,7 +414,7 @@ Rectangle {
                             text: telemetryOverlay._activeVehicle
                                   ? (telemetryOverlay._activeVehicle.telemetryRNoise !== 0
                                      ? telemetryOverlay._activeVehicle.telemetryRNoise + " dBm"
-                                     : qsTr("Yoxdur"))
+                                     : qsTr("Əlaqə yoxdur"))
                                   : qsTr("Aktiv aparat yoxdur")
                             color: "#CCCCCC"
                             font.bold: true

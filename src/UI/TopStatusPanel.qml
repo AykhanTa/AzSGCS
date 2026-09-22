@@ -287,9 +287,9 @@ Rectangle {
     property string _commLostText:      qsTr("Əlaqələr İtirildi")
     property string _readyToFlyText:    qsTr("Uçmağa Hazır")
     property string _notReadyToFlyText: qsTr("Hazır deyil")
-    property string _disconnectedText:  qsTr("Bağlantı Yox")
+    property string _disconnectedText:  qsTr("Bağlantı Yoxdur")
     property string _armedText:         qsTr("Armed")
-    property string _flyingText:        qsTr("Flying")
+    property string _flyingText:        qsTr("Uçuşda")
     property string _landingText:       qsTr("Eniş")
 
     property bool _communicationLost: _activeVehicle ? _activeVehicle.vehicleLinkManager.communicationLost : true
@@ -810,7 +810,7 @@ Rectangle {
     }
 
     function telemetryValueText() {
-        if (!_vehReady) return qsTr("Aparat yox")
+        if (!_vehReady) return qsTr("Əlaqə yoxdur")
         var rssi = _veh.telemetryLRSSI
         if (rssi === 0 || rssi === undefined || rssi === null) return "Telemetriya yoxdur"
         return telemetryQualityLabel() + " (" + rssi + " dBm)"

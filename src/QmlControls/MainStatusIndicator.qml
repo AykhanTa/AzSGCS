@@ -47,8 +47,8 @@ RowLayout {
         property string _notReadyToFlyText: qsTr("Hazır deyil")
         property string _disconnectedText:  qsTr("Bağlantı kəsildi - Əl ilə qoşulmaq üçün klikləyin")
         property string _armedText:         qsTr("Armed")
-        property string _flyingText:        qsTr("Flying")
-        property string _landingText:       qsTr("Landing")
+        property string _flyingText:        qsTr("Uçuşda")
+        property string _landingText:       qsTr("Eniş")
 
         function mainStatusText() {
             var statusText

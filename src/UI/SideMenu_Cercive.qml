@@ -343,7 +343,7 @@ Prosesi başa çatdırmaq üçün təyyarəniz də yenidən işə salınacaq."),
                                 "Qırat H10",
                                 "Qırat H20",
                                 "Qırat H30",
-                                "Hədəf",
+                                "Arrow-2",
                                 "Boran"
                             ]
 

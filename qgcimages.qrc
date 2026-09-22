@@ -25,7 +25,7 @@
         <file alias="Airframe/QuadRotorWide.svg">src/AutoPilotPlugins/Common/Images/QuadRotorWide.svg</file>
         <file alias="Airframe/QuadRotorX.svg">src/AutoPilotPlugins/Common/Images/QuadRotorX.svg</file>
         <file alias="Airframe/Boran.svg">src/AutoPilotPlugins/Common/Images/Boran.svg</file>
-        <file alias="Airframe/Hedef.svg">src/AutoPilotPlugins/Common/Images/Hedef.svg</file>
+        <file alias="Airframe/Arrow-2.svg">src/AutoPilotPlugins/Common/Images/Arrow-2.svg</file>
         <file alias="Airframe/QiratH10.svg">src/AutoPilotPlugins/Common/Images/QiratH10.svg</file>
         <file alias="Airframe/QiratH20.svg">src/AutoPilotPlugins/Common/Images/QiratH20.svg</file>
         <file alias="Airframe/QiratH30.svg">src/AutoPilotPlugins/Common/Images/QiratH30.svg</file>
