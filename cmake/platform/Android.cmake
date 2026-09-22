@@ -3,7 +3,14 @@ if(NOT ANDROID)
     return()
 endif()
 
-if(${Qt6_VERSION} VERSION_EQUAL 6.8.3)
+# Qt ships prebuilt Android libraries built against one NDK. Crossing a major
+# version brings a different libc++_shared along with it, which shows up as
+# link errors or as symbol mismatches at load time rather than here, so pin it.
+if(${Qt6_VERSION} VERSION_GREATER_EQUAL 6.11)
+    if(NOT ${CMAKE_ANDROID_NDK_VERSION} VERSION_EQUAL 27.2)
+        message(FATAL_ERROR "Invalid NDK Version: ${CMAKE_ANDROID_NDK_VERSION}. Qt ${Qt6_VERSION} is built against 27C, use ndk;27.2.12479018.")
+    endif()
+elseif(${Qt6_VERSION} VERSION_EQUAL 6.8.3)
     if(NOT ${CMAKE_ANDROID_NDK_VERSION} VERSION_EQUAL 26.1 AND NOT ${CMAKE_ANDROID_NDK_VERSION} VERSION_EQUAL 27.2)
         message(FATAL_ERROR "Invalid NDK Version: ${CMAKE_ANDROID_NDK_VERSION}, Use Version 26B of 27C instead.")
     endif()
