@@ -81,11 +81,20 @@ Item {
 
     readonly property real _fontH: ScreenTools.defaultFontPixelHeight
     readonly property real _innerRadius: _fontH * 5
-    readonly property real _baseAttitudeSize: (_innerRadius * 2.3) + 40
+    // The pad used to be a flat 40px, which is a third of the widget at the
+    // desktop font size and a rounding error at the tablet one, so the dial
+    // changed proportions with the DPI rather than just size.
+    readonly property real _baseAttitudeSize: (_innerRadius * 2.3) + (_fontH * 2.1)
     readonly property real _baseCompassRatio: 1.12
 
-    readonly property real _raw: Math.min(1.0, Math.min(mainWindow.width / 1280, mainWindow.height / 720))
-    readonly property real _shrinkFactor: Math.max(0.85, 0.92 + 0.08 * _raw)
+    // Shrink a little in a cramped window. Measured in font heights, not raw
+    // pixels: 1280x720 of a dense display is physically small but read as a full
+    // size window, so the widget stayed large exactly where it had least room.
+    // 67 x 38 font heights is the same window as 1280x720 at the desktop font.
+    readonly property real _raw: Math.min(1.0,
+                                          Math.min(mainWindow.width  / (_fontH * 67),
+                                                   mainWindow.height / (_fontH * 38)))
+    readonly property real _shrinkFactor: 0.92 + 0.08 * _raw
 
     property real attitudeSize: _baseAttitudeSize * _shrinkFactor
     property real compassSize:  attitudeSize * _baseCompassRatio

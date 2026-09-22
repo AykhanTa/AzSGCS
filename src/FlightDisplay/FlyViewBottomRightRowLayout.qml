@@ -40,9 +40,11 @@ Item {
     property bool showFlightPanel: mainWindow.showFlightPanel
     property bool showRightToolStrip: true
 
-    // ✅ YENİ: Həm Telemetry, həm də ToolStrip üçün ortaq en ölçüsü.
-    // 308-i 350 etdik. Ehtiyac olarsa, 380, 400 kimi artırıb-azalda bilərsiniz.
-    property real rightElementsWidth: 330
+    // Telemetry bar and tool strip share a right edge, so they share a width.
+    // It is in font heights rather than pixels: the text inside them scales
+    // with the font and a pixel constant does not, so the two only agreed at
+    // one DPI. Used when the bar is hidden; otherwise the bar's own width wins.
+    property real rightElementsWidth: ScreenTools.defaultFontPixelHeight * 17.4
 
     implicitWidth:  Math.max(_w(instrumentPanel), _w(telemetryBar), _w(toolStripRight))
 
@@ -81,8 +83,10 @@ Item {
 
         visible: showFlightPanel
 
-        // ✅ DƏYİŞİKLİK: Eni yuxarıdakı ortaq dəyərə bağladıq
-        width: root.rightElementsWidth
+        // No width here on purpose: the bar clamps itself against the font size
+        // and adds the instrument panel's extraValuesWidth. Overriding it with a
+        // fixed width threw both away, and the bar clips, so the values were cut
+        // off rather than reported.
 
         anchors.right: parent.right
         anchors.rightMargin: 0
@@ -103,9 +107,12 @@ Item {
 
         verticalMode: false
 
-        // ✅ DƏYİŞİKLİK: 308 əvəzinə ortaq en ölçüsünü istifadə edirik
-        width: root.rightElementsWidth
-        height: 120
+        // Follow the bar so the right edges line up, falling back to the shared
+        // width when it is hidden. HorizontalToolStrip splits whatever height it
+        // is given between two button rows while the labels scale with the font,
+        // so this has to grow with the font or the labels outgrow the buttons.
+        width: telemetryBar.visible ? telemetryBar.width : root.rightElementsWidth
+        height: ScreenTools.defaultFontPixelHeight * 6.3
 
         anchors.right: parent.right
         anchors.rightMargin: 0
