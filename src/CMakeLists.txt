@@ -185,6 +185,13 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         Qt6::Quick
         Qt6::QuickControls2
         Qt6::Sensors
+        # Linked here as well as in QtLocationPluginModule, which is what actually
+        # calls it. qt_import_plugins only considers a plugin type that the app
+        # target links directly, so without this the sqldrivers type never became
+        # a candidate and INCLUDE_BY_TYPE sqldrivers selected from nothing: the
+        # QSQLITE driver was left out of the Android package and the map tile
+        # cache could not open its database, so no tiles were ever served.
+        Qt6::Sql
         Qt6::Svg
         Qt6::TextToSpeech
         Qt6::Widgets
