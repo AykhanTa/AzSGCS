@@ -15,11 +15,21 @@ name wins:
 3. `<app dir>/dted` — portable desktop install
 4. `:/dted` — compiled in (desktop only)
 
-On Android `AppDataLocation` resolves to:
+`AppDataLocation` is a list, and on Android it holds two directories. The app
+prints the whole search order when it finds nothing, which on a device with the
+stock package name reads:
 
 ```
-/sdcard/Android/data/org.mavlink.qgroundcontrol/files/dted
+/data/user/0/org.mavlink.qgroundcontrol/files/dted
+/storage/emulated/0/Android/data/org.mavlink.qgroundcontrol/files/dted
+/data/app/<...>/lib/arm64/dted
+:/dted
 ```
+
+The first is the app's private directory: the app can read it, `adb push`
+cannot write it. **Push to the second**, the external app-specific directory,
+which `adb` can write and the app can read with no storage permission. It is
+also what `/sdcard/Android/data/...` points at.
 
 Substitute the real package name if `QGC_ANDROID_PACKAGE_NAME` was changed.
 
@@ -28,12 +38,14 @@ Substitute the real package name if `QGC_ANDROID_PACKAGE_NAME` was changed.
 Run the app once first, so Android creates the directory.
 
 ```sh
-adb shell mkdir -p /sdcard/Android/data/org.mavlink.qgroundcontrol/files/dted
-adb push resources/dted/. /sdcard/Android/data/org.mavlink.qgroundcontrol/files/dted/
+DEST=/storage/emulated/0/Android/data/org.mavlink.qgroundcontrol/files/dted
+adb shell mkdir -p $DEST
+adb push resources/dted/. $DEST/
 ```
 
-That pushes ~619 MB and takes a few minutes over USB. Only `.dt2` files are
-read; `dted.qrc` can be pushed too, it is ignored.
+That is ~620 MB: a few seconds over USB 3, a few minutes over USB 2. Only
+`.dt2` files are read; `dted.qrc` and the reference Python server go along for
+the ride and are ignored.
 
 ### Checking it worked
 
@@ -45,6 +57,13 @@ Expect `Loaded 25 DTED elevation tiles`. If instead you see
 `No DTED (.dt2) tiles found. Searched: ...`, the listed paths are exactly what
 the app tried — compare them against where the files actually landed. The usual
 cause is a package name mismatch in the destination path.
+
+The scan runs from the LocalDtedElevation singleton constructor, so nothing is
+logged until something asks for an elevation. Dropping a couple of waypoints in
+the Plan view is the quickest way to ask: the terrain profile under the map
+fills in with a green ground line when it works. To be sure the answer came from
+disk rather than the network, check that no request to the online terrain
+provider follows.
 
 Coverage is E44–E48 / N38–N41. Outside that box elevation falls back to the
 configured online provider.
