@@ -321,6 +321,11 @@ Rectangle {
                 anchors.right:          flightSpeedField.left
                 anchors.rightMargin:    valuesRect._pad * 0.6
                 anchors.verticalCenter: parent.verticalCenter
+                // Two lines, which is what the row is tall enough for. The label
+                // only gets what the field leaves it -- about 70 logical pixels on
+                // the narrowest panel -- and "Ucus sureti" does not fit on one.
+                textWrapMode:           Text.Wrap
+                spacing:                ScreenTools.defaultFontPixelWidth * 0.4
                 text:                   qsTr("Uçuş sürəti")
                 checked:                missionItem.speedSection.specifyFlightSpeed
                 onClicked:              missionItem.speedSection.specifyFlightSpeed = checked
@@ -331,7 +336,10 @@ Rectangle {
                 anchors.right:          parent.right
                 anchors.rightMargin:    valuesRect._pad
                 anchors.verticalCenter: parent.verticalCenter
-                width:                  valuesRect._ctrlW
+                // Narrower than the other rows: this one has a checkbox in front of
+                // its label, and the indicator and its gap come out of the same
+                // width the label has to fit in.
+                width:                  Math.min(valuesRect._ctrlW, ScreenTools.defaultFontPixelWidth * 8)
                 height:                 Math.max(28, valuesRect._rowH - 12)
                 fact:                   missionItem.speedSection.flightSpeed
                 enabled:                flightSpeedCheckBox.checked

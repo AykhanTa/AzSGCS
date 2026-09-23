@@ -13,6 +13,9 @@ CheckBox {
     property color  textColor:          _qgcPal.text
     property bool   textBold:           false
     property real   textFontPointSize:  ScreenTools.defaultFontPointSize
+    /// Opt in where the row is tall enough for two lines; the default keeps every
+    /// existing checkbox exactly one line high.
+    property int    textWrapMode:       Text.NoWrap
 
     property var    _qgcPal: QGCPalette { colorGroupEnabled: enabled }
     property bool   _noText: text === ""
@@ -34,6 +37,11 @@ CheckBox {
         font.bold:          control.textBold
         font.family:        ScreenTools.normalFontFamily
         color:              control.textColor
+        // Where the control is narrower than its label -- an anchored checkbox in a
+        // form row, say -- the text used to keep painting straight over whatever sat
+        // beside it. It gives way now instead.
+        wrapMode:           control.textWrapMode
+        elide:              Text.ElideRight
     }
 
     property color accentColor: "#00C853"
