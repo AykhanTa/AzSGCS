@@ -42,6 +42,20 @@ Rectangle {
 
     signal dropped(int index)
 
+    // 80 is the height a button wants. When the strip cannot fit them all they
+    // share out what there is instead, down to a floor that still takes a touch:
+    // the strip does scroll, but an action below the fold reads as missing, and
+    // on the Plan view that hid the button for reopening the bottom panel.
+    readonly property real _buttonHeight: {
+        var count = repeater.count
+        if (count <= 0) {
+            return 80
+        }
+        var room = flickable.height - (titleLabel.visible ? titleLabel.height : 0)
+                   - (toolStripColumn.spacing * count)
+        return Math.max(ScreenTools.minTouchPixels * 1.6, Math.min(80, room / count))
+    }
+
     DeadMouseArea {
         anchors.fill: parent
     }
@@ -79,7 +93,7 @@ Rectangle {
                     id:                 buttonTemplate
                     anchors.left:       toolStripColumn.left
                     anchors.right:      toolStripColumn.right
-                    height:             80
+                    height:             _root._buttonHeight
                     radius:             ScreenTools.defaultFontPixelWidth / 2
                     fontPointSize:      _root.fontSize
                     toolStripAction:    modelData
