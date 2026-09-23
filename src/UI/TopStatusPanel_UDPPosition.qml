@@ -1,5 +1,7 @@
 import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick.Controls
+
+import QGroundControl.Controls
 import QtQuick.Layouts 1.15
 
 Rectangle {
@@ -153,11 +155,17 @@ Rectangle {
             Rectangle {
                 width: 20; height: 20; radius: 4
                 color: closeMouse.containsMouse ? "#553333" : "transparent"
-                Text {
+                // An icon, not a glyph. This used to be U+2715 from Dingbats, which
+                // Roboto does not carry, so on Android the button was blank. Also
+                // no longer dimmed until hovered: a touch screen never hovers.
+                QGCColoredImage {
                     anchors.centerIn: parent
-                    text: "✕"
-                    color: closeMouse.containsMouse ? "white" : "#888"
-                    font.pixelSize: 12
+                    width:  Math.round(parent.width * 0.6)
+                    height: width
+                    sourceSize.height: height
+                    fillMode: Image.PreserveAspectFit
+                    source: "qrc:/res/AZSHIELD_ICON/TopStatusPanel_Cixis.svg"
+                    color: closeMouse.containsMouse ? "white" : "#CCCCCC"
                 }
                 MouseArea {
                     id: closeMouse

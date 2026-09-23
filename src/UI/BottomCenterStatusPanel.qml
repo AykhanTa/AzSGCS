@@ -1,5 +1,7 @@
 import QtQuick
 import QtQuick.Controls
+
+import QGroundControl.Controls
 import QtQuick.Layouts
 
 Item {
@@ -112,12 +114,17 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
 
-        Text {
+        // An icon, not a glyph. This used to be U+2304/U+2303, the arrowheads from
+        // Miscellaneous Technical, which Roboto does not carry -- so on Android the
+        // only thing marking the control was an empty circle.
+        QGCColoredImage {
             anchors.centerIn: parent
-            text: root.expanded ? "⌄" : "⌃"
+            width:  Math.round(parent.height * 0.42)
+            height: width
+            sourceSize.height: height
+            fillMode: Image.PreserveAspectFit
+            source: root.expanded ? "/res/chevron-down.svg" : "/res/chevron-up.svg"
             color: root.textColor
-            font.pixelSize: 14
-            font.bold: true
         }
 
         MouseArea {
