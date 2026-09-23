@@ -36,7 +36,8 @@ Rectangle {
                                  : Math.max(10, (Qt.application.font.pointSize > 0 ? Qt.application.font.pointSize : 10))
 
     readonly property real _margin:    Math.round(Math.max(10, _fontPx * 0.80))
-    readonly property real _pad:       Math.round(Math.max(10, _fontPx * 0.80))
+    readonly property real _pad:       Math.round(Math.max(8, _fontPx * 0.62))
+    readonly property real _gap:       Math.round(Math.max(6, _fontPx * 0.35))
     readonly property real _closeSize: Math.round(_clamp(_fontPx * 1.25, 18, 22))
 
     // ✅ TopStatusPanel hündürlüyü qədər aşağıdan başlasın
@@ -67,11 +68,11 @@ Rectangle {
     readonly property real _availW: Math.max(120, overlay.width - _panelLeftX - _margin)
     readonly property real _availH: Math.max(140, overlay.height - _topInset - (_margin * 2))
 
-    readonly property real _panelW: Math.round(Math.min(Math.min(520, Math.max(300, _availW)), _availW))
-    readonly property real _panelH: Math.round(Math.min(Math.min(overlay.height * 0.82, Math.max(320, _availH)), _availH))
+    readonly property real _panelW: Math.round(Math.min(_availW, Math.max(260, Math.min(520, overlay.width * 0.46))))
+    readonly property real _panelH: Math.round(Math.min(_availH, Math.max(240, overlay.height * 0.72)))
 
     readonly property real _panelHMax: _panelH
-    readonly property real _panelHMin: 220
+    readonly property real _panelHMin: Math.min(200, _availH)
 
     // Vehicle refs
     readonly property var  _activeVehicle:   QGroundControl.multiVehicleManager.activeVehicle
@@ -295,14 +296,14 @@ Rectangle {
             ColumnLayout {
                 id: contentCol
                 width: contentFlick.width
-                spacing: 10
+                spacing: overlay._gap
 
                 RowLayout {
                     Layout.fillWidth: true
-                    spacing: 8
+                    spacing: overlay._gap
                     Rectangle {
-                        width:  20
-                        height: 18
+                        width:  Math.round(overlay._fontPx)
+                        height: Math.round(overlay._fontPx * 0.9)
                         radius: 4
                         color:  (_activeVehicle && _activeVehicle.armed) ? "#00C853" : "#4A4A4A"
 
@@ -320,7 +321,7 @@ Rectangle {
 
                 Rectangle {
                     Layout.fillWidth: true
-                    height: Math.max(52, overlay._fontPx * 3.0)
+                    height: Math.round(Math.max(48, overlay._fontPx * 2.6))
                     radius: 10
                     color: "#333333"
                     border.width: 1
@@ -328,8 +329,8 @@ Rectangle {
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.margins: 10
-                        spacing: 10
+                        anchors.margins: overlay._gap
+                        spacing: overlay._gap
 
                         QGCLabel {
                             Layout.fillWidth: true
@@ -374,15 +375,14 @@ Rectangle {
                         border.color: "#4A4A4A"
                         clip: true
 
-                        Layout.preferredHeight: Math.min(
-                                                    Math.max(160, overlay._fontPx * 10),
-                                                    Math.max(190, panel.height * 0.38)
-                                                )
+                        Layout.preferredHeight: Math.round(overlay._clamp(overlay._panelH * 0.30,
+                                                                          overlay._fontPx * 5,
+                                                                          overlay._fontPx * 9))
 
                         QGCFlickable {
                             id: messageFlick
                             anchors.fill: parent
-                            anchors.margins: 10
+                            anchors.margins: overlay._gap
                             clip: true
 
                             flickableDirection: Flickable.VerticalFlick
@@ -471,13 +471,13 @@ Rectangle {
                         radius: 8
                         color: "#1E1E1E"
                         border.color: "#4A4A4A"
-                        Layout.preferredHeight: overallStatusCol.implicitHeight + 20
+                        Layout.preferredHeight: overallStatusCol.implicitHeight + (overlay._gap * 2)
 
                         ColumnLayout {
                             id: overallStatusCol
                             anchors.fill: parent
-                            anchors.margins: 12
-                            spacing: 8
+                            anchors.margins: overlay._gap
+                            spacing: overlay._gap
 
                             Repeater {
                                 model: _activeVehicle ? _activeVehicle.healthAndArmingCheckReport.problemsForCurrentMode : null
@@ -562,7 +562,9 @@ Rectangle {
                         clip: true
 
                         Layout.preferredHeight: Math.min(sensorList.contentHeight + 6,
-                                                         Math.max(160, panel.height * 0.35))
+                                                         Math.round(overlay._clamp(overlay._panelH * 0.28,
+                                                                                   overlay._fontPx * 4.5,
+                                                                                   overlay._fontPx * 8)))
 
                         ListView {
                             id: sensorList
