@@ -47,6 +47,12 @@ Rectangle {
                                                )
     readonly property real _actionBtnW: isCollapsed ? 50 : _actionBtnWExpanded
 
+    // 3 font heights is the 60px these used to hard code. Capped against the
+    // window as well, because 60 is a twentieth of a desktop screen and a ninth
+    // of the G30's 533 logical pixels, so the pair dominated the menu there.
+    readonly property real _actionBtnH: Math.min(ScreenTools.defaultFontPixelHeight * 3,
+                                                 (leftPanel.parent ? leftPanel.parent.height : 600) * 0.10)
+
     width: isCollapsed ? collapsedWidth : (_actionBtnW + (2 * _m))
 
     // ---------- QGC state ----------
@@ -390,7 +396,7 @@ Rectangle {
                 Layout.preferredWidth: _actionBtnW
                 Layout.minimumWidth: _actionBtnW
                 Layout.maximumWidth: _actionBtnW
-                Layout.preferredHeight: 60
+                Layout.preferredHeight: leftPanel._actionBtnH
 
                 radius: 10
                 color: "#434343"
@@ -399,13 +405,13 @@ Rectangle {
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.margins: 12
+                    anchors.margins: Math.round(manualButton.height * 0.2)
                     spacing: 10
 
                     Image {
                         source: leftPanel._azIconRoot + "manual.svg"
-                        Layout.preferredWidth: 24
-                        Layout.preferredHeight: 24
+                        Layout.preferredWidth: Math.round(manualButton.height * 0.40)
+                        Layout.preferredHeight: Layout.preferredWidth
                         fillMode: Image.PreserveAspectFit
                     }
 
@@ -436,7 +442,7 @@ Rectangle {
                 Layout.preferredWidth: _actionBtnW
                 Layout.minimumWidth: _actionBtnW
                 Layout.maximumWidth: _actionBtnW
-                Layout.preferredHeight: 60
+                Layout.preferredHeight: leftPanel._actionBtnH
 
                 radius: 8
                 color: "#434343"
@@ -451,8 +457,8 @@ Rectangle {
 
                     Image {
                         source: leftPanel._azIconRoot + "disconnect.svg"
-                        width: 26
-                        height: 26
+                        width: Math.round(disconnectButton.height * 0.43)
+                        height: width
                         fillMode: Image.PreserveAspectFit
                         opacity: disconnectButton.enabled ? 1.0 : 0.2
                     }
