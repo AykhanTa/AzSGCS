@@ -77,16 +77,22 @@ Rectangle {
     readonly property real _controlIcon: Math.round(_controlSize * 0.9)
 
     // Derived from the blocks addBlock() actually created. A hardcoded count
-    // that disagrees with them makes _idealBlockW too wide, so the row spills
-    // past the right edge on every screen size.
+    // that disagrees with them sizes the blocks wrongly, so the row spills past
+    // the right edge on every screen size.
     readonly property int  _blockCount: Math.max(1, statusRow.children.length)
-    readonly property real _blockMinW:  Math.max(_fontW * 12, 118)
+    readonly property real _blockMinW:  Math.max(_fontW * 14, 132)
     readonly property real _blockMaxW:  Math.max(_fontW * 28, 320)
 
     readonly property real _progressH:   Math.max(3, height * 0.05)
     readonly property real _statusAreaW: statusFlick.width
-    readonly property real _idealBlockW: (_statusAreaW - (_blockSpace * (_blockCount - 1))) / _blockCount
-    readonly property real _blockW:      _clamp(_idealBlockW, _blockMinW, _blockMaxW)
+
+    // How many whole blocks the strip can show at once. Sizing the blocks to
+    // exactly fill that space means no block is ever painted half-cut, at rest
+    // or at either end of the scroll.
+    readonly property int _visibleBlocks: Math.max(1, Math.min(_blockCount,
+                                                   Math.floor((_statusAreaW + _blockSpace) / (_blockMinW + _blockSpace))))
+    readonly property real _blockW: _clamp((_statusAreaW - (_blockSpace * (_visibleBlocks - 1))) / _visibleBlocks,
+                                           _blockMinW, _blockMaxW)
 
     height: Math.round(_clamp(_fontH * 4.0, 56, 64))
 
@@ -139,14 +145,11 @@ Rectangle {
     property bool isConnected: _activeVehicle ? true : false
 
     readonly property real _rowSpacing: {
-        // _blockCount is 1 until the blocks exist; dividing by (count - 1) then
-        // yields Infinity, so bail out before the division.
-        if (_statusAreaW <= 0 || _blockCount <= 1) return _blockSpace
-        if (_idealBlockW > _blockMaxW) {
-            var s = (_statusAreaW - (_blockMaxW * _blockCount)) / (_blockCount - 1)
-            return Math.max(_blockSpace, s)
-        }
-        return _blockSpace
+        // _visibleBlocks is 1 until the blocks exist; dividing by (count - 1)
+        // then yields Infinity, so bail out before the division.
+        if (_statusAreaW <= 0 || _visibleBlocks <= 1) return _blockSpace
+        var leftover = _statusAreaW - (_blockW * _visibleBlocks)
+        return Math.max(_blockSpace, leftover / (_visibleBlocks - 1))
     }
 
     function disconnectVehicle() {
@@ -1270,11 +1273,16 @@ Rectangle {
                             text: block.label
                             color: "white"
                             font.pixelSize: topStatusPanel._labelFontPx
+                            // A block is narrow on a handheld screen. Losing a
+                            // point of type reads better than losing the end of
+                            // the word, so only elide once shrinking runs out.
+                            fontSizeMode: Text.HorizontalFit
+                            minimumPixelSize: Math.max(10, Math.round(font.pixelSize * 0.75))
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
                             maximumLineCount: 1
                             verticalAlignment: Text.AlignVCenter
-                            Layout.maximumWidth: Math.max(60, parent.width - topStatusPanel._iconSize - (topStatusPanel._inBlockPad * 2))
+                            Layout.maximumWidth: Math.max(1, parent.width - topStatusPanel._iconSize - topStatusPanel._inBlockPad)
                         }
 
                         Item { Layout.fillWidth: true }
@@ -1288,6 +1296,8 @@ Rectangle {
                         wrapMode: Text.NoWrap
                         maximumLineCount: 1
                         font.pixelSize: topStatusPanel._valueFontPx
+                        fontSizeMode: Text.HorizontalFit
+                        minimumPixelSize: Math.max(10, Math.round(font.pixelSize * 0.75))
                         color: "white"
 
                         text: {
@@ -1470,10 +1480,11 @@ Rectangle {
     ScrollBar {
         id: statusHScrollBar
         orientation: Qt.Horizontal
-        // Not attached via ScrollBar.horizontal, so `active` never becomes true
-        // and AsNeeded would keep the bar at zero opacity forever.
-        policy: statusFlick.contentWidth > statusFlick.width + 1 ? ScrollBar.AlwaysOn
-                                                                 : ScrollBar.AlwaysOff
+        policy: ScrollBar.AsNeeded
+        // Nothing attaches this bar to the Flickable, so `active` would stay
+        // false and AsNeeded would never paint it. Drive it by hand: the style
+        // fades the bar in while the strip moves and back out afterwards.
+        active: statusFlick.moving || statusFlick.dragging
 
         anchors.left:      statusFlick.left
         anchors.right:     statusFlick.right
