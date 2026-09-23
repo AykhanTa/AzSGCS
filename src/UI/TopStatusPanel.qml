@@ -76,7 +76,10 @@ Rectangle {
     readonly property real _controlSize: Math.round(_clamp(_fontH * 1.20, 18, 20))
     readonly property real _controlIcon: Math.round(_controlSize * 0.9)
 
-    readonly property int  _blockCount: 8
+    // Derived from the blocks addBlock() actually created. A hardcoded count
+    // that disagrees with them makes _idealBlockW too wide, so the row spills
+    // past the right edge on every screen size.
+    readonly property int  _blockCount: Math.max(1, statusRow.children.length)
     readonly property real _blockMinW:  Math.max(_fontW * 12, 118)
     readonly property real _blockMaxW:  Math.max(_fontW * 28, 320)
 
@@ -136,7 +139,9 @@ Rectangle {
     property bool isConnected: _activeVehicle ? true : false
 
     readonly property real _rowSpacing: {
-        if (_statusAreaW <= 0) return _blockSpace
+        // _blockCount is 1 until the blocks exist; dividing by (count - 1) then
+        // yields Infinity, so bail out before the division.
+        if (_statusAreaW <= 0 || _blockCount <= 1) return _blockSpace
         if (_idealBlockW > _blockMaxW) {
             var s = (_statusAreaW - (_blockMaxW * _blockCount)) / (_blockCount - 1)
             return Math.max(_blockSpace, s)
@@ -1316,6 +1321,25 @@ Rectangle {
         contentWidth: statusRow.implicitWidth
         contentHeight: statusRow.height
 
+        // Land on a block boundary instead of stopping mid-block.
+        onMovementEnded: {
+            var step = topStatusPanel._blockW + statusRow.spacing
+            if (step <= 0) {
+                return
+            }
+            var maxX = Math.max(0, contentWidth - width)
+            statusSnap.to = Math.min(maxX, Math.max(0, Math.round(contentX / step) * step))
+            statusSnap.restart()
+        }
+
+        NumberAnimation {
+            id: statusSnap
+            target: statusFlick
+            property: "contentX"
+            duration: 140
+            easing.type: Easing.OutCubic
+        }
+
         Row {
             id: statusRow
             height: statusFlick.height
@@ -1446,13 +1470,19 @@ Rectangle {
     ScrollBar {
         id: statusHScrollBar
         orientation: Qt.Horizontal
-        policy: ScrollBar.AsNeeded
+        // Not attached via ScrollBar.horizontal, so `active` never becomes true
+        // and AsNeeded would keep the bar at zero opacity forever.
+        policy: statusFlick.contentWidth > statusFlick.width + 1 ? ScrollBar.AlwaysOn
+                                                                 : ScrollBar.AlwaysOff
 
         anchors.left:      statusFlick.left
         anchors.right:     statusFlick.right
         anchors.top:       statusFlick.bottom
         anchors.topMargin: 1
-        height: Math.max(4, topStatusPanel._progressH)
+        // Basic style pads the bar by 2 on each side, which left the 4px-high
+        // groove with a zero-height thumb - nothing was ever drawn.
+        padding: 0
+        height: Math.max(5, topStatusPanel._progressH)
 
         size:     statusFlick.visibleArea.widthRatio
         position: statusFlick.visibleArea.xPosition
