@@ -308,8 +308,13 @@ Rectangle {
 
         // ---------- Uçuş sürəti ----------
         Rectangle {
+            id:         flightSpeedRow
             width:      parent.width
-            height:     valuesRect._rowH
+            // This is the only row whose label shares its line with a checkbox, so
+            // it is the first to run out of width. Rather than pick a line count
+            // that suits one screen, the row grows to whatever the wrapped label
+            // needs - two lines on a G30, three on the narrower G20.
+            height:     Math.max(valuesRect._rowH, flightSpeedCheckBox.implicitHeight + valuesRect._pad)
             radius:     8
             color:      "#2A2A2A"
             visible:    _showFlightSpeed
@@ -321,9 +326,6 @@ Rectangle {
                 anchors.right:          flightSpeedField.left
                 anchors.rightMargin:    valuesRect._pad * 0.6
                 anchors.verticalCenter: parent.verticalCenter
-                // Two lines, which is what the row is tall enough for. The label
-                // only gets what the field leaves it -- about 70 logical pixels on
-                // the narrowest panel -- and "Ucus sureti" does not fit on one.
                 textWrapMode:           Text.Wrap
                 spacing:                ScreenTools.defaultFontPixelWidth * 0.4
                 text:                   qsTr("Uçuş sürəti")
@@ -336,10 +338,9 @@ Rectangle {
                 anchors.right:          parent.right
                 anchors.rightMargin:    valuesRect._pad
                 anchors.verticalCenter: parent.verticalCenter
-                // Narrower than the other rows: this one has a checkbox in front of
-                // its label, and the indicator and its gap come out of the same
-                // width the label has to fit in.
-                width:                  Math.min(valuesRect._ctrlW, ScreenTools.defaultFontPixelWidth * 8)
+                // Holds a speed like "15.0", so it takes only what that needs and
+                // leaves the rest of the row to the label, which needs it more.
+                width:                  Math.min(valuesRect._ctrlW, ScreenTools.defaultFontPixelWidth * 6)
                 height:                 Math.max(28, valuesRect._rowH - 12)
                 fact:                   missionItem.speedSection.flightSpeed
                 enabled:                flightSpeedCheckBox.checked
