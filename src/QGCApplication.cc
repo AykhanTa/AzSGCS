@@ -26,6 +26,7 @@
 #include <QtCore/private/qthread_p.h>
 
 #include "ExternalPositionManager.h"
+#include "SkydroidGimbalController.h"
 
 #include "QGCLogging.h"
 #include "AudioOutput.h"
@@ -293,6 +294,23 @@ void QGCApplication::_initForNormalAppBoot()
                 this,
                 [extPos](Vehicle *v) {
                     extPos->setVehicle(v);
+                }
+                );
+
+            // Skydroid camera pods (C13 and friends) sit on the air unit network and
+            // take their own protocol, not MAVLink, so they run beside GimbalController
+            // rather than through it. Control input comes from RC_CHANNELS, which is why
+            // it follows the active vehicle.
+            auto *skydroidGimbal = new SkydroidGimbalController(this);
+            _qmlAppEngine->rootContext()->setContextProperty(
+                "skydroidGimbal", skydroidGimbal);
+
+            QObject::connect(
+                MultiVehicleManager::instance(),
+                &MultiVehicleManager::activeVehicleChanged,
+                this,
+                [skydroidGimbal](Vehicle *v) {
+                    skydroidGimbal->setVehicle(v);
                 }
                 );
 

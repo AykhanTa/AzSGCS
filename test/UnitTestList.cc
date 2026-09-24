@@ -13,6 +13,7 @@
 
 // ADSB
 #include "ADSBTest.h"
+#include "SkydroidGimbalTest.h"
 
 // AnalyzeView
 #include "ExifParserTest.h"
@@ -128,6 +129,7 @@ int QGCUnitTest::runTests(bool stress, const QStringList& unitTests)
 {
     // ADSB
     UT_REGISTER_TEST(ADSBTest)
+    UT_REGISTER_TEST(SkydroidGimbalTest)
 
     // AnalyzeView
     UT_REGISTER_TEST(ExifParserTest)

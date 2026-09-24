@@ -59,6 +59,7 @@ qt_add_qml_module(QGroundControlModule
     QML_FILES UI/Telemetry_Settings.qml
     QML_FILES UI/PX4LogTransfer_Settings.qml
     QML_FILES UI/ADSBServer.qml
+    QML_FILES UI/Gimbal_Settings.qml
     QML_FILES UI/Console.qml
     QML_FILES UI/AppSetting_VideoSettings.qml
     QML_FILES UI/AppSettings_MapSettings.qml

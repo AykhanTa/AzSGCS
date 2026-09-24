@@ -1,0 +1,109 @@
+{
+    "version":      1,
+    "fileType":  "FactMetaData",
+    "QGC.MetaData.Facts":
+[
+{
+    "name":              "enabled",
+    "shortDesc":         "Enable Skydroid gimbal control",
+    "longDesc":          "Control a Skydroid pod (C01-C14) over the air unit network. This is a direct IP protocol, separate from the MAVLink gimbal protocol.",
+    "type":              "bool",
+    "default":           false
+},
+{
+    "name":              "address",
+    "shortDesc":         "Pod control address",
+    "type":              "string",
+    "default":           "192.168.144.108"
+},
+{
+    "name":              "port",
+    "shortDesc":         "Pod control port",
+    "type":              "uint32",
+    "min":               1,
+    "max":               65535,
+    "default":           5000
+},
+{
+    "name":              "rcControlEnabled",
+    "shortDesc":         "Drive the gimbal from RC channels",
+    "longDesc":          "Reads the channels out of the RC_CHANNELS the autopilot reports, so the transmitter's own knobs move the gimbal.",
+    "type":              "bool",
+    "default":           true
+},
+{
+    "name":              "pitchChannel",
+    "shortDesc":         "Pitch channel",
+    "longDesc":          "1-based RC channel, 0 to disable.",
+    "type":              "uint32",
+    "min":               0,
+    "max":               18,
+    "default":           9
+},
+{
+    "name":              "yawChannel",
+    "shortDesc":         "Heading channel",
+    "type":              "uint32",
+    "min":               0,
+    "max":               18,
+    "default":           10
+},
+{
+    "name":              "zoomChannel",
+    "shortDesc":         "Zoom channel",
+    "type":              "uint32",
+    "min":               0,
+    "max":               18,
+    "default":           11
+},
+{
+    "name":              "pitchReversed",
+    "shortDesc":         "Reverse pitch",
+    "type":              "bool",
+    "default":           false
+},
+{
+    "name":              "yawReversed",
+    "shortDesc":         "Reverse heading",
+    "type":              "bool",
+    "default":           false
+},
+{
+    "name":              "maxSpeed",
+    "shortDesc":         "Maximum gimbal speed",
+    "longDesc":          "Protocol units. The stock ground station nudges the pod at 30.",
+    "type":              "uint32",
+    "min":               1,
+    "max":               127,
+    "default":           60
+},
+{
+    "name":              "rcDeadband",
+    "shortDesc":         "Channel deadband",
+    "longDesc":          "PWM either side of centre that counts as no input.",
+    "type":              "uint32",
+    "min":               0,
+    "max":               400,
+    "default":           60,
+    "units":             "us"
+},
+{
+    "name":              "rcMin",
+    "shortDesc":         "Channel minimum",
+    "type":              "uint32",
+    "min":               800,
+    "max":               1500,
+    "default":           1000,
+    "units":             "us"
+},
+{
+    "name":              "rcMax",
+    "shortDesc":         "Channel maximum",
+    "type":              "uint32",
+    "min":               1500,
+    "max":               2200,
+    "default":           2000,
+    "units":             "us"
+}
+]
+}

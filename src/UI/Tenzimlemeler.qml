@@ -94,6 +94,7 @@ Rectangle {
         ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/GPS.svg";         textLabel: qsTr("NTRIP/RTK");        page: "NTRIP_Settings.qml";                index: 4 }
         ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appTelemetr.svg"; textLabel: qsTr("Telemetriya");       page: "Telemetry_Settings.qml";            index: 5 }
         ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appADSB.svg";     textLabel: qsTr("ADSB Server");       page: "ADSBServer.qml";                    index: 6 }
+        ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appVideo.svg";    textLabel: qsTr("Gimbal");            page: "Gimbal_Settings.qml";               index: 13 }
         ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appLink.svg";     textLabel: qsTr("Rabitə Kanalları");  page: "Comm_links.qml";                    index: 7 }
         ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appMap.svg";      textLabel: qsTr("Xəritələr");         page: "AppSettings_MapSettings.qml";       index: 8 }
         ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/appPX4.svg";      textLabel: qsTr("PX4 Log Transferi"); page: "PX4LogTransfer_Settings.qml";       index: 9 }
