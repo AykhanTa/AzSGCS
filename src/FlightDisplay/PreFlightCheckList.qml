@@ -22,6 +22,8 @@ import QGroundControl.Controls
 import QGroundControl.FlightDisplay
 
 ColumnLayout {
+    id: checkListRoot
+
     // Siyahının elementləri ilə eyni yığcamlıq eşiyi.
     readonly property bool _compact: ScreenTools.isShortScreen
 
@@ -170,18 +172,18 @@ ColumnLayout {
     // Header/title of checklist
     RowLayout {
         Layout.fillWidth: true
-        height:           ScreenTools.defaultFontPixelHeight * (_compact ? 1.3 : 1.75)
+        height:           ScreenTools.defaultFontPixelHeight * (checkListRoot._compact ? 1.15 : 1.75)
         spacing:          0
 
         QGCLabel {
             Layout.fillWidth: true
             text:             allChecksPassed ? qsTr("(Keçdi)") : qsTr("Davam edir")
-            font.pointSize:   _compact ? ScreenTools.defaultFontPointSize : ScreenTools.mediumFontPointSize
+            font.pointSize:   checkListRoot._compact ? ScreenTools.defaultFontPointSize : ScreenTools.mediumFontPointSize
         }
 
         QGCButton {
-            width:            ScreenTools.defaultFontPixelHeight * (_compact ? 1.0 : 1.2)
-            height:           ScreenTools.defaultFontPixelHeight * (_compact ? 1.0 : 1.2)
+            width:            ScreenTools.defaultFontPixelHeight * (checkListRoot._compact ? 1.0 : 1.2)
+            height:           ScreenTools.defaultFontPixelHeight * (checkListRoot._compact ? 1.0 : 1.2)
             Layout.alignment: Qt.AlignVCenter
             onClicked:        restartChecklist()
 

@@ -25,6 +25,8 @@ import QGroundControl.Controls
 ///                 Or it can also optionally be override by the user.
 /// If a button uses both manual and telemetry checks, the telemetry check takes precendence and must be passed first.
 QGCButton {
+    id: checkButton
+
     property string name:                           ""
     property string manualText:                     ""      ///< text to show for a manual check, "" signals no manual check
     property string telemetryTextFailure                    ///< text to show if telemetry check failed (override not allowed)
@@ -42,7 +44,7 @@ QGCButton {
     readonly property bool _compact:    ScreenTools.isShortScreen
 
     property int _horizontalPadding:    ScreenTools.defaultFontPixelWidth * (_compact ? 0.7 : 1)
-    property int _verticalPadding:      Math.round(ScreenTools.defaultFontPixelHeight * (_compact ? 0.3 : 0.5))
+    property int _verticalPadding:      Math.round(ScreenTools.defaultFontPixelHeight * (_compact ? 0.24 : 0.5))
     property real _stateFlagWidth:      ScreenTools.defaultFontPixelWidth * (_compact ? 2.5 : 4)
 
     readonly property int _statePending:    0   ///< Telemetry check is failing or manual check not yet verified, user can click to make it pass
@@ -88,7 +90,7 @@ QGCButton {
         wrapMode:               Text.WordWrap
         horizontalAlignment:    Text.AlignHCenter
         color:                  qgcPal.buttonText
-        font.pointSize:         _compact ? ScreenTools.smallFontPointSize : ScreenTools.defaultFontPointSize
+        font.pointSize:         checkButton._compact ? ScreenTools.smallFontPointSize : ScreenTools.defaultFontPointSize
         text:                   _text
     }
 

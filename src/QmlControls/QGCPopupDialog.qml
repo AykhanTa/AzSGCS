@@ -62,8 +62,13 @@ Popup {
     signal rejected
 
     property var    _qgcPal:            QGroundControl.globalPalette
+
+    // Kiçik ekranlarda (G30/G20) başlıq sətri çox vaxt məzmundan geniş çıxır:
+    // dialoq lazımsız böyüyür və məzmunun sağında boş zolaq qalır.
+    readonly property bool _compact:    ScreenTools.isShortScreen
+
     property real   _frameSize:         ScreenTools.defaultFontPixelWidth
-    property real   _contentMargin:     ScreenTools.defaultFontPixelHeight / 2
+    property real   _contentMargin:     ScreenTools.defaultFontPixelHeight * (_compact ? 0.35 : 0.5)
     property bool   _acceptAllowed:     acceptButton.visible
     property bool   _rejectAllowed:     rejectButton.visible
     property int    _previousValidationErrorCount: 0
@@ -236,10 +241,11 @@ Popup {
                 id: titleLable
                 Layout.fillWidth:   true
                 text:               root.title
-                font.pointSize:     ScreenTools.mediumFontPointSize
+                font.pointSize:     root._compact ? ScreenTools.defaultFontPointSize : ScreenTools.mediumFontPointSize
                 font.bold:          true
                 color:              "#FFFFFF"
                 verticalAlignment:	Text.AlignVCenter
+                elide:              Text.ElideRight
             }
 
             QGCButton {
@@ -284,6 +290,9 @@ Popup {
                 Item {
                     id:     dialogContentParent
                     focus:  true
+                    // childrenRect is in this item's own coordinates, so it does
+                    // not move with x -- no binding loop.
+                    x:      Math.max(0, (parent.width - childrenRect.width) / 2)
 
                     Keys.onPressed: (event) => {
                         if (event.key === Qt.Key_Escape && _rejectAllowed) {

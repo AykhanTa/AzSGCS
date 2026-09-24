@@ -16,6 +16,8 @@ import QGroundControl.Controls
 
 /// A PreFlightCheckGroup manages a set of PreFlightCheckButtons as a single entity.
 Column  {
+    id: checkGroup
+
     property string name
     property bool   passed: false
     property bool   failed: false
@@ -51,13 +53,18 @@ Column  {
         id:             header
         anchors.left:   parent.left
         anchors.right:  parent.right
+        // Üç qrup başlığı kiçik ekranda siyahı hündürlüyünün dörddə birini
+        // yeyirdi. Toxunma sahəsi hələ də rahat qalacaq qədər saxlanılıb.
+        headerHeight:   checkGroup._compact ? Math.max(32, ScreenTools.defaultFontPixelHeight * 1.7)
+                                            : Math.max(40, ScreenTools.defaultFontPixelHeight * 2.2)
+        _sectionSpacer: ScreenTools.defaultFontPixelWidth * (checkGroup._compact ? 0.25 : 0.5)
         text:           name + (passed ? qsTr(" (passed)") : "")
         color:          failed ? qgcPal.statusFailedText : (passed ? qgcPal.statusPassedText : qgcPal.statusPendingText)
     }
 
     Column {
         id:         innerColumn
-        spacing:    ScreenTools.defaultFontPixelHeight * (_compact ? 0.28 : 0.5)
+        spacing:    ScreenTools.defaultFontPixelHeight * (checkGroup._compact ? 0.28 : 0.5)
         visible:    header.checked
 
         function buttonPassedChanged() {
