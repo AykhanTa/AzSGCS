@@ -35,9 +35,15 @@ QGCButton {
 
     property int _manualState:          manualText === "" ? _statePassed : _statePending
     property int _telemetryState:       _statePassed
-    property int _horizontalPadding:    ScreenTools.defaultFontPixelWidth
-    property int _verticalPadding:      Math.round(ScreenTools.defaultFontPixelHeight / 2)
-    property real _stateFlagWidth:      ScreenTools.defaultFontPixelWidth * 4
+
+    // Bu düymələrin eni bütün siyahının enini təyin edir. Sabit 40 simvol
+    // G30/G20 kimi ekranlarda pəncərənin yarısını tuturdu, ona görə kiçik
+    // ekranda hər ölçü yığcamlaşır.
+    readonly property bool _compact:    ScreenTools.isShortScreen
+
+    property int _horizontalPadding:    ScreenTools.defaultFontPixelWidth * (_compact ? 0.7 : 1)
+    property int _verticalPadding:      Math.round(ScreenTools.defaultFontPixelHeight * (_compact ? 0.3 : 0.5))
+    property real _stateFlagWidth:      ScreenTools.defaultFontPixelWidth * (_compact ? 2.5 : 4)
 
     readonly property int _statePending:    0   ///< Telemetry check is failing or manual check not yet verified, user can click to make it pass
     readonly property int _stateFailed:     1   ///< Telemetry check is failing, user cannot click to make it pass
@@ -59,7 +65,7 @@ QGCButton {
                                           _pendingColor :
                                           _failedColor))
 
-    width:          40 * ScreenTools.defaultFontPixelWidth
+    width:          ScreenTools.defaultFontPixelWidth * (_compact ? 29 : 40)
     topPadding:     _verticalPadding
     bottomPadding:  _verticalPadding
     leftPadding:    (_horizontalPadding * 2) + _stateFlagWidth
@@ -82,6 +88,7 @@ QGCButton {
         wrapMode:               Text.WordWrap
         horizontalAlignment:    Text.AlignHCenter
         color:                  qgcPal.buttonText
+        font.pointSize:         _compact ? ScreenTools.smallFontPointSize : ScreenTools.defaultFontPointSize
         text:                   _text
     }
 

@@ -20,7 +20,10 @@ Column  {
     property bool   passed: false
     property bool   failed: false
 
-    spacing: ScreenTools.defaultFontPixelHeight / 2
+    // Düymələrlə eyni yığcamlıq eşiyi, yoxsa aralıqlar tək başına yer yeyir.
+    readonly property bool _compact: ScreenTools.isShortScreen
+
+    spacing: ScreenTools.defaultFontPixelHeight * (_compact ? 0.28 : 0.5)
 
     property alias _checked: header.checked
 
@@ -54,7 +57,7 @@ Column  {
 
     Column {
         id:         innerColumn
-        spacing:    ScreenTools.defaultFontPixelHeight / 2
+        spacing:    ScreenTools.defaultFontPixelHeight * (_compact ? 0.28 : 0.5)
         visible:    header.checked
 
         function buttonPassedChanged() {
