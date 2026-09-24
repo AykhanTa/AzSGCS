@@ -29,7 +29,7 @@ Rectangle {
     radius:     _margins
     visible:    _camera.capturesVideo || _camera.capturesPhotos
 
-    property real   _margins:                   ScreenTools.defaultFontPixelHeight / 2
+    property real   _margins:                   ScreenTools.defaultFontPixelHeight * 0.35
     property real   _smallMargins:              ScreenTools.defaultFontPixelWidth / 2
     property var    _activeVehicle:             globals.activeVehicle
     property var    _cameraManager:             _activeVehicle.cameraManager
@@ -91,7 +91,7 @@ Rectangle {
                 // Photo/Video Mode Selector
                 Rectangle {
                     Layout.alignment:   Qt.AlignHCenter
-                    width:              ScreenTools.defaultFontPixelWidth * 10
+                    width:              ScreenTools.defaultFontPixelWidth * 7
                     height:             width / 2
                     color:              qgcPal.windowShadeLight
                     radius:             height * 0.5
@@ -158,11 +158,11 @@ Rectangle {
                 Rectangle {
                     Layout.alignment:   Qt.AlignHCenter
                     color:              Qt.rgba(0,0,0,0)
-                    width:              ScreenTools.defaultFontPixelWidth * 6
+                    width:              ScreenTools.defaultFontPixelWidth * 4.5
                     height:             width
                     radius:             width * 0.5
                     border.color:       qgcPal.buttonText
-                    border.width:       3
+                    border.width:       2
 
                     Rectangle {
                         // anchors.centerIn snaps to integer coordinates, which
@@ -219,7 +219,7 @@ Rectangle {
                         anchors.left:       parent.left
                         anchors.top:        parent.top
                         text:               _videoCaptureIdle ? "00:00:00" : _camera.recordTimeStr
-                        font.pointSize:     ScreenTools.largeFontPointSize
+                        font.pointSize:     ScreenTools.defaultFontPointSize
                         visible:            _cameraInVideoMode
                     }
 
@@ -230,7 +230,7 @@ Rectangle {
                         anchors.left:       parent.left
                         anchors.top:        parent.top
                         text:               _activeVehicle ? ('00000' + _activeVehicle.cameraTriggerPoints.count).slice(-5) : "00000"
-                        font.pointSize:     ScreenTools.largeFontPointSize
+                        font.pointSize:     ScreenTools.defaultFontPointSize
                         visible:            _cameraInPhotoMode
                     }
                 }
@@ -243,14 +243,14 @@ Rectangle {
                     QGCLabel {
                         Layout.alignment:   Qt.AlignHCenter
                         text:               qsTr("Free Space: ") + _camera.storageFreeStr
-                        font.pointSize:     ScreenTools.defaultFontPointSize
+                        font.pointSize:     ScreenTools.smallFontPointSize
                         visible:            _camera.storageStatus === MavlinkCameraControl.STORAGE_READY
                     }
 
                     QGCLabel {
                         Layout.alignment:   Qt.AlignHCenter
                         text:               qsTr("Battery: ") + _camera.batteryRemainingStr
-                        font.pointSize:     ScreenTools.defaultFontPointSize
+                        font.pointSize:     ScreenTools.smallFontPointSize
                         visible:            _camera.batteryRemaining >= 0
                     }
                 }
@@ -265,10 +265,10 @@ Rectangle {
                 Rectangle {
                     Layout.alignment:       Qt.AlignHCenter
                     color:                  _camera.trackingEnabled ? qgcPal.colorRed : qgcPal.windowShadeLight
-                    Layout.preferredWidth:  ScreenTools.defaultFontPixelWidth * 6
+                    Layout.preferredWidth:  ScreenTools.defaultFontPixelWidth * 4.5
                     Layout.preferredHeight: Layout.preferredWidth
                     border.color:           qgcPal.buttonText
-                    border.width:           3
+                    border.width:           2
                     
                     QGCColoredImage {
                         height:             parent.height * 0.5
@@ -294,7 +294,7 @@ Rectangle {
                 QGCLabel {
                     Layout.alignment:   Qt.AlignHCenter
                     text:               qsTr("Camera Tracking")
-                    font.pointSize:     ScreenTools.defaultFontPointSize
+                    font.pointSize:     ScreenTools.smallFontPointSize
                     visible:            _camera && _camera.hasTracking
                 }
             }
@@ -303,7 +303,7 @@ Rectangle {
                 Layout.alignment:       Qt.AlignHCenter
                 source:                 "/res/gear-black.svg"
                 mipmap:                 true
-                Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.5
+                Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 1.2
                 Layout.preferredWidth:  Layout.preferredHeight
                 sourceSize.height:      Layout.preferredHeight
                 color:                  qgcPal.text
