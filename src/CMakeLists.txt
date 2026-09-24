@@ -1,6 +1,10 @@
 qt_add_library(QGroundControlModule STATIC)
 
 set_source_files_properties(UI/MainWindow.qml PROPERTIES QT_RESOURCE_ALIAS MainWindow.qml)
+# UI/qmldir carries a "prefer :/qml/QGroundControl/" directive, so the engine
+# rewrites a UI/ path to the module root when it loads this page by URL. Alias it
+# there, the same way MainWindow.qml is handled.
+set_source_files_properties(UI/Gimbal_Settings.qml PROPERTIES QT_RESOURCE_ALIAS Gimbal_Settings.qml)
 
 target_link_libraries(QGroundControlModule PRIVATE Qt6::Core)
 
