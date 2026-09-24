@@ -17,6 +17,9 @@ Rectangle {
     // ---- Responsive ölçülər ----
     readonly property real _m:            Math.max(12, ScreenTools.defaultFontPixelHeight * 0.75)
     readonly property real _side:         Math.max(12, _m * 0.9)
+
+    // Çərçivə səhifəsi ilə eyni eşik — kiçik ekranlarda başlıq yığcamlaşır.
+    readonly property bool _compact:      (width < 1200) || (height < 820) || ScreenTools.isShortScreen
     readonly property real _fieldW:       Math.max(170, Math.min(240, width * 0.22))        // normal editor eni
     readonly property real _editorWideW:  Math.max(340, Math.min(520, width * 0.50))        // field+button kimi geniş editor üçün
     readonly property bool _wideTop:      width >= 1100                                      // batareya info sağda/üstə
@@ -122,12 +125,12 @@ Rectangle {
             // --- Header (yuxarı boşluqsuz) ---
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: 6
+                spacing: root._compact ? 3 : 6
 
                 Text {
                     text: qsTr("Güc Parametrləri")
                     color: "white"
-                    font.pixelSize: 26
+                    font.pixelSize: root._compact ? 21 : 26
                     font.bold: true
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
@@ -136,7 +139,7 @@ Rectangle {
                 Text {
                     text: qsTr("Batareya və enerji idarəetməsini konfiqurasiya edin")
                     color: "#E8E8E8"
-                    font.pixelSize: 16
+                    font.pixelSize: root._compact ? 13 : 16
                     font.bold: false
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true

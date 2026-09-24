@@ -48,6 +48,9 @@ Rectangle {
     // }
 
     // -------- responsive metrics --------
+    // Çərçivə səhifəsi ilə eyni eşik — G30/G20 kimi kiçik ekranlarda başlıq yığcamlaşır.
+    readonly property bool _compact: (width < 1200) || (height < 820) || ScreenTools.isShortScreen
+
     readonly property bool phone:  width < 700
     readonly property bool tablet: width < 1100
     readonly property bool smallScreen: tablet  // köhnə ad istifadə edən yerlər üçün
@@ -188,112 +191,14 @@ Rectangle {
 
     QGCPalette { id: qgcPal; colorGroupEnabled: enabled }
 
-    // -------- Header --------
-    Column {
-        id: headerArea
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.top: parent.top
-        // Enerji/Aktuatorlar səhifələri kimi başlıq yuxarıdan boşluqsuz başlasın.
-        anchors.leftMargin: sidePadding
-        anchors.rightMargin: sidePadding
-        anchors.topMargin: 0
-        spacing: Math.max(8, ScreenTools.defaultFontPixelHeight * 0.6)
-
-        Text {
-            text: qsTr("Təyyarənin Konfiqurasiyası Xülasəsi")
-            color: "white"
-            font.pixelSize: 26
-            font.bold: true
-            wrapMode: Text.WordWrap
-        }
-
-        // Subtitle — səhifənin məqsədini izah edir (digər səhifələrlə eyni üslub)
-        Text {
-            text: qsTr("Təyyarənizin bütün komponentlərinin quraşdırma vəziyyətinə buradan nəzər salın; hər blok müvafiq konfiqurasiya səhifəsinə keçid edir.")
-            color: "#E8E8E8"
-            font.pixelSize: 16
-            font.bold: false
-            wrapMode: Text.WordWrap
-            width: parent.width
-        }
-
-        // subtitle YOX (sənin istədiyin kimi)
-
-        Rectangle {
-            id: warningBar
-            anchors.left: parent.left
-            anchors.right: parent.right
-            radius: 10
-            color: "#B3947272"
-            border.width: 1
-            border.color: "#B3FF0000"
-
-            readonly property real padX: Math.max(10, ScreenTools.defaultFontPixelWidth * 1.2)
-            readonly property real padY: Math.max(8,  ScreenTools.defaultFontPixelHeight * 0.6)
-            readonly property real minH: Math.max(46, ScreenTools.defaultFontPixelHeight * 2.6)
-
-            // ✅ hündürlük mətinə görə böyüsün, min hündürlük də olsun
-            height: Math.max(minH, warnText.implicitHeight + padY * 2)
-
-            readonly property bool setupComplete: QGroundControl.multiVehicleManager.activeVehicle ?
-                QGroundControl.multiVehicleManager.activeVehicle.autopilotPlugin.setupComplete : false
-
-            // Yalnız aparat qoşulub, parametrlər hazırdır VƏ hələ də tamamlanmamış
-            // quraşdırma (qırmızı işıqlı komponent) qalıbsa göstər. Hər şey hazırdırsa
-            // (bütün işıqlar yaşıl) və ya aparat yoxdursa — gizli.
-            visible: _summaryRoot._parametersReady && !setupComplete
-
-            RowLayout {
-                anchors.fill: parent
-                anchors.leftMargin: warningBar.padX
-                anchors.rightMargin: warningBar.padX
-                anchors.topMargin: warningBar.padY
-                anchors.bottomMargin: warningBar.padY
-                spacing: Math.max(10, ScreenTools.defaultFontPixelWidth)
-
-                Image {
-                    source: "qrc:/res/AZSHIELD_ICON/bx_error.svg"
-                    Layout.preferredWidth: 22
-                    Layout.preferredHeight: 22
-                    Layout.alignment: Qt.AlignVCenter
-                    fillMode: Image.PreserveAspectFit
-                }
-
-                QGCLabel {
-                    id: warnText
-                    Layout.fillWidth: true
-                    wrapMode: Text.WordWrap
-
-                    // ✅ sağa/sola daşma olmasın
-                    elide: Text.ElideRight
-
-                    // center yazanda bəzi ölçülərdə pis görünür, səliqəli üçün Left daha yaxşıdır
-                    horizontalAlignment: Text.AlignLeft
-                    verticalAlignment: Text.AlignVCenter
-
-                    color: warningBar.setupComplete ? qgcPal.text : qgcPal.warningText
-                    font.bold: true
-                    font.pixelSize: Math.max(12, ScreenTools.defaultFontPixelHeight * 0.85)
-
-                    text: warningBar.setupComplete ?
-                        qsTr("Aşağıda təyyarəniz üçün parametrlərin xülasəsini tapa bilərsiniz. Solda hər bir komponent üçün quraşdırma menyuları var.") :
-                        qsTr("XƏBƏRDARLIQ: Təyyarəniz uçuşdan əvvəl quraşdırma tələb edir. Zəhmət olmasa, soldakı menyudan istifadə edərək qırmızı ilə işarələnmiş elementləri həll edin.")
-                }
-            }
-        }
-
-
-    }
 
     // -------- Scroll content --------
     QGCFlickable {
         id: flick
-        anchors.top: headerArea.bottom
+        anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.topMargin: Math.max(8, ScreenTools.defaultFontPixelHeight * 0.8)
 
         clip: true
         flickableDirection: Flickable.VerticalFlick
@@ -306,6 +211,102 @@ Rectangle {
             id: contentColumn
             width: parent.width
             spacing: 0
+
+            // -------- Header (məzmunla birlikdə sürüşür) --------
+            Column {
+                id: headerArea
+                // Başlıq artıq scroll məzmununun bir parçasıdır: aşağı sürüşdürəndə
+                // Çərçivə səhifəsindəki kimi yuxarı çıxır və yer tutmur.
+                x: sidePadding
+                width: Math.max(0, contentColumn.width - sidePadding * 2)
+                bottomPadding: Math.max(8, ScreenTools.defaultFontPixelHeight * 0.8)
+                spacing: Math.max(6, ScreenTools.defaultFontPixelHeight * (_summaryRoot._compact ? 0.4 : 0.6))
+
+                Text {
+                    text: qsTr("Təyyarənin Konfiqurasiyası Xülasəsi")
+                    color: "white"
+                    font.pixelSize: _summaryRoot._compact ? 21 : 26
+                    font.bold: true
+                    wrapMode: Text.WordWrap
+                }
+
+                // Subtitle — səhifənin məqsədini izah edir (digər səhifələrlə eyni üslub)
+                Text {
+                    text: qsTr("Təyyarənizin bütün komponentlərinin quraşdırma vəziyyətinə buradan nəzər salın; hər blok müvafiq konfiqurasiya səhifəsinə keçid edir.")
+                    color: "#E8E8E8"
+                    font.pixelSize: _summaryRoot._compact ? 13 : 16
+                    font.bold: false
+                    wrapMode: Text.WordWrap
+                    width: parent.width
+                }
+
+                // subtitle YOX (sənin istədiyin kimi)
+
+                Rectangle {
+                    id: warningBar
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    radius: 10
+                    color: "#B3947272"
+                    border.width: 1
+                    border.color: "#B3FF0000"
+
+                    readonly property real padX: Math.max(10, ScreenTools.defaultFontPixelWidth * 1.2)
+                    readonly property real padY: Math.max(8,  ScreenTools.defaultFontPixelHeight * 0.6)
+                    readonly property real minH: Math.max(46, ScreenTools.defaultFontPixelHeight * 2.6)
+
+                    // ✅ hündürlük mətinə görə böyüsün, min hündürlük də olsun
+                    height: Math.max(minH, warnText.implicitHeight + padY * 2)
+
+                    readonly property bool setupComplete: QGroundControl.multiVehicleManager.activeVehicle ?
+                        QGroundControl.multiVehicleManager.activeVehicle.autopilotPlugin.setupComplete : false
+
+                    // Yalnız aparat qoşulub, parametrlər hazırdır VƏ hələ də tamamlanmamış
+                    // quraşdırma (qırmızı işıqlı komponent) qalıbsa göstər. Hər şey hazırdırsa
+                    // (bütün işıqlar yaşıl) və ya aparat yoxdursa — gizli.
+                    visible: _summaryRoot._parametersReady && !setupComplete
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: warningBar.padX
+                        anchors.rightMargin: warningBar.padX
+                        anchors.topMargin: warningBar.padY
+                        anchors.bottomMargin: warningBar.padY
+                        spacing: Math.max(10, ScreenTools.defaultFontPixelWidth)
+
+                        Image {
+                            source: "qrc:/res/AZSHIELD_ICON/bx_error.svg"
+                            Layout.preferredWidth: 22
+                            Layout.preferredHeight: 22
+                            Layout.alignment: Qt.AlignVCenter
+                            fillMode: Image.PreserveAspectFit
+                        }
+
+                        QGCLabel {
+                            id: warnText
+                            Layout.fillWidth: true
+                            wrapMode: Text.WordWrap
+
+                            // ✅ sağa/sola daşma olmasın
+                            elide: Text.ElideRight
+
+                            // center yazanda bəzi ölçülərdə pis görünür, səliqəli üçün Left daha yaxşıdır
+                            horizontalAlignment: Text.AlignLeft
+                            verticalAlignment: Text.AlignVCenter
+
+                            color: warningBar.setupComplete ? qgcPal.text : qgcPal.warningText
+                            font.bold: true
+                            font.pixelSize: Math.max(12, ScreenTools.defaultFontPixelHeight * 0.85)
+
+                            text: warningBar.setupComplete ?
+                                qsTr("Aşağıda təyyarəniz üçün parametrlərin xülasəsini tapa bilərsiniz. Solda hər bir komponent üçün quraşdırma menyuları var.") :
+                                qsTr("XƏBƏRDARLIQ: Təyyarəniz uçuşdan əvvəl quraşdırma tələb edir. Zəhmət olmasa, soldakı menyudan istifadə edərək qırmızı ilə işarələnmiş elementləri həll edin.")
+                        }
+                    }
+                }
+
+
+            }
 
             // -------- Parametrlər yüklənir (digər səhifələrlə eyni üslub) --------
             // Aparat qoşulmayıb və ya parametrlər hələ hazır deyil.

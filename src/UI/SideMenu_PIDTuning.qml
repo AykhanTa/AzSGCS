@@ -20,6 +20,14 @@ Rectangle {
                                    && globals.activeVehicle.parameterManager
                                    && globals.activeVehicle.parameterManager.parametersReady
 
+    // Bu səhifədə scroll PIDTuning kontrolunun öz içindədir, ona görə başlığı
+    // sadəcə onun məzmununa qoymaq mümkün deyil. Əvəzinə scroll aşağı gedəndə
+    // başlıq yığılır (yer tutmur), yuxarı qayıdanda yenidən açılır.
+    property bool _headerCollapsed: false
+    property real _headerFactor:    (_headerCollapsed && parametersReady) ? 0 : 1
+
+    Behavior on _headerFactor { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+
     QtObject {
         id: st
         property int tab: 0   // 0=Rate, 1=Attitude
@@ -47,25 +55,40 @@ Rectangle {
         spacing: root._compact ? (root._m * 0.65) : root._m
 
         // Header (başlıq + açıqlama bir-birinə yaxın)
-        ColumnLayout {
+        // Hündürlüyü _headerFactor idarə edir; yığılanda ColumnLayout-un
+        // aralığını da aparsın deyə tamam gizlənir.
+        Item {
+            id: headerArea
             Layout.fillWidth: true
-            spacing: root._compact ? 3 : 6
+            Layout.preferredHeight: Math.round(_fullH * root._headerFactor)
+            visible: root._headerFactor > 0.01
+            clip: true
 
-            Text {
-                text: qsTr("PID tənzimləmə")
-                color: "white"
-                font.pixelSize: root._compact ? 22 : 26
-                font.bold: true
-                wrapMode: Text.WordWrap
-                Layout.fillWidth: true
-            }
+            readonly property real _fullH: headerCol.implicitHeight
 
-            Text {
-                text: qsTr("Uçuşun stabilliyini və reaksiya sürətini yaxşılaşdırmaq üçün Rate və Attitude nəzarətçilərinin PID parametrlərini tənzimləyin. Qrafikdə Response/Setpoint davranışını izləyin.")
-                color: "#E8E8E8"
-                font.pixelSize: 16
-                wrapMode: Text.WordWrap
-                Layout.fillWidth: true
+            ColumnLayout {
+                id: headerCol
+                width: headerArea.width
+                // Yığılan hissə aşağı sıxılmasın, yuxarı sürüşsün.
+                y: headerArea.height - headerArea._fullH
+                spacing: root._compact ? 3 : 6
+
+                Text {
+                    text: qsTr("PID tənzimləmə")
+                    color: "white"
+                    font.pixelSize: root._compact ? 21 : 26
+                    font.bold: true
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
+
+                Text {
+                    text: qsTr("Uçuşun stabilliyini və reaksiya sürətini yaxşılaşdırmaq üçün Rate və Attitude nəzarətçilərinin PID parametrlərini tənzimləyin. Qrafikdə Response/Setpoint davranışını izləyin.")
+                    color: "#E8E8E8"
+                    font.pixelSize: root._compact ? 13 : 16
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
             }
         }
 
@@ -196,6 +219,21 @@ Rectangle {
 
                     showAutoModeChange: true
                     showAutoTuning:     true
+
+                    // Başlığın yığılması üçün histerezis: açmaq üçün lazım olan
+                    // hədd bağlamaq həddindən xeyli aşağıdır, və başlıq yığılandan
+                    // sonra da scroll qalmalıdır -- əks halda hündürlük dəyişikliyi
+                    // scroll-u geri qısaldıb aç-bağla dövrəsi yaradardı.
+                    onScrollYChanged: {
+                        var openAt  = ScreenTools.defaultFontPixelHeight * 0.25
+                        var closeAt = ScreenTools.defaultFontPixelHeight
+
+                        if (root._headerCollapsed) {
+                            if (scrollY < openAt) root._headerCollapsed = false
+                        } else if (scrollY > closeAt && scrollMaxY > headerArea._fullH + closeAt) {
+                            root._headerCollapsed = true
+                        }
+                    }
 
                     Connections {
                         target: st

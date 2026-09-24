@@ -26,6 +26,9 @@ Rectangle {
     // Breakpoint: kiçik ekranda alt-alta, böyükdə yan-yana
     readonly property bool _twoCols: width >= 1200
 
+    // Çərçivə səhifəsi ilə eyni eşik — kiçik ekranlarda başlıq yığcamlaşır.
+    readonly property bool _compact: (width < 1200) || (height < 820) || ScreenTools.isShortScreen
+
     function _popupParent() {
         return (typeof mainWindow !== "undefined") ? mainWindow : actuatorPage
     }
@@ -75,79 +78,88 @@ Rectangle {
     }
 
 
-    ColumnLayout {
+    // Səhifənin yeganə scroll sahəsi. Başlıq da onun məzmunudur, ona görə
+    // aşağı sürüşdürəndə Çərçivə səhifəsindəki kimi yuxarı çıxır və yer tutmur.
+    QGCFlickable {
+        id: vFlick
         z: 2
         anchors.fill: parent
         anchors.leftMargin: _side
         anchors.rightMargin: _side
-        anchors.bottomMargin: _side
         anchors.topMargin: 0
+        clip: true
 
-        spacing: _m
+        flickableDirection: Flickable.VerticalFlick
+        boundsBehavior: Flickable.StopAtBounds
 
-        // Header (başlıq + açıqlama bir-birinə yaxın)
+        // ✅ interaktiv control-lar üstündə drag edəndə belə scroll başlasın
+        pressDelay: 150
+
+        contentWidth: width
+        contentHeight: pageCol.implicitHeight + _side
+
+        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+        ScrollBar.horizontal: ScrollBar { policy: ScrollBar.AlwaysOff }
+
         ColumnLayout {
-            Layout.fillWidth: true
-            spacing: 6
+            id: pageCol
+            width: vFlick.width
+            spacing: _m
 
-            Text {
-                text: qsTr("Aktuator Konfiqurasiyası")
-                color: "#FFFFFF"
-                font.pixelSize: 26
-                font.bold: true
-                wrapMode: Text.WordWrap
+            // Header (başlıq + açıqlama bir-birinə yaxın)
+            ColumnLayout {
                 Layout.fillWidth: true
+                spacing: actuatorPage._compact ? 3 : 6
+
+                Text {
+                    text: qsTr("Aktuator Konfiqurasiyası")
+                    color: "#FFFFFF"
+                    font.pixelSize: actuatorPage._compact ? 21 : 26
+                    font.bold: true
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
+
+                Text {
+                    text: qsTr("Ötürücü çıxışlarını və motor konfiqurasiyasını idarə edin. Mikserin həndəsəsini tənzimləyin və aktuator testini həyata keçirin.")
+                    color: "#E8E8E8"
+                    font.pixelSize: actuatorPage._compact ? 13 : 16
+                    font.bold: false
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
             }
 
-            Text {
-                text: qsTr("Ötürücü çıxışlarını və motor konfiqurasiyasını idarə edin. Mikserin həndəsəsini tənzimləyin və aktuator testini həyata keçirin.")
-                color: "#E8E8E8"
-                font.pixelSize: 16
-                font.bold: false
-                wrapMode: Text.WordWrap
+            // Avtopilot bağlantısı gözləyən kart
+            Rectangle {
                 Layout.fillWidth: true
+                radius: 16
+                color: "#3D3B3B"
+                border.width: 1
+                border.color: "#9D9D9D"
+                visible: !actuatorPage.parametersReady
+                implicitHeight: 220
+
+                Text {
+                    anchors.centerIn: parent
+                    width: parent.width - 2 * _m
+                    text: qsTr("Parametrlər yüklənir...\nAvtopilot bağlantısını gözləyin")
+                    color: "#FFFFFF"
+                    font.pixelSize: 18
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.WordWrap
+                }
             }
-        }
 
-        // Avtopilot bağlantısı gözləyən kart
-        Rectangle {
-            Layout.fillWidth: true
-            radius: 16
-            color: "#3D3B3B"
-            border.width: 1
-            border.color: "#9D9D9D"
-            visible: !actuatorPage.parametersReady
-            implicitHeight: 220
-
-            Text {
-                anchors.centerIn: parent
-                width: parent.width - 2 * _m
-                text: qsTr("Parametrlər yüklənir...\nAvtopilot bağlantısını gözləyin")
-                color: "#FFFFFF"
-                font.pixelSize: 18
-                font.bold: true
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.WordWrap
+            // Body Loader — yalnız avtopilot qoşulduqda yüklənir.
+            Loader {
+                id: bodyLoader
+                Layout.fillWidth: true
+                visible: actuatorPage.parametersReady
+                active: actuatorPage.parametersReady
+                sourceComponent: bodyComponent
             }
-        }
-
-        // Body Loader — yalnız avtopilot qoşulduqda yüklənir.
-        Loader {
-            id: bodyLoader
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            visible: actuatorPage.parametersReady
-            active: actuatorPage.parametersReady
-            sourceComponent: bodyComponent
-        }
-
-        // Avtopilot qoşulu olmadıqda boş yeri aşağıda saxlayan filler
-        // (Frame səhifəsindəki kimi)
-        Item {
-            Layout.fillWidth: true
-            Layout.fillHeight: !actuatorPage.parametersReady
-            Layout.preferredHeight: actuatorPage.parametersReady ? 0 : -1
-            visible: !actuatorPage.parametersReady
         }
     }
 
@@ -204,32 +216,16 @@ Rectangle {
             Item { Layout.fillWidth: true }
         }
 
-        // ✅ ScrollView yerinə QGCFlickable: mouse ilə “tutub sürüşdürüb” scroll işləyəcək
-        QGCFlickable {
-            id: vFlick
+        // Scroll artıq səhifə səviyyəsindədir; burada yalnız məzmunu boyuna
+        // görə yer tutan bir qab lazımdır.
+        Item {
             Layout.fillWidth: true
-            Layout.fillHeight: actuatorPage.parametersReady
-            Layout.preferredHeight: actuatorPage.parametersReady ? -1 : 0
-            clip: true
+            Layout.preferredHeight: contentGrid.implicitHeight
             visible: actuatorPage.parametersReady
-
-            flickableDirection: Flickable.VerticalFlick
-            boundsBehavior: Flickable.StopAtBounds
-
-            // ✅ interaktiv control-lar üstündə drag edəndə belə scroll başlasın
-            pressDelay: 150
-
-            contentWidth: width
-            contentHeight: contentGrid.implicitHeight
-
-            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
-            ScrollBar.horizontal: ScrollBar { policy: ScrollBar.AlwaysOff }
-
-
 
             GridLayout {
                 id: contentGrid
-                width: vFlick.width
+                width: parent.width
                 columns: actuatorPage._twoCols ? 2 : 1
                 columnSpacing: 30
                 rowSpacing: 30

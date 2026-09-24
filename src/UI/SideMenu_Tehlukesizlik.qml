@@ -117,31 +117,13 @@ Rectangle {
         onWheel: (wheel) => { wheel.accepted = true }
     }
 
-    // ======================= Başlıq =======================
-    Column {
-        id: headerArea
-        anchors.left: parent.left; anchors.right: parent.right; anchors.top: parent.top
-        anchors.leftMargin: _side; anchors.rightMargin: _side
-        spacing: 6
-        Text {
-            text: qsTr("Təhlükəsizlik Konfiqurasiyası")
-            color: "white"; font.pixelSize: 26; font.bold: true
-            wrapMode: Text.WordWrap; width: parent.width
-        }
-        Text {
-            text: qsTr("Batareya, RC/data-link itkisi, geofence və enmə üçün failsafe davranışlarını konfiqurasiya edin.")
-            color: "#E8E8E8"; font.pixelSize: 16
-            wrapMode: Text.WordWrap; width: parent.width
-        }
-    }
-
     // ======================= Scroll kontent =======================
     QGCFlickable {
         id: pageFlick
         z: 1
-        anchors.top: headerArea.bottom
+        anchors.top: parent.top
         anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom
-        anchors.leftMargin: _side; anchors.rightMargin: _side; anchors.topMargin: _m
+        anchors.leftMargin: _side; anchors.rightMargin: _side
         clip: true
         flickableDirection: Flickable.VerticalFlick
         contentWidth: width
@@ -152,6 +134,25 @@ Rectangle {
             id: outerCol
             width: pageFlick.width
             spacing: _m
+
+            // ---------- Başlıq ----------
+            // Scroll məzmununun bir parçasıdır: aşağı sürüşdürəndə Çərçivə
+            // səhifəsindəki kimi yuxarı çıxır və yer tutmur.
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: root._compact ? 3 : 6
+
+                Text {
+                    text: qsTr("Təhlükəsizlik Konfiqurasiyası")
+                    color: "white"; font.pixelSize: root._compact ? 21 : 26; font.bold: true
+                    wrapMode: Text.WordWrap; Layout.fillWidth: true
+                }
+                Text {
+                    text: qsTr("Batareya, RC/data-link itkisi, geofence və enmə üçün failsafe davranışlarını konfiqurasiya edin.")
+                    color: "#E8E8E8"; font.pixelSize: root._compact ? 13 : 16
+                    wrapMode: Text.WordWrap; Layout.fillWidth: true
+                }
+            }
 
             // ---------- Yükləmə / aparat yoxdur ----------
             Rectangle {

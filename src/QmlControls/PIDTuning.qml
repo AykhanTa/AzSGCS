@@ -49,6 +49,11 @@ Item {
     readonly property real _minChartH: ScreenTools.defaultFontPixelHeight * (_stacked ? 12 : 18)
     readonly property real _maxChartH: ScreenTools.defaultFontPixelHeight * (_stacked ? 18 : 32)
 
+    // Scroll vəziyyəti — bunu yerləşdirən səhifə (məs. SideMenu_PIDTuning) öz
+    // başlığını buna bağlayır ki, aşağı sürüşdürəndə başlıq yuxarı çıxsın.
+    readonly property real scrollY:    outerFlick.contentY
+    readonly property real scrollMaxY: Math.max(0, outerFlick.contentHeight - outerFlick.height)
+
     // controller local
     FactPanelController { id: controller }
 
