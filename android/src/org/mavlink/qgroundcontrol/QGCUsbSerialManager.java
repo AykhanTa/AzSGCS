@@ -28,6 +28,11 @@ public class QGCUsbSerialManager {
     private static List<UsbSerialDriver> drivers = new CopyOnWriteArrayList<>();
     private static ConcurrentHashMap<Integer, UsbDeviceResources> deviceResourcesMap = new ConcurrentHashMap<>();
 
+    // Device ids we have already put a permission dialog up for. availableDevicesInfo()
+    // is polled about once a second, so without this the user would be asked again on
+    // every poll.
+    private static final Set<Integer> permissionRequested = ConcurrentHashMap.newKeySet();
+
     // Native methods
     private static native void nativeDeviceHasDisconnected(final long classPtr);
     public static native void nativeDeviceException(final long classPtr, final String message);
@@ -185,6 +190,7 @@ public class QGCUsbSerialManager {
         UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
         if (device != null) {
             int deviceId = device.getDeviceId();
+            permissionRequested.remove(deviceId);
             UsbDeviceResources resources = deviceResourcesMap.remove(deviceId);
             if (resources != null) {
                 nativeDeviceHasDisconnected(resources.classPtr);
@@ -420,11 +426,68 @@ public class QGCUsbSerialManager {
         final List<String> deviceInfoList = new ArrayList<>();
 
         for (final UsbDevice device : usbManager.getDeviceList().values()) {
-            final String deviceInfo = formatDeviceInfo(device);
-            deviceInfoList.add(deviceInfo);
+            try {
+                requestPermissionIfSerialDevice(device);
+                deviceInfoList.add(formatDeviceInfo(device));
+            } catch (final Exception e) {
+                // One unreadable device must not cost us the whole list: some ground
+                // stations carry an internal USB device we will never have a use for,
+                // and it used to take every other port down with it.
+                QGCLogger.w(TAG, "Skipping device " + device.getDeviceName() + ": " + e);
+            }
         }
 
         return deviceInfoList.toArray(new String[0]);
+    }
+
+    /**
+     * Asks for permission to a device the prober recognises as a serial port, once.
+     *
+     * Devices that are not serial ports are left alone, so unrelated hardware on the
+     * bus never raises a dialog.
+     *
+     * @param device The UsbDevice to check.
+     */
+    private static void requestPermissionIfSerialDevice(final UsbDevice device) {
+        if (usbManager.hasPermission(device)) {
+            permissionRequested.remove(device.getDeviceId());
+            return;
+        }
+
+        if (usbSerialProber.probeDevice(device) == null) {
+            return;
+        }
+
+        if (permissionRequested.add(device.getDeviceId())) {
+            QGCLogger.i(TAG, "Requesting permission to use device " + device.getDeviceName());
+            usbManager.requestPermission(device, usbPermissionIntent);
+        }
+    }
+
+    /**
+     * Reads a device's serial number, or "" when it cannot be read.
+     *
+     * UsbDevice.getSerialNumber() throws SecurityException unless the app already holds
+     * permission for that device (Android 10 and later). It used to be called unguarded
+     * from formatDeviceInfo(), so a single device we had no permission for threw straight
+     * out of availableDevicesInfo() and the caller got no device list at all - not even
+     * the ports we did have permission for.
+     *
+     * @param device The UsbDevice to read.
+     * @return The serial number, or an empty string.
+     */
+    private static String serialNumberOf(final UsbDevice device) {
+        if (!usbManager.hasPermission(device)) {
+            return "";
+        }
+
+        try {
+            final String serialNumber = device.getSerialNumber();
+            return (serialNumber != null) ? serialNumber : "";
+        } catch (final SecurityException e) {
+            QGCLogger.w(TAG, "No permission to read serial number of " + device.getDeviceName());
+            return "";
+        }
     }
 
     /**
@@ -438,7 +501,7 @@ public class QGCUsbSerialManager {
         deviceInfo.append(device.getDeviceName()).append(":")
                  .append(device.getProductName()).append(":")
                  .append(device.getManufacturerName()).append(":")
-                 .append(device.getSerialNumber()).append(":")
+                 .append(serialNumberOf(device)).append(":")
                  .append(device.getProductId()).append(":")
                  .append(device.getVendorId());
 
