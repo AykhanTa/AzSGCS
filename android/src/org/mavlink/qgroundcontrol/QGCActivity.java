@@ -12,6 +12,8 @@ import android.view.WindowManager;
 import android.app.Activity;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
+import android.system.ErrnoException;
+import android.system.Os;
 
 import org.qtproject.qt.android.bindings.QtActivity;
 
@@ -40,6 +42,8 @@ public class QGCActivity extends QtActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        disableFullscreenKeyboard();
+
         super.onCreate(savedInstanceState);
 
         nativeInit();
@@ -48,6 +52,25 @@ public class QGCActivity extends QtActivity {
         setupMulticastLock();
 
         QGCUsbSerialManager.initialize(this);
+    }
+
+    /**
+     * Keeps the on-screen keyboard from taking over the whole screen.
+     *
+     * In landscape an IME defaults to "extract mode": it replaces the application
+     * with a full-screen editor of its own, so the field being typed into and
+     * everything around it disappear. Qt sets EditorInfo.IME_FLAG_NO_FULLSCREEN
+     * on its input connection, but only when this variable is present, and the
+     * check is a plain getenv() on the process environment.
+     *
+     * Called before super.onCreate() so it is in place before Qt starts.
+     */
+    private void disableFullscreenKeyboard() {
+        try {
+            Os.setenv("QT_ANDROID_NO_FULLSCREEN_KEYBOARD", "1", true);
+        } catch (final ErrnoException e) {
+            Log.w(TAG, "Could not disable the fullscreen keyboard", e);
+        }
     }
 
     @Override
