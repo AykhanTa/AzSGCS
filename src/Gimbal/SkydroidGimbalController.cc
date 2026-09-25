@@ -262,20 +262,39 @@ void SkydroidGimbalController::setVehicle(Vehicle *vehicle)
 
     if (_vehicle) {
         connect(_vehicle, &Vehicle::rcChannelsChanged, this, &SkydroidGimbalController::_rcChannelsChanged);
+        qCDebug(SkydroidGimbalLog) << "Following vehicle" << _vehicle->id() << "for RC input";
     } else {
+        qCDebug(SkydroidGimbalLog) << "No vehicle: RC gimbal control is inactive";
+        _rcChannelCount = 0;
+        _rcPitchPwm = -1;
+        _rcYawPwm = -1;
+        _rcZoomPwm = -1;
         stopMotion();
     }
+
+    emit rcChanged();
+}
+
+int SkydroidGimbalController::_rawChannel(int channel, int channelCount, const int *pwmValues)
+{
+    if ((channel <= 0) || (channel > channelCount) || (channel > QGCMAVLink::maxRcChannels)) {
+        return -1;
+    }
+
+    // Vehicle reports a channel it is not driving as -1, and some receivers send
+    // 0 or UINT16_MAX for the same thing.
+    const int pwm = pwmValues[channel - 1];
+    if ((pwm <= 0) || (pwm >= 65535)) {
+        return -1;
+    }
+
+    return pwm;
 }
 
 int SkydroidGimbalController::_channelToSpeed(int channel, int channelCount, const int *pwmValues, bool reversed) const
 {
-    if ((channel <= 0) || (channel > channelCount) || (channel > QGCMAVLink::maxRcChannels)) {
-        return 0;
-    }
-
-    const int pwm = pwmValues[channel - 1];
-    // A channel the receiver is not driving reads as 0 or UINT16_MAX.
-    if ((pwm <= 0) || (pwm >= 65535)) {
+    const int pwm = _rawChannel(channel, channelCount, pwmValues);
+    if (pwm < 0) {
         return 0;
     }
 
@@ -310,6 +329,27 @@ int SkydroidGimbalController::_channelToSpeed(int channel, int channelCount, con
 void SkydroidGimbalController::_rcChannelsChanged(int channelCount, int pwmValues[QGCMAVLink::maxRcChannels])
 {
     SkydroidGimbalSettings *settings = SettingsManager::instance()->skydroidGimbalSettings();
+
+    // Recorded before the enable checks, so the settings page can still show that
+    // channels are arriving when control itself is switched off. "No RC_CHANNELS
+    // at all" and "channels arrive but never leave the deadband" look identical
+    // from the outside and need opposite fixes.
+    _rcChannelCount = channelCount;
+    _rcPitchPwm = _rawChannel(settings->pitchChannel()->rawValue().toInt(), channelCount, pwmValues);
+    _rcYawPwm   = _rawChannel(settings->yawChannel()->rawValue().toInt(), channelCount, pwmValues);
+    _rcZoomPwm  = _rawChannel(settings->zoomChannel()->rawValue().toInt(), channelCount, pwmValues);
+    _rcUpdateCount++;
+    emit rcChanged();
+
+    if (!_rcLogThrottle.isValid() || (_rcLogThrottle.elapsed() > 1000)) {
+        _rcLogThrottle.restart();
+        qCDebug(SkydroidGimbalLog) << "RC chancount" << channelCount
+                                   << "pitch ch" << settings->pitchChannel()->rawValue().toInt() << "=" << _rcPitchPwm
+                                   << "yaw ch" << settings->yawChannel()->rawValue().toInt() << "=" << _rcYawPwm
+                                   << "zoom ch" << settings->zoomChannel()->rawValue().toInt() << "=" << _rcZoomPwm
+                                   << "| enabled" << settings->enabled()->rawValue().toBool()
+                                   << "rcControl" << settings->rcControlEnabled()->rawValue().toBool();
+    }
 
     if (!settings->enabled()->rawValue().toBool() || !settings->rcControlEnabled()->rawValue().toBool()) {
         return;

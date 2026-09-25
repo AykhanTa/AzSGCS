@@ -270,6 +270,75 @@ SettingsPage {
             FieldRow { fact: root._gimbal.zoomChannel;      rowEnabled: root._rcOn }
             BoolRow  { fact: root._gimbal.pitchReversed;    rowEnabled: root._rcOn }
             BoolRow  { fact: root._gimbal.yawReversed;      rowEnabled: root._rcOn }
+
+            // Canlı RC dəyərləri. Əl ilə yoxlama düymələri işləyib RC işləmirsə,
+            // problemin harada olduğunu yalnız bu göstərir: dəyərlər ümumiyyətlən
+            // gəlmir, yoxsa gəlir amma ölü zonadan çıxmır.
+            Rectangle {
+                Layout.fillWidth: true
+                radius: 10
+                color: "#2A2A2A"
+                border.width: 1
+                border.color: "#6E6E6E"
+                implicitHeight: rcLiveCol.implicitHeight + root.gap * 1.6
+
+                ColumnLayout {
+                    id: rcLiveCol
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.leftMargin: root.gap
+                    anchors.rightMargin: root.gap
+                    spacing: root.gap * 0.5
+
+                    QGCLabel {
+                        text: qsTr("Canlı RC")
+                        color: "white"
+                        font.bold: true
+                        font.pixelSize: root.labelPx
+                    }
+
+                    QGCLabel {
+                        text: {
+                            if (!root._ctl) {
+                                return qsTr("idarəedici mövcud deyil")
+                            }
+                            if (!root._ctl.rcConnected) {
+                                return qsTr("Aparat qoşulu deyil — RC_CHANNELS uçuş kontrollerindən gəlir, ona görə aparat olmadan bu yol işləmir.")
+                            }
+                            if (root._ctl.rcUpdateCount === 0) {
+                                return qsTr("Aparat qoşuludur, amma hələ bir dənə də RC_CHANNELS gəlməyib.")
+                            }
+                            return qsTr("kanal sayı: ") + root._ctl.rcChannelCount +
+                                   "  ·  pitch " + root._ctl.rcPitchPwm +
+                                   "  ·  yaw " + root._ctl.rcYawPwm +
+                                   "  ·  zoom " + root._ctl.rcZoomPwm +
+                                   "\n" + qsTr("hesablanan sürət:") +
+                                   "  pitch " + root._ctl.pitchSpeed +
+                                   "  ·  yaw " + root._ctl.yawSpeed +
+                                   "  ·  zoom " + root._ctl.zoomDirection +
+                                   "  ·  " + qsTr("paket: ") + root._ctl.rcUpdateCount
+                        }
+                        color: {
+                            if (!root._ctl || !root._ctl.rcConnected) return "#FF8A80"
+                            return (root._ctl.rcUpdateCount > 0) ? "#00C853" : "#E8E8E8"
+                        }
+                        font.pixelSize: root.labelPx * 0.92
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
+                        Layout.minimumWidth: 0
+                    }
+
+                    QGCLabel {
+                        text: qsTr("-1 = həmin kanal gəlmir. Dəyərlər dəyişir, amma sürət 0 qalırsa, ölü zonanı azaldın və ya kanal aralığını yoxlayın.")
+                        color: "#CCCCCC"
+                        font.pixelSize: root.labelPx * 0.85
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
+                        Layout.minimumWidth: 0
+                    }
+                }
+            }
         }
     }
 

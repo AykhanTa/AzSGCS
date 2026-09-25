@@ -47,6 +47,16 @@ class SkydroidGimbalController : public QObject
     Q_PROPERTY(int     zoomDirection READ zoomDirection NOTIFY zoomChanged)
     Q_PROPERTY(quint64 sentCount    READ sentCount    NOTIFY sentCountChanged)
 
+    // RC diagnostics. Without these there is no way to tell "no RC_CHANNELS is
+    // arriving at all" apart from "the channels arrive but never leave the
+    // deadband", and the two have completely different fixes.
+    Q_PROPERTY(bool    rcConnected    READ rcConnected    NOTIFY rcChanged)
+    Q_PROPERTY(int     rcChannelCount READ rcChannelCount NOTIFY rcChanged)
+    Q_PROPERTY(int     rcPitchPwm     READ rcPitchPwm     NOTIFY rcChanged)
+    Q_PROPERTY(int     rcYawPwm       READ rcYawPwm       NOTIFY rcChanged)
+    Q_PROPERTY(int     rcZoomPwm      READ rcZoomPwm      NOTIFY rcChanged)
+    Q_PROPERTY(quint64 rcUpdateCount  READ rcUpdateCount  NOTIFY rcChanged)
+
 public:
     explicit SkydroidGimbalController(QObject *parent = nullptr);
     ~SkydroidGimbalController();
@@ -68,6 +78,13 @@ public:
     int     zoomDirection() const { return _zoomDirection; }
     quint64 sentCount() const { return _sentCount; }
 
+    bool    rcConnected() const { return !_vehicle.isNull(); }
+    int     rcChannelCount() const { return _rcChannelCount; }
+    int     rcPitchPwm() const { return _rcPitchPwm; }
+    int     rcYawPwm() const { return _rcYawPwm; }
+    int     rcZoomPwm() const { return _rcZoomPwm; }
+    quint64 rcUpdateCount() const { return _rcUpdateCount; }
+
     void setVehicle(Vehicle *vehicle);
 
 public slots:
@@ -88,6 +105,7 @@ signals:
     void speedChanged();
     void zoomChanged();
     void sentCountChanged();
+    void rcChanged();
     void podReply(const QString &message);
 
 private slots:
@@ -105,6 +123,10 @@ private:
     /// `channel` is 1-based; 0 means the axis is not bound.
     int  _channelToSpeed(int channel, int channelCount, const int *pwmValues, bool reversed) const;
 
+    /// Raw PWM for a 1-based channel, or -1 when the channel is unbound or the
+    /// receiver is not driving it.
+    static int _rawChannel(int channel, int channelCount, const int *pwmValues);
+
     QUdpSocket      *_socket = nullptr;
     QTimer          *_repeatTimer = nullptr;
     QPointer<Vehicle> _vehicle;
@@ -116,4 +138,11 @@ private:
     int     _yawSpeed = 0;
     int     _zoomDirection = 0;
     quint64 _sentCount = 0;
+
+    int     _rcChannelCount = 0;
+    int     _rcPitchPwm = -1;
+    int     _rcYawPwm = -1;
+    int     _rcZoomPwm = -1;
+    quint64 _rcUpdateCount = 0;
+    QElapsedTimer _rcLogThrottle;
 };

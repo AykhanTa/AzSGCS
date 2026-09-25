@@ -314,6 +314,10 @@ void QGCApplication::_initForNormalAppBoot()
                 }
                 );
 
+            // activeVehicleChanged only fires on a change, so a vehicle that is
+            // already active by the time we get here would never be picked up.
+            skydroidGimbal->setVehicle(MultiVehicleManager::instance()->activeVehicle());
+
 
             // Image provider for Optical Flow
     _qmlAppEngine->addImageProvider(_qgcImageProviderId, new QGCImageProvider());
