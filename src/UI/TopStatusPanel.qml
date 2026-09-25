@@ -1213,7 +1213,13 @@ Rectangle {
                             }
 
                             Image {
-                                anchors.fill: parent
+                                // Bu ikonun sahəsi 20x29 -- digər blok ikonları
+                                // kvadratdır (26x26, 27x27). PreserveAspectFit onu
+                                // qutunun tam hündürlüyünə yayır, ona görə yanındakı
+                                // ikonlardan gözlə görünəcək qədər iri çıxırdı.
+                                anchors.centerIn: parent
+                                width:  Math.round(parent.width * 0.78)
+                                height: Math.round(parent.height * 0.78)
                                 visible: block.blockId === "telemetry"
                                 source: topStatusPanel.telemetryIconSource()
                                 fillMode: Image.PreserveAspectFit

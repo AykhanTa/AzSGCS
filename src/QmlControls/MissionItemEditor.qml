@@ -83,7 +83,10 @@ Rectangle {
         }
     }
 
-    Row {
+    // RowLayout, not Row: a Row leaves its children at their implicit width, so a
+    // long command name ran on underneath the trash and hamburger buttons instead
+    // of eliding at the edge of the space left for it.
+    RowLayout {
         id:                 topRowLayout
         anchors.margins:    _margin
         anchors.left:       parent.left
@@ -95,9 +98,9 @@ Rectangle {
         // Sıra nömrəsi nişanı — hansı elementin neçənci olduğu dərhal görünsün
         Rectangle {
             id:                     sequenceBadge
-            anchors.verticalCenter: parent.verticalCenter
-            width:                  Math.max(20, ScreenTools.defaultFontPixelHeight * 1.35)
-            height:                 width
+            Layout.alignment:       Qt.AlignVCenter
+            implicitWidth:          Math.max(20, ScreenTools.defaultFontPixelHeight * 1.35)
+            implicitHeight:         implicitWidth
             radius:                 width / 2
             color:                  _currentItem ? "#00C853" : "#4A4A4A"
             visible:                _readyForSave
@@ -115,9 +118,9 @@ Rectangle {
 
         Rectangle {
             id:                     notReadyForSaveIndicator
-            anchors.verticalCenter: parent.verticalCenter
-            width:                  Math.max(20, ScreenTools.defaultFontPixelHeight * 1.35)
-            height:                 width
+            Layout.alignment:       Qt.AlignVCenter
+            implicitWidth:          Math.max(20, ScreenTools.defaultFontPixelHeight * 1.35)
+            implicitHeight:         implicitWidth
             border.width:           1
             border.color:           qgcPal.warningText
             color:                  "white"
@@ -137,23 +140,32 @@ Rectangle {
 
         Item {
             id:                     commandPicker
-            anchors.verticalCenter: parent.verticalCenter
-            height:                 ScreenTools.implicitComboBoxHeight
-            width:                  innerLayout.width
+            Layout.alignment:       Qt.AlignVCenter
+            Layout.fillWidth:       true
+            Layout.minimumWidth:    0
+            // Preferred width is the whole name; the layout shrinks it from here
+            // and the label elides rather than spilling past the buttons.
+            implicitWidth:          innerLayout.implicitWidth
+            implicitHeight:         ScreenTools.implicitComboBoxHeight
             visible:                !commandLabel.visible
 
             RowLayout {
                 id:                     innerLayout
+                anchors.left:           parent.left
+                anchors.right:          parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 spacing:                _padding
 
                 property real _padding: ScreenTools.comboBoxPadding
 
                 QGCLabel {
-                    text:           missionItem.commandName
-                    font.bold:      true
-                    font.pointSize: ScreenTools.defaultFontPointSize
-                    color:          _outerTextColor
+                    text:                missionItem.commandName
+                    font.bold:           true
+                    font.pointSize:      ScreenTools.defaultFontPointSize
+                    color:               _outerTextColor
+                    elide:               Text.ElideRight
+                    Layout.fillWidth:    true
+                    Layout.minimumWidth: 0
                 }
 
                 QGCColoredImage {
@@ -186,8 +198,10 @@ Rectangle {
 
         QGCLabel {
             id:                     commandLabel
-            anchors.verticalCenter: parent.verticalCenter
-            height:                 ScreenTools.implicitComboBoxHeight
+            Layout.alignment:       Qt.AlignVCenter
+            Layout.fillWidth:       true
+            Layout.minimumWidth:    0
+            Layout.preferredHeight: ScreenTools.implicitComboBoxHeight
             visible:                !missionItem.isCurrentItem || !missionItem.isSimpleItem || _waypointsOnlyMode || missionItem.isTakeoffItem
             verticalAlignment:      Text.AlignVCenter
             text:                   missionItem.commandName

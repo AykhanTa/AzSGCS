@@ -90,6 +90,10 @@ QGCFlickable {
                             QGCLabel {
                                 id:                 textFieldLabel
                                 anchors.baseline:   textField.baseline
+                                anchors.left:       parent.left
+                                anchors.right:      textField.left
+                                anchors.rightMargin: ScreenTools.defaultFontPixelWidth / 2
+                                elide:              Text.ElideRight
                                 text:               myGeoFenceController.paramLabels[index]
                             }
 
@@ -122,7 +126,8 @@ QGCFlickable {
                     }
 
                     Rectangle {
-                        width: 300
+                        anchors.left:  parent.left
+                        anchors.right: parent.right
                         height: fenceButtons.height + 20
                         radius: 3
                         color: "#3D3B3B"
@@ -138,15 +143,14 @@ QGCFlickable {
 
                             // Polygon Fence Button
                             Rectangle {
-                                width: 300
+                                anchors.left:  parent.left
+                                anchors.right: parent.right
                                 height: 40
-                                anchors.horizontalCenter: parent.horizontalCenter
                                 radius: 3
                                 color: "#3D3B3B"
 
                                 QGCButton {
-                                    anchors.centerIn: parent
-                                    width: 300
+                                    anchors.fill: parent
                                      backgroundColor: "#2A2A2A"
                                     text: qsTr("Polygon Fence")
                                     onClicked: {
@@ -160,15 +164,14 @@ QGCFlickable {
 
                             // Circular Fence Button
                             Rectangle {
-                                width: 300
+                                anchors.left:  parent.left
+                                anchors.right: parent.right
                                 height: 40
-                                anchors.horizontalCenter: parent.horizontalCenter
                                 radius: 3
                                 color: "#3D3B3B"
 
                                 QGCButton {
-                                    anchors.centerIn: parent
-                                    width: 300
+                                    anchors.fill: parent
                                     backgroundColor: "#2A2A2A"
                                     text: qsTr("Circular Fence")
                                     onClicked: {
@@ -201,9 +204,13 @@ QGCFlickable {
                         visible:            polygonSection.checked && myGeoFenceController.polygons.count > 0
 
                         QGCLabel {
-                            text:               qsTr("Daxiletmə")
-                            Layout.column:      0
-                            Layout.alignment:   Qt.AlignHCenter
+                            text:                 qsTr("Daxiletmə")
+                            Layout.column:        0
+                            Layout.alignment:     Qt.AlignHCenter
+                            Layout.fillWidth:     true
+                            Layout.minimumWidth:  0
+                            horizontalAlignment:  Text.AlignHCenter
+                            elide:                Text.ElideRight
                              color: "#FFFFFF"
                         }
 
@@ -236,9 +243,13 @@ QGCFlickable {
                           }
 
                         QGCLabel {
-                            text:               qsTr("Redaktə et")
-                            Layout.column:      1
-                            Layout.alignment:   Qt.AlignHCenter
+                            text:                 qsTr("Redaktə et")
+                            Layout.column:        1
+                            Layout.alignment:     Qt.AlignHCenter
+                            Layout.fillWidth:     true
+                            Layout.minimumWidth:  0
+                            horizontalAlignment:  Text.AlignHCenter
+                            elide:                Text.ElideRight
                              color: "#FFFFFF"
                         }
 
@@ -261,9 +272,13 @@ QGCFlickable {
                         }
 
                         QGCLabel {
-                            text:               qsTr("Sil")
-                            Layout.column:      2
-                            Layout.alignment:   Qt.AlignHCenter
+                            text:                 qsTr("Sil")
+                            Layout.column:        2
+                            Layout.alignment:     Qt.AlignHCenter
+                            Layout.fillWidth:     true
+                            Layout.minimumWidth:  0
+                            horizontalAlignment:  Text.AlignHCenter
+                            elide:                Text.ElideRight
                              color: "#FFFFFF"
                         }
 
@@ -272,7 +287,10 @@ QGCFlickable {
 
                               // Delete butonu yerine çöp kutusu ikonu
                               QGCButton {
-                                  Layout.alignment:   Qt.AlignHCenter
+                                  Layout.alignment:       Qt.AlignHCenter
+                                  Layout.minimumWidth:    0
+                                  Layout.preferredWidth:  Math.max(30, ScreenTools.defaultFontPixelHeight * 1.8)
+                                  Layout.preferredHeight: Layout.preferredWidth
                                   onClicked:          myGeoFenceController.deletePolygon(index)
                                   backgroundColor: "#3D3B3B"
 
@@ -308,9 +326,13 @@ QGCFlickable {
                         visible:            polygonSection.checked && myGeoFenceController.circles.count > 0
 
                         QGCLabel {
-                            text:               qsTr("Daxiletmə")
-                            Layout.column:      0
-                            Layout.alignment:   Qt.AlignHCenter
+                            text:                 qsTr("Daxiletmə")
+                            Layout.column:        0
+                            Layout.alignment:     Qt.AlignHCenter
+                            Layout.fillWidth:     true
+                            Layout.minimumWidth:  0
+                            horizontalAlignment:  Text.AlignHCenter
+                            elide:                Text.ElideRight
                             color: "#FFFFFF"
                         }
 
@@ -352,9 +374,13 @@ QGCFlickable {
                         }
 
                         QGCLabel {
-                            text:               qsTr("Redaktə et")
-                            Layout.column:      1
-                            Layout.alignment:   Qt.AlignHCenter
+                            text:                 qsTr("Redaktə et")
+                            Layout.column:        1
+                            Layout.alignment:     Qt.AlignHCenter
+                            Layout.fillWidth:     true
+                            Layout.minimumWidth:  0
+                            horizontalAlignment:  Text.AlignHCenter
+                            elide:                Text.ElideRight
                              color: "#FFFFFF"
                         }
 
@@ -377,9 +403,13 @@ QGCFlickable {
                         }
 
                         QGCLabel {
-                            text:               qsTr("Radius")
-                            Layout.column:      2
-                            Layout.alignment:   Qt.AlignHCenter
+                            text:                 qsTr("Radius")
+                            Layout.column:        2
+                            Layout.alignment:     Qt.AlignHCenter
+                            Layout.fillWidth:     true
+                            Layout.minimumWidth:  0
+                            horizontalAlignment:  Text.AlignHCenter
+                            elide:                Text.ElideRight
                              color: "#FFFFFF"
                         }
 
@@ -387,16 +417,26 @@ QGCFlickable {
                             model: myGeoFenceController.circles
 
                             FactTextField {
-                                fact:               object.radius
-                                Layout.fillWidth:   true
-                                Layout.alignment:   Qt.AlignHCenter
+                                fact:                   object.radius
+                                // Yer çatmayanda layout bütün elementləri minimuma
+                                // doğru sıxır, ona görə burada həlledici olan
+                                // minimumdur: dəyər + vahid ("1000.0 m") sığmalıdır.
+                                // Sütun başlıqlarının minimumu 0-dır, sıxılmanı
+                                // onlar udur.
+                                Layout.fillWidth:       true
+                                Layout.minimumWidth:    Math.max(60, ScreenTools.defaultFontPixelWidth * 7)
+                                Layout.alignment:       Qt.AlignHCenter
                             }
                         }
 
                         QGCLabel {
-                            text:               qsTr("Sil")
-                            Layout.column:      3
-                            Layout.alignment:   Qt.AlignHCenter
+                            text:                 qsTr("Sil")
+                            Layout.column:        3
+                            Layout.alignment:     Qt.AlignHCenter
+                            Layout.fillWidth:     true
+                            Layout.minimumWidth:  0
+                            horizontalAlignment:  Text.AlignHCenter
+                            elide:                Text.ElideRight
                             color: "#FFFFFF"
                         }
 
@@ -404,8 +444,8 @@ QGCFlickable {
                             model: myGeoFenceController.circles
 
                             Rectangle {
-                                width: 30
-                                height: 30
+                                implicitWidth:  30
+                                implicitHeight: 30
                                 radius: 3
                                 color: "#3D3B3B"
                                 Layout.alignment: Qt.AlignHCenter

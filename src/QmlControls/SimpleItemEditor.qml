@@ -11,6 +11,8 @@ import QGroundControl.FactControls
 
 // Editor for Simple mission items
 Rectangle {
+    id:     simpleItemEditor
+
     width:  availableWidth
     height: editorColumn.height + (_margin * 2)
     //color:  qgcPal.windowShadeDark
@@ -26,7 +28,7 @@ Rectangle {
     property real _radius:                  ScreenTools.defaultFontPixelWidth / 2
 
     // Sağdakı dəyər sahələrinin eni — etiket solda, dəyər sağda eyni xətt üzrə
-    readonly property real _fieldW: Math.max(90, Math.min(150, availableWidth * 0.42))
+    readonly property real _fieldW: Math.max(80, Math.min(130, availableWidth * 0.38))
 
     function updateAltitudeModeText() {
         if (missionItem.altitudeMode === QGroundControl.AltitudeModeRelative) {
@@ -242,79 +244,95 @@ Rectangle {
                 }
             }
 
-            GridLayout {
+            // Hər sətir öz RowLayout-udur: etiket artıq eni udur, sahənin eni
+            // isə simpleItemEditor._fieldW ilə məhdudlaşır. Əvvəlki iki sütunlu GridLayout-da
+            // sütunun eni ən enli elementin minimumu qədər olurdu və cüt
+            // panelə sığmayanda sahələr sağ kənardan çıxırdı.
+            ColumnLayout {
                 anchors.left:   parent.left
                 anchors.right:  parent.right
-                flow:           GridLayout.TopToBottom
-                rows:           missionItem.textFieldFacts.count +
-                                missionItem.nanFacts.count +
-                                (missionItem.speedSection.available ? 1 : 0)
-                columns:        2
+                spacing:        simpleItemEditor._margin
 
                 Repeater {
                     model: missionItem.textFieldFacts
 
-                    QGCLabel {
-                        text:                object.name
+                    RowLayout {
+                        Layout.fillWidth:   true
+                        spacing:            simpleItemEditor._altRectMargin
+
+                        QGCLabel {
+                            text:                object.name
+                            Layout.fillWidth:    true
+                            Layout.minimumWidth: 0
+                            Layout.alignment:    Qt.AlignVCenter
+                            elide:               Text.ElideRight
+                        }
+
+                        FactTextField {
+                            showUnits:              true
+                            fact:                   object
+                            Layout.preferredWidth:  simpleItemEditor._fieldW
+                            Layout.maximumWidth:    simpleItemEditor._fieldW
+                            Layout.minimumWidth:    0
+                            Layout.alignment:       Qt.AlignRight | Qt.AlignVCenter
+                            enabled:                !object.readOnly
+                        }
+                    }
+                }
+
+                Repeater {
+                    model: missionItem.nanFacts
+
+                    RowLayout {
+                        Layout.fillWidth:   true
+                        spacing:            simpleItemEditor._altRectMargin
+
+                        QGCCheckBox {
+                            text:                object.name
+                            checked:             !isNaN(object.rawValue)
+                            onClicked:           object.rawValue = checked ? 0 : NaN
+                            textWrapMode:        Text.Wrap
+                            Layout.fillWidth:    true
+                            Layout.minimumWidth: 0
+                            Layout.alignment:    Qt.AlignVCenter
+                        }
+
+                        FactTextField {
+                            showUnits:              true
+                            fact:                   object
+                            Layout.preferredWidth:  simpleItemEditor._fieldW
+                            Layout.maximumWidth:    simpleItemEditor._fieldW
+                            Layout.minimumWidth:    0
+                            Layout.alignment:       Qt.AlignRight | Qt.AlignVCenter
+                            enabled:                !isNaN(object.rawValue)
+                        }
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth:   true
+                    spacing:            simpleItemEditor._altRectMargin
+                    visible:            missionItem.speedSection.available
+
+                    QGCCheckBox {
+                        id:                  flightSpeedCheckbox
+                        text:                qsTr("Flight Speed")
+                        checked:             missionItem.speedSection.specifyFlightSpeed
+                        onClicked:           missionItem.speedSection.specifyFlightSpeed = checked
+                        textWrapMode:        Text.Wrap
                         Layout.fillWidth:    true
                         Layout.minimumWidth: 0
                         Layout.alignment:    Qt.AlignVCenter
-                        elide:               Text.ElideRight
                     }
-                }
-
-                Repeater {
-                    model: missionItem.nanFacts
-
-                    QGCCheckBox {
-                        text:           object.name
-                        checked:        !isNaN(object.rawValue)
-                        onClicked:      object.rawValue = checked ? 0 : NaN
-                    }
-                }
-
-                QGCCheckBox {
-                    id:         flightSpeedCheckbox
-                    text:       qsTr("Flight Speed")
-                    checked:    missionItem.speedSection.specifyFlightSpeed
-                    onClicked:  missionItem.speedSection.specifyFlightSpeed = checked
-                    visible:    missionItem.speedSection.available
-                }
-
-
-                Repeater {
-                    model: missionItem.textFieldFacts
 
                     FactTextField {
-                        showUnits:              true
-                        fact:                   object
-                        Layout.preferredWidth:  _fieldW
+                        fact:                   missionItem.speedSection.flightSpeed
+                        Layout.preferredWidth:  simpleItemEditor._fieldW
+                        Layout.maximumWidth:    simpleItemEditor._fieldW
                         Layout.minimumWidth:    0
                         Layout.alignment:       Qt.AlignRight | Qt.AlignVCenter
-                        enabled:                !object.readOnly
+                        enabled:                flightSpeedCheckbox.checked
                     }
-                }
-
-                Repeater {
-                    model: missionItem.nanFacts
-
-                    FactTextField {
-                        showUnits:              true
-                        fact:                   object
-                        Layout.preferredWidth:  _fieldW
-                        Layout.minimumWidth:    0
-                        Layout.alignment:       Qt.AlignRight | Qt.AlignVCenter
-                        enabled:                !isNaN(object.rawValue)
-                    }
-                }
-
-                FactTextField {
-                    fact:                   missionItem.speedSection.flightSpeed
-                    Layout.preferredWidth:  _fieldW
-                    Layout.minimumWidth:    0
-                    Layout.alignment:       Qt.AlignRight | Qt.AlignVCenter
-                    enabled:                flightSpeedCheckbox.checked
-                    visible:            missionItem.speedSection.available
                 }
             }
 
