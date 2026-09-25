@@ -31,39 +31,76 @@ ApplicationWindow {
         color: "black"
         z: 9999
 
+        // main_logo.svg is a 593x426 bitmap wrapped in SVG, not vector art, so anything
+        // drawn larger than that many device pixels is an upscale. Staying at or below it
+        // keeps the logo pixel exact on both the desktop and the G30 (dpr 2.25).
+        readonly property int  _artworkWidth:  593
+        readonly property int  _artworkHeight: 426
+        readonly property real _dpr:           Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1
+
+        // Latched when the animation starts rather than bound to width/height: the window
+        // goes full screen around the same moment, and a size that changes mid-animation is
+        // what made the logo jump.
+        property int _logoWidth: 0
+
+        function _computeLogoWidth() {
+            var byWidth  = splashScreen.width * 0.5
+            var byHeight = splashScreen.height * 0.5 * (_artworkWidth / _artworkHeight)
+            var native_  = _artworkWidth / _dpr
+            return Math.max(1, Math.floor(Math.min(byWidth, byHeight, native_)))
+        }
+
+        function start() {
+            if (splashAnimation.running || !splashScreen.visible) {
+                return
+            }
+            splashScreen._logoWidth = splashScreen._computeLogoWidth()
+            splashAnimation.start()
+        }
+
         Image {
             id: splashImage
             source: "qrc:/res/AZSHIELD_ICON/main_logo.svg"
-            anchors.centerIn: parent
-            width: 0
-            height: 0
-            fillMode: Image.PreserveAspectFit
+
+            // Rasterised straight at the size it is drawn at, so nothing is scaled on the
+            // way to the screen. Only the width is given; Qt takes the height from the
+            // artwork's own ratio, which cannot squash it.
+            sourceSize.width: splashScreen._logoWidth
+            width:  implicitWidth
+            height: implicitHeight
+
+            // Whole pixels. Centering through a binding leaves the image on a half pixel,
+            // and a half-pixel texture sample is what reads as shimmer.
+            x: Math.round((splashScreen.width  - width)  / 2)
+            y: Math.round((splashScreen.height - height) / 2)
+
             opacity: 0
-            visible: true
         }
 
+        // Nothing here moves or resizes: only opacity changes, so there is no frame where
+        // the logo is drawn at a fractional size or offset.
         SequentialAnimation {
             id: splashAnimation
-            ScriptAction { script: splashImage.opacity = 1 }
 
-            ParallelAnimation {
-                PropertyAnimation {
-                    target: splashImage
-                    property: "width"
-                    to: Screen.width * 0.5
-                    duration: 2500
-                    easing.type: Easing.OutCubic
-                }
-                PropertyAnimation {
-                    target: splashImage
-                    property: "height"
-                    to: Screen.height * 0.5
-                    duration: 2500
-                    easing.type: Easing.OutCubic
-                }
+            NumberAnimation {
+                target:         splashImage
+                property:       "opacity"
+                from:           0
+                to:             1
+                duration:       600
+                easing.type:    Easing.OutCubic
             }
 
-            PauseAnimation { duration: 500 }
+            PauseAnimation { duration: 1900 }
+
+            NumberAnimation {
+                target:         splashScreen
+                property:       "opacity"
+                from:           1
+                to:             0
+                duration:       500
+                easing.type:    Easing.InCubic
+            }
 
             ScriptAction {
                 script: {
@@ -77,9 +114,9 @@ ApplicationWindow {
             }
         }
 
-        Component.onCompleted: {
-            splashAnimation.start()
-        }
+        // Backstop only. The window normally kicks this off once it is up, and callLater
+        // folds the two requests into one call.
+        Component.onCompleted: Qt.callLater(splashScreen.start)
     }
     // --- SPLASH SCREEN KODU SONU ---
 
@@ -89,6 +126,10 @@ ApplicationWindow {
             mainWindow.showFullScreen()
         }
         mainWindow.visible = true
+
+        // Only once the window is up and at its final size, so the logo is placed against
+        // geometry that will not move under it.
+        Qt.callLater(splashScreen.start)
 
         // Dar pəncərədə SideMenu avtomatik collapse (dock qalır, overlay etmirik ki UI bloklanmasın)
         Qt.callLater(_applyResponsiveMenuState)
