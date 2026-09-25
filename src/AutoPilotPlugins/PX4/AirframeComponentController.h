@@ -33,19 +33,29 @@ public:
     
     Q_PROPERTY(QVariantList airframeTypes MEMBER _airframeTypes CONSTANT)
     
-    Q_PROPERTY(QString currentAirframeType MEMBER _currentAirframeType CONSTANT)
+    Q_PROPERTY(QString currentAirframeType MEMBER _currentAirframeType NOTIFY currentAirframeTypeChanged)
     Q_PROPERTY(QString currentVehicleName MEMBER _currentVehicleName CONSTANT)
     Q_PROPERTY(int currentVehicleIndex MEMBER _currentVehicleIndex CONSTANT)
     
     Q_PROPERTY(int autostartId MEMBER _autostartId NOTIFY autostartIdChanged)
     
     Q_INVOKABLE void changeAutostart(void);
+
+    /// Which card the user last applied for an autostart id, empty when none was recorded.
+    ///
+    /// Two cards share an id when one airframe flies another's configuration (see
+    /// PX4AirframeLoader::_insertCustomAirframes). A vehicle reports only the id, so without
+    /// this the page comes back up on whichever card owns the id by default rather than on the
+    /// one that was chosen.
+    static QString savedAirframeGroup(int autostartId);
+    static void    saveAirframeGroup(int autostartId, const QString &group);
     
     int currentAirframeIndex(void);
     void setCurrentAirframeIndex(int newIndex);
     
 signals:
     void autostartIdChanged(int newAutostartId);
+    void currentAirframeTypeChanged(const QString &currentAirframeType);
     void showCustomConfigPanelChanged(bool show);
     
 private slots:

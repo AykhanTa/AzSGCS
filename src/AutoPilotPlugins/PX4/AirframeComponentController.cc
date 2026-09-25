@@ -16,11 +16,33 @@
 #include "Vehicle.h"
 #include "ParameterManager.h"
 
+#include <QtCore/QSettings>
 #include <QtCore/QThread>
 #include <QtCore/QVariant>
 #include <QtGui/QCursor>
 
 bool AirframeComponentController::_typesRegistered = false;
+
+/// QSettings group holding the applied card per autostart id.
+static const char *kAirframeSelectionSettingsGroup = "AirframeSelection";
+
+QString AirframeComponentController::savedAirframeGroup(int autostartId)
+{
+    QSettings settings;
+    settings.beginGroup(kAirframeSelectionSettingsGroup);
+    return settings.value(QString::number(autostartId)).toString();
+}
+
+void AirframeComponentController::saveAirframeGroup(int autostartId, const QString &group)
+{
+    if (group.isEmpty()) {
+        return;
+    }
+
+    QSettings settings;
+    settings.beginGroup(kAirframeSelectionSettingsGroup);
+    settings.setValue(QString::number(autostartId), group);
+}
 
 AirframeComponentController::AirframeComponentController(void) :
     _currentVehicleIndex(0),
@@ -42,6 +64,10 @@ AirframeComponentController::AirframeComponentController(void) :
     bool autostartFound = false;
     _autostartId = getParameterFact(ParameterManager::defaultComponentId, "SYS_AUTOSTART")->rawValue().toInt();
     _currentVehicleName = QString::number(_autostartId); // Temp val. Replaced with actual vehicle name if found
+
+    // The card the user applied for this id, if it was this ground station that applied it.
+    const QString rememberedGroup = savedAirframeGroup(_autostartId);
+    bool selectionRemembered = false;
     
     for (int tindex = 0; tindex < AirframeComponentAirframes::get().count(); tindex++) {
 
@@ -66,10 +92,23 @@ AirframeComponentController::AirframeComponentController(void) :
                     qWarning() << "AirframeComponentController::AirframeComponentController duplicate ids found:" << _autostartId;
                 }
 
-                const bool claimsSelection = !autostartFound || !pType->secondary;
+                const bool isRemembered = !rememberedGroup.isEmpty() && (pType->name == rememberedGroup);
+
+                bool claimsSelection;
+                if (!autostartFound) {
+                    claimsSelection = true;
+                } else if (selectionRemembered) {
+                    // What the user actually applied outranks every other rule.
+                    claimsSelection = false;
+                } else if (isRemembered) {
+                    claimsSelection = true;
+                } else {
+                    claimsSelection = !pType->secondary;
+                }
                 autostartFound = true;
 
                 if (claimsSelection) {
+                    selectionRemembered = isRemembered;
                     _currentAirframeType = pType->name;
                     _currentVehicleName = pInfo->name;
                     _currentVehicleIndex = index;
@@ -99,7 +138,11 @@ void AirframeComponentController::changeAutostart(void)
                 return;
         }
     QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    
+
+    // Record the card before the vehicle reboots. It reports back only SYS_AUTOSTART, which two
+    // cards can share, so this is the only place the choice between them can be kept.
+    saveAirframeGroup(_autostartId, _currentAirframeType);
+
     Fact* sysAutoStartFact  = getParameterFact(-1, "SYS_AUTOSTART");
     Fact* sysAutoConfigFact = getParameterFact(-1, "SYS_AUTOCONFIG");
     
