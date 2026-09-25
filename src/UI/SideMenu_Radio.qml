@@ -576,9 +576,21 @@ Rectangle {
                         Layout.preferredHeight: root.rcMonitorH
                         clip: true
 
-                        RCChannelMonitor {
-                            anchors.fill: parent
-                            twoColumn: true
+                        // Monitor bütün kanallar üçün öz hündürlüyünü alır; kart sabit hündürlükdədir,
+                        // ona görə sığmayan kanallar kəsilməsin deyə burada scroll olunur. Hamısı
+                        // sığanda interactive söndürülür ki, sürüşdürmə səhifənin özünə getsin.
+                        QGCFlickable {
+                            anchors.fill:       parent
+                            contentWidth:       width
+                            contentHeight:      rcMonitorWide.height
+                            flickableDirection: Flickable.VerticalFlick
+                            interactive:        contentHeight > height
+
+                            RCChannelMonitor {
+                                id:         rcMonitorWide
+                                width:      parent.width
+                                twoColumn:  true
+                            }
                         }
 
                         // Placeholder overlay
@@ -949,9 +961,21 @@ Rectangle {
                                 Layout.preferredHeight: root.rcMonitorH
                                 clip: true
 
-                                RCChannelMonitor {
-                                    anchors.fill: parent
-                                    twoColumn: false
+                                // Monitor bütün kanallar üçün öz hündürlüyünü alır; kart sabit hündürlükdədir,
+                                // ona görə sığmayan kanallar kəsilməsin deyə burada scroll olunur. Hamısı
+                                // sığanda interactive söndürülür ki, sürüşdürmə səhifənin özünə getsin.
+                                QGCFlickable {
+                                    anchors.fill:       parent
+                                    contentWidth:       width
+                                    contentHeight:      rcMonitorCompact.height
+                                    flickableDirection: Flickable.VerticalFlick
+                                    interactive:        contentHeight > height
+
+                                    RCChannelMonitor {
+                                        id:         rcMonitorCompact
+                                        width:      parent.width
+                                        twoColumn:  false
+                                    }
                                 }
 
                                 Rectangle {

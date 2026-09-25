@@ -399,10 +399,22 @@ Rectangle {
                                         Layout.fillWidth: true
                                     }
 
-                                    RCChannelMonitor {
-                                        Layout.fillWidth: true
-                                        Layout.fillHeight: true
-                                        twoColumn: width >= 600
+                                    // Monitor bütün kanallar üçün öz hündürlüyünü alır; kart sabit hündürlükdədir,
+                                    // ona görə sığmayan kanallar kəsilməsin deyə burada scroll olunur. Hamısı
+                                    // sığanda interactive söndürülür ki, sürüşdürmə səhifənin özünə getsin.
+                                    QGCFlickable {
+                                        Layout.fillWidth:   true
+                                        Layout.fillHeight:  true
+                                        contentWidth:       width
+                                        contentHeight:      rcMonitor.height
+                                        flickableDirection: Flickable.VerticalFlick
+                                        interactive:        contentHeight > height
+
+                                        RCChannelMonitor {
+                                            id:         rcMonitor
+                                            width:      parent.width
+                                            twoColumn:  width >= 600
+                                        }
                                     }
                                 }
 
