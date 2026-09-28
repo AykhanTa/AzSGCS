@@ -247,6 +247,7 @@
         <file alias="QGroundControl/SideMenu_Tehlukesizlik.qml">src/UI/SideMenu_Tehlukesizlik.qml</file>
         <file alias="QGroundControl/SideMenu_PIDTuning.qml">src/UI/SideMenu_PIDTuning.qml</file>
         <file alias="QGroundControl/Side_Parameter.qml">src/UI/Side_Parameter.qml</file>
+        <file alias="QGroundControl/Side_ParameterPage.qml">src/UI/Side_ParameterPage.qml</file>
         <file alias="QGroundControl/Side_Proqram_Teminati.qml">src/UI/Side_Proqram_Teminati.qml</file>
 
 <file alias="QGroundControl/SerialSettings.qml">src/UI/SerialSettings.qml</file>

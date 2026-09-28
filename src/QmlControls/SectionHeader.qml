@@ -25,6 +25,9 @@ CheckBox {
     /// Başlıq zolağının hündürlüyü. Yığcam yerlərdə (məs. uçuşdan əvvəl yoxlama
     /// siyahısı) kiçildilə bilsin deyə açıq saxlanılıb; default dəyər dəyişməyib.
     property real  headerHeight:   Math.max(40, ScreenTools.defaultFontPixelHeight * 2.2)
+    /// Uzun başlıq əvvəlcə bir az kiçilib sığmağa çalışsın, kəsilmə yalnız son çarə olsun.
+    /// Default söndürülüb ki, digər istifadə yerləri dəyişməsin.
+    property bool  shrinkToFit:    false
 
     property real  _pad:           Math.max(8, ScreenTools.defaultFontPixelWidth * 0.9)
     property real  _sectionSpacer: ScreenTools.defaultFontPixelWidth / 2
@@ -75,6 +78,8 @@ CheckBox {
                 color:                  control.color
                 font.bold:              true
                 font.pointSize:         ScreenTools.defaultFontPointSize
+                fontSizeMode:           control.shrinkToFit ? Text.HorizontalFit : Text.FixedSize
+                minimumPointSize:       ScreenTools.defaultFontPointSize * 0.75
                 elide:                  Text.ElideRight
             }
 

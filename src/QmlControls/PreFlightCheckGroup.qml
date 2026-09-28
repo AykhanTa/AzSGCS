@@ -58,6 +58,9 @@ Column  {
         headerHeight:   checkGroup._compact ? Math.max(32, ScreenTools.defaultFontPixelHeight * 1.7)
                                             : Math.max(40, ScreenTools.defaultFontPixelHeight * 2.2)
         _sectionSpacer: ScreenTools.defaultFontPixelWidth * (checkGroup._compact ? 0.25 : 0.5)
+        // Qrup adları cümlədir ("Zəhmət olmasa aparatı burada işə salın") və dar panelə
+        // sığmayanda kəsilirdi.
+        shrinkToFit:    true
         text:           name + (passed ? qsTr(" (passed)") : "")
         color:          failed ? qgcPal.statusFailedText : (passed ? qgcPal.statusPassedText : qgcPal.statusPendingText)
     }
