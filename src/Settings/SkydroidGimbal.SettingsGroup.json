@@ -27,7 +27,7 @@
 {
     "name":              "rcControlEnabled",
     "shortDesc":         "Drive the gimbal from RC channels",
-    "longDesc":          "Reads the channels out of the RC_CHANNELS the autopilot reports, so the transmitter's own knobs move the gimbal.",
+    "longDesc":          "Moves the gimbal from the transmitter's own knobs. On a Skydroid remote controller the channels are read from the controller itself, so no autopilot is needed; otherwise they come from the RC_CHANNELS the autopilot reports.",
     "type":              "bool",
     "default":           true
 },

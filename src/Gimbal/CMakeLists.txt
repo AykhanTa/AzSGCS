@@ -6,6 +6,8 @@ target_sources(${CMAKE_PROJECT_NAME}
         GimbalController.h
         SkydroidGimbalController.cc
         SkydroidGimbalController.h
+        SkydroidRcInput.cc
+        SkydroidRcInput.h
 )
 
 # Add JSON files

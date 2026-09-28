@@ -47,6 +47,7 @@ qt_add_qml_module(FlightDisplayModule
         ObstacleDistanceOverlayMap.qml
         ObstacleDistanceOverlayVideo.qml
         OnScreenGimbalController.qml
+        SkydroidGimbalShortcuts.qml
         PreFlightBatteryCheck.qml
         PreFlightCheckList.qml
         PreFlightCheckListShowAction.qml

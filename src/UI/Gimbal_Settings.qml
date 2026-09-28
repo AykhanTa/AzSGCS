@@ -298,16 +298,60 @@ SettingsPage {
                         font.pixelSize: root.labelPx
                     }
 
+                    // Kanalların haradan gəldiyi: pultun özü (Skydroid SDK) və ya
+                    // uçuş kontrollerinin RC_CHANNELS mesajı. Pult oxunursa o üstündür.
+                    QGCLabel {
+                        visible: !!root._ctl
+                        text: {
+                            if (!root._ctl) {
+                                return ""
+                            }
+                            switch (root._ctl.rcSource) {
+                            case 2:  return qsTr("Mənbə: pultun özü (Skydroid SDK)")
+                            case 1:  return qsTr("Mənbə: uçuş kontrolleri (RC_CHANNELS)")
+                            default: return qsTr("Mənbə: yoxdur")
+                            }
+                        }
+                        color: (root._ctl && root._ctl.rcSource !== 0) ? "#00C853" : "#FF8A80"
+                        font.pixelSize: root.labelPx * 0.92
+                        font.bold: true
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
+                        Layout.minimumWidth: 0
+                    }
+
+                    QGCLabel {
+                        visible: !!root._ctl && (root._ctl.rcInputState !== -1)
+                        text: {
+                            if (!root._ctl) {
+                                return ""
+                            }
+                            switch (root._ctl.rcInputState) {
+                            case 0:  return qsTr("Pult: oxunmur — gimbal və ya RC idarəsi söndürülüb.")
+                            case 1:  return qsTr("Pult: qoşulur…")
+                            case 2:  return qsTr("Pult: qoşuludur.")
+                            case 3:  return qsTr("Pult: qoşulmaq alınmadı (%1). Skydroid köməkçi tətbiqi açıqdırsa, bağlayın — hər 5 saniyədən bir yenidən cəhd edilir.").arg(root._ctl.rcInputMessage)
+                            default: return ""
+                            }
+                        }
+                        color: (root._ctl && root._ctl.rcInputState === 2) ? "#E8E8E8"
+                             : (root._ctl && root._ctl.rcInputState === 3) ? "#FFB74D" : "#CCCCCC"
+                        font.pixelSize: root.labelPx * 0.85
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
+                        Layout.minimumWidth: 0
+                    }
+
                     QGCLabel {
                         text: {
                             if (!root._ctl) {
                                 return qsTr("idarəedici mövcud deyil")
                             }
                             if (!root._ctl.rcConnected) {
-                                return qsTr("Aparat qoşulu deyil — RC_CHANNELS uçuş kontrollerindən gəlir, ona görə aparat olmadan bu yol işləmir.")
+                                return qsTr("Kanal mənbəyi yoxdur: pult oxunmur və uçuş kontrolleri qoşulu deyil.")
                             }
                             if (root._ctl.rcUpdateCount === 0) {
-                                return qsTr("Aparat qoşuludur, amma hələ bir dənə də RC_CHANNELS gəlməyib.")
+                                return qsTr("Mənbə var, amma hələ bir dənə də kanal paketi gəlməyib.")
                             }
                             return qsTr("kanal sayı: ") + root._ctl.rcChannelCount +
                                    "  ·  pitch " + root._ctl.rcPitchPwm +
@@ -321,9 +365,31 @@ SettingsPage {
                         }
                         color: {
                             if (!root._ctl || !root._ctl.rcConnected) return "#FF8A80"
-                            return (root._ctl.rcUpdateCount > 0) ? "#00C853" : "#E8E8E8"
+                            return (root._ctl.rcSource !== 0) ? "#00C853" : "#E8E8E8"
                         }
                         font.pixelSize: root.labelPx * 0.92
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
+                        Layout.minimumWidth: 0
+                    }
+
+                    // Bütün kanallar: hansı düymənin hansı kanalı tərpətdiyini burada
+                    // görüb yuxarıdakı kanal nömrələrini ona görə təyin etmək olur.
+                    QGCLabel {
+                        visible: !!root._ctl && (root._ctl.rcChannels.length > 0)
+                        text: {
+                            if (!root._ctl) {
+                                return ""
+                            }
+                            var channels = root._ctl.rcChannels
+                            var parts = []
+                            for (var i = 0; i < channels.length; i++) {
+                                parts.push("CH" + (i + 1) + " " + channels[i])
+                            }
+                            return qsTr("Bütün kanallar: ") + parts.join("  ·  ")
+                        }
+                        color: "#E8E8E8"
+                        font.pixelSize: root.labelPx * 0.85
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
@@ -446,6 +512,42 @@ SettingsPage {
                     Layout.fillWidth: true
                     onPressed: root._ctl.zoomOut()
                     onReleased: root._ctl.zoomStop()
+                }
+            }
+
+            QGCLabel {
+                text: qsTr("Montaj rejimi")
+                color: "white"
+                font.bold: true
+                font.pixelSize: root.labelPx * 1.05
+                Layout.topMargin: root.gap * 0.5
+            }
+
+            // Əvvəlki versiyada zoom əmri əslində bu rejimi dəyişən əmr idi, ona
+            // görə gimbal səhv rejimdə qalmış ola bilər. Bərpa yolu buradır.
+            QGCLabel {
+                text: qsTr("Pod-un necə quraşdırıldığını bildirir. Əvvəlki versiyada zoom düymələri bu rejimi səhvən dəyişirdi: gimbal tərs dönürsə və ya qəribə hərəkət edirsə, burada düzgün rejimi seçin. Dronun altından asılan pod üçün \"Asılı\" seçilir.")
+                color: "#CCCCCC"
+                font.pixelSize: root.labelPx * 0.92
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+                Layout.minimumWidth: 0
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: root.gap
+                enabled: root._ctl && root._gimbal.enabled.rawValue
+
+                QGCButton {
+                    text: qsTr("Asılı (normal)")
+                    Layout.fillWidth: true
+                    onClicked: root._ctl.setMountHanging()
+                }
+                QGCButton {
+                    text: qsTr("Tərs (üstdə)")
+                    Layout.fillWidth: true
+                    onClicked: root._ctl.setMountInverted()
                 }
             }
         }

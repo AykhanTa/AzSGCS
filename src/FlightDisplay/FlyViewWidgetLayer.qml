@@ -214,6 +214,34 @@ Item {
         height: Math.min(implicitHeight, Math.max(120, _maxH))
     }
 
+    // Skydroid pod shortcuts down the right edge, like Skydroid's own ground station.
+    // They sit under whatever the compass/telemetry stack is drawing, and only move to
+    // its left when even the smallest buttons would not fit beneath it.
+    SkydroidGimbalShortcuts {
+        id:                     skydroidShortcuts
+        z:                      QGroundControl.zOrderWidgets
+        anchors.right:          parent.right
+        anchors.rightMargin:    _besideStack ? (_totalToolInsets.rightEdgeCenterInset + _margin) : _margin
+
+        readonly property real _margin:     _root._layoutMargin
+        readonly property real _topInset:   (_root.topStatusPanelRef && _root.topStatusPanelRef.visible) ? _root.topStatusPanelRef.height : 0
+        readonly property var  _settings:   QGroundControl.settingsManager.skydroidGimbalSettings
+
+        // The instrument panel keeps its size with no vehicle but draws nothing, so the
+        // stack only counts once it has something to show.
+        readonly property bool _stackShowing: bottomRightRowLayout.visible && (!!_root._activeVehicle || mainWindow.showFlightPanel)
+        readonly property real _stackBottom:  _stackShowing ? (bottomRightRowLayout.y + (bottomRightRowLayout.height * bottomRightRowLayout.scale)) : _topInset
+        readonly property real _roomBelow:    _root.height - _stackBottom - (_margin * 2)
+        readonly property bool _besideStack:  _roomBelow < minimumHeight
+
+        availableHeight: _besideStack ? (_root.height - _topInset - (_margin * 2)) : _roomBelow
+        y:               (_besideStack ? (_topInset + _margin) : (_stackBottom + _margin)) + ((availableHeight - height) / 2)
+        // This layer only exists on the fly view, so the pod being enabled is all it takes.
+        // (mainWindow.isFlyViewActive is the flight instrument panel's toggle, not "fly
+        // view is showing", and would hide these on the main video screen.)
+        visible:         _settings.enabled.rawValue
+    }
+
     FlyViewMissionCompleteDialog {
         missionController:      _missionController
         geoFenceController:     _geoFenceController

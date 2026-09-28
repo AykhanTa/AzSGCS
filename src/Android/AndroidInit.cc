@@ -4,6 +4,7 @@
 #endif
 #include "JoystickAndroid.h"
 #include "QGCLoggingCategory.h"
+#include "SkydroidRcInput.h"
 
 #include <QtCore/QJniEnvironment>
 #include <QtCore/QJniObject>
@@ -109,6 +110,8 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved)
     #endif
 
     JoystickAndroid::setNativeMethods();
+
+    SkydroidRcInput::setNativeMethods();
 
     QNativeInterface::QAndroidApplication::hideSplashScreen(333);
 

@@ -22,10 +22,20 @@ private slots:
     void _rcCentredStickKeepsButtonTest();
     void _rcWatchdogStopsTest();
     void _rcDisableStopsTest();
+    void _remoteOverridesVehicleTest();
+    void _remoteWatchdogTest();
+    void _vehicleTakesOverAfterRemoteTest();
+    void _vehicleLossKeepsRemoteTest();
+    void _parseReplyTest();
+    void _toggledStreamUrlTest();
+    void _podCommandsOnTheWireTest();
 
 private:
     /// Feeds one RC_CHANNELS sample with every channel centred except `channel`.
     static void _sendRc(SkydroidGimbalController &controller, int channel, int pwm);
+
+    /// Same, as read off the Skydroid remote controller itself.
+    static void _sendRemote(SkydroidGimbalController &controller, int channel, int pwm);
 
     QVariantMap _savedSettings;
 };
