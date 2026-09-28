@@ -5125,7 +5125,7 @@ Click Ok to start the auto-tuning process.
     <message>
       <location filename="../src/FlightDisplay/DefaultChecklist.qml" line="50"/>
       <source>Please arm the vehicle here</source>
-      <translation>Zəhmət olmasa aparatı burada xodlayın</translation>
+      <translation>Zəhmət olmasa aparatı burada işə salın</translation>
     </message>
     <message>
       <location filename="../src/FlightDisplay/DefaultChecklist.qml" line="53"/>
@@ -6243,7 +6243,7 @@ Click Ok to start the auto-tuning process.
     <message>
       <location filename="../src/FlightDisplay/FixedWingChecklist.qml" line="25"/>
       <source>Fixed Wing Initial Checks</source>
-      <translation>Sabit qanad ilkin yoxlamalar</translation>
+      <translation>Sabit Qanad İlkin Yoxlanışlar</translation>
     </message>
     <message>
       <location filename="../src/FlightDisplay/FixedWingChecklist.qml" line="28"/>
@@ -6258,7 +6258,7 @@ Click Ok to start the auto-tuning process.
     <message>
       <location filename="../src/FlightDisplay/FixedWingChecklist.qml" line="50"/>
       <source>Please arm the vehicle here</source>
-      <translation>Zəhmət aparatı burada xodlayın</translation>
+      <translation>Zəhmət olmasa aparatı burada işə salın</translation>
     </message>
     <message>
       <location filename="../src/FlightDisplay/FixedWingChecklist.qml" line="53"/>
@@ -10572,7 +10572,7 @@ Do you wish to proceed?</translation>
     <message>
       <location filename="../src/FlightDisplay/MultiRotorChecklist.qml" line="25"/>
       <source>Multirotor Initial Checks</source>
-      <translation>Multirotor İlkin Çeklər</translation>
+      <translation>Multirotor İlkin Yoxlanışlar</translation>
     </message>
     <message>
       <location filename="../src/FlightDisplay/MultiRotorChecklist.qml" line="28"/>
@@ -10587,7 +10587,7 @@ Do you wish to proceed?</translation>
     <message>
       <location filename="../src/FlightDisplay/MultiRotorChecklist.qml" line="50"/>
       <source>Please arm the vehicle here</source>
-      <translation>Zəhmət olmasa aparatı burada xodlayın</translation>
+      <translation>Zəhmət olmasa aparatı burada işə salın</translation>
     </message>
     <message>
       <location filename="../src/FlightDisplay/MultiRotorChecklist.qml" line="53"/>
@@ -15167,7 +15167,7 @@ Lövhəyə kalibrləmə yükləmək üçün Sonrakı düyməsini vurun. Bu dəy�
     <message>
       <location filename="../src/FlightDisplay/RoverChecklist.qml" line="25"/>
       <source>Rover Initial Checks</source>
-      <translation>Rover İlkin Çeklər</translation>
+      <translation>Rover İlkin Yoxlanışlar</translation>
     </message>
     <message>
       <location filename="../src/FlightDisplay/RoverChecklist.qml" line="28"/>
@@ -15182,7 +15182,7 @@ Lövhəyə kalibrləmə yükləmək üçün Sonrakı düyməsini vurun. Bu dəy�
     <message>
       <location filename="../src/FlightDisplay/RoverChecklist.qml" line="50"/>
       <source>Please arm the vehicle here</source>
-      <translation>Zəhmət olmasa aparatı burada xodlayın</translation>
+      <translation>Zəhmət olmasa aparatı burada işə salın</translation>
     </message>
     <message>
       <location filename="../src/FlightDisplay/RoverChecklist.qml" line="53"/>
@@ -16574,7 +16574,7 @@ ROTATION_NONE indicates component points in direction of flight.</translation>
     <message>
       <location filename="../src/FlightDisplay/SubChecklist.qml" line="50"/>
       <source>Please arm the vehicle here</source>
-      <translation>Zəhmət olmasa nəqliyyat vasitəsini burada silahlandırın</translation>
+      <translation>Zəhmət olmasa aparatı burada işə salın</translation>
     </message>
     <message>
       <location filename="../src/FlightDisplay/SubChecklist.qml" line="53"/>
@@ -17655,7 +17655,7 @@ ROTATION_NONE indicates component points in direction of flight.</translation>
     <message>
       <location filename="../src/FlightDisplay/VTOLChecklist.qml" line="25"/>
       <source>VTOL Initial Checks</source>
-      <translation>VTOL İlkin Çeklər</translation>
+      <translation>VTOL İlkin Yoxlanışlar</translation>
     </message>
     <message>
       <location filename="../src/FlightDisplay/VTOLChecklist.qml" line="28"/>
@@ -17670,7 +17670,7 @@ ROTATION_NONE indicates component points in direction of flight.</translation>
     <message>
       <location filename="../src/FlightDisplay/VTOLChecklist.qml" line="50"/>
       <source>Please arm the vehicle here</source>
-      <translation>Zəhmət olmasa aparatı burada xodlayın</translation>
+      <translation>Zəhmət olmasa aparatı burada işə salın</translation>
     </message>
     <message>
       <location filename="../src/FlightDisplay/VTOLChecklist.qml" line="53"/>

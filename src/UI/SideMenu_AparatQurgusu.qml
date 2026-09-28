@@ -233,7 +233,7 @@ Rectangle {
                         ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/Motors.svg";      textLabel: qsTr("Aktuatorlar");      page: "SideMenu_Motors.qml";         idx: 7 }
                         ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/Safety.svg";      textLabel: qsTr("Təhlükəsizlik");    page: "SideMenu_Tehlukesizlik.qml";  idx: 8 }
                         ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/PID.svg";         textLabel: qsTr("PID tənzimləmə");   page: "SideMenu_PIDTuning.qml";      idx: 9 }
-                        ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/Parameters.svg";  textLabel: qsTr("Parametrlər");      page: "Side_Parameter.qml";          idx: 10 }
+                        ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/Parameters.svg";  textLabel: qsTr("Parametrlər");      page: "Side_ParameterPage.qml";      idx: 10 }
                         ListElement { iconPath: "qrc:/res/AZSHIELD_ICON/Firmware.svg";    textLabel: qsTr("Proqramı Yüklə");   page: "Side_Proqram_Teminati.qml";   idx: 11 }
                     }
 

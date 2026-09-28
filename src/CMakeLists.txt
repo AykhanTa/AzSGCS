@@ -29,6 +29,7 @@ qt_add_qml_module(QGroundControlModule
     QML_FILES UI/MainWindow.qml
     QML_FILES UI/TopStatusPanel_GPS.qml
     QML_FILES UI/Side_Parameter.qml
+    QML_FILES UI/Side_ParameterPage.qml
     QML_FILES UI/Side_Proqram_Teminati.qml
     QML_FILES UI/SideMenu_Enerji.qml
     QML_FILES UI/SideMenu_FlightMode.qml

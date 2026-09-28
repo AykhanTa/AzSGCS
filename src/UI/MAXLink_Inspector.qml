@@ -212,12 +212,42 @@ AnalyzePage {
         id: pageComponent
 
         Item {
+            id: pageRoot
             width:  availableWidth
             height: availableHeight
 
+            readonly property bool _hasVehicle: !!QGroundControl.multiVehicleManager.activeVehicle
+
             Loader {
                 anchors.fill: parent
+                active: pageRoot._hasVehicle
                 sourceComponent: root._compact ? compactPage : widePage
+            }
+
+            // Aparat qoşulmayıbsa digər səhifələr kimi boz panel.
+            Rectangle {
+                visible: !pageRoot._hasVehicle
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.leftMargin: root._sidePad
+                anchors.rightMargin: root._sidePad
+                height: 220
+                radius: 16
+                color: "#3D3B3B"
+                border.width: 1
+                border.color: "#9D9D9D"
+
+                Text {
+                    anchors.centerIn: parent
+                    width: parent.width - (root._sidePad * 2)
+                    text: qsTr("Aktiv aparat yoxdur.\nQoşulduqdan sonra MAVLink mesajları görünəcək.")
+                    color: "#FFFFFF"
+                    font.pixelSize: Math.max(16, root._fontH * 0.95)
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.WordWrap
+                }
             }
         }
     }

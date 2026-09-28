@@ -312,7 +312,7 @@ Rectangle {
 
                     QGCLabel {
                         Layout.fillWidth: true
-                        text: _activeVehicle ? qsTr("Arm") : qsTr("Disconnected")
+                        text: _activeVehicle ? qsTr("Arm") : qsTr("Əlaqə yaradılmayıb")
                         font.bold: true
                         color: "white"
                         elide: Text.ElideRight

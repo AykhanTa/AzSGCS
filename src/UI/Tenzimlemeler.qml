@@ -37,6 +37,27 @@ Rectangle {
     // ✅ Xaricdən açanda hansı səhifə açılsın
     property int startIndex: -1
 
+    // Səhifə adı ilə açmaq (məs. "Comm_links.qml"). Sıra nömrəsindən üstündür: siyahıya
+    // yeni bölmə əlavə olunanda nömrələr sürüşür, ad isə dəyişmir.
+    property string startPage: ""
+
+    function indexOfPage(page) {
+        for (var i = 0; i < menuModel.count; i++) {
+            if (menuModel.get(i).page === page) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    function _startIndex() {
+        var byPage = (startPage !== "") ? indexOfPage(startPage) : -1
+        if (byPage >= 0) {
+            return byPage
+        }
+        return (startIndex >= 0) ? startIndex : selectedIndex
+    }
+
     function openMenuByIndex(i) {
         if (i < 0 || i >= menuModel.count) i = 0
 
@@ -58,7 +79,7 @@ Rectangle {
     }
 
     Component.onCompleted: Qt.callLater(function() {
-        openMenuByIndex(startIndex >= 0 ? startIndex : selectedIndex)
+        openMenuByIndex(_startIndex())
     })
 
     onStartIndexChanged: {

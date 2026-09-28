@@ -1001,8 +1001,9 @@ ApplicationWindow {
                                 leftPanel.visible = false
                             }
 
-                            // ✅ Tənzimləmələr overlay-ini aç və "Rabitə Kanalları"na (index 7) keç
-                            sideMenuLoader.setSource(Qt.resolvedUrl("Tenzimlemeler.qml"), { startIndex: 7 })
+                            // Tənzimləmələr overlay-ini aç və "Rabitə Kanalları"na keç. Səhifə adı
+                            // ilə açılır: sabit nömrə (7) siyahıya Gimbal əlavə olunanda Gimbal-ı açırdı.
+                            sideMenuLoader.setSource(Qt.resolvedUrl("Tenzimlemeler.qml"), { startPage: "Comm_links.qml" })
                         }
                     }
                 }
