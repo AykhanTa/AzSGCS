@@ -21,7 +21,8 @@ Rectangle {
     // ---------- Responsiv ölçülər ----------
     property int  originalWidth: 250
     property int  collapsedWidth: 80
-    property bool isCollapsed: false
+    // Açılışda yığılmış başlayır: video/xəritə üçün yer qalsın. Loqoya toxunanda açılır.
+    property bool isCollapsed: true
 
     Behavior on width { NumberAnimation { duration: 160 } }
 

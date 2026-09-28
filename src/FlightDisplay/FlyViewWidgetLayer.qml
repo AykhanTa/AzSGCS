@@ -236,10 +236,10 @@ Item {
 
         availableHeight: _besideStack ? (_root.height - _topInset - (_margin * 2)) : _roomBelow
         y:               (_besideStack ? (_topInset + _margin) : (_stackBottom + _margin)) + ((availableHeight - height) / 2)
-        // This layer only exists on the fly view, so the pod being enabled is all it takes.
-        // (mainWindow.isFlyViewActive is the flight instrument panel's toggle, not "fly
-        // view is showing", and would hide these on the main video screen.)
-        visible:         _settings.enabled.rawValue
+        // This layer only exists on the fly view, so the pod being enabled is what shows
+        // them. They step aside while the flight panel is open rather than squeeze in
+        // next to its compass and telemetry.
+        visible:         _settings.enabled.rawValue && !mainWindow.showFlightPanel
     }
 
     FlyViewMissionCompleteDialog {
