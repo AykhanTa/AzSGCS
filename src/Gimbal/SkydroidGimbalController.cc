@@ -31,6 +31,13 @@ constexpr const char *kZoomIn    = "#TPUG2wPTZ0A";
 constexpr const char *kZoomOut   = "#TPUG2wPTZ0B";
 constexpr const char *kPtzStop   = "#TPUG2wPTZ00";
 constexpr const char *kVersion   = "#TPUD2rVER00";
+
+// The pod keeps the last speed it was given and _repeatTimer keeps resending it, so if
+// RC input stops arriving while a stick is deflected the gimbal would turn until it
+// came back. RC_CHANNELS from an autopilot over a telemetry radio can be as slow as
+// 1-2 Hz, so this is long enough not to cut in between normal packets.
+constexpr int kRcStaleMs = 2000;
+constexpr int kRcWatchdogIntervalMs = 250;
 }
 
 SkydroidGimbalController::SkydroidGimbalController(QObject *parent)
@@ -50,7 +57,12 @@ SkydroidGimbalController::SkydroidGimbalController(QObject *parent)
         }
     });
 
+    _rcWatchdog = new QTimer(this);
+    _rcWatchdog->setInterval(kRcWatchdogIntervalMs);
+    connect(_rcWatchdog, &QTimer::timeout, this, &SkydroidGimbalController::_checkRcStale);
+
     SkydroidGimbalSettings *settings = SettingsManager::instance()->skydroidGimbalSettings();
+    connect(settings->rcControlEnabled(), &Fact::rawValueChanged, this, &SkydroidGimbalController::_rcControlEnabledChanged);
     connect(settings->enabled(), &Fact::rawValueChanged, this, &SkydroidGimbalController::_settingsChanged);
     connect(settings->address(), &Fact::rawValueChanged, this, &SkydroidGimbalController::_settingsChanged);
     connect(settings->port(),    &Fact::rawValueChanged, this, &SkydroidGimbalController::_settingsChanged);
@@ -95,6 +107,9 @@ void SkydroidGimbalController::_settingsChanged()
         _pitchSpeed = 0;
         _yawSpeed = 0;
         _zoomDirection = 0;
+        _rcCmdPitch = 0;
+        _rcCmdYaw = 0;
+        _rcCmdZoom = 0;
         return;
     }
 
@@ -269,10 +284,49 @@ void SkydroidGimbalController::setVehicle(Vehicle *vehicle)
         _rcPitchPwm = -1;
         _rcYawPwm = -1;
         _rcZoomPwm = -1;
+        _stopRcMotion();
         stopMotion();
     }
 
     emit rcChanged();
+}
+
+void SkydroidGimbalController::_stopRcMotion()
+{
+    _rcWatchdog->stop();
+
+    if (!_rcDriving()) {
+        return;
+    }
+
+    _rcCmdPitch = 0;
+    _rcCmdYaw = 0;
+    _rcCmdZoom = 0;
+    stopMotion();
+}
+
+void SkydroidGimbalController::_rcControlEnabledChanged()
+{
+    // Switching RC control off must not leave the gimbal turning at whatever the stick
+    // was last holding: nothing would ever send the stop.
+    if (!SettingsManager::instance()->skydroidGimbalSettings()->rcControlEnabled()->rawValue().toBool()) {
+        _stopRcMotion();
+    }
+}
+
+void SkydroidGimbalController::_checkRcStale()
+{
+    if (!_rcDriving()) {
+        _rcWatchdog->stop();
+        return;
+    }
+
+    if (_rcLastApplied.isValid() && (_rcLastApplied.elapsed() < kRcStaleMs)) {
+        return;
+    }
+
+    qCWarning(SkydroidGimbalLog) << "RC input stopped arriving while the sticks were moving the gimbal; stopping it";
+    _stopRcMotion();
 }
 
 int SkydroidGimbalController::_rawChannel(int channel, int channelCount, const int *pwmValues)
@@ -355,13 +409,35 @@ void SkydroidGimbalController::_rcChannelsChanged(int channelCount, int pwmValue
         return;
     }
 
-    setPitchSpeed(_channelToSpeed(settings->pitchChannel()->rawValue().toInt(), channelCount, pwmValues,
-                                  settings->pitchReversed()->rawValue().toBool()));
-    setYawSpeed(_channelToSpeed(settings->yawChannel()->rawValue().toInt(), channelCount, pwmValues,
-                                settings->yawReversed()->rawValue().toBool()));
+    const int pitch = _channelToSpeed(settings->pitchChannel()->rawValue().toInt(), channelCount, pwmValues,
+                                      settings->pitchReversed()->rawValue().toBool());
+    const int yaw = _channelToSpeed(settings->yawChannel()->rawValue().toInt(), channelCount, pwmValues,
+                                    settings->yawReversed()->rawValue().toBool());
 
     // Zoom is a rate, not a position: anything outside the deadband means keep
     // zooming that way until the knob comes back.
-    const int zoom = _channelToSpeed(settings->zoomChannel()->rawValue().toInt(), channelCount, pwmValues, false);
-    _setZoomDirection((zoom > 0) ? 1 : ((zoom < 0) ? -1 : 0));
+    const int zoomSpeed = _channelToSpeed(settings->zoomChannel()->rawValue().toInt(), channelCount, pwmValues, false);
+    const int zoom = (zoomSpeed > 0) ? 1 : ((zoomSpeed < 0) ? -1 : 0);
+
+    _rcLastApplied.restart();
+
+    // Only a change in what the sticks ask for is applied. A centred stick reports the
+    // same zero in every packet, and applying it each time would cancel a gimbal page
+    // button while it is held down.
+    if (pitch != _rcCmdPitch) {
+        _rcCmdPitch = pitch;
+        setPitchSpeed(pitch);
+    }
+    if (yaw != _rcCmdYaw) {
+        _rcCmdYaw = yaw;
+        setYawSpeed(yaw);
+    }
+    if (zoom != _rcCmdZoom) {
+        _rcCmdZoom = zoom;
+        _setZoomDirection(zoom);
+    }
+
+    if (_rcDriving() && !_rcWatchdog->isActive()) {
+        _rcWatchdog->start();
+    }
 }

@@ -41,6 +41,8 @@ class SkydroidGimbalController : public QObject
 {
     Q_OBJECT
 
+    friend class SkydroidGimbalTest;
+
     Q_PROPERTY(bool    active       READ active       NOTIFY activeChanged)
     Q_PROPERTY(int     pitchSpeed   READ pitchSpeed   NOTIFY speedChanged)
     Q_PROPERTY(int     yawSpeed     READ yawSpeed     NOTIFY speedChanged)
@@ -112,12 +114,21 @@ private slots:
     void _readPendingDatagrams();
     void _rcChannelsChanged(int channelCount, int pwmValues[QGCMAVLink::maxRcChannels]);
     void _settingsChanged();
+    void _rcControlEnabledChanged();
+    void _checkRcStale();
 
 private:
     void _openSocket();
     void _closeSocket();
     void _send(const QString &body);
     void _setZoomDirection(int direction);
+
+    /// True while the last thing the sticks asked for was motion.
+    bool _rcDriving() const { return (_rcCmdPitch != 0) || (_rcCmdYaw != 0) || (_rcCmdZoom != 0); }
+
+    /// Stops whatever the sticks set going and forgets it, so the next sample that asks
+    /// for motion is applied afresh.
+    void _stopRcMotion();
 
     /// Channel PWM to a speed in protocol units, or 0 inside the deadband.
     /// `channel` is 1-based; 0 means the axis is not bound.
@@ -129,6 +140,7 @@ private:
 
     QUdpSocket      *_socket = nullptr;
     QTimer          *_repeatTimer = nullptr;
+    QTimer          *_rcWatchdog = nullptr;
     QPointer<Vehicle> _vehicle;
     QHostAddress     _target;
     quint16          _port = 0;
@@ -145,4 +157,11 @@ private:
     int     _rcZoomPwm = -1;
     quint64 _rcUpdateCount = 0;
     QElapsedTimer _rcLogThrottle;
+
+    // What the sticks last asked for, kept apart from the live speeds so the gimbal page
+    // buttons and the sticks do not undo each other.
+    int     _rcCmdPitch = 0;
+    int     _rcCmdYaw = 0;
+    int     _rcCmdZoom = 0;
+    QElapsedTimer _rcLastApplied;
 };
