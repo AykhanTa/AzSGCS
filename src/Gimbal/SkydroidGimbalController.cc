@@ -9,7 +9,6 @@
 
 #include "SkydroidGimbalController.h"
 
-#include <QtCore/QRegularExpression>
 #include <QtCore/QTimer>
 #include <QtNetwork/QUdpSocket>
 
@@ -104,6 +103,7 @@ SkydroidGimbalController::SkydroidGimbalController(QObject *parent)
     VideoSettings *videoSettings = SettingsManager::instance()->videoSettings();
     connect(videoSettings->rtspUrl(),     &Fact::rawValueChanged, this, &SkydroidGimbalController::thermalChanged);
     connect(videoSettings->videoSource(), &Fact::rawValueChanged, this, &SkydroidGimbalController::thermalChanged);
+    connect(settings->thermalRtspUrl(),   &Fact::rawValueChanged, this, &SkydroidGimbalController::thermalChanged);
 
     _settingsChanged();
 }
@@ -166,48 +166,47 @@ bool SkydroidGimbalController::parseReply(const QByteArray &datagram, QString *c
     return true;
 }
 
-QString SkydroidGimbalController::toggledStreamUrl(const QString &url)
-{
-    static const QRegularExpression streamRe(QStringLiteral("(stream=)([12])(?!\\d)"));
-
-    const QRegularExpressionMatch match = streamRe.match(url);
-    if (!match.hasMatch()) {
-        return QString();
-    }
-
-    QString toggled = url;
-    const QString other = (match.captured(2) == QStringLiteral("1")) ? QStringLiteral("2") : QStringLiteral("1");
-    toggled.replace(match.capturedStart(2), match.capturedLength(2), other);
-    return toggled;
-}
-
 bool SkydroidGimbalController::thermalAvailable() const
 {
     VideoSettings *videoSettings = SettingsManager::instance()->videoSettings();
-    if (videoSettings->videoSource()->rawValue().toString() != QString::fromLatin1(VideoSettings::videoSourceRTSP)) {
-        return false;
-    }
-    return !toggledStreamUrl(videoSettings->rtspUrl()->rawValue().toString()).isEmpty();
+    SkydroidGimbalSettings *settings = SettingsManager::instance()->skydroidGimbalSettings();
+
+    return (videoSettings->videoSource()->rawValue().toString() == QString::fromLatin1(VideoSettings::videoSourceRTSP))
+           && !settings->thermalRtspUrl()->rawValue().toString().trimmed().isEmpty();
 }
 
 bool SkydroidGimbalController::thermalView() const
 {
-    static const QRegularExpression thermalRe(QStringLiteral("stream=2(?!\\d)"));
-    return thermalAvailable() && thermalRe.match(SettingsManager::instance()->videoSettings()->rtspUrl()->rawValue().toString()).hasMatch();
+    if (!thermalAvailable()) {
+        return false;
+    }
+
+    const QString url = SettingsManager::instance()->videoSettings()->rtspUrl()->rawValue().toString().trimmed();
+    return url == SettingsManager::instance()->skydroidGimbalSettings()->thermalRtspUrl()->rawValue().toString().trimmed();
 }
 
 void SkydroidGimbalController::toggleThermal()
 {
     if (!thermalAvailable()) {
-        qCWarning(SkydroidGimbalLog) << "Thermal view needs an RTSP source with stream=1 or stream=2 in its URL";
+        qCWarning(SkydroidGimbalLog) << "Thermal view needs an RTSP video source and a thermal stream URL";
         return;
     }
 
-    Fact *rtspUrl = SettingsManager::instance()->videoSettings()->rtspUrl();
-    const QString url = toggledStreamUrl(rtspUrl->rawValue().toString());
+    // The two URLs are set outright rather than derived from one another: the C13's
+    // thermal stream is on a different port as well as a different path, and a guess
+    // from the current URL got the port wrong. Whatever the video was set to, this
+    // always lands on one of the two known-good streams.
+    SkydroidGimbalSettings *settings = SettingsManager::instance()->skydroidGimbalSettings();
+    const QString url = thermalView() ? settings->visibleRtspUrl()->rawValue().toString().trimmed()
+                                      : settings->thermalRtspUrl()->rawValue().toString().trimmed();
+    if (url.isEmpty()) {
+        qCWarning(SkydroidGimbalLog) << "No visible camera stream URL to switch back to";
+        return;
+    }
+
     qCDebug(SkydroidGimbalLog) << "Switching video to" << url;
     // VideoManager restarts the stream on its own when the URL changes.
-    rtspUrl->setRawValue(url);
+    SettingsManager::instance()->videoSettings()->rtspUrl()->setRawValue(url);
 }
 
 void SkydroidGimbalController::_settingsChanged()

@@ -52,8 +52,8 @@ class SkydroidGimbalController : public QObject
     Q_PROPERTY(quint64 sentCount    READ sentCount    NOTIFY sentCountChanged)
     Q_PROPERTY(bool    recording    READ recording    NOTIFY recordingChanged)
 
-    // Thermal view is the pod's second RTSP stream (stream=2 next to the visible
-    // camera's stream=1), switched by swapping the stream in the RTSP URL.
+    // Thermal view is the pod's second RTSP stream. The video is switched between the
+    // two URLs set in the pod settings.
     Q_PROPERTY(bool    thermalAvailable READ thermalAvailable NOTIFY thermalChanged)
     Q_PROPERTY(bool    thermalView      READ thermalView      NOTIFY thermalChanged)
 
@@ -102,9 +102,6 @@ public:
     /// digit, 'r' or 'w', a three letter command, the data, and the checksum. False when
     /// the datagram is not such a frame or its checksum does not match.
     static bool parseReply(const QByteArray &datagram, QString *command, QString *data);
-
-    /// `url` with stream=1 and stream=2 swapped, or an empty string when it names neither.
-    static QString toggledStreamUrl(const QString &url);
 
     bool    active() const { return _active; }
     int     pitchSpeed() const { return _pitchSpeed; }

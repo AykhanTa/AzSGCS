@@ -180,6 +180,8 @@ SettingsPage {
             BoolRow  { fact: root._gimbal.enabled }
             FieldRow { fact: root._gimbal.address; rowEnabled: root._gimbal.enabled.rawValue }
             FieldRow { fact: root._gimbal.port;    rowEnabled: root._gimbal.enabled.rawValue }
+            FieldRow { fact: root._gimbal.visibleRtspUrl; rowEnabled: root._gimbal.enabled.rawValue }
+            FieldRow { fact: root._gimbal.thermalRtspUrl; rowEnabled: root._gimbal.enabled.rawValue }
 
             // Vəziyyət: istifadəçi uçuşa çıxmadan bağlantının işlədiyini görsün.
             Rectangle {

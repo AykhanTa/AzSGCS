@@ -24,6 +24,8 @@ public:
     DEFINE_SETTINGFACT(enabled)
     DEFINE_SETTINGFACT(address)
     DEFINE_SETTINGFACT(port)
+    DEFINE_SETTINGFACT(visibleRtspUrl)
+    DEFINE_SETTINGFACT(thermalRtspUrl)
     DEFINE_SETTINGFACT(rcControlEnabled)
     DEFINE_SETTINGFACT(pitchChannel)
     DEFINE_SETTINGFACT(yawChannel)

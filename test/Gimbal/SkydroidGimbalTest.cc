@@ -2,6 +2,7 @@
 #include "SettingsManager.h"
 #include "SkydroidGimbalController.h"
 #include "SkydroidGimbalSettings.h"
+#include "VideoSettings.h"
 
 #include <QtCore/QElapsedTimer>
 #include <QtNetwork/QUdpSocket>
@@ -13,9 +14,11 @@ constexpr int kPitchChannel = 9;
 QList<Fact *> gimbalFacts()
 {
     SkydroidGimbalSettings *s = SettingsManager::instance()->skydroidGimbalSettings();
+    VideoSettings *v = SettingsManager::instance()->videoSettings();
     return { s->enabled(), s->address(), s->port(), s->rcControlEnabled(), s->pitchChannel(),
              s->yawChannel(), s->zoomChannel(), s->pitchReversed(), s->yawReversed(),
-             s->maxSpeed(), s->rcDeadband(), s->rcMin(), s->rcMax() };
+             s->maxSpeed(), s->rcDeadband(), s->rcMin(), s->rcMax(),
+             s->visibleRtspUrl(), s->thermalRtspUrl(), v->videoSource(), v->rtspUrl() };
 }
 }
 
@@ -272,18 +275,46 @@ void SkydroidGimbalTest::_parseReplyTest()
     QVERIFY(!SkydroidGimbalController::parseReply(QByteArray(), &command, &data));
 }
 
-void SkydroidGimbalTest::_toggledStreamUrlTest()
+void SkydroidGimbalTest::_thermalToggleTest()
 {
-    QCOMPARE(SkydroidGimbalController::toggledStreamUrl(QStringLiteral("rtsp://192.168.144.108:554/stream=1")),
-             QStringLiteral("rtsp://192.168.144.108:554/stream=2"));
-    QCOMPARE(SkydroidGimbalController::toggledStreamUrl(QStringLiteral("rtsp://192.168.144.108:554/stream=2")),
-             QStringLiteral("rtsp://192.168.144.108:554/stream=1"));
+    SkydroidGimbalSettings *s = SettingsManager::instance()->skydroidGimbalSettings();
+    VideoSettings *v = SettingsManager::instance()->videoSettings();
 
-    // Anything that is not stream 1 or 2 is left alone rather than guessed at.
-    QVERIFY(SkydroidGimbalController::toggledStreamUrl(QStringLiteral("rtsp://192.168.144.108:554/stream=12")).isEmpty());
-    QVERIFY(SkydroidGimbalController::toggledStreamUrl(QStringLiteral("rtsp://192.168.144.108:554/stream=3")).isEmpty());
-    QVERIFY(SkydroidGimbalController::toggledStreamUrl(QStringLiteral("rtsp://192.168.144.108:554/main")).isEmpty());
-    QVERIFY(SkydroidGimbalController::toggledStreamUrl(QString()).isEmpty());
+    // The C13's thermal stream is on port 555, not the visible camera's 554, which is
+    // what swapping the stream number alone got wrong.
+    QCOMPARE(s->thermalRtspUrl()->rawDefaultValue().toString(), QStringLiteral("rtsp://192.168.144.108:555/stream=2"));
+    QCOMPARE(s->visibleRtspUrl()->rawDefaultValue().toString(), QStringLiteral("rtsp://192.168.144.108:554/stream=1"));
+
+    s->visibleRtspUrl()->setRawValue(s->visibleRtspUrl()->rawDefaultValue());
+    s->thermalRtspUrl()->setRawValue(s->thermalRtspUrl()->rawDefaultValue());
+
+    SkydroidGimbalController controller;
+
+    // Not an RTSP source: nothing to switch.
+    v->videoSource()->setRawValue(QString::fromLatin1(VideoSettings::videoSourceNoVideo));
+    QVERIFY(!controller.thermalAvailable());
+
+    v->videoSource()->setRawValue(QString::fromLatin1(VideoSettings::videoSourceRTSP));
+    v->rtspUrl()->setRawValue(QStringLiteral("rtsp://192.168.144.108:554/stream=1"));
+    QVERIFY(controller.thermalAvailable());
+    QVERIFY(!controller.thermalView());
+
+    controller.toggleThermal();
+    QCOMPARE(v->rtspUrl()->rawValue().toString(), QStringLiteral("rtsp://192.168.144.108:555/stream=2"));
+    QVERIFY(controller.thermalView());
+
+    controller.toggleThermal();
+    QCOMPARE(v->rtspUrl()->rawValue().toString(), QStringLiteral("rtsp://192.168.144.108:554/stream=1"));
+    QVERIFY(!controller.thermalView());
+
+    // The URL the earlier build left behind (thermal path on the visible port) is not a
+    // working stream. One press lands on the real thermal stream, the next on visible.
+    v->rtspUrl()->setRawValue(QStringLiteral("rtsp://192.168.144.108:554/stream=2"));
+    QVERIFY(!controller.thermalView());
+    controller.toggleThermal();
+    QCOMPARE(v->rtspUrl()->rawValue().toString(), QStringLiteral("rtsp://192.168.144.108:555/stream=2"));
+    controller.toggleThermal();
+    QCOMPARE(v->rtspUrl()->rawValue().toString(), QStringLiteral("rtsp://192.168.144.108:554/stream=1"));
 }
 
 void SkydroidGimbalTest::_podCommandsOnTheWireTest()

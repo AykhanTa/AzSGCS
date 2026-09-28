@@ -27,7 +27,7 @@ private slots:
     void _vehicleTakesOverAfterRemoteTest();
     void _vehicleLossKeepsRemoteTest();
     void _parseReplyTest();
-    void _toggledStreamUrlTest();
+    void _thermalToggleTest();
     void _podCommandsOnTheWireTest();
 
 private:

@@ -25,6 +25,20 @@
     "default":           5000
 },
 {
+    "name":              "visibleRtspUrl",
+    "shortDesc":         "Visible camera stream",
+    "longDesc":          "RTSP URL of the pod's visible camera. The thermal button switches back to this.",
+    "type":              "string",
+    "default":           "rtsp://192.168.144.108:554/stream=1"
+},
+{
+    "name":              "thermalRtspUrl",
+    "shortDesc":         "Thermal camera stream",
+    "longDesc":          "RTSP URL of the pod's thermal camera. On the C12, C13 and C14 it is served on port 555, not the visible camera's 554.",
+    "type":              "string",
+    "default":           "rtsp://192.168.144.108:555/stream=2"
+},
+{
     "name":              "rcControlEnabled",
     "shortDesc":         "Drive the gimbal from RC channels",
     "longDesc":          "Moves the gimbal from the transmitter's own knobs. On a Skydroid remote controller the channels are read from the controller itself, so no autopilot is needed; otherwise they come from the RC_CHANNELS the autopilot reports.",
