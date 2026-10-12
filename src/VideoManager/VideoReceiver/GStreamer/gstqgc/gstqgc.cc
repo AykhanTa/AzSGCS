@@ -19,16 +19,16 @@ plugin_init(GstPlugin *plugin)
     return ret;
 }
 
-#define GST_PACKAGE_NAME   "GStreamer plugin for QGC's Video Receiver"
-#define GST_PACKAGE_ORIGIN "https://qgroundcontrol.com/"
+#define GST_PACKAGE_NAME   "GStreamer plugin for " QGC_APP_NAME "'s Video Receiver"
+#define GST_PACKAGE_ORIGIN QGC_APP_NAME
 #define GST_LICENSE        "LGPL"
-#define PACKAGE            "QGC Video Receiver"
+#define PACKAGE            QGC_APP_NAME " Video Receiver"
 #define PACKAGE_VERSION    "current"
 
 GST_PLUGIN_DEFINE(
     GST_VERSION_MAJOR, GST_VERSION_MINOR,
     qgc,
-    "QGC Video Receiver Plugin",
+    QGC_APP_NAME " Video Receiver Plugin",
     plugin_init,
     PACKAGE_VERSION, GST_LICENSE, GST_PACKAGE_NAME, GST_PACKAGE_ORIGIN
 )

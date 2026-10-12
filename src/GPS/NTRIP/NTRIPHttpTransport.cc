@@ -1,5 +1,6 @@
 #include "NTRIPHttpTransport.h"
 
+#include <QtCore/QCoreApplication>
 #include <QtCore/QDateTime>
 #include <QtCore/QRegularExpression>
 #include <QtNetwork/QSslError>
@@ -75,7 +76,7 @@ NTRIPHttpTransport::HttpRequest NTRIPHttpTransport::buildHttpRequest(const NTRIP
     req += "GET /" + config.mountpoint.toUtf8() + " HTTP/1.1\r\n";
     req += "Host: " + config.host.toUtf8() + "\r\n";
     req += "Ntrip-Version: Ntrip/2.0\r\n";
-    req += "User-Agent: NTRIP QGroundControl/1.0\r\n";
+    req += "User-Agent: NTRIP " + QCoreApplication::applicationName().toUtf8() + "/1.0\r\n";
 
     if (!config.username.isEmpty() || !config.password.isEmpty()) {
         result.credentialsInClear = !config.useTls;

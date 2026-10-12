@@ -689,7 +689,7 @@ QString PlanManager::_ackTypeToString(AckType_t ackType)
         return QString("Guided Mode Item");
     default:
         qWarning(PlanManagerLog) << QStringLiteral("Fell off end of switch statement %1").arg(_planTypeString());
-        return QString("QGC Internal Error");
+        return QString("Internal Error");
     }
 }
 

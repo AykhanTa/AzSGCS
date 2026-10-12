@@ -60,7 +60,7 @@ G_DEFINE_TYPE_WITH_CODE(
         GST_CAT_DEFAULT,
         "qgcsinkbin",
         0,
-        "QGC Video Sink Bin"));
+        QGC_APP_NAME " Video Sink Bin"));
 
 GST_ELEMENT_REGISTER_DEFINE_WITH_CODE(qgcvideosinkbin,"qgcvideosinkbin",
                                       GST_RANK_NONE,
@@ -141,9 +141,9 @@ gst_qgc_video_sink_bin_class_init(GstQgcVideoSinkBinClass *klass)
     );
 
     gst_element_class_set_static_metadata(element_class,
-        "QGC Video Sink Bin", "Sink/Video/Bin",
-        "GL accelerated video sink wrapper used by QGroundControl",
-        "QGroundControl team"
+        QGC_APP_NAME " Video Sink Bin", "Sink/Video/Bin",
+        "GL accelerated video sink wrapper used by " QGC_APP_NAME,
+        QGC_APP_NAME
     );
 }
 

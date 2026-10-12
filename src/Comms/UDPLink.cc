@@ -503,7 +503,7 @@ void UDPWorker::_zeroconfRegisterCallback(DNSServiceRef sdRef, DNSServiceFlags f
 
 void UDPWorker::_registerZeroconf(uint16_t port)
 {
-    static constexpr const char *regType = "_qgroundcontrol._udp";
+    static constexpr const char *regType = "_azshieldgcs._udp";
 
     if (_dnssServiceRef) {
         qCWarning(UDPLinkLog) << "Already registered zeroconf";

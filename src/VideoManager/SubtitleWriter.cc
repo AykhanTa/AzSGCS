@@ -15,6 +15,7 @@
 #include "MultiVehicleManager.h"
 #include "QGCLoggingCategory.h"
 
+#include <QtCore/QCoreApplication>
 #include <QtCore/QDateTime>
 #include <QtCore/QFileInfo>
 #include <QtCore/QString>
@@ -77,7 +78,7 @@ void SubtitleWriter::startCapturingTelemetry(const QString &videoFile, QSize siz
     // This is file header
     stream << QStringLiteral(
         "[Script Info]\n"
-        "Title: QGroundControl Subtitle Telemetry file\n"
+        "Title: %4 Subtitle Telemetry file\n"
         "ScriptType: v4.00+\n"
         "WrapStyle: 0\n"
         "ScaledBorderAndShadow: yes\n"
@@ -91,7 +92,7 @@ void SubtitleWriter::startCapturingTelemetry(const QString &videoFile, QSize siz
         "\n"
         "[Events]\n"
         "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n"
-    ).arg(_size.width()).arg(_size.height()).arg(scaledFontSize);
+    ).arg(_size.width()).arg(_size.height()).arg(scaledFontSize).arg(QCoreApplication::applicationName());
 
     // TODO: Find a good way to input title
     // stream << QStringLiteral("Dialogue: 0,0:00:00.00,999:00:00.00,Default,,0,0,0,,{\\pos(5,35)}%1\n");

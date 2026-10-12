@@ -1,5 +1,6 @@
 #include "NTRIPSourceTableController.h"
 
+#include <QtCore/QCoreApplication>
 #include <QtCore/QDateTime>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
@@ -99,7 +100,7 @@ void NTRIPSourceTableController::fetch(const NTRIPTransportConfig& config, const
 
     QGCNetworkHelper::RequestConfig reqCfg;
     reqCfg.timeoutMs = kFetchTimeoutMs;
-    reqCfg.userAgent = QStringLiteral("QGC-NTRIP");
+    reqCfg.userAgent = QStringLiteral("%1-NTRIP").arg(QCoreApplication::applicationName());
     reqCfg.http2Allowed = false;
     reqCfg.cacheEnabled = false;
 

@@ -138,20 +138,16 @@ public:
     virtual void postLoadFromJson(PlanMasterController *pController, QJsonObject &json) { Q_UNUSED(pController); Q_UNUSED(json); }
 
     /// Returns the url to download the stable version check file. Return QString() to indicate no version check should be performed.
-    /// Default QGC mainline implemenentation returns QGC Stable file location. Default QGC custom build code returns QString().
-    /// Custom builds can override to turn on and provide their own location.
+    /// No check is made by default: the upstream file announces upstream releases, not this app's.
+    /// Override to turn it on and provide a location.
     /// The contents of this file should be a single line in the form:
     ///     v3.4.4
     /// This indicates the latest stable version number.
-#ifdef QGC_CUSTOM_BUILD
     virtual QString stableVersionCheckFileUrl() const { return QString(); }
-#else
-    virtual QString stableVersionCheckFileUrl() const { return QStringLiteral("https://s3-us-west-2.amazonaws.com/qgroundcontrol/latest/QGC.version.txt"); }
-#endif
 
     /// Returns the user visible url to show user where to download new stable builds from.
-    /// Custom builds must override to provide their own location.
-    virtual QString stableDownloadLocation() const { return QStringLiteral("qgroundcontrol.com"); }
+    /// Must be overridden together with stableVersionCheckFileUrl().
+    virtual QString stableDownloadLocation() const { return QString(); }
 
     /// Returns the complex mission items to display in the Plan UI
     /// @param complexMissionItemNames Default set of complex items

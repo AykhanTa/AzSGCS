@@ -15,6 +15,7 @@
 #include "QmlObjectListModel.h"
 
 #include <QtCore/QApplicationStatic>
+#include <QtCore/QCoreApplication>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
 #include <QtCore/QJsonArray>
@@ -37,7 +38,6 @@ namespace JsonHelper
     constexpr const char *_translateKeysKey = "translateKeys";
     constexpr const char *_arrayIDKeysKey = "_arrayIDKeys";
     constexpr const char *_jsonGroundStationKey = "groundStation";
-    constexpr const char *_jsonGroundStationValue = "QGroundControl";
 }
 
 QString JsonHelper::_jsonValueTypeToString(QJsonValue::Type type)
@@ -359,7 +359,7 @@ QJsonObject JsonHelper::openInternalQGCJsonFile(const QString &jsonFilename, con
 
 void JsonHelper::saveQGCJsonFileHeader(QJsonObject &jsonObject, const QString &fileType, int version)
 {
-    jsonObject[_jsonGroundStationKey] = _jsonGroundStationValue;
+    jsonObject[_jsonGroundStationKey] = QCoreApplication::applicationName();
     jsonObject[jsonFileTypeKey] = fileType;
     jsonObject[jsonVersionKey] = version;
 }

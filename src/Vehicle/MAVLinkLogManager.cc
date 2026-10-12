@@ -14,6 +14,7 @@
 #include "AppSettings.h"
 #include "Vehicle.h"
 
+#include <QtCore/QCoreApplication>
 #include <QtCore/QDirIterator>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
@@ -24,6 +25,11 @@
 QGC_LOGGING_CATEGORY(MAVLinkLogManagerLog, "qgc.vehicle.mavlinklogmanager")
 
 static constexpr const char *kSidecarExtension = ".uploaded";
+
+static QString _defaultDescription()
+{
+    return QStringLiteral("%1 Session").arg(QCoreApplication::applicationName());
+}
 
 MAVLinkLogFiles::MAVLinkLogFiles(MAVLinkLogManager *manager, const QString &filePath, bool newFile)
     : QObject(manager)
@@ -304,7 +310,7 @@ MAVLinkLogManager::MAVLinkLogManager(Vehicle *vehicle, QObject *parent)
     settings.beginGroup(kMAVLinkLogGroup);
 
     setEmailAddress(settings.value(kEmailAddressKey, QString()).toString());
-    setDescription(settings.value(kDescriptionsKey, QString(kDefaultDescr)).toString());
+    setDescription(settings.value(kDescriptionsKey, _defaultDescription()).toString());
     setUploadURL(settings.value(kPx4URLKey, QString(kDefaultPx4URL)).toString());
     setVideoURL(settings.value(kVideoURLKey, QString()).toString());
     setEnableAutoUpload(settings.value(kEnableAutoUploadKey, true).toBool());
@@ -650,7 +656,7 @@ bool MAVLinkLogManager::_sendLog(const QString &logFile)
     QString defaultDescription = _description;
     if (_description.isEmpty()) {
         qCWarning(MAVLinkLogManagerLog) << "Log description missing. Using defaults.";
-        defaultDescription = kDefaultDescr;
+        defaultDescription = _defaultDescription();
     }
 
     if (_emailAddress.isEmpty()) {
