@@ -20,12 +20,8 @@ Rectangle {
     border.width: 2
     border.color: "white"
 
-    // Linkləri ağ + hover-da underline (vizual olaraq kliklənəndir)
-    readonly property string _whiteLinkStyle:
-        "<style>a{color:#ffffff;text-decoration:none;} a:hover{color:#ffffff;text-decoration:underline;}</style>"
-
     Text {
-        text: "AzShieldControl Panel"
+        text: qsTr("%1 Dəstək").arg(QGroundControl.appName)
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         anchors.topMargin: 20
@@ -34,105 +30,40 @@ Rectangle {
         color: "white"
     }
 
-    QGCFlickable {
-        id: flick
+    // Dəstək səhifələri hazır olana qədər burada heç bir xarici link göstərilmir.
+    ColumnLayout {
         anchors.fill: parent
-
-        // padding
         anchors.topMargin: 90
         anchors.leftMargin: 30
         anchors.rightMargin: 30
         anchors.bottomMargin: 30
-
-        clip: true
-        flickableDirection: Flickable.VerticalFlick
-        boundsBehavior: Flickable.StopAtBounds
-
-        // sağa scroll olmasın
-        contentWidth: width
-        contentHeight: grid.implicitHeight
-
-        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
-        ScrollBar.horizontal: ScrollBar { policy: ScrollBar.AlwaysOff }
-
-        readonly property bool narrow: width < 820
+        spacing: 14
 
         GridLayout {
-            id: grid
-            width: flick.width
-            columns: flick.narrow ? 1 : 2
-            columnSpacing: flick.narrow ? 12 : 40
+            Layout.fillWidth: true
+            columns: 2
+            columnSpacing: 40
             rowSpacing: 14
 
-            // --- 1 ---
             QGCLabel {
-                text: qsTr("AzShieldControl İstifadəçi Təlimatı")
+                text: qsTr("Versiya")
                 font.pointSize: 12
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
-                Layout.minimumWidth: 0
             }
             QGCLabel {
-                id: link1
-                linkColor: "white"
-                textFormat: Text.RichText
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
-                Layout.minimumWidth: 0
-                font.pointSize: 10
-                text: root._whiteLinkStyle +
-                      "<a href=\"https://www.instagram.com/_abilov_?igsh=MWxib3h2d2V0NjV0OA==\">https://www.instagram.com/_abilov_?igsh=MWxib3h2d2V0NjV0OA==</a>"
-                onLinkActivated: (link) => Qt.openUrlExternally(link)
-
-                HoverHandler { cursorShape: Qt.PointingHandCursor }
-            }
-
-            // --- 2 ---
-            QGCLabel {
-                text: qsTr("PX4 İstifadəçiləri Müzakirə Forumu")
+                text: QGroundControl.qgcVersion
                 font.pointSize: 12
-                wrapMode: Text.Wrap
+                wrapMode: Text.WrapAnywhere
                 Layout.fillWidth: true
-                Layout.minimumWidth: 0
             }
-            QGCLabel {
-                id: link2
-                linkColor: "white"
-                textFormat: Text.RichText
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
-                Layout.minimumWidth: 0
-                font.pointSize: 10
-                text: root._whiteLinkStyle +
-                      "<a href=\"https://www.youtube.com\">https://www.youtube.com/</a>"
-                onLinkActivated: (link) => Qt.openUrlExternally(link)
-
-                HoverHandler { cursorShape: Qt.PointingHandCursor }
-            }
-
-            // --- 3 ---
-            QGCLabel {
-                text: qsTr("ArduPilot İstifadəçiləri Müzakirə Forumu")
-                font.pointSize: 12
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
-                Layout.minimumWidth: 0
-            }
-            QGCLabel {
-                id: link3
-                linkColor: "white"
-                textFormat: Text.RichText
-                wrapMode: Text.Wrap
-                Layout.fillWidth: true
-                Layout.minimumWidth: 0
-                font.pointSize: 10
-                text: root._whiteLinkStyle +
-                      "<a href=\"https://discuss.ardupilot.org/c/ground-control-software/qgroundcontrol\">https://discuss.ardupilot.org/c/ground-control-software/qgroundcontrol</a>"
-                onLinkActivated: (link) => Qt.openUrlExternally(link)
-
-                HoverHandler { cursorShape: Qt.PointingHandCursor }
-            }
-
         }
+
+        QGCLabel {
+            text: qsTr("Dəstək əlaqə məlumatları sonradan əlavə olunacaq.")
+            font.pointSize: 10
+            wrapMode: Text.Wrap
+            Layout.fillWidth: true
+        }
+
+        Item { Layout.fillHeight: true }
     }
 }

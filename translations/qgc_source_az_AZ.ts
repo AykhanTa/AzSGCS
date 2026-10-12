@@ -5247,8 +5247,8 @@ Click Ok to start the auto-tuning process.
     </message>
     <message>
       <location filename="../src/AutoPilotPlugins/Common/ESP8266Component.qml" line="258"/>
-      <source>QGC UDP Port</source>
-      <translation>QGC UDP Port</translation>
+      <source>GCS UDP Port</source>
+      <translation>GCS UDP portu</translation>
     </message>
     <message>
       <location filename="../src/AutoPilotPlugins/Common/ESP8266Component.qml" line="277"/>
@@ -5262,13 +5262,13 @@ Click Ok to start the auto-tuning process.
     </message>
     <message>
       <location filename="../src/AutoPilotPlugins/Common/ESP8266Component.qml" line="294"/>
-      <source>Bridge/QGC Link</source>
-      <translation>Körpü / QGC bağlantısı</translation>
+      <source>Bridge/GCS Link</source>
+      <translation>Körpü / GCS bağlantısı</translation>
     </message>
     <message>
       <location filename="../src/AutoPilotPlugins/Common/ESP8266Component.qml" line="298"/>
-      <source>QGC/Bridge Link</source>
-      <translation>QGC/Bridge Link</translation>
+      <source>GCS/Bridge Link</source>
+      <translation>GCS / Körpü bağlantısı</translation>
     </message>
     <message>
       <location filename="../src/AutoPilotPlugins/Common/ESP8266Component.qml" line="304"/>
@@ -5308,8 +5308,8 @@ Click Ok to start the auto-tuning process.
     </message>
     <message>
       <location filename="../src/AutoPilotPlugins/Common/ESP8266Component.qml" line="451"/>
-      <source>This will restart the WiFi Bridge so the settings you&apos;ve changed can take effect. Note that you may have to change your computer WiFi settings and QGroundControl link settings to match these changes. Are you sure you want to restart it?</source>
-      <translation>Dəyişdirdiyiniz parametrlərin təsir göstərə bilməsi üçün WiFi Bridge yenidən başladın. Bu dəyişikliklərə uyğun olmaq üçün kompüterinizin WiFi parametrlərini və QGroundControl keçid parametrlərini dəyişdirməlisiniz. Yenidən başlatmaq istədiyinizə əminsiniz?</translation>
+      <source>This will restart the WiFi Bridge so the settings you&apos;ve changed can take effect. Note that you may have to change your computer WiFi settings and %1 link settings to match these changes. Are you sure you want to restart it?</source>
+      <translation>Dəyişdirdiyiniz ayarların qüvvəyə minməsi üçün WiFi Bridge yenidən başladılacaq. Bu dəyişikliklərə uyğun olaraq kompüterinizin WiFi ayarlarını və %1 bağlantı ayarlarını dəyişməli ola bilərsiniz. Yenidən başlatmaq istədiyinizə əminsiniz?</translation>
     </message>
     <message>
       <location filename="../src/AutoPilotPlugins/Common/ESP8266Component.qml" line="466"/>
@@ -8039,11 +8039,6 @@ Click Ok to start the auto-tuning process.
   <context>
     <name>HelpSettings</name>
     <message>
-      <location filename="../src/UI/AppSettings/HelpSettings.qml" line="37"/>
-      <source>QGroundControl User Guide</source>
-      <translation>QGroundControl İstifadəçi Təlimatı</translation>
-    </message>
-    <message>
       <location filename="../src/UI/AppSettings/HelpSettings.qml" line="44"/>
       <source>PX4 Users Discussion Forum</source>
       <translation>PX4 İstifadəçilər Müzakirə Forumu</translation>
@@ -8052,11 +8047,6 @@ Click Ok to start the auto-tuning process.
       <location filename="../src/UI/AppSettings/HelpSettings.qml" line="51"/>
       <source>ArduPilot Users Discussion Forum</source>
       <translation>ArduPilot İstifadəçiləri Müzakirə Forumu</translation>
-    </message>
-    <message>
-      <location filename="../src/UI/AppSettings/HelpSettings.qml" line="58"/>
-      <source>QGroundControl Discord Channel</source>
-      <translation type="unfinished">QGroundControl Discord Channel</translation>
     </message>
   </context>
   <context>
@@ -8496,8 +8486,8 @@ Click Ok to start the auto-tuning process.
     </message>
     <message>
       <location filename="../src/Vehicle/VehicleSetup/JoystickConfigButtons.qml" line="258"/>
-      <source>QGC functions do not support shift actions</source>
-      <translation type="unfinished">QGC functions do not support shift actions</translation>
+      <source>%1 functions do not support shift actions</source>
+      <translation>%1 funksiyaları shift əməliyyatlarını dəstəkləmir</translation>
     </message>
     <message>
       <location filename="../src/Vehicle/VehicleSetup/JoystickConfigButtons.qml" line="264"/>
@@ -11141,8 +11131,8 @@ Is this really what you want?</translation>
     </message>
     <message>
       <location filename="../src/FirmwarePlugin/PX4/PX4FirmwarePlugin.cc" line="710"/>
-      <source>QGroundControl supports PX4 Pro firmware Version %1.%2.%3 and above. You are using a version prior to that which will lead to unpredictable results. Please upgrade your firmware.</source>
-      <translation>QGroundControl Versiya %1.%2.%3 və yuxarı PX4 Pro firmware versiyasını dəstəkləyir. Əvvəlcədən gözlənilməz nəticələrə səbəb olacaq bir versiyadan istifadə edirsiniz. Zəhmət olmasa firmware proqramını təkmilləşdirin.</translation>
+      <source>%1 supports PX4 Pro firmware Version %2.%3.%4 and above. You are using a version prior to that which will lead to unpredictable results. Please upgrade your firmware.</source>
+      <translation>%1 PX4 Pro proqram təminatının %2.%3.%4 və daha yeni versiyalarını dəstəkləyir. İstifadə etdiyiniz versiya daha köhnədir və gözlənilməz nəticələrə səbəb ola bilər. Zəhmət olmasa proqram təminatını yeniləyin.</translation>
     </message>
   </context>
   <context>
@@ -13614,16 +13604,6 @@ Click &apos;Ok&apos; to upload the Plan anyway.</translation>
       <location filename="../src/FlightDisplay/PreFlightSoundCheck.qml" line="16"/>
       <source>Sound output</source>
       <translation>Səs çıxışı</translation>
-    </message>
-    <message>
-      <location filename="../src/FlightDisplay/PreFlightSoundCheck.qml" line="17"/>
-      <source>QGC audio output enabled. System audio output enabled, too?</source>
-      <translation>QGC səs çıxışı akivdir. Sistemin səs çıxışı da aktivdir?</translation>
-    </message>
-    <message>
-      <location filename="../src/FlightDisplay/PreFlightSoundCheck.qml" line="18"/>
-      <source>QGC audio output is disabled. Please enable it under application settings-&gt;general to hear audio warnings!</source>
-      <translation>QGC səs çıxışı deaktiv edilmişdir. Zəhmət olmasa səsli xəbərdarlıqları eşitmək üçün tətbiq parametrləri-&gt; ümumi daxilində düzəliş et!</translation>
     </message>
   </context>
   <context>

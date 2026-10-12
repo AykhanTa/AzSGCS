@@ -66,7 +66,7 @@ Rectangle {
         QGCToolBarButton {
             id:                     currentButton
             Layout.preferredHeight: viewButtonRow.height
-            icon.source:            "/res/QGCLogoFull.svg"
+            icon.source:            "qrc:/res/AZSHIELD_ICON/Logo2.svg"
             logo:                   true
             onClicked:              mainWindow.showToolSelectDialog()
         }

@@ -339,7 +339,7 @@ ApplicationWindow {
     }
 
     function showSettingsTool(settingsPage = "") {
-        showTool(qsTr("Application Settings"), "qrc:/qml/QGroundControl/Controls/AppSettings.qml", "/res/QGCLogoWhite")
+        showTool(qsTr("Application Settings"), "qrc:/qml/QGroundControl/Controls/AppSettings.qml", "qrc:/res/AZSHIELD_ICON/Logo2.svg")
         if (settingsPage !== "") {
             toolDrawerLoader.item.showSettingsPage(settingsPage)
         }
@@ -701,7 +701,7 @@ ApplicationWindow {
                             height: toolSelectDialog._toolButtonHeight
                             Layout.fillWidth: true
                             text: qsTr("Application Settings")
-                            imageResource: "/res/QGCLogoFull.svg"
+                            imageResource: "qrc:/res/AZSHIELD_ICON/Logo2.svg"
                             imageColor: "transparent"
                             visible: !QGroundControl.corePlugin.options.combineSettingsAndSetup
                             onClicked: {

@@ -4442,8 +4442,8 @@
     <message>
       <extracomment>.QGC.MetaData.Facts[enableStorageLimit].longDesc, </extracomment>
       <location filename="../src/Settings/Video.SettingsGroup.json"/>
-      <source>When enabled, old video files will be auto-deleted when the total size of QGC-recorded video exceeds the maximum video storage usage.</source>
-      <translation type="unfinished">When enabled, old video files will be auto-deleted when the total size of QGC-recorded video exceeds the maximum video storage usage.</translation>
+      <source>When enabled, old video files will be auto-deleted when the total size of recorded video exceeds the maximum video storage usage.</source>
+      <translation>Aktiv olduqda, yazılmış videoların ümumi həcmi maksimum video yaddaş limitini keçəndə köhnə video faylları avtomatik silinir.</translation>
     </message>
     <message>
       <extracomment>.QGC.MetaData.Facts[rtspTimeout].shortDesc, </extracomment>

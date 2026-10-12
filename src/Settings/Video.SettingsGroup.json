@@ -91,7 +91,7 @@
 {
     "name":             "enableStorageLimit",
     "shortDesc": "Enable/Disable Limits on Storage Usage",
-    "longDesc":  "When enabled, old video files will be auto-deleted when the total size of QGC-recorded video exceeds the maximum video storage usage.",
+    "longDesc":  "When enabled, old video files will be auto-deleted when the total size of recorded video exceeds the maximum video storage usage.",
     "type":             "bool",
     "default":     false,
     "mobileDefault":   true

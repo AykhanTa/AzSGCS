@@ -63,7 +63,7 @@ SettingsPage {
         }
 
         QGCLabel {
-            text: qsTr("Bu bölüm drone ilə QGroundControl arasında bağlantı ayarlarını idarə etmək üçün istifadə olunur.")
+            text: qsTr("Bu bölüm drone ilə %1 arasında bağlantı ayarlarını idarə etmək üçün istifadə olunur.").arg(QGroundControl.appName)
             color: "#E8E8E8"
             font.pixelSize: 16
             wrapMode: Text.WordWrap
