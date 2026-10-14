@@ -9,8 +9,10 @@
 
 #include "QGCApplication.h"
 
+#include <QtCore/QDir>
 #include <QtCore/QEvent>
 #include <QtCore/QFile>
+#include <QtCore/QFileInfo>
 #include <QtCore/QMetaMethod>
 #include <QtCore/QMetaObject>
 #include <QtCore/QRegularExpression>
@@ -58,6 +60,31 @@
 
 QGC_LOGGING_CATEGORY(QGCApplicationLog, "qgc.qgcapplication")
 
+/// Builds made before the app name was fixed ran as "AzShield Daily" and kept their settings
+/// under that name. Copy them across once, the first time this name has no settings of its
+/// own, so links, gimbal, map and save-path setup survive the rename. The old file is left
+/// in place.
+static void _migrateLegacySettings()
+{
+    const QString current = QSettings().fileName();
+    if (QFile::exists(current)) {
+        return;
+    }
+
+    const QString legacy = QSettings(QSettings::IniFormat, QSettings::UserScope,
+                                     QCoreApplication::organizationName(), QStringLiteral("AzShield Daily")).fileName();
+    if (!QFile::exists(legacy)) {
+        return;
+    }
+
+    (void) QDir().mkpath(QFileInfo(current).absolutePath());
+    if (QFile::copy(legacy, current)) {
+        qCInfo(QGCApplicationLog) << "Settings copied from" << legacy << "to" << current;
+    } else {
+        qCWarning(QGCApplicationLog) << "Could not copy settings from" << legacy << "to" << current;
+    }
+}
+
 QGCApplication::QGCApplication(int &argc, char *argv[], const QGCCommandLineParser::CommandLineParseResult &cli)
     : QApplication(argc, argv)
       , _runningUnitTests(cli.runningUnitTests)
@@ -87,13 +114,9 @@ QGCApplication::QGCApplication(int &argc, char *argv[], const QGCCommandLinePars
         // name. Also we want to run unit tests with clean settings every time.
         applicationName = QStringLiteral("%1_unittest").arg(QGC_APP_NAME);
     } else {
-#ifdef QGC_DAILY_BUILD
-        // This gives daily builds their own separate settings space. Allowing you to use daily and stable builds
-        // side by side without daily screwing up your stable settings.
-        applicationName = QStringLiteral("%1 Daily").arg("AzShield");
-#else
+        // Daily and stable builds share one name and one settings space: the name is shown
+        // to the user, written into plan files and sent to NTRIP casters.
         applicationName = QGC_APP_NAME;
-#endif
     }
     setApplicationName(applicationName);
     setOrganizationName(QGC_ORG_NAME);
@@ -102,6 +125,9 @@ QGCApplication::QGCApplication(int &argc, char *argv[], const QGCCommandLinePars
 
             // Set settings format
     QSettings::setDefaultFormat(QSettings::IniFormat);
+    if (!_runningUnitTests && !_simpleBootTest) {
+        _migrateLegacySettings();
+    }
     QSettings settings;
     qCDebug(QGCApplicationLog) << "Parametrlərin yeri" << settings.fileName() << "Yazıla bilirmi?:" << settings.isWritable();
 
