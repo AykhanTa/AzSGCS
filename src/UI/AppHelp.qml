@@ -47,11 +47,14 @@ Rectangle {
 
             QGCLabel {
                 text: qsTr("Versiya")
-                font.pointSize: 12
+                color: "white"
+                font.pixelSize: 18
+                font.bold: true
             }
             QGCLabel {
                 text: QGroundControl.qgcVersion
-                font.pointSize: 12
+                color: "#E8E8E8"
+                font.pixelSize: 18
                 wrapMode: Text.WrapAnywhere
                 Layout.fillWidth: true
             }
@@ -59,7 +62,8 @@ Rectangle {
 
         QGCLabel {
             text: qsTr("Dəstək əlaqə məlumatları sonradan əlavə olunacaq.")
-            font.pointSize: 10
+            color: "#E8E8E8"
+            font.pixelSize: 16
             wrapMode: Text.Wrap
             Layout.fillWidth: true
         }
