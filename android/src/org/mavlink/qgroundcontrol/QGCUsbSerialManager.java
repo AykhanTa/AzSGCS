@@ -94,7 +94,10 @@ public class QGCUsbSerialManager {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             intentFlags = PendingIntent.FLAG_IMMUTABLE;
         }
-        usbPermissionIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), intentFlags);
+        // Addressed to this app only: another install declaring the same action
+        // must not receive (or answer) this app's permission result.
+        final Intent permissionIntent = new Intent(ACTION_USB_PERMISSION).setPackage(context.getPackageName());
+        usbPermissionIntent = PendingIntent.getBroadcast(context, 0, permissionIntent, intentFlags);
     }
 
     /**

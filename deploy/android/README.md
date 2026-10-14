@@ -16,12 +16,11 @@ name wins:
 4. `:/dted` — compiled in (desktop only)
 
 `AppDataLocation` is a list, and on Android it holds two directories. The app
-prints the whole search order when it finds nothing, which on a device with the
-stock package name reads:
+prints the whole search order when it finds nothing, which on a device reads:
 
 ```
-/data/user/0/org.mavlink.qgroundcontrol/files/dted
-/storage/emulated/0/Android/data/org.mavlink.qgroundcontrol/files/dted
+/data/user/0/az.azshielddefence.gcs/files/dted
+/storage/emulated/0/Android/data/az.azshielddefence.gcs/files/dted
 /data/app/<...>/lib/arm64/dted
 :/dted
 ```
@@ -38,7 +37,7 @@ Substitute the real package name if `QGC_ANDROID_PACKAGE_NAME` was changed.
 Run the app once first, so Android creates the directory.
 
 ```sh
-DEST=/storage/emulated/0/Android/data/org.mavlink.qgroundcontrol/files/dted
+DEST=/storage/emulated/0/Android/data/az.azshielddefence.gcs/files/dted
 adb shell mkdir -p $DEST
 adb push resources/dted/. $DEST/
 ```

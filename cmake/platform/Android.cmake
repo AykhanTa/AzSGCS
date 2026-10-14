@@ -46,6 +46,16 @@ endif()
 set(ANDROID_VERSION_CODE "${ANDROID_BITNESS_CODE}${CMAKE_PROJECT_VERSION_MAJOR}${CMAKE_PROJECT_VERSION_MINOR}${ANDROID_PATCH_VERSION}000")
 message(STATUS "Android version code: ${ANDROID_VERSION_CODE}")
 
+# android/build.gradle sets applicationId itself (its namespace stays the Java
+# package), so QT_ANDROID_PACKAGE_NAME alone does not decide the installed
+# package. Catch the two drifting apart here rather than on the device.
+file(STRINGS "${QGC_ANDROID_PACKAGE_SOURCE_DIR}/build.gradle" _qgc_gradle_app_id
+    REGEX "^[ \t]*applicationId[ \t]*=?[ \t]*\"[^\"]+\"")
+string(REGEX MATCH "\"([^\"]+)\"" _qgc_gradle_app_id_match "${_qgc_gradle_app_id}")
+if(NOT CMAKE_MATCH_1 STREQUAL QGC_ANDROID_PACKAGE_NAME)
+    message(FATAL_ERROR "QGC: android/build.gradle applicationId (${CMAKE_MATCH_1}) does not match QGC_ANDROID_PACKAGE_NAME (${QGC_ANDROID_PACKAGE_NAME})")
+endif()
+
 set_target_properties(${CMAKE_PROJECT_NAME}
     PROPERTIES
         # QT_ANDROID_ABIS ${CMAKE_ANDROID_ARCH_ABI}

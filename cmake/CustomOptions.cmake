@@ -6,8 +6,8 @@ set(QGC_APP_NAME "AzShieldGCS" CACHE STRING "App Name")
 set(QGC_APP_COPYRIGHT "Copyright (c) 2026 AzShield Defence. All rights reserved." CACHE STRING "Copyright")
 set(QGC_APP_DESCRIPTION "AzShieldGCS Ground Control Station" CACHE STRING "Description")
 set(QGC_ORG_NAME "AzShieldGCS" CACHE STRING "Org Name")
-set(QGC_ORG_DOMAIN "qgroundcontrol.com" CACHE STRING "Domain")
-set(QGC_PACKAGE_NAME "org.mavlink.qgroundcontrol" CACHE STRING "Package Name")
+set(QGC_ORG_DOMAIN "azshielddefence.az" CACHE STRING "Domain")
+set(QGC_PACKAGE_NAME "az.azshielddefence.gcs" CACHE STRING "Package Name")
 set(QGC_SETTINGS_VERSION "9" CACHE STRING "Settings Version") # If you need to make an incompatible changes to stored settings, bump this version number up by 1. This will caused store settings to be cleared on next boot.
 
 # Build

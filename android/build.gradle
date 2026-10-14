@@ -88,13 +88,17 @@ android {
     }
 
     defaultConfig {
+        // The installed package name. It must match QGC_ANDROID_PACKAGE_NAME;
+        // cmake/platform/Android.cmake stops the configure if they differ.
+        // The Java sources keep the namespace above, so they need no moving.
+        applicationId = "az.azshielddefence.gcs"
         resConfig "en"
         minSdkVersion qtMinSdkVersion
         targetSdkVersion qtTargetSdkVersion
         ndk.abiFilters = qtTargetAbiList.split(",")
 
         println "timestamp: " + getTimestampStr()
-        // println "applicationId: ${applicationId}"
+        println "applicationId: ${applicationId}"
         println "minSdkVersion: ${minSdkVersion}"
         println "targetSdkVersion: ${targetSdkVersion}"
         println "ndk.abiFilters: ${ndk.abiFilters}"
