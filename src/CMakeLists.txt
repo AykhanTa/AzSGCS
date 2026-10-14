@@ -142,13 +142,14 @@ target_sources(${CMAKE_PROJECT_NAME}
 )
 
 if(WIN32)
-    set(APP_ICON_RC "${CMAKE_CURRENT_BINARY_DIR}/appicon.rc")
+    # Icon and version info (company, description, copyright) for the exe.
+    set(APP_RC "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.rc")
     configure_file(
-        "${CMAKE_SOURCE_DIR}/deploy/windows/appicon.rc.in"
-        "${APP_ICON_RC}"
+        "${CMAKE_SOURCE_DIR}/deploy/windows/AzShieldGCS.rc.in"
+        "${APP_RC}"
         @ONLY
     )
-    target_sources(${CMAKE_PROJECT_NAME} PRIVATE "${APP_ICON_RC}")
+    target_sources(${CMAKE_PROJECT_NAME} PRIVATE "${APP_RC}")
 endif()
 
 

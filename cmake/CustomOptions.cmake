@@ -3,8 +3,8 @@ include(CMakeDependentOption)
 
 # App
 set(QGC_APP_NAME "AzShieldGCS" CACHE STRING "App Name")
-set(QGC_APP_COPYRIGHT "Copyright (c) 2025 QGroundControl. All rights reserved." CACHE STRING "Copyright")
-set(QGC_APP_DESCRIPTION "Open Source Ground Control App" CACHE STRING "Description")
+set(QGC_APP_COPYRIGHT "Copyright (c) 2026 AzShield Defence. All rights reserved." CACHE STRING "Copyright")
+set(QGC_APP_DESCRIPTION "AzShieldGCS Ground Control Station" CACHE STRING "Description")
 set(QGC_ORG_NAME "AzShieldGCS" CACHE STRING "Org Name")
 set(QGC_ORG_DOMAIN "qgroundcontrol.com" CACHE STRING "Domain")
 set(QGC_PACKAGE_NAME "org.mavlink.qgroundcontrol" CACHE STRING "Package Name")
@@ -86,7 +86,7 @@ set(QGC_APPIMAGE_APPDATA_DEVELOPER "qgroundcontrol" CACHE STRING "AppImage Metad
 # Windows
 set(QGC_WINDOWS_INSTALL_HEADER_PATH "${CMAKE_SOURCE_DIR}/deploy/windows/installheader.bmp" CACHE FILEPATH "Windows Install Header Path")
 set(QGC_WINDOWS_ICON_PATH "${CMAKE_SOURCE_DIR}/deploy/windows/WindowsQGC.ico" CACHE FILEPATH "Windows Icon Path")
-set(QGC_WINDOWS_RESOURCE_FILE_PATH "${CMAKE_SOURCE_DIR}/deploy/windows/QGroundControl.rc" CACHE FILEPATH "Windows Resource File Path")
+set(QGC_WINDOWS_RESOURCE_FILE_PATH "${CMAKE_SOURCE_DIR}/deploy/windows/AzShieldGCS.rc.in" CACHE FILEPATH "Windows Resource File Template")
 
 # CPM
 set(QGC_CPM_SOURCE_CACHE "" CACHE PATH "Directory to Download CPM Dependencies, Overrides CPM_SOURCE_CACHE Env Variable")
