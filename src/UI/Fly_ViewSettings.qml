@@ -471,8 +471,7 @@ Rectangle {
             border.width: 1
             border.color: panelStyle.border
             visible: _guidedMinimumAltitude.visible || _guidedMaximumAltitude.visible ||
-                     _maxGoToLocationDistance.visible || _forwardFlightGoToLocationLoiterRad.visible ||
-                     _goToLocationRequiresConfirmInGuided.visible
+                     _maxGoToLocationDistance.visible || _forwardFlightGoToLocationLoiterRad.visible
 
             height: layout.implicitHeight + panelStyle.pad * 2
 
@@ -635,7 +634,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
-                    visible: _goToLocationRequiresConfirmInGuided.visible
+                    // Go To həmişə paneldə "Təsdiq et" ilə göndərilir: bu açar artıq heç nəyi dəyişmir.
+                    visible: false
                     implicitHeight: Math.max(root.rowMinH, confirmRow.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
 

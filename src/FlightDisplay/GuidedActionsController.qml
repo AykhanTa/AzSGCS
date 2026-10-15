@@ -28,6 +28,7 @@ Item {
 
     property var missionController
     property var confirmDialog
+    property var gotoPanel          ///< GoToLocationPanel: Go To hündürlük/sürət paneli
     property var guidedValueSlider
     property var fwdFlightGotoMapCircle
     property var orbitMapCircle
@@ -171,7 +172,7 @@ Item {
     // Note: The '_missionItemCount - 2' is a hack to not trigger resume mission when a mission ends with an RTL item
     property bool showResumeMission:    _activeVehicle && !_vehicleArmed && _vehicleWasFlying && _missionAvailable && _resumeMissionIndex > 0 && (_resumeMissionIndex < _missionItemCount - 2)
 
-    property bool guidedUIVisible:          confirmDialog.visible
+    property bool guidedUIVisible:          confirmDialog.visible || (gotoPanel ? gotoPanel.visible : false)
 
     property var    _corePlugin:            QGroundControl.corePlugin
     property var    _corePluginOptions:     QGroundControl.corePlugin.options
@@ -597,6 +598,26 @@ Item {
     }
 
     // Executes the specified action
+    /// Opens the Go To panel for a map location. The command is only sent once the panel is confirmed.
+    function showGotoPanel(coordinate, mapIndicator) {
+        if (gotoPanel) {
+            gotoPanel.open(coordinate, mapIndicator)
+        }
+    }
+
+    /// Go To with the panel's values. altitudeRelative (m above home) and speed (m/s) may be NaN
+    /// to keep the vehicle's current altitude / its own speed.
+    function executeGoto(coordinate, altitudeRelative, speed) {
+        if (!_activeVehicle) {
+            return
+        }
+        _activeVehicle.guidedModeGotoLocation(
+            coordinate,
+            _vehicleInFwdFlight ? _flyViewSettings.forwardFlightGoToLocationLoiterRad.value : 0,
+            altitudeRelative,
+            speed)
+    }
+
     function executeAction(actionCode, actionData, sliderOutputValue, optionChecked) {
         var i;
         var selectedVehicles;

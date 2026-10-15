@@ -258,6 +258,14 @@ Item {
         utmspSliderTrigger:         utmspActTrigger
     }
 
+    GoToLocationPanel {
+        anchors.top:                parent.top
+        anchors.topMargin:          50
+        anchors.horizontalCenter:   parent.horizontalCenter
+        z:                          QGroundControl.zOrderTopMost
+        guidedController:           _guidedController
+    }
+
     Loader {
         id:                         virtualJoystickMultiTouch
         z:                          QGroundControl.zOrderTopMost + 1
