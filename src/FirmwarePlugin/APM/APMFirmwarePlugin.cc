@@ -817,11 +817,30 @@ out:
     delete data;
 }
 
-void APMFirmwarePlugin::guidedModeGotoLocation(Vehicle *vehicle, const QGeoCoordinate &gotoCoord, double forwardFlightLoiterRadius) const
+void APMFirmwarePlugin::guidedModeGotoLocation(Vehicle *vehicle, const QGeoCoordinate &gotoCoord, double forwardFlightLoiterRadius, double altitudeRelative, double speed) const
 {
     if (qIsNaN(vehicle->altitudeRelative()->rawValue().toDouble())) {
         qgcApp()->showAppMessage(QStringLiteral("Unable to go to location, vehicle position not known."));
         return;
+    }
+
+    const bool haveTargetAltitude = !qIsNaN(altitudeRelative);
+    const float targetAltitudeAMSL = static_cast<float>(haveTargetAltitude
+                                                        ? vehicle->homePosition().altitude() + altitudeRelative
+                                                        : vehicle->altitudeAMSL()->rawValue().toDouble());
+
+    // ArduPilot takes the speed separately. In Guided it applies to the next destination, so it
+    // goes first. Plane honours the speed type, Copter treats the value as its WPNAV speed.
+    if (!qIsNaN(speed) && (speed > 0)) {
+        vehicle->sendMavCommand(
+            vehicle->defaultComponentId(),
+            MAV_CMD_DO_CHANGE_SPEED,
+            true,                                   // show error if fails
+            vehicle->inFwdFlight() ? 0.0f : 1.0f,   // 0: airspeed, 1: groundspeed
+            static_cast<float>(speed),
+            -1.0f,                                  // throttle: no change
+            0.0f,                                   // absolute speed
+            NAN, NAN, NAN);
     }
 
     // attempt to use MAV_CMD_DO_REPOSITION to move vehicle.  If that
@@ -865,7 +884,7 @@ void APMFirmwarePlugin::guidedModeGotoLocation(Vehicle *vehicle, const QGeoCoord
                 yawParam,
                 gotoCoord.latitude(),
                 gotoCoord.longitude(),
-                vehicle->altitudeAMSL()->rawValue().toFloat()
+                targetAltitudeAMSL
             );
         }
         if (instanceData->MAV_CMD_DO_REPOSITION_supported) {
@@ -877,7 +896,7 @@ void APMFirmwarePlugin::guidedModeGotoLocation(Vehicle *vehicle, const QGeoCoord
     setGuidedMode(vehicle, true);
 
     QGeoCoordinate coordWithAltitude = gotoCoord;
-    coordWithAltitude.setAltitude(vehicle->altitudeRelative()->rawValue().toDouble());
+    coordWithAltitude.setAltitude(haveTargetAltitude ? altitudeRelative : vehicle->altitudeRelative()->rawValue().toDouble());
     vehicle->missionManager()->writeArduPilotGuidedMissionItem(coordWithAltitude, false /* altChangeOnly */);
 }
 

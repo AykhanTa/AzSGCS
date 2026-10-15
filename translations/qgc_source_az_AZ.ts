@@ -17846,6 +17846,26 @@ ROTATION_NONE indicates component points in direction of flight.</translation>
   <context>
     <name>Vehicle</name>
     <message>
+      <location filename="../src/Vehicle/Vehicle.cc"/>
+      <source>Unable to go to location, home position altitude unknown.</source>
+      <translation>Mövqeyə uçmaq mümkün deyil: ev nöqtəsinin hündürlüyü bilinmir.</translation>
+    </message>
+    <message>
+      <location filename="../src/Vehicle/Vehicle.cc"/>
+      <source>Altitude must be between %1 and %2 %3.</source>
+      <translation>Hündürlük %1 ilə %2 %3 arasında olmalıdır.</translation>
+    </message>
+    <message>
+      <location filename="../src/Vehicle/Vehicle.cc"/>
+      <source>Speed must be greater than zero.</source>
+      <translation>Sürət sıfırdan böyük olmalıdır.</translation>
+    </message>
+    <message>
+      <location filename="../src/Vehicle/Vehicle.cc"/>
+      <source>Speed must be between %1 and %2 %3.</source>
+      <translation>Sürət %1 ilə %2 %3 arasında olmalıdır.</translation>
+    </message>
+    <message>
       <location filename="../src/Vehicle/Vehicle.cc" line="2217"/>
       <source>New location is too far. Must be less than %1 %2.</source>
       <translation>Yeni mövqe çox uzaqdadır. Məsafə %1 %2-dən az olmalıdır.</translation>

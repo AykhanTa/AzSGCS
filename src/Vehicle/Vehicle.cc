@@ -2202,7 +2202,7 @@ void Vehicle::startMission()
     _firmwarePlugin->startMission(this);
 }
 
-void Vehicle::guidedModeGotoLocation(const QGeoCoordinate& gotoCoord, double forwardFlightLoiterRadius)
+void Vehicle::guidedModeGotoLocation(const QGeoCoordinate& gotoCoord, double forwardFlightLoiterRadius, double altitudeRelative, double speed)
 {
     if (!guidedModeSupported()) {
         qgcApp()->showAppMessage(guided_mode_not_supported_by_vehicle);
@@ -2220,13 +2220,58 @@ void Vehicle::guidedModeGotoLocation(const QGeoCoordinate& gotoCoord, double for
         return;
     }
 
+    // The target altitude and speed are checked here rather than trusted from the UI: they go
+    // straight to the autopilot.
+    if (!qIsNaN(altitudeRelative)) {
+        if (!homePosition().isValid() || qIsNaN(homePosition().altitude())) {
+            qgcApp()->showAppMessage(tr("Unable to go to location, home position altitude unknown."));
+            return;
+        }
+
+        FlyViewSettings *const flyViewSettings = SettingsManager::instance()->flyViewSettings();
+        const double minAltitude = flyViewSettings->guidedMinimumAltitude()->rawValue().toDouble();
+        const double maxAltitude = flyViewSettings->guidedMaximumAltitude()->rawValue().toDouble();
+        if ((altitudeRelative < minAltitude) || (altitudeRelative > maxAltitude)) {
+            qgcApp()->showAppMessage(tr("Altitude must be between %1 and %2 %3.")
+                                         .arg(FactMetaData::metersToAppSettingsVerticalDistanceUnits(minAltitude).toDouble(), 0, 'f', 1)
+                                         .arg(FactMetaData::metersToAppSettingsVerticalDistanceUnits(maxAltitude).toDouble(), 0, 'f', 1)
+                                         .arg(FactMetaData::appSettingsVerticalDistanceUnitsString()));
+            return;
+        }
+    }
+
+    if (!qIsNaN(speed)) {
+        if (speed <= 0) {
+            qgcApp()->showAppMessage(tr("Speed must be greater than zero."));
+            return;
+        }
+
+        double minSpeed = 0;
+        double maxSpeed = qQNaN();
+        if (inFwdFlight()) {
+            if (haveFWSpeedLimits()) {
+                minSpeed = minimumEquivalentAirspeed();
+                maxSpeed = maximumEquivalentAirspeed();
+            }
+        } else if (haveMRSpeedLimits()) {
+            maxSpeed = maximumHorizontalSpeedMultirotor();
+        }
+        if ((speed < minSpeed) || (!qIsNaN(maxSpeed) && (speed > maxSpeed))) {
+            qgcApp()->showAppMessage(tr("Speed must be between %1 and %2 %3.")
+                                         .arg(FactMetaData::metersSecondToAppSettingsSpeedUnits(minSpeed).toDouble(), 0, 'f', 1)
+                                         .arg(FactMetaData::metersSecondToAppSettingsSpeedUnits(maxSpeed).toDouble(), 0, 'f', 1)
+                                         .arg(FactMetaData::appSettingsSpeedUnitsString()));
+            return;
+        }
+    }
+
     // ✅ UI üçün: GoTo target-i saxla. Hündürlük bilinmirsə firmware plugin heç nə göndərmədən
     // imtina edir, onda hədəf də göstərilməməlidir.
     if (!qIsNaN(altitudeAMSL()->rawValue().toDouble())) {
         _setGoToTarget(gotoCoord);
     }
 
-    _firmwarePlugin->guidedModeGotoLocation(this, gotoCoord, forwardFlightLoiterRadius);
+    _firmwarePlugin->guidedModeGotoLocation(this, gotoCoord, forwardFlightLoiterRadius, altitudeRelative, speed);
 }
 
 void Vehicle::guidedModeChangeAltitude(double altitudeChange, bool pauseVehicle)

@@ -217,7 +217,11 @@ public:
     virtual void startMission(Vehicle *vehicle) const;
 
     /// Command vehicle to move to specified location (altitude is included and relative)
-    virtual void guidedModeGotoLocation(Vehicle *vehicle, const QGeoCoordinate &gotoCoord, double forwardFlightLoiterRadius = 0.0) const;
+    /// @param altitudeRelative Target altitude above home in meters, NaN to keep the current altitude
+    /// @param speed Speed to fly there in m/s: ground speed in hover flight, airspeed in forward
+    ///              flight. NaN to keep the vehicle's own speed.
+    virtual void guidedModeGotoLocation(Vehicle *vehicle, const QGeoCoordinate &gotoCoord, double forwardFlightLoiterRadius = 0.0,
+                                        double altitudeRelative = qQNaN(), double speed = qQNaN()) const;
 
     /// Command vehicle to change altitude
     ///     @param altitudeChange If > 0, go up by amount specified, if < 0, go down by amount specified

@@ -115,6 +115,7 @@
 // #include "RequestMessageTest.h"
 // #include "SendMavCommandWithHandlerTest.h"
 // #include "SendMavCommandWithSignalingTest.h"
+#include "VehicleGoToOptionsTest.h"
 #include "VehicleGoToTargetTest.h"
 #include "VehicleLinkManagerTest.h"
 
@@ -230,6 +231,7 @@ int QGCUnitTest::runTests(bool stress, const QStringList& unitTests)
     // UT_REGISTER_TEST(RequestMessageTest)
     // UT_REGISTER_TEST(SendMavCommandWithHandlerTest)
     // UT_REGISTER_TEST(SendMavCommandWithSignalingTest)
+    UT_REGISTER_TEST(VehicleGoToOptionsTest)
     UT_REGISTER_TEST(VehicleGoToTargetTest)
     UT_REGISTER_TEST(VehicleLinkManagerTest)
 

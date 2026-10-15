@@ -394,7 +394,7 @@ bool PX4FirmwarePlugin::fixedWingAirSpeedLimitsAvailable(Vehicle* vehicle) const
             vehicle->parameterManager()->parameterExists(ParameterManager::defaultComponentId, "FW_AIRSPD_MAX");
 }
 
-void PX4FirmwarePlugin::guidedModeGotoLocation(Vehicle* vehicle, const QGeoCoordinate& gotoCoord, double forwardFlightLoiterRadius) const
+void PX4FirmwarePlugin::guidedModeGotoLocation(Vehicle* vehicle, const QGeoCoordinate& gotoCoord, double forwardFlightLoiterRadius, double altitudeRelative, double speed) const
 {
     // PX4 doesn't support setting the forward flight loiter radius of
     // MAV_CMD_DO_REPOSITION
@@ -405,29 +405,37 @@ void PX4FirmwarePlugin::guidedModeGotoLocation(Vehicle* vehicle, const QGeoCoord
         return;
     }
 
+    // DO_REPOSITION takes an AMSL altitude. Without a target the vehicle keeps its own.
+    const float targetAltitudeAMSL = static_cast<float>(qIsNaN(altitudeRelative)
+                                                        ? vehicle->altitudeAMSL()->rawValue().toDouble()
+                                                        : vehicle->homePosition().altitude() + altitudeRelative);
+    // param1 is PX4's cruising speed for the reposition: ground speed for a multirotor, the
+    // airspeed setpoint in fixed-wing flight. -1 keeps the default.
+    const float cruisingSpeed = (qIsNaN(speed) || (speed <= 0)) ? -1.0f : static_cast<float>(speed);
+
     if (vehicle->capabilityBits() & MAV_PROTOCOL_CAPABILITY_COMMAND_INT) {
         vehicle->sendMavCommandInt(vehicle->defaultComponentId(),
                                    MAV_CMD_DO_REPOSITION,
                                    MAV_FRAME_GLOBAL,
                                    true,   // show error is fails
-                                   -1.0f,
+                                   cruisingSpeed,
                                    MAV_DO_REPOSITION_FLAGS_CHANGE_MODE,
                                    0.0f,
                                    NAN,
                                    gotoCoord.latitude(),
                                    gotoCoord.longitude(),
-                                   vehicle->altitudeAMSL()->rawValue().toFloat());
+                                   targetAltitudeAMSL);
     } else {
         vehicle->sendMavCommand(vehicle->defaultComponentId(),
                                 MAV_CMD_DO_REPOSITION,
                                 true,   // show error is fails
-                                -1.0f,
+                                cruisingSpeed,
                                 MAV_DO_REPOSITION_FLAGS_CHANGE_MODE,
                                 0.0f,
                                 NAN,
                                 static_cast<float>(gotoCoord.latitude()),
                                 static_cast<float>(gotoCoord.longitude()),
-                                vehicle->altitudeAMSL()->rawValue().toFloat());
+                                targetAltitudeAMSL);
     }
 }
 

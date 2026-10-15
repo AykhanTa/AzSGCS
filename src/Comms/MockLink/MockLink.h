@@ -81,8 +81,18 @@ public:
     /// Returns the filename for the simulated log file. Only available after a download is requested.
     QString logDownloadFile() const { return _logDownloadFilename; }
 
-    void clearReceivedMavCommandCounts() { _receivedMavCommandCountMap.clear(); }
+    void clearReceivedMavCommandCounts() { _receivedMavCommandCountMap.clear(); _lastReceivedMavCommandMap.clear(); }
     int receivedMavCommandCount(MAV_CMD command) const { return _receivedMavCommandCountMap[command]; }
+
+    /// Parameters of the last COMMAND_LONG or COMMAND_INT received for a command. For
+    /// COMMAND_INT, param5/param6 are the latitude/longitude in degrees and param7 is z.
+    struct ReceivedMavCommand {
+        bool    commandInt = false;
+        float   param1 = 0, param2 = 0, param3 = 0, param4 = 0;
+        double  param5 = 0, param6 = 0;
+        float   param7 = 0;
+    };
+    ReceivedMavCommand lastReceivedMavCommand(MAV_CMD command) const { return _lastReceivedMavCommandMap.value(command); }
 
     enum RequestMessageFailureMode_t {
         FailRequestMessageNone,
@@ -154,6 +164,8 @@ private:
     void _handleParamRequestRead(const mavlink_message_t &msg);
     void _handleFTP(const mavlink_message_t &msg);
     void _handleCommandLong(const mavlink_message_t &msg);
+    void _handleCommandInt(const mavlink_message_t &msg);
+    uint8_t _handleDoReposition(float flags);
     void _handleInProgressCommandLong(const mavlink_command_long_t &request);
     void _handleManualControl(const mavlink_message_t &msg);
     void _handlePreFlightCalibration(const mavlink_command_long_t &request);
@@ -255,6 +267,7 @@ private:
     RequestMessageFailureMode_t _requestMessageFailureMode = FailRequestMessageNone;
 
     QMap<MAV_CMD, int> _receivedMavCommandCountMap;
+    QMap<MAV_CMD, ReceivedMavCommand> _lastReceivedMavCommandMap;
     QMap<int, QMap<QString, QVariant>> _mapParamName2Value;
     QMap<int, QMap<QString, MAV_PARAM_TYPE>> _mapParamName2MavParamType;
 

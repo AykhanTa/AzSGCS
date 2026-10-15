@@ -148,11 +148,13 @@ void FirmwarePlugin::guidedModeTakeoff(Vehicle *vehicle, double takeoffAltRel) c
     qgcApp()->showAppMessage(guided_mode_not_supported_by_vehicle);
 }
 
-void FirmwarePlugin::guidedModeGotoLocation(Vehicle *vehicle, const QGeoCoordinate &gotoCoord, double forwardFlightLoiterRadius) const
+void FirmwarePlugin::guidedModeGotoLocation(Vehicle *vehicle, const QGeoCoordinate &gotoCoord, double forwardFlightLoiterRadius, double altitudeRelative, double speed) const
 {
     Q_UNUSED(vehicle);
     Q_UNUSED(gotoCoord);
     Q_UNUSED(forwardFlightLoiterRadius);
+    Q_UNUSED(altitudeRelative);
+    Q_UNUSED(speed);
     qgcApp()->showAppMessage(guided_mode_not_supported_by_vehicle);
 }
 

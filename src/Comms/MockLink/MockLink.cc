@@ -601,6 +601,9 @@ void MockLink::_handleIncomingMavlinkMsg(const mavlink_message_t &msg)
     case MAVLINK_MSG_ID_COMMAND_LONG:
         _handleCommandLong(msg);
         break;
+    case MAVLINK_MSG_ID_COMMAND_INT:
+        _handleCommandInt(msg);
+        break;
     case MAVLINK_MSG_ID_MANUAL_CONTROL:
         _handleManualControl(msg);
         break;
@@ -1054,18 +1057,14 @@ void MockLink::_handleCommandLong(const mavlink_message_t &msg)
     mavlink_msg_command_long_decode(&msg, &request);
 
     _receivedMavCommandCountMap[static_cast<MAV_CMD>(request.command)]++;
+    ReceivedMavCommand &received = _lastReceivedMavCommandMap[static_cast<MAV_CMD>(request.command)];
+    received = { false, request.param1, request.param2, request.param3, request.param4, request.param5, request.param6, request.param7 };
 
     uint8_t commandResult = MAV_RESULT_UNSUPPORTED;
 
     switch (request.command) {
     case MAV_CMD_DO_REPOSITION:
-        // PX4 accepts a reposition and, asked to, switches to Hold to fly it.
-        if (_firmwareType == MAV_AUTOPILOT_PX4) {
-            if (static_cast<int>(request.param2) & MAV_DO_REPOSITION_FLAGS_CHANGE_MODE) {
-                _mavCustomMode = PX4CustomMode::AUTO_LOITER;
-            }
-            commandResult = MAV_RESULT_ACCEPTED;
-        }
+        commandResult = _handleDoReposition(request.param2);
         break;
     case MAV_CMD_COMPONENT_ARM_DISARM:
         if (request.param1 == 0.0f) {
@@ -1150,6 +1149,48 @@ void MockLink::_handleCommandLong(const mavlink_message_t &msg)
     case MockLink::MAV_CMD_MOCKLINK_RESULT_IN_PROGRESS_NO_ACK:
         _handleInProgressCommandLong(request);
         return;
+    }
+
+    mavlink_message_t commandAck{};
+    (void) mavlink_msg_command_ack_pack_chan(
+        _vehicleSystemId,
+        _vehicleComponentId,
+        mavlinkChannel(),
+        &commandAck,
+        request.command,
+        commandResult,
+        0,    // progress
+        0,    // result_param2
+        0,    // target_system
+        0     // target_component
+    );
+    respondWithMavlinkMessage(commandAck);
+}
+
+uint8_t MockLink::_handleDoReposition(float flags)
+{
+    // PX4 accepts a reposition and, asked to, switches to Hold to fly it.
+    if (_firmwareType != MAV_AUTOPILOT_PX4) {
+        return MAV_RESULT_UNSUPPORTED;
+    }
+    if (static_cast<int>(flags) & MAV_DO_REPOSITION_FLAGS_CHANGE_MODE) {
+        _mavCustomMode = PX4CustomMode::AUTO_LOITER;
+    }
+    return MAV_RESULT_ACCEPTED;
+}
+
+void MockLink::_handleCommandInt(const mavlink_message_t &msg)
+{
+    mavlink_command_int_t request{};
+    mavlink_msg_command_int_decode(&msg, &request);
+
+    _receivedMavCommandCountMap[static_cast<MAV_CMD>(request.command)]++;
+    ReceivedMavCommand &received = _lastReceivedMavCommandMap[static_cast<MAV_CMD>(request.command)];
+    received = { true, request.param1, request.param2, request.param3, request.param4, request.x * 1e-7, request.y * 1e-7, request.z };
+
+    uint8_t commandResult = MAV_RESULT_UNSUPPORTED;
+    if (request.command == MAV_CMD_DO_REPOSITION) {
+        commandResult = _handleDoReposition(request.param2);
     }
 
     mavlink_message_t commandAck{};
