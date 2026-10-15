@@ -1058,6 +1058,15 @@ void MockLink::_handleCommandLong(const mavlink_message_t &msg)
     uint8_t commandResult = MAV_RESULT_UNSUPPORTED;
 
     switch (request.command) {
+    case MAV_CMD_DO_REPOSITION:
+        // PX4 accepts a reposition and, asked to, switches to Hold to fly it.
+        if (_firmwareType == MAV_AUTOPILOT_PX4) {
+            if (static_cast<int>(request.param2) & MAV_DO_REPOSITION_FLAGS_CHANGE_MODE) {
+                _mavCustomMode = PX4CustomMode::AUTO_LOITER;
+            }
+            commandResult = MAV_RESULT_ACCEPTED;
+        }
+        break;
     case MAV_CMD_COMPONENT_ARM_DISARM:
         if (request.param1 == 0.0f) {
             _mavBaseMode &= ~MAV_MODE_FLAG_SAFETY_ARMED;

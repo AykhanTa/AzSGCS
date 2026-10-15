@@ -162,17 +162,27 @@ Item {
     readonly property bool _goToActive: _v ? _v.goToActive : false
     readonly property var  _goToCoord:  _v ? _v.goToCoordinate : null
 
+    // Hədəfə bu məsafədən yaxın olanda istiqamət GPS səs-küyündən hər an dəyişir: ox
+    // təsadüfi fırlanmasın deyə gizlədilir.
+    readonly property real _goToArrivedRadiusM: 5
+
+    readonly property bool _goToArrived: {
+        if (!_goToActive || !_v || !_coordValid(_v.coordinate) || !_coordValid(_goToCoord)) return false
+        return _v.coordinate.distanceTo(_goToCoord) < _goToArrivedRadiusM
+    }
+
     readonly property real _goToBearingAbs: {
-        if (!_goToActive) return NaN
+        if (!_goToActive || _goToArrived) return NaN
         if (_v && _coordValid(_v.coordinate) && _coordValid(_goToCoord)) {
             return _bearingDeg(_v.coordinate, _goToCoord)
         }
         return NaN
     }
 
-    // Target selection: GoTo varsa -> GoTo, yoxsa -> Mission WP
+    // Target selection: GoTo varsa -> GoTo, yoxsa -> Mission WP. GoTo zamanı aparat missiya
+    // nöqtəsinə getmir, ona görə hədəfə çatanda da missiya oxu göstərilmir.
     readonly property real _targetBearingAbs: {
-        if (!isNaN(_goToBearingAbs)) return _goToBearingAbs
+        if (_goToActive) return _goToBearingAbs
         return _wpBearingAbs
     }
 

@@ -17846,6 +17846,11 @@ ROTATION_NONE indicates component points in direction of flight.</translation>
   <context>
     <name>Vehicle</name>
     <message>
+      <location filename="../src/Vehicle/Vehicle.cc" line="2217"/>
+      <source>New location is too far. Must be less than %1 %2.</source>
+      <translation>Yeni mövqe çox uzaqdadır. Məsafə %1 %2-dən az olmalıdır.</translation>
+    </message>
+    <message>
       <location filename="../src/Vehicle/Vehicle.cc" line="1775"/>
       <source>Mission transfer failed. Error: %1</source>
       <translation>Missiya köçürüldü. Xəta:%1</translation>

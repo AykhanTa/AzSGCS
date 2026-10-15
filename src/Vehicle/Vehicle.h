@@ -108,6 +108,7 @@ class Vehicle : public VehicleFactGroup
     friend class SendMavCommandWithSignallingTest;  // Unit test
     friend class SendMavCommandWithHandlerTest;     // Unit test
     friend class RequestMessageTest;                // Unit test
+    friend class VehicleGoToTargetTest;             // Unit test
     friend class GimbalController;                  // Allow GimbalController to call _addFactGroup
 
 public:
@@ -966,9 +967,16 @@ private slots:
 private:
 
     void _setGoToTarget(const QGeoCoordinate& coord);
+    void _goToFlightModeChanged(const QString& flightMode);
+    void _goToCommandResult(int vehicleId, int targetComponent, int command, int ackResult, int failureCode);
 
     bool          _goToActive = false;
     QGeoCoordinate _goToCoordinate;
+    /// The vehicle has been in its goto flight mode since the target was set. Until then a
+    /// report of another mode is the mode it was in before the command, not a departure.
+    bool          _goToEnteredMode = false;
+    /// The DO_REPOSITION that set the target has not been answered yet.
+    bool          _goToAwaitingAck = false;
 
     void _loadJoystickSettings          ();
     void _activeVehicleChanged          (Vehicle* newActiveVehicle);

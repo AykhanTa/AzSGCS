@@ -126,6 +126,8 @@ Vehicle::Vehicle(LinkInterface*             link,
     connect(MAVLinkProtocol::instance(), &MAVLinkProtocol::mavlinkMessageStatus,   this, &Vehicle::_mavlinkMessageStatus);
 
     connect(this, &Vehicle::flightModeChanged,          this, &Vehicle::_handleFlightModeChanged);
+    connect(this, &Vehicle::flightModeChanged,          this, &Vehicle::_goToFlightModeChanged);
+    connect(this, &Vehicle::mavCommandResult,           this, &Vehicle::_goToCommandResult);
     connect(this, &Vehicle::armedChanged,               this, &Vehicle::_announceArmedChanged);
     connect(this, &Vehicle::flyingChanged, this, [this](bool flying){
         if (flying) {
@@ -251,6 +253,9 @@ void Vehicle::_setGoToTarget(const QGeoCoordinate& coord)
 {
     const bool newActive = coord.isValid();
 
+    _goToEnteredMode = newActive && (flightMode() == gotoFlightMode());
+    _goToAwaitingAck = newActive;
+
     if (_goToActive != newActive) {
         _goToActive = newActive;
         emit goToActiveChanged(_goToActive);
@@ -263,6 +268,9 @@ void Vehicle::_setGoToTarget(const QGeoCoordinate& coord)
 }
 void Vehicle::clearGoTo()
 {
+    _goToEnteredMode = false;
+    _goToAwaitingAck = false;
+
     if (!_goToActive && !_goToCoordinate.isValid()) {
         return;
     }
@@ -2030,6 +2038,39 @@ void Vehicle::_handleFlightModeChanged(const QString& flightMode)
     emit guidedModeChanged(_firmwarePlugin->isGuidedMode(this));
 }
 
+/// The goto target only holds while the vehicle flies it. Once the vehicle leaves the goto
+/// flight mode (RTL, land, mission, orbit, ...) it is going somewhere else, so the target is
+/// dropped, the same way the fly view map drops its "Go here" marker.
+void Vehicle::_goToFlightModeChanged(const QString& flightMode)
+{
+    if (!_goToActive) {
+        return;
+    }
+
+    if (flightMode == gotoFlightMode()) {
+        _goToEnteredMode = true;
+    } else if (_goToEnteredMode) {
+        clearGoTo();
+    }
+}
+
+/// A goto the vehicle refused never starts, so its target must not be shown.
+void Vehicle::_goToCommandResult(int vehicleId, int targetComponent, int command, int ackResult, int failureCode)
+{
+    Q_UNUSED(vehicleId)
+    Q_UNUSED(targetComponent)
+    Q_UNUSED(failureCode)
+
+    if ((command != MAV_CMD_DO_REPOSITION) || !_goToAwaitingAck) {
+        return;
+    }
+
+    _goToAwaitingAck = false;
+    if (ackResult != MAV_RESULT_ACCEPTED) {
+        clearGoTo();
+    }
+}
+
 void Vehicle::_announceArmedChanged(bool armed)
 {
     _say(QString("%1 %2").arg(_vehicleIdSpeech()).arg(armed ? tr("armed") : tr("disarmed")));
@@ -2173,14 +2214,17 @@ void Vehicle::guidedModeGotoLocation(const QGeoCoordinate& gotoCoord, double for
 
     double maxDistance = SettingsManager::instance()->flyViewSettings()->maxGoToLocationDistance()->rawValue().toDouble();
     if (coordinate().distanceTo(gotoCoord) > maxDistance) {
-        qgcApp()->showAppMessage(QString("New location is too far. Must be less than %1 %2.")
+        qgcApp()->showAppMessage(tr("New location is too far. Must be less than %1 %2.")
                                      .arg(qRound(FactMetaData::metersToAppSettingsHorizontalDistanceUnits(maxDistance).toDouble()))
                                      .arg(FactMetaData::appSettingsHorizontalDistanceUnitsString()));
         return;
     }
 
-            // ✅ UI üçün: GoTo target-i saxla
-    _setGoToTarget(gotoCoord);
+    // ✅ UI üçün: GoTo target-i saxla. Hündürlük bilinmirsə firmware plugin heç nə göndərmədən
+    // imtina edir, onda hədəf də göstərilməməlidir.
+    if (!qIsNaN(altitudeAMSL()->rawValue().toDouble())) {
+        _setGoToTarget(gotoCoord);
+    }
 
     _firmwarePlugin->guidedModeGotoLocation(this, gotoCoord, forwardFlightLoiterRadius);
 }
@@ -2190,6 +2234,10 @@ void Vehicle::guidedModeChangeAltitude(double altitudeChange, bool pauseVehicle)
     if (!guidedModeSupported()) {
         qgcApp()->showAppMessage(guided_mode_not_supported_by_vehicle);
         return;
+    }
+    // An altitude change alone keeps the goto target; with a pause the vehicle stops first.
+    if (pauseVehicle) {
+        clearGoTo();
     }
     _firmwarePlugin->guidedModeChangeAltitude(this, altitudeChange, pauseVehicle);
 }
@@ -2341,6 +2389,8 @@ void Vehicle::pauseVehicle()
         qgcApp()->showAppMessage(QStringLiteral("Pause not supported by vehicle."));
         return;
     }
+    // Pausing stops the vehicle where it is, possibly without leaving the goto flight mode.
+    clearGoTo();
     _firmwarePlugin->pauseVehicle(this);
 }
 
