@@ -350,7 +350,6 @@ RowLayout {
     QGCButton {
         text: _planMasterController.currentPlanFile === "" ? qsTr("Fərqli saxla") : qsTr("Saxla")
         //iconSource: "/res/SaveToDisk.svg"
-        //iconSource: "file:///C:/Users/user/qgroundcontrol/resources/AZSHIELD_ICON/SaveToDisk.svg"
         iconSource: "qrc:/res/AZSHIELD_ICON/SaveToDisk.svg"
         enabled: !_syncInProgress && _hasPlanItems
         primary: _controllerDirty
@@ -361,7 +360,6 @@ RowLayout {
         id: uploadButton
         text: qsTr("Yüklə")
        // iconSource: "/res/UploadToVehicle.svg"
-        //iconSource: "file:///C:/Users/user/qgroundcontrol/resources/AZSHIELD_ICON/UploadToVehicle.svg"
         iconSource: "qrc:/res/AZSHIELD_ICON/UploadToVehicle.svg"
         enabled: _utmspEnabled ? (!_syncInProgress && UTMSPStateStorage.enableMissionUploadButton) : (!_syncInProgress && _hasPlanItems)
         visible: !_syncInProgress
@@ -372,7 +370,6 @@ RowLayout {
     QGCButton {
         text: qsTr("Təmizlə")
         //iconSource: "/res/TrashCan.svg"
-        //iconSource: "file:///C:/Users/user/qgroundcontrol/resources/AZSHIELD_ICON/TrashCan.svg"
         iconSource: "qrc:/res/AZSHIELD_ICON/TrashCan.svg"
         enabled: !_syncInProgress
         onClicked: _clearClicked()

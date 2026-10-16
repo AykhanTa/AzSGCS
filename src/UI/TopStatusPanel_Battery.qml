@@ -240,7 +240,6 @@ Item {
                         var a = batteryPopup.anchorItem
                         var t = batteryPopup.topPanelItem
 
-                       // var src = "file:///C:/Users/user/qgroundcontrol/src/UI/TopStatusPanel_Battery_Settings.qml"
                         var src = "qrc:/qml/QGroundControl/UI/TopStatusPanel_Battery_Settings.qml"
 
 

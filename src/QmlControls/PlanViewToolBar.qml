@@ -35,7 +35,6 @@ Rectangle {
     QGCToolBarButton {
         id: qgcButton
         height: parent.height
-        //icon.source: "file:///C:/Users/user/qgroundcontrol/resources/AZSHIELD_ICON/Home.svg"
         icon.source: "qrc:/res/AZSHIELD_ICON/Home.svg"
         // Not a logo: the artwork is a single white glyph, so on the Plan toolbar,
         // which is light, it was white on white. Tinted with the toolbar text
