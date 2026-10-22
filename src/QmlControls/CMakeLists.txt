@@ -72,6 +72,7 @@ qt_add_qml_module(QGroundControlControlsModule
     QML_FILES
         AltModeDialog.qml
         AzGradientRect.qml
+        AzRadialGlow.qml
         AzTheme.qml
         AppSettings.qml
         APMSubMotorDisplay.qml

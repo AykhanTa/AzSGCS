@@ -61,8 +61,32 @@ QtObject {
     readonly property color cardGradientEnd:      "#181B1E"
     readonly property real  cardGradientEndPos:   0.9383
     readonly property color cardBorder:           "#353A3F"
+    readonly property color cardHoverBorder:      "#5D646B"
     readonly property real  cardRadius:           14
+    // box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.024)
+    readonly property color cardShadow:           Qt.rgba(0, 0, 0, 0.2)
+    readonly property color cardTopHighlight:     Qt.rgba(1, 1, 1, 0.024)
+
+    // ---- Top bar ----
+    readonly property color topBarShadow:       Qt.rgba(0, 0, 0, 0.28)
+    readonly property color topBarMenuTop:      "#0F1215"
+    readonly property color topBarMenuBottom:   "#0B0D0F"
+    readonly property color topBarMenuIcon:     "#C8CACD"
+    // The kebab button's hover in the CSS; also marks the card whose panel is open.
+    readonly property color activeTintStart:    Qt.rgba(29 / 255, 78 / 255, 216 / 255, 0.04)
+    readonly property color activeTintEnd:      Qt.rgba(37 / 255, 99 / 255, 235 / 255, 0.09)
+    readonly property color activeBorder:       Qt.rgba(37 / 255, 99 / 255, 235 / 255, 0.6)
 
     // ---- Status colours ----
-    readonly property color statusRed: "#FF3443"
+    // Red and its glow are in the CSS, green is sampled from the "Bağlantı" mock-up.
+    // Blue has no mock-up yet; it is the same family as activeTint.
+    readonly property color statusRed:       "#FF3443"
+    readonly property color statusRedGlow:   Qt.rgba(188 / 255, 38 / 255, 43 / 255, 0.24)
+    readonly property color statusGreen:     "#00B546"
+    readonly property color statusGreenGlow: Qt.rgba(0, 181 / 255, 70 / 255, 0.24)
+    readonly property color statusBlue:      "#3B82F6"
+    readonly property color statusBlueGlow:  Qt.rgba(59 / 255, 130 / 255, 246 / 255, 0.24)
+    readonly property color statusOrange:    "#FF9F1A"
+    readonly property color statusYellow:    "#FFD43B"
+    readonly property color modeChangeGlow:  Qt.rgba(238 / 255, 204 / 255, 68 / 255, 0.30)
 }

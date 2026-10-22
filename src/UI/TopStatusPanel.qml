@@ -1,14 +1,16 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Effects
 import QtQuick.Layouts
 import QGroundControl
 import QGroundControl.Controls
 import QGroundControl.FactControls
 
-Rectangle {
+Item {
     id: topStatusPanel
 
     readonly property string _azIconBase: "qrc:/res/AZSHIELD_ICON/"
+    readonly property string _azV2IconBase: "qrc:/res/AZSHIELD_ICON/v2/"
     readonly property string _uiQrcBase:  "qrc:/qml/QGroundControl/UI/"
 
     readonly property var _mw: (typeof mainWindow !== "undefined") ? mainWindow : null
@@ -63,44 +65,16 @@ Rectangle {
 
     function _clamp(v, lo, hi) { return Math.max(lo, Math.min(v, hi)) }
 
-    readonly property bool _hasScreenTools: (typeof ScreenTools !== "undefined")
-    readonly property real _fontH: _hasScreenTools ? ScreenTools.defaultFontPixelHeight : Math.max(12, Qt.application.font.pixelSize)
-    readonly property real _fontW: _hasScreenTools ? ScreenTools.defaultFontPixelWidth  : Math.max(8,  Qt.application.font.pixelSize * 0.60)
+    // Figma "StatusBar": 80 px tall, padding 8/12, 280x64 cards 8 px apart, and the
+    // 62 px kebab column at the right end. AzTheme.px() scales them with the window.
+    readonly property real _padH:      AzTheme.px(12)
+    readonly property real _blockW:    AzTheme.px(280)
+    readonly property real _blockH:    AzTheme.px(64)
+    readonly property real _blockGap:  AzTheme.px(8)
+    readonly property real _menuW:     AzTheme.px(62)
+    readonly property real _progressH: Math.max(2, AzTheme.px(2))
 
-    readonly property real _hMargin:     Math.max(_fontW * 0.7, 6)
-    readonly property real _vMargin:     Math.max(_fontH * 0.25, 4)
-    readonly property real _inBlockPad:  Math.max(_fontW * 0.6, 4)
-    readonly property real _blockSpace:  Math.max(_fontW * 0.6, 6)
-    readonly property real _iconSize:    Math.round(_clamp(_fontH * 1.45, 22, 26))
-
-    readonly property real _controlSize: Math.round(_clamp(_fontH * 1.20, 18, 20))
-    readonly property real _controlIcon: Math.round(_controlSize * 0.9)
-
-    // Derived from the blocks addBlock() actually created. A hardcoded count
-    // that disagrees with them sizes the blocks wrongly, so the row spills past
-    // the right edge on every screen size.
-    readonly property int  _blockCount: Math.max(1, statusRow.children.length)
-    readonly property real _blockMinW:  Math.max(_fontW * 14, 132)
-    readonly property real _blockMaxW:  Math.max(_fontW * 28, 320)
-
-    readonly property real _progressH:   Math.max(3, height * 0.05)
-    readonly property real _statusAreaW: statusFlick.width
-
-    // How many whole blocks the strip can show at once. Sizing the blocks to
-    // exactly fill that space means no block is ever painted half-cut, at rest
-    // or at either end of the scroll.
-    readonly property int _visibleBlocks: Math.max(1, Math.min(_blockCount,
-                                                   Math.floor((_statusAreaW + _blockSpace) / (_blockMinW + _blockSpace))))
-    readonly property real _blockW: _clamp((_statusAreaW - (_blockSpace * (_visibleBlocks - 1))) / _visibleBlocks,
-                                           _blockMinW, _blockMaxW)
-
-    height: Math.round(_clamp(_fontH * 4.0, 56, 64))
-
-    readonly property int _labelFontPx: Math.max(10, Math.round(_fontH * 0.78))
-    readonly property int _valueFontPx: Math.max(10, Math.round(_fontH * 0.74))
-
-    color: "black"
-    clip: true
+    height: AzTheme.px(80)
     z: 200
 
     property bool userHidden: false
@@ -143,14 +117,6 @@ Rectangle {
                                          ? batteryController.getParameterFact(-1, "BATT_EMER_VOLT", false) : null
 
     property bool isConnected: _activeVehicle ? true : false
-
-    readonly property real _rowSpacing: {
-        // _visibleBlocks is 1 until the blocks exist; dividing by (count - 1)
-        // then yields Infinity, so bail out before the division.
-        if (_statusAreaW <= 0 || _visibleBlocks <= 1) return _blockSpace
-        var leftover = _statusAreaW - (_blockW * _visibleBlocks)
-        return Math.max(_blockSpace, leftover / (_visibleBlocks - 1))
-    }
 
     function disconnectVehicle() {
         console.log("=== BAĞLANTI KESME İŞLEMİ BAŞLATILDI ===")
@@ -245,10 +211,10 @@ Rectangle {
         const v = _veh
 
         if (!v) {
-            return "white"
+            return AzTheme.textCard
         }
 
-        return (v.checkListState === Vehicle.CheckListPassed) ? "green" : "red"
+        return (v.checkListState === Vehicle.CheckListPassed) ? AzTheme.statusGreen : AzTheme.statusRed
     }
 
     function resetToDefaultValues() {
@@ -724,41 +690,52 @@ Rectangle {
     readonly property var _veh: QGroundControl.multiVehicleManager.activeVehicle
     readonly property var _bat: _veh && _veh.batteries && _veh.batteries.count > 0 ? _veh.batteries.get(0) : null
 
-    function gpsStatusIcon() {
+    // Red: no link, link lost or not ready. Green: ready or armed. Blue: in the air.
+    function statusAccent(statusText) {
+        if (statusText === _flyingText || statusText === _landingText) return AzTheme.statusBlue
+        if (statusText === _readyToFlyText || statusText === _armedText) return AzTheme.statusGreen
+        return AzTheme.statusRed
+    }
+
+    function statusGlow(statusText) {
+        if (statusText === _flyingText || statusText === _landingText) return AzTheme.statusBlueGlow
+        if (statusText === _readyToFlyText || statusText === _armedText) return AzTheme.statusGreenGlow
+        return AzTheme.statusRedGlow
+    }
+
+    function gpsIconColor() {
         const v = _veh
         const g = v && v.gps ? v.gps : null
         const gpsCount = g && g.count ? g.count.rawValue : NaN
 
-        if (!g) return _azIconBase + "GPS.svg"
-        if (isNaN(gpsCount) || gpsCount <= 0) return _azIconBase + "GPSgirmizi.svg"
-        return _azIconBase + "GPSyasil.svg"
+        if (!g) return AzTheme.textCard
+        if (isNaN(gpsCount) || gpsCount <= 0) return AzTheme.statusRed
+        return AzTheme.statusGreen
     }
 
-    function batterySvg() {
+    function batteryIconColor() {
         const b = _bat
-        if (!b) return "/qmlimages/Battery.svg"
+        if (!b) return AzTheme.textCard
 
         const st = b.chargeState ? b.chargeState.rawValue : undefined
-
-        if (st === MAVLink.MAV_BATTERY_CHARGE_STATE_LOW)      return "/qmlimages/BatteryOrange.svg"
-        if (st === MAVLink.MAV_BATTERY_CHARGE_STATE_CRITICAL) return "/qmlimages/BatteryCritical.svg"
-        if (st === MAVLink.MAV_BATTERY_CHARGE_STATE_EMERGENCY ||
+        if (st === MAVLink.MAV_BATTERY_CHARGE_STATE_LOW) return AzTheme.statusOrange
+        if (st === MAVLink.MAV_BATTERY_CHARGE_STATE_CRITICAL ||
+                st === MAVLink.MAV_BATTERY_CHARGE_STATE_EMERGENCY ||
                 st === MAVLink.MAV_BATTERY_CHARGE_STATE_FAILED ||
-                st === MAVLink.MAV_BATTERY_CHARGE_STATE_UNHEALTHY) return "/qmlimages/BatteryEMERGENCY.svg"
+                st === MAVLink.MAV_BATTERY_CHARGE_STATE_UNHEALTHY) return AzTheme.statusRed
 
         const p = safeBatteryPercent(b)
         if (!isNaN(p)) {
-            if (p > threshold1) return "/qmlimages/BatteryGreen.svg"
-            if (p > threshold2) return "/qmlimages/BatteryYellowGreen.svg"
-            return "/qmlimages/BatteryYellow.svg"
+            if (p > threshold1) return AzTheme.statusGreen
+            if (p > threshold2) return AzTheme.statusYellow
+            return AzTheme.statusOrange
         }
 
-        return "/qmlimages/Battery.svg"
+        return AzTheme.textCard
     }
 
-    function flightModeColor() {
-        if (_veh && _veh.flightMode && _veh.flightMode === "AUTO") return "green"
-        return "white"
+    function flightModeIconColor() {
+        return (_veh && _veh.flightMode && _veh.flightMode !== "n/a") ? AzTheme.statusGreen : AzTheme.textCard
     }
 
     function _factVal(f) {
@@ -772,12 +749,12 @@ Rectangle {
     readonly property real _rssi: _vehReady ? _factVal(_veh.rcRSSI) : NaN
     readonly property bool _rssiOk: !isNaN(_rssi) && _rssi >= 0 && _rssi <= 100
 
-    function rcIconSource() {
-        if (!_vehReady) return _azIconBase + "RCSignal.svg"
-        if (!_rssiOk)   return _azIconBase + "RCSignalRed.svg"
-        if (_rssi <= 40) return _azIconBase + "RCSignalYellow.svg"
-        if (_rssi >= 70) return _azIconBase + "RCSignalGreen.svg"
-        return _azIconBase + "RCSignalOrange.svg"
+    function rcIconColor() {
+        if (!_vehReady)  return AzTheme.textCard
+        if (!_rssiOk)    return AzTheme.statusRed
+        if (_rssi <= 40) return AzTheme.statusYellow
+        if (_rssi >= 70) return AzTheme.statusGreen
+        return AzTheme.statusOrange
     }
 
     function rcQualityLabel() {
@@ -794,17 +771,14 @@ Rectangle {
         return rcQualityLabel() + " (" + Math.round(_rssi) + "%)"
     }
 
-    function telemetryIconSource() {
-        if (!_vehReady) return _azIconBase + "Telemetri.svg"
+    function telemetryIconColor() {
+        if (!_vehReady) return AzTheme.textCard
 
         var rssi = _veh.telemetryLRSSI
-        if (rssi === undefined || rssi === null || rssi === 0) {
-            return _azIconBase + "TelemetriRed.svg"
-        }
-
-        if (rssi >= -60) return _azIconBase + "TelemetriGreen.svg"
-        if (rssi >= -80) return _azIconBase + "TelemetriOrange.svg"
-        return _azIconBase + "TelemetriRed.svg"
+        if (rssi === undefined || rssi === null || rssi === 0) return AzTheme.statusRed
+        if (rssi >= -60) return AzTheme.statusGreen
+        if (rssi >= -80) return AzTheme.statusOrange
+        return AzTheme.statusRed
     }
 
     function telemetryQualityLabel() {
@@ -824,301 +798,305 @@ Rectangle {
         return telemetryQualityLabel() + " (" + rssi + " dBm)"
     }
 
-    function batteryColor() {
-        const b = _bat
-        if (!b) return QGroundControl.globalPalette.text
+    // Which card's panel is open, so the card can show it.
+    readonly property bool   _hasSettingsLoader:  (typeof settingsLoader !== "undefined") && settingsLoader !== null
+    readonly property string _settingsSource:     _hasSettingsLoader && settingsLoader.source ? settingsLoader.source.toString() : ""
+    readonly property bool   _settingsPanelShown: _hasSettingsLoader && settingsLoader.item ? settingsLoader.item.panelVisible !== false : false
 
-        const st = b.chargeState ? b.chargeState.rawValue : undefined
-        if (st === MAVLink.MAV_BATTERY_CHARGE_STATE_LOW) return QGroundControl.globalPalette.colorOrange
-        if (st === MAVLink.MAV_BATTERY_CHARGE_STATE_CRITICAL) return QGroundControl.globalPalette.colorRed
-        if (st === MAVLink.MAV_BATTERY_CHARGE_STATE_EMERGENCY ||
-                st === MAVLink.MAV_BATTERY_CHARGE_STATE_FAILED ||
-                st === MAVLink.MAV_BATTERY_CHARGE_STATE_UNHEALTHY) return QGroundControl.globalPalette.colorRed
-
-        const p = safeBatteryPercent(b)
-        if (!isNaN(p)) {
-            if (p > threshold1) return QGroundControl.globalPalette.colorGreen
-            if (p > threshold2) return QGroundControl.globalPalette.colorYellowGreen
-            return QGroundControl.globalPalette.colorYellow
+    function blockPanelOpen(blockId) {
+        function settingsShows(fileName) {
+            return _settingsPanelShown && _settingsSource.indexOf(fileName) >= 0
         }
-
-        return QGroundControl.globalPalette.text
+        switch (blockId) {
+        case "status":      return !!(statusMessageLoader.item && statusMessageLoader.item.visible)
+        case "flightMode":  return flightModePopupVisible || settingsShows("TopStatusPanel_UcusRejimi")
+        case "rcSignal":    return settingsShows("TopStatusPanel_RCSignal")
+        case "telemetry":   return settingsShows("TopStatusPanel_Telemetry")
+        case "battery":     return settingsShows("TopStatusPanel_Battery")
+        case "gps":         return settingsShows("TopStatusPanel_GPS")
+        case "vehicle":     return !!(vehicleSelectorLoader.item && vehicleSelectorLoader.item.panelVisible)
+        case "udpPosition": return !!(udpPanelLoader.item && udpPanelLoader.item.panelVisible)
+        }
+        return false
     }
 
-    Row {
-        id: windowControls
-        spacing: Math.max(topStatusPanel._fontW * 0.6, 6)
-        anchors.top: parent.top
-        anchors.right: parent.right
-        anchors.topMargin: topStatusPanel._vMargin
-        anchors.rightMargin: topStatusPanel._hMargin
-        z: 10
+    // =========================
+    //  Bar background: linear-gradient(155deg), box-shadow 0 8px 16px rgba(0, 0, 0, 0.28)
+    // =========================
+    RectangularShadow {
+        anchors.fill: barBackground
+        offset.y:     AzTheme.px(8)
+        blur:         AzTheme.px(16)
+        color:        AzTheme.topBarShadow
+    }
 
-        Rectangle {
-            width: topStatusPanel._controlSize
-            height: topStatusPanel._controlSize
-            radius: Math.max(4, topStatusPanel._controlSize * 0.30)
-            color: "transparent"
-
-            Image {
-                source: _azIconBase + "exit.svg"
-                anchors.centerIn: parent
-                width: topStatusPanel._controlIcon
-                height: topStatusPanel._controlIcon
-                fillMode: Image.PreserveAspectFit
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: topStatusPanel.exitRequested()
-            }
-        }
+    AzGradientRect {
+        id:            barBackground
+        anchors.fill:  parent
+        angle:         AzTheme.panelGradientAngle
+        startColor:    AzTheme.panelGradientStart
+        startPosition: AzTheme.panelGradientStartPos
+        endColor:      AzTheme.panelGradientEnd
+        endPosition:   AzTheme.panelGradientEndPos
     }
 
     Component {
         id: statusBlockComponent
 
-        Rectangle {
+        Item {
             id: block
 
-            property url icon: ""
+            property url    icon:      ""
+            property real   iconW:     24
+            property real   iconH:     24
+            property color  iconColor: AzTheme.textCard
             // Stable, never translated key used for all dispatch/comparisons.
             // Never branch on `label` - it changes with the UI language.
-            property string blockId: ""
-            property string label: ""
+            property string blockId:   ""
+            property string label:     ""
             property string valueText: ""
-            property var battery: null
-
-            property color normalColor: "#2b2b2b"
-            property color baseColor: normalColor
-            property color hoverColor: "#3a3a3a"
-            property bool isHovered: false
-
-            property color iconColor: "white"
-            property color targetIconColor: "white"
+            property var    battery:   null
 
             property string tooltipText: ""
-            property bool showTooltip: false
+            property bool   showTooltip: false
 
-            width: topStatusPanel._blockW
-            height: (parent && parent.height > 0)
-                    ? parent.height
-                    : (topStatusPanel.height - (topStatusPanel._vMargin * 2) - (topStatusPanel._progressH + 2))
+            readonly property bool isStatusBlock: blockId === "status"
+            readonly property bool isClickable:   isStatusBlock || (blockId === "checklist") || (blockId === "udpPosition") || (blockId === "vehicle") || topStatusPanel.isConnected
+            readonly property bool isActive:      topStatusPanel.blockPanelOpen(blockId)
 
-            radius: 8
-            color: isHovered ? hoverColor : baseColor
-            clip: true
-
-            function restoreColorBinding() {
-                block.color = Qt.binding(function() {
-                    return block.isHovered ? block.hoverColor : block.baseColor
-                })
-            }
-
-            property bool isStatusBlock: blockId === "status"
-            property bool isClickable: isStatusBlock || (blockId === "checklist") || (blockId === "udpPosition") || (blockId === "vehicle") || topStatusPanel.isConnected
-
+            // The status card is red, green or blue with the vehicle state and pulses its
+            // glow when that changes. The other cards only tint their icon; the flight
+            // mode card glows briefly when the mode changes.
             property string currentStatus: ""
+            property color  modeChangeGlow: "transparent"
+            readonly property color accentColor: isStatusBlock ? topStatusPanel.statusAccent(currentStatus) : iconColor
+            readonly property color glowColor:   isStatusBlock ? topStatusPanel.statusGlow(currentStatus) : modeChangeGlow
 
-            ToolTip {
-                id: batteryTooltip
-                visible: block.showTooltip && block.tooltipText !== ""
-                text: block.tooltipText
-                delay: 500
-                timeout: 3000
+            width:  topStatusPanel._blockW
+            height: topStatusPanel._blockH
 
-                background: Rectangle {
-                    color: "#2A2A2A"
-                    border.color: "#666666"
-                    radius: 4
+            function updateStatus() {
+                var statusText = topStatusPanel.getDetailedIhaStatus().text
+                if (statusText === currentStatus) {
+                    return
                 }
+                currentStatus = statusText
+                glowPulse.restart()
+            }
 
-                contentItem: Text {
-                    text: batteryTooltip.text
-                    color: "white"
-                    font.pixelSize: 11
+            // box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2)
+            RectangularShadow {
+                anchors.fill: cardBackground
+                offset.y:     AzTheme.px(8)
+                blur:         AzTheme.px(20)
+                radius:       cardBackground.radius
+                color:        AzTheme.cardShadow
+            }
+
+            // linear-gradient(145deg, #25272A, #181B1E), 1 px #353A3F, radius 14
+            AzGradientRect {
+                id:            cardBackground
+                anchors.fill:  parent
+                angle:         AzTheme.cardGradientAngle
+                startColor:    AzTheme.cardGradientStart
+                startPosition: AzTheme.cardGradientStartPos
+                endColor:      AzTheme.cardGradientEnd
+                endPosition:   AzTheme.cardGradientEndPos
+                radius:        AzTheme.px(AzTheme.cardRadius)
+                borderWidth:   1
+                borderColor:   block.isActive ? AzTheme.activeBorder
+                                              : ((mouseArea.containsMouse && block.isClickable) ? AzTheme.cardHoverBorder : AzTheme.cardBorder)
+            }
+
+            // Open panel: the blue tint of the kebab button's hover.
+            Rectangle {
+                anchors.fill:    parent
+                anchors.margins: 1
+                radius:          cardBackground.radius - 1
+                visible:         block.isActive
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0;      color: AzTheme.activeTintStart }
+                    GradientStop { position: 0.5982; color: AzTheme.activeTintEnd }
                 }
             }
 
-            onLabelChanged: {
-                if (isStatusBlock) {
-                    updateBlinkEffect()
-                }
+            // inset 0 1px 0 rgba(255, 255, 255, 0.024)
+            Rectangle {
+                x:      cardBackground.radius
+                y:      1
+                width:  parent.width - (2 * cardBackground.radius)
+                height: 1
+                color:  AzTheme.cardTopHighlight
             }
 
-            function updateBlinkEffect() {
-                readyToFlyBlinkAnimation.stop()
-                connectionLostBlinkAnimation.stop()
-                notReadyBlinkAnimation.stop()
-                armBlinkAnimation.stop()
-                flyingBlinkAnimation.stop()
-
-                var status = topStatusPanel.getDetailedIhaStatus()
-                currentStatus = status.text
-
-                block.baseColor = block.normalColor
-                block.hoverColor = "#3a3a3a"
-                block.iconColor = "white"
-
-                if (currentStatus === topStatusPanel._readyToFlyText) {
-                    block.targetIconColor = "green"
-                    readyToFlyBlinkAnimation.start()
-                } else if (currentStatus === topStatusPanel._commLostText ||
-                           currentStatus === topStatusPanel._disconnectedText) {
-                    block.targetIconColor = "#FF0000"
-                    connectionLostBlinkAnimation.start()
-                } else if (currentStatus === topStatusPanel._notReadyToFlyText) {
-                    block.targetIconColor = "#FF0000"
-                    notReadyBlinkAnimation.start()
-                } else if (currentStatus === topStatusPanel._armedText) {
-                    block.targetIconColor = "green"
-                    armBlinkAnimation.start()
-                } else if (currentStatus === topStatusPanel._flyingText ||
-                           currentStatus === topStatusPanel._landingText) {
-                    block.targetIconColor = "#0066FF"
-                    flyingBlinkAnimation.start()
-                } else {
-                    block.iconColor = "white"
-                    block.targetIconColor = "white"
-                    restoreColorBinding()
-                }
-            }
-
-            SequentialAnimation {
-                id: readyToFlyBlinkAnimation
-                PropertyAnimation { target: block; property: "color"; to: "green"; duration: 250 }
-                PropertyAnimation { target: block; property: "color"; to: block.normalColor; duration: 250 }
-                PropertyAnimation { target: block; property: "color"; to: "green"; duration: 250 }
-                PropertyAnimation { target: block; property: "color"; to: block.normalColor; duration: 250 }
-                onStopped: {
-                    block.iconColor = block.targetIconColor
-                    restoreColorBinding()
-                }
+            AzRadialGlow {
+                id:           glow
+                anchors.fill: parent
+                radius:       cardBackground.radius
+                color:        block.glowColor
+                visible:      block.glowColor.a > 0
             }
 
             SequentialAnimation {
-                id: connectionLostBlinkAnimation
-                PropertyAnimation { target: block; property: "color"; to: "#FF0000"; duration: 250 }
-                PropertyAnimation { target: block; property: "color"; to: block.normalColor; duration: 250 }
-                PropertyAnimation { target: block; property: "color"; to: "#FF0000"; duration: 250 }
-                PropertyAnimation { target: block; property: "color"; to: block.normalColor; duration: 250 }
-                onStopped: {
-                    block.iconColor = block.targetIconColor
-                    restoreColorBinding()
-                }
-            }
-
-            SequentialAnimation {
-                id: notReadyBlinkAnimation
-                PropertyAnimation { target: block; property: "color"; to: "#FF0000"; duration: 250 }
-                PropertyAnimation { target: block; property: "color"; to: block.normalColor; duration: 250 }
-                PropertyAnimation { target: block; property: "color"; to: "#FF0000"; duration: 250 }
-                PropertyAnimation { target: block; property: "color"; to: block.normalColor; duration: 250 }
-                onStopped: {
-                    block.iconColor = block.targetIconColor
-                    restoreColorBinding()
-                }
-            }
-
-            SequentialAnimation {
-                id: armBlinkAnimation
-                PropertyAnimation { target: block; property: "color"; to: "green"; duration: 250 }
-                PropertyAnimation { target: block; property: "color"; to: block.normalColor; duration: 250 }
-                PropertyAnimation { target: block; property: "color"; to: "green"; duration: 250 }
-                PropertyAnimation { target: block; property: "color"; to: block.normalColor; duration: 250 }
-                onStopped: {
-                    block.iconColor = block.targetIconColor
-                    restoreColorBinding()
-                }
-            }
-
-            SequentialAnimation {
-                id: flyingBlinkAnimation
-                PropertyAnimation { target: block; property: "color"; to: "#0066FF"; duration: 250 }
-                PropertyAnimation { target: block; property: "color"; to: block.normalColor; duration: 250 }
-                PropertyAnimation { target: block; property: "color"; to: "#0066FF"; duration: 250 }
-                PropertyAnimation { target: block; property: "color"; to: block.normalColor; duration: 250 }
-                onStopped: {
-                    block.iconColor = block.targetIconColor
-                    restoreColorBinding()
-                }
-            }
-
-            SequentialAnimation {
-                id: modeChangeBlinkAnimation
-                running: false
-                loops: 1
-                PropertyAnimation { target: block; property: "color"; to: "#EECC44"; duration: 150 }
-                PropertyAnimation { target: block; property: "color"; to: block.normalColor; duration: 150 }
+                id:    glowPulse
+                loops: 3
+                NumberAnimation { target: glow; property: "opacity"; to: 0.15; duration: 250 }
+                NumberAnimation { target: glow; property: "opacity"; to: 1.0;  duration: 250 }
+                onStopped: glow.opacity = 1.0
             }
 
             Timer {
-                id: modeChangeStopTimer
-                interval: 3000
-                repeat: false
-                running: false
-                onTriggered: {
-                    modeChangeBlinkAnimation.stop()
-                    restoreColorBinding()
-                }
+                id:       modeChangeStopTimer
+                interval: 1600
+                onTriggered: block.modeChangeGlow = "transparent"
             }
 
             Connections {
                 target: topStatusPanel._veh
                 function onFlightModeChanged() {
                     if (block.blockId === "flightMode") {
-                        modeChangeBlinkAnimation.start()
+                        block.modeChangeGlow = AzTheme.modeChangeGlow
+                        glowPulse.restart()
                         modeChangeStopTimer.restart()
                     }
                 }
             }
 
+            onValueTextChanged: {
+                if (isStatusBlock) {
+                    updateStatus()
+                }
+            }
+
             Component.onCompleted: {
                 if (isStatusBlock) {
-                    updateBlinkEffect()
+                    updateStatus()
                     statusCheckTimer.start()
                 }
             }
 
+            // Not every input of getDetailedIhaStatus() notifies, so poll it as before.
             Timer {
-                id: statusCheckTimer
+                id:       statusCheckTimer
                 interval: 1000
-                running: false
-                repeat: true
-                onTriggered: {
-                    if (block.isStatusBlock) {
-                        var newStatus = topStatusPanel.getDetailedIhaStatus().text
-                        if (newStatus !== block.currentStatus) {
-                            block.updateBlinkEffect()
-                        }
-                    }
+                repeat:   true
+                onTriggered: block.updateStatus()
+            }
+
+            ToolTip {
+                id:      batteryTooltip
+                visible: block.showTooltip && block.tooltipText !== ""
+                text:    block.tooltipText
+                delay:   500
+                timeout: 3000
+
+                background: Rectangle {
+                    color:        AzTheme.cardGradientEnd
+                    border.color: AzTheme.cardHoverBorder
+                    radius:       AzTheme.px(8)
+                }
+
+                contentItem: Text {
+                    text:           batteryTooltip.text
+                    color:          AzTheme.textCard
+                    font.family:    AzTheme.fontFamily
+                    font.pixelSize: AzTheme.fontPx(12)
                 }
             }
 
+            // The icon sits level with the title, not centred on the card.
+            QGCColoredImage {
+                id:                           blockIcon
+                x:                            AzTheme.px(20)
+                anchors.verticalCenter:       parent.verticalCenter
+                anchors.verticalCenterOffset: -AzTheme.px(8)
+                width:                        AzTheme.px(block.iconW)
+                height:                       AzTheme.px(block.iconH)
+                source:                       block.icon
+                color:                        block.accentColor
+
+                // filter: drop-shadow(0 0 16px rgba(255, 52, 67, 0.25)) on the status icon
+                layer.enabled: block.isStatusBlock
+                layer.effect: MultiEffect {
+                    shadowEnabled:          true
+                    shadowColor:            Qt.rgba(block.accentColor.r, block.accentColor.g, block.accentColor.b, 0.25)
+                    shadowHorizontalOffset: 0
+                    shadowVerticalOffset:   0
+                    blurMax:                AzTheme.px(16)
+                    shadowBlur:             1.0
+                }
+            }
+
+            Text {
+                anchors.left:                 blockIcon.right
+                anchors.leftMargin:           AzTheme.px(12)
+                anchors.right:                parent.right
+                anchors.rightMargin:          AzTheme.px(block.isStatusBlock ? 28 : 16)
+                anchors.verticalCenter:       parent.verticalCenter
+                anchors.verticalCenterOffset: -AzTheme.px(13)
+                text:                         block.label
+                color:                        AzTheme.textCard
+                font.family:                  AzTheme.fontFamily
+                font.weight:                  Font.DemiBold
+                font.pixelSize:               AzTheme.fontPx(18)
+                elide:                        Text.ElideRight
+            }
+
+            Text {
+                anchors.left:                 blockIcon.right
+                anchors.leftMargin:           AzTheme.px(12)
+                anchors.right:                parent.right
+                anchors.rightMargin:          AzTheme.px(16)
+                anchors.verticalCenter:       parent.verticalCenter
+                anchors.verticalCenterOffset: AzTheme.px(12)
+                color:                        AzTheme.textSecondary
+                font.family:                  AzTheme.fontFamily
+                font.pixelSize:               AzTheme.fontPx(14)
+                elide:                        Text.ElideRight
+                text: {
+                    if (block.battery) return topStatusPanel.safeBatteryValueText(block.battery)
+                    if (block.valueText && block.valueText.length > 0) return block.valueText
+                    return "n/a"
+                }
+            }
+
+            // Status dot: 7 px, box-shadow 0 0 7px in the same colour
+            RectangularShadow {
+                anchors.fill: statusDot
+                visible:      block.isStatusBlock
+                radius:       statusDot.radius
+                blur:         AzTheme.px(7)
+                color:        block.accentColor
+            }
+
+            Rectangle {
+                id:      statusDot
+                visible: block.isStatusBlock
+                x:       parent.width - AzTheme.px(20)
+                y:       AzTheme.px(11)
+                width:   Math.max(4, AzTheme.px(7))
+                height:  width
+                radius:  width / 2
+                color:   block.accentColor
+            }
+
             MouseArea {
-                id: mouseArea
+                id:           mouseArea
                 anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
+                cursorShape:  block.isClickable ? Qt.PointingHandCursor : Qt.ArrowCursor
                 hoverEnabled: true
-                enabled: block.isClickable
 
                 onEntered: {
-                    if (block.isClickable) {
-                        block.isHovered = true
-                        if (block.blockId === "battery") {
-                            block.tooltipText = topStatusPanel.checkBatteryFailsafe(topStatusPanel._bat)
-                            if (block.tooltipText !== "") {
-                                block.showTooltip = true
-                            }
+                    if (block.isClickable && block.blockId === "battery") {
+                        block.tooltipText = topStatusPanel.checkBatteryFailsafe(topStatusPanel._bat)
+                        if (block.tooltipText !== "") {
+                            block.showTooltip = true
                         }
                     }
                 }
 
-                onExited: {
-                    block.isHovered = false
-                    block.showTooltip = false
-                }
+                onExited: block.showTooltip = false
 
                 onClicked: {
                     if (!block.isClickable) return
@@ -1176,168 +1154,28 @@ Rectangle {
                     }
                 }
             }
-
-            Item {
-                anchors.fill: parent
-                anchors.margins: topStatusPanel._inBlockPad
-
-                Column {
-                    anchors.centerIn: parent
-                    width: parent.width
-                    spacing: Math.max(2, topStatusPanel._fontH * 0.12)
-
-                    RowLayout {
-                        width: parent.width
-                        spacing: topStatusPanel._inBlockPad
-
-                        Item { Layout.fillWidth: true }
-
-                        Item {
-                            Layout.preferredWidth:  topStatusPanel._iconSize
-                            Layout.preferredHeight: topStatusPanel._iconSize
-
-                            Image {
-                                anchors.fill: parent
-                                visible: block.blockId === "battery"
-                                source: topStatusPanel.batterySvg()
-                                fillMode: Image.PreserveAspectFit
-                            }
-
-                            QGCColoredImage {
-                                anchors.fill: parent
-                                visible: block.blockId === "flightMode"
-                                source: block.icon
-                                fillMode: Image.PreserveAspectFit
-                                color: topStatusPanel._veh && topStatusPanel._veh.flightMode && topStatusPanel._veh.flightMode !== "n/a"
-                                       ? "#00FF00" : "white"
-                            }
-
-                            Image {
-                                // Bu ikonun sahəsi 20x29 -- digər blok ikonları
-                                // kvadratdır (26x26, 27x27). PreserveAspectFit onu
-                                // qutunun tam hündürlüyünə yayır, ona görə yanındakı
-                                // ikonlardan gözlə görünəcək qədər iri çıxırdı.
-                                anchors.centerIn: parent
-                                width:  Math.round(parent.width * 0.78)
-                                height: Math.round(parent.height * 0.78)
-                                visible: block.blockId === "telemetry"
-                                source: topStatusPanel.telemetryIconSource()
-                                fillMode: Image.PreserveAspectFit
-                                cache: false
-                                asynchronous: false
-                            }
-
-                            Image {
-                                anchors.fill: parent
-                                visible: block.blockId === "rcSignal"
-                                source: topStatusPanel.rcIconSource()
-                                fillMode: Image.PreserveAspectFit
-                                cache: false
-                                asynchronous: false
-                            }
-
-                            Image {
-                                anchors.fill: parent
-                                visible: block.blockId === "disconnect"
-                                source: _azIconBase + "disconnect.svg"
-                                fillMode: Image.PreserveAspectFit
-                            }
-
-                            QGCColoredImage {
-                                anchors.fill: parent
-                                visible: block.blockId === "checklist"
-                                source: block.icon
-                                fillMode: Image.PreserveAspectFit
-                                color: topStatusPanel.checklistIconColor()
-                            }
-
-                            Image {
-                                anchors.fill: parent
-                                visible: !block.isStatusBlock &&
-                                         block.blockId !== "checklist" &&
-                                         block.blockId !== "battery" &&
-                                         block.blockId !== "flightMode" &&
-                                         block.blockId !== "telemetry" &&
-                                         block.blockId !== "rcSignal" &&
-                                         block.blockId !== "disconnect"
-                                source: block.icon
-                                fillMode: Image.PreserveAspectFit
-                                cache: false
-                                asynchronous: false
-                            }
-
-                            QGCColoredImage {
-                                anchors.fill: parent
-                                visible: block.isStatusBlock
-                                source: block.icon
-                                fillMode: Image.PreserveAspectFit
-                                color: block.iconColor
-                            }
-                        }
-
-                        Text {
-                            text: block.label
-                            color: "white"
-                            font.pixelSize: topStatusPanel._labelFontPx
-                            // A block is narrow on a handheld screen. Losing a
-                            // point of type reads better than losing the end of
-                            // the word, so only elide once shrinking runs out.
-                            fontSizeMode: Text.HorizontalFit
-                            minimumPixelSize: Math.max(10, Math.round(font.pixelSize * 0.75))
-                            elide: Text.ElideRight
-                            wrapMode: Text.NoWrap
-                            maximumLineCount: 1
-                            verticalAlignment: Text.AlignVCenter
-                            Layout.maximumWidth: Math.max(1, parent.width - topStatusPanel._iconSize - topStatusPanel._inBlockPad)
-                        }
-
-                        Item { Layout.fillWidth: true }
-                    }
-
-                    Text {
-                        width: parent.width
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        elide: Text.ElideRight
-                        wrapMode: Text.NoWrap
-                        maximumLineCount: 1
-                        font.pixelSize: topStatusPanel._valueFontPx
-                        fontSizeMode: Text.HorizontalFit
-                        minimumPixelSize: Math.max(10, Math.round(font.pixelSize * 0.75))
-                        color: "white"
-
-                        text: {
-                            if (block.battery) return topStatusPanel.safeBatteryValueText(block.battery)
-                            if (block.valueText && block.valueText.length > 0) return block.valueText
-                            return "n/a"
-                        }
-                    }
-                }
-            }
         }
     }
 
+    // =========================
+    //  Cards: 280x64, 8 px apart, padding 8/12; the strip scrolls when they do not fit
+    // =========================
     Flickable {
-        id: statusFlick
-        anchors.left: parent.left
-        anchors.right: windowControls.left
-        anchors.top: parent.top
+        id:             statusFlick
+        anchors.left:   parent.left
+        anchors.right:  menuArea.left
+        anchors.top:    parent.top
         anchors.bottom: parent.bottom
 
-        anchors.leftMargin: topStatusPanel._hMargin
-        anchors.rightMargin: topStatusPanel._hMargin
-        anchors.topMargin: topStatusPanel._vMargin
-        anchors.bottomMargin: topStatusPanel._vMargin + topStatusPanel._progressH + 2
-
-        clip: true
+        clip:               true
         flickableDirection: Flickable.HorizontalFlick
-        interactive: contentWidth > width
-        boundsBehavior: Flickable.StopAtBounds
+        interactive:        contentWidth > width
+        boundsBehavior:     Flickable.StopAtBounds
 
-        contentWidth: statusRow.implicitWidth
-        contentHeight: statusRow.height
+        contentWidth:  statusRow.implicitWidth
+        contentHeight: height
 
-        // Land on a block boundary instead of stopping mid-block.
+        // Land on a card boundary instead of stopping mid-card.
         onMovementEnded: {
             var step = topStatusPanel._blockW + statusRow.spacing
             if (step <= 0) {
@@ -1349,22 +1187,26 @@ Rectangle {
         }
 
         NumberAnimation {
-            id: statusSnap
-            target: statusFlick
-            property: "contentX"
-            duration: 140
+            id:          statusSnap
+            target:      statusFlick
+            property:    "contentX"
+            duration:    140
             easing.type: Easing.OutCubic
         }
 
         Row {
-            id: statusRow
-            height: statusFlick.height
-            spacing: topStatusPanel._rowSpacing
+            id:            statusRow
+            height:        statusFlick.height
+            spacing:       topStatusPanel._blockGap
+            leftPadding:   topStatusPanel._padH
+            rightPadding:  topStatusPanel._padH
+            topPadding:    Math.max(0, (height - topStatusPanel._blockH) / 2)
 
             function addBlock(props) {
                 var obj = statusBlockComponent.createObject(statusRow, props)
                 if (!obj) {
                     console.warn("Status block create failed")
+                    return null
                 }
 
                 if (props.blockId === "battery") {
@@ -1378,14 +1220,17 @@ Rectangle {
 
             Component.onCompleted: {
                 addBlock({
-                    icon: Qt.binding(function () { return topStatusPanel.getDetailedIhaStatus().icon }),
+                    icon: _azV2IconBase + "top_status.svg",
                     blockId: "status",
-                    label: Qt.binding(function () { return topStatusPanel.getDetailedIhaStatus().statusLabel }),
+                    label: qsTr("Status"),
                     valueText: Qt.binding(function () { return topStatusPanel.getDetailedIhaStatus().text })
                 })
 
                 addBlock({
-                    icon: _azIconBase + "Checklist.svg",
+                    icon: _azV2IconBase + "top_checklist.svg",
+                    iconW: 26,
+                    iconH: 26,
+                    iconColor: Qt.binding(function () { return topStatusPanel.checklistIconColor() }),
                     blockId: "checklist",
                     label: qsTr("Yoxlama Paneli"),
                     valueText: Qt.binding(function () {
@@ -1396,7 +1241,8 @@ Rectangle {
                 })
 
                 addBlock({
-                    icon: _azIconBase + "FlightMode.svg",
+                    icon: _azV2IconBase + "top_flightmode.svg",
+                    iconColor: Qt.binding(function () { return topStatusPanel.flightModeIconColor() }),
                     blockId: "flightMode",
                     label: qsTr("Uçuş Rejimi"),
                     valueText: Qt.binding(function () {
@@ -1408,21 +1254,24 @@ Rectangle {
                 })
 
                 addBlock({
-                    icon: _azIconBase + "RCSignal.svg",
+                    icon: _azV2IconBase + "top_rc.svg",
+                    iconColor: Qt.binding(function () { return topStatusPanel.rcIconColor() }),
                     blockId: "rcSignal",
                     label: qsTr("RC Siqnalı"),
                     valueText: Qt.binding(function () { return topStatusPanel.rcValueText() })
                 })
 
                 addBlock({
-                    icon: _azIconBase + "Telemetri.svg",
+                    icon: _azV2IconBase + "top_telemetry.svg",
+                    iconColor: Qt.binding(function () { return topStatusPanel.telemetryIconColor() }),
                     blockId: "telemetry",
                     label: qsTr("Telemetriya"),
                     valueText: Qt.binding(function () { return topStatusPanel.telemetryValueText() })
                 })
 
                 addBlock({
-                    icon: Qt.binding(function () { return topStatusPanel.batterySvg() }),
+                    icon: _azV2IconBase + "top_battery.svg",
+                    iconColor: Qt.binding(function () { return topStatusPanel.batteryIconColor() }),
                     blockId: "battery",
                     label: qsTr("Batareya"),
                     battery: Qt.binding(function(){ return topStatusPanel._bat }),
@@ -1439,7 +1288,8 @@ Rectangle {
                 })
 
                 addBlock({
-                    icon: Qt.binding(function () { return topStatusPanel.gpsStatusIcon() }),
+                    icon: _azV2IconBase + "top_gps.svg",
+                    iconColor: Qt.binding(function () { return topStatusPanel.gpsIconColor() }),
                     blockId: "gps",
                     label: "GPS",
                     valueText: Qt.binding(function () {
@@ -1451,7 +1301,8 @@ Rectangle {
                 })
 
                 addBlock({
-                    icon: _azIconBase + "FlightMode.svg",
+                    icon: _azV2IconBase + "top_vehicle.svg",
+                    iconW: 30,
                     blockId: "vehicle",
                     label: qsTr("Aparat"),
                     valueText: Qt.binding(function () {
@@ -1466,7 +1317,7 @@ Rectangle {
                 })
 
                 addBlock({
-                    icon: _azIconBase + "GPS.svg",
+                    icon: _azV2IconBase + "top_udp.svg",
                     blockId: "udpPosition",
                     label: qsTr("UDP Pozisiya"),
                     valueText: Qt.binding(function () {
@@ -1478,11 +1329,9 @@ Rectangle {
                 })
             }
         }
-
     }
 
-    // Horizontal scroll göstəricisi — düymələrin İÇİNDƏ deyil, ALTINDA ayrılmış zolaqda
-    // yerləşir ki, buttonların üstünə düşməsin.
+    // Thin scroll indicator along the bottom edge, shown while the strip moves.
     ScrollBar {
         id: statusHScrollBar
         orientation: Qt.Horizontal
@@ -1492,14 +1341,13 @@ Rectangle {
         // fades the bar in while the strip moves and back out afterwards.
         active: statusFlick.moving || statusFlick.dragging
 
-        anchors.left:      statusFlick.left
-        anchors.right:     statusFlick.right
-        anchors.top:       statusFlick.bottom
-        anchors.topMargin: 1
+        anchors.left:   statusFlick.left
+        anchors.right:  statusFlick.right
+        anchors.bottom: parent.bottom
         // Basic style pads the bar by 2 on each side, which left the 4px-high
         // groove with a zero-height thumb - nothing was ever drawn.
         padding: 0
-        height: Math.max(5, topStatusPanel._progressH)
+        height:  Math.max(3, AzTheme.px(4))
 
         size:     statusFlick.visibleArea.widthRatio
         position: statusFlick.visibleArea.xPosition
@@ -1523,13 +1371,163 @@ Rectangle {
         }
     }
 
+    // =========================
+    //  Kebab menu at the right end: linear-gradient(180deg, #0F1215, #0B0D0F),
+    //  a 42 px button with three #C8CACD dots
+    // =========================
+    Item {
+        id:             menuArea
+        anchors.top:    parent.top
+        anchors.bottom: parent.bottom
+        anchors.right:  parent.right
+        width:          topStatusPanel._menuW
+
+        Rectangle {
+            anchors.fill: parent
+            gradient: Gradient {
+                GradientStop { position: 0; color: AzTheme.topBarMenuTop }
+                GradientStop { position: 1; color: AzTheme.topBarMenuBottom }
+            }
+        }
+
+        Item {
+            id:               menuButton
+            anchors.centerIn: parent
+            width:            AzTheme.px(42)
+            height:           width
+
+            // linear-gradient(90deg, rgba(29, 78, 216, 0.04), rgba(37, 99, 235, 0.09))
+            Rectangle {
+                anchors.centerIn: parent
+                width:            AzTheme.px(36)
+                height:           width
+                radius:           AzTheme.px(9.2)
+                visible:          menuMouse.containsMouse || menuMouse.pressed || windowMenu.visible
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0;      color: AzTheme.activeTintStart }
+                    GradientStop { position: 0.5982; color: AzTheme.activeTintEnd }
+                }
+            }
+
+            Column {
+                anchors.centerIn: parent
+                spacing:          AzTheme.px(4.5)
+
+                Repeater {
+                    model: 3
+                    Rectangle {
+                        width:  Math.max(3, AzTheme.px(3.75))
+                        height: width
+                        radius: width / 2
+                        color:  AzTheme.topBarMenuIcon
+                    }
+                }
+            }
+
+            MouseArea {
+                id:           menuMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape:  Qt.PointingHandCursor
+                onClicked:    windowMenu.visible ? windowMenu.close() : windowMenu.open()
+            }
+        }
+
+        Popup {
+            id:          windowMenu
+            y:           menuArea.height + AzTheme.px(6)
+            x:           menuArea.width - width - AzTheme.px(8)
+            padding:     AzTheme.px(6)
+            closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+            // A Shape's implicit size follows its path, which follows the popup, so
+            // size the popup from its content alone.
+            implicitWidth:  contentItem.implicitWidth + leftPadding + rightPadding
+            implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
+
+            background: AzGradientRect {
+                angle:         AzTheme.panelGradientAngle
+                startColor:    AzTheme.menuSelectedBottom
+                startPosition: AzTheme.panelGradientStartPos
+                endColor:      AzTheme.panelGradientEnd
+                endPosition:   AzTheme.panelGradientEndPos
+                radius:        AzTheme.px(AzTheme.cardRadius)
+                borderColor:   AzTheme.panelBorder
+                borderWidth:   1
+            }
+
+            contentItem: Column {
+                spacing: AzTheme.px(2)
+
+                Repeater {
+                    // Minimising means nothing on the tablets, which run full screen.
+                    model: ScreenTools.isMobile
+                           ? [ { action: "exit",     text: qsTr("Çıxış"),            icon: "menu_exit.svg" } ]
+                           : [ { action: "minimize", text: qsTr("Pəncərəni kiçilt"), icon: "menu_minimize.svg" },
+                               { action: "exit",     text: qsTr("Çıxış"),            icon: "menu_exit.svg" } ]
+
+                    delegate: Item {
+                        width:  AzTheme.px(220)
+                        height: AzTheme.px(44)
+
+                        Rectangle {
+                            anchors.fill: parent
+                            radius:       AzTheme.px(8)
+                            visible:      menuItemMouse.containsMouse || menuItemMouse.pressed
+                            color:        Qt.rgba(1, 1, 1, 0.05)
+                            border.width: 1
+                            border.color: AzTheme.panelBorder
+                        }
+
+                        Image {
+                            id:                     menuItemIcon
+                            x:                      AzTheme.px(12)
+                            anchors.verticalCenter: parent.verticalCenter
+                            width:                  AzTheme.px(18)
+                            height:                 width
+                            sourceSize.width:       width
+                            sourceSize.height:      height
+                            fillMode:               Image.PreserveAspectFit
+                            source:                 _azV2IconBase + modelData.icon
+                        }
+
+                        Text {
+                            anchors.left:           menuItemIcon.right
+                            anchors.leftMargin:     AzTheme.px(12)
+                            anchors.verticalCenter: parent.verticalCenter
+                            text:                   modelData.text
+                            color:                  AzTheme.textCard
+                            font.family:            AzTheme.fontFamily
+                            font.pixelSize:         AzTheme.fontPx(16)
+                        }
+
+                        MouseArea {
+                            id:           menuItemMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape:  Qt.PointingHandCursor
+                            onClicked: {
+                                windowMenu.close()
+                                if (modelData.action === "minimize") {
+                                    topStatusPanel.minimizeRequested()
+                                } else {
+                                    topStatusPanel.exitRequested()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Parameter download progress along the bottom edge.
     Rectangle {
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 2
-        height: topStatusPanel._progressH
-        width: _activeVehicle ? _activeVehicle.loadProgress * parent.width : 0
-        color: QGroundControl.globalPalette.colorGreen
-        visible: !_showLargeProgress
+        height:         topStatusPanel._progressH
+        width:          _activeVehicle ? _activeVehicle.loadProgress * parent.width : 0
+        color:          AzTheme.statusGreen
+        visible:        !_showLargeProgress
     }
 
     Loader {
