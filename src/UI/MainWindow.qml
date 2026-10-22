@@ -163,13 +163,18 @@ ApplicationWindow {
 
     function _applyResponsiveMenuState() {
         if (!leftPanel) return
-        if (_autoCollapseMenu && leftPanel.visible) {
+        if ((_autoCollapseMenu || AzTheme.compact) && leftPanel.visible) {
             // ✅ width-ə toxunma, yalnız state dəyiş
             leftPanel.isCollapsed = true
         }
     }
 
-    onWidthChanged: Qt.callLater(_applyResponsiveMenuState)
+    onWidthChanged:  Qt.callLater(_applyResponsiveMenuState)
+    onHeightChanged: Qt.callLater(_applyResponsiveMenuState)
+
+    // The design tokens scale against the window, not the screen.
+    Binding { target: AzTheme; property: "windowWidth";  value: mainWindow.width }
+    Binding { target: AzTheme; property: "windowHeight"; value: mainWindow.height }
 
     Item {
         id: viewsClip

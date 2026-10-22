@@ -61,7 +61,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_
 
 qt_add_library(QGroundControlControlsModule STATIC)
 
-set_source_files_properties(ScreenTools.qml PROPERTIES
+set_source_files_properties(ScreenTools.qml AzTheme.qml PROPERTIES
     QT_QML_SINGLETON_TYPE TRUE
 )
 
@@ -71,6 +71,8 @@ qt_add_qml_module(QGroundControlControlsModule
     RESOURCE_PREFIX /qml
     QML_FILES
         AltModeDialog.qml
+        AzGradientRect.qml
+        AzTheme.qml
         AppSettings.qml
         APMSubMotorDisplay.qml
         AppMessages.qml
