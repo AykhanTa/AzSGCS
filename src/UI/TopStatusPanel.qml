@@ -890,7 +890,15 @@ Item {
             // edge (28 on the status card, which has the dot there). All cards take the
             // widest of these (topStatusPanel._blockW).
             readonly property real _rightInset:   AzTheme.px(isStatusBlock ? 28 : 16)
-            readonly property real naturalWidth:  Math.ceil(blockIcon.x + blockIcon.width + AzTheme.px(12) + titleText.implicitWidth + _rightInset)
+            readonly property real naturalWidth:  Math.ceil(AzTheme.px(20) + blockIcon.width + AzTheme.px(12) + titleText.implicitWidth + _rightInset)
+
+            // Icon and text are centred on the card as one group; the two lines stay
+            // left-aligned inside it so they line up with each other and the icon.
+            readonly property real _leftInset:  AzTheme.px(16)
+            readonly property real _textGap:    AzTheme.px(12)
+            readonly property real _textRoom:   Math.max(0, width - _leftInset - _rightInset - blockIcon.width - _textGap)
+            readonly property real _textW:      Math.min(_textRoom, Math.max(titleText.implicitWidth, valueTextItem.implicitWidth))
+            readonly property real _contentX:   _leftInset + (width - _leftInset - _rightInset - (blockIcon.width + _textGap + _textW)) / 2
 
             width:  topStatusPanel._blockW
             height: topStatusPanel._blockH
@@ -1028,7 +1036,7 @@ Item {
             // The icon sits level with the title, not centred on the card.
             QGCColoredImage {
                 id:                           blockIcon
-                x:                            AzTheme.px(20)
+                x:                            Math.round(block._contentX)
                 anchors.verticalCenter:       parent.verticalCenter
                 anchors.verticalCenterOffset: -AzTheme.px(6)
                 width:                        AzTheme.px(block.iconW)
@@ -1051,9 +1059,8 @@ Item {
             Text {
                 id:                           titleText
                 anchors.left:                 blockIcon.right
-                anchors.leftMargin:           AzTheme.px(12)
-                anchors.right:                parent.right
-                anchors.rightMargin:          block._rightInset
+                anchors.leftMargin:           block._textGap
+                width:                        block._textW
                 anchors.verticalCenter:       parent.verticalCenter
                 anchors.verticalCenterOffset: -AzTheme.px(11)
                 text:                         block.label
@@ -1067,9 +1074,8 @@ Item {
             Text {
                 id:                           valueTextItem
                 anchors.left:                 blockIcon.right
-                anchors.leftMargin:           AzTheme.px(12)
-                anchors.right:                parent.right
-                anchors.rightMargin:          block._rightInset
+                anchors.leftMargin:           block._textGap
+                width:                        block._textW
                 anchors.verticalCenter:       parent.verticalCenter
                 anchors.verticalCenterOffset: AzTheme.px(10)
                 color:                        AzTheme.textSecondary
