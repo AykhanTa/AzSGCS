@@ -71,9 +71,18 @@ qt_add_qml_module(QGroundControlControlsModule
     RESOURCE_PREFIX /qml
     QML_FILES
         AltModeDialog.qml
+        AzButton.qml
         AzGradientRect.qml
+        AzGroup.qml
+        AzIconButton.qml
+        AzInfoRow.qml
+        AzPopupFrame.qml
         AzRadialGlow.qml
+        AzSectionTitle.qml
+        AzSettingRow.qml
+        AzSwitch.qml
         AzTheme.qml
+        AzValuePill.qml
         AppSettings.qml
         APMSubMotorDisplay.qml
         AppMessages.qml

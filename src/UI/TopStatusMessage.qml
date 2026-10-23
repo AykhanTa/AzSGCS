@@ -1,86 +1,38 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
-import QtQuick.Dialogs
+import QtQuick
+import QtQuick.Controls
 
 import QGroundControl
 import QGroundControl.Controls
 import QGroundControl.FactControls
 
-Rectangle {
+// The panel of the Status card: arming, the vehicle's messages, the health and arming
+// problems and the sensor states. The title and the ARM row stay put; the rest scrolls.
+AzPopupFrame {
     id: overlay
-    anchors.fill: parent
-    color: "transparent"
-    visible: false
-    z: 1
+
+    panelVisible: false
+    topPanelItem: statusPanelItem
+    title:        qsTr("Status")
+
+    onCloseRequested: close()
 
     // TopStatusPanel Loader ötürür (panelin yerini hesablayırıq)
     property var statusPanelItem: null
-
-    QGCPalette { id: qgcPal; colorGroupEnabled: true }
-
-    function _clamp(v, lo, hi) { return Math.max(lo, Math.min(v, hi)) }
-
-    function _wheelDeltaY(wheel) {
-        if (wheel.pixelDelta && wheel.pixelDelta.y !== 0) return wheel.pixelDelta.y
-        if (wheel.angleDelta && wheel.angleDelta.y !== 0) return wheel.angleDelta.y / 2
-        return 0
-    }
-
-    readonly property bool _hasScreenTools: (typeof ScreenTools !== "undefined")
-    readonly property real _fontPx: _hasScreenTools && ScreenTools.defaultFontPixelHeight !== undefined
-                                 ? ScreenTools.defaultFontPixelHeight
-                                 : Math.max(14, (Qt.application.font.pixelSize > 0 ? Qt.application.font.pixelSize : 14))
-    readonly property real _fontPt: _hasScreenTools && ScreenTools.defaultFontPointSize !== undefined
-                                 ? ScreenTools.defaultFontPointSize
-                                 : Math.max(10, (Qt.application.font.pointSize > 0 ? Qt.application.font.pointSize : 10))
-
-    readonly property real _margin:    Math.round(Math.max(10, _fontPx * 0.80))
-    readonly property real _pad:       Math.round(Math.max(8, _fontPx * 0.62))
-    readonly property real _gap:       Math.round(Math.max(6, _fontPx * 0.35))
-    readonly property real _closeSize: Math.round(_clamp(_fontPx * 1.25, 18, 22))
-
-    // ✅ TopStatusPanel hündürlüyü qədər aşağıdan başlasın
-    readonly property real _topInset: statusPanelItem ? statusPanelItem.height : 0
-
-    // ✅ SideMenu bitdiyi yerdən başlasın (açıq/collapsed/kiçik ekran fərqi yoxdur)
-    // Prioritet: mainWindow._leftInset (səndə var), fallback: statusPanelItem.x
-    readonly property real _sideMenuInset: {
-        if (typeof mainWindow !== "undefined" && mainWindow && mainWindow._leftInset !== undefined) {
-            var v = mainWindow._leftInset
-            return (v === undefined || v === null) ? 0 : v
-        }
-        if (statusPanelItem && statusPanelItem.x !== undefined) {
-            return Math.max(0, statusPanelItem.x)
-        }
-        return 0
-    }
-
-    // SideMenu ilə panel arasında “biraz məsafə”
-    readonly property real _sideMenuGap: Math.round(Math.max(8, _fontPx * 0.55))
-
-    // Panelin soldan real başlanğıcı:
-    // - SideMenu varsa: sideMenuEnd + gap
-    // - Yoxdursa: standart margin
-    readonly property real _panelLeftX: (_sideMenuInset > 0) ? (_sideMenuInset + _sideMenuGap) : _margin
-
-    // Qalan boşluğa görə panel eni (kiçik ekranda da sığsın)
-    readonly property real _availW: Math.max(120, overlay.width - _panelLeftX - _margin)
-    readonly property real _availH: Math.max(140, overlay.height - _topInset - (_margin * 2))
-
-    readonly property real _panelW: Math.round(Math.min(_availW, Math.max(260, Math.min(520, overlay.width * 0.46))))
-    readonly property real _panelH: Math.round(Math.min(_availH, Math.max(240, overlay.height * 0.72)))
-
-    readonly property real _panelHMax: _panelH
-    readonly property real _panelHMin: Math.min(200, _availH)
 
     // Vehicle refs
     readonly property var  _activeVehicle:   QGroundControl.multiVehicleManager.activeVehicle
     readonly property bool _checksSupported: _activeVehicle ? _activeVehicle.healthAndArmingCheckReport.supported : false
     function canArmNow() { return _activeVehicle ? (_checksSupported ? _activeVehicle.healthAndArmingCheckReport.canArm : true) : false }
 
+    readonly property real _linePx:   AzTheme.px(AzTheme.groupLineHeight)
+    readonly property real _groupPad: AzTheme.px(AzTheme.groupPadding)
+    readonly property real _textPx:   AzTheme.fontPx(AzTheme.popupTextSize)
+
+    function _clamp(v, lo, hi) { return Math.max(lo, Math.min(v, hi)) }
+
     // ===================== Vehicle Messages (manual refresh, signal-based) =====================
     property string _vehicleMessagesHtml: ""
+    property bool   _hasMessages:         false
 
     function _getFormattedMessagesRaw() {
         if (!_activeVehicle) return ""
@@ -97,29 +49,20 @@ Rectangle {
     }
 
     function _isMessageAtBottom() {
-        if (!messageFlick) return true
         var maxY = Math.max(0, messageFlick.contentHeight - messageFlick.height)
         return messageFlick.contentY >= (maxY - 8)
     }
 
     function _scrollMessageToBottom() {
-        if (!messageFlick) return
-        var maxY = Math.max(0, messageFlick.contentHeight - messageFlick.height)
-        messageFlick.contentY = maxY
+        messageFlick.contentY = Math.max(0, messageFlick.contentHeight - messageFlick.height)
     }
 
     function _refreshVehicleMessages(forceBottom) {
         var stickToBottom = forceBottom || _isMessageAtBottom()
+        var raw = _activeVehicle ? _getFormattedMessagesRaw() : ""
 
-        var html = ""
-        if (!_activeVehicle) {
-            html = qsTr("Heç bir təyyarə qoşulmayıb")
-        } else {
-            var raw = _getFormattedMessagesRaw()
-            html = (raw && raw.length > 0) ? formatMessage(raw) : qsTr("Mesaj yoxdur")
-        }
-
-        overlay._vehicleMessagesHtml = html
+        overlay._hasMessages = raw.length > 0
+        overlay._vehicleMessagesHtml = overlay._hasMessages ? formatMessage(raw) : ""
 
         Qt.callLater(function() {
             if (overlay.visible && stickToBottom) _scrollMessageToBottom()
@@ -127,11 +70,11 @@ Rectangle {
     }
 
     function open()  {
-        overlay.visible = true
+        overlay.panelVisible = true
         _refreshVehicleMessages(true)
     }
     function close() {
-        overlay.visible = false
+        overlay.panelVisible = false
     }
 
     // ================= PARAM LINK / PARAMETER DIALOG =================
@@ -161,483 +104,311 @@ Rectangle {
         }
     }
 
+    // Each message arrives as <font style="<#E|#I|#N>">[time comp] Severity: text</font><br/>.
+    // Errors and worse are red, warnings and notices yellow, the rest white; every
+    // message becomes a paragraph so the lines get the mock-up's spacing.
     function formatMessage(message) {
         if (!message) return ""
-        var pt = Math.max(8, overlay._fontPt - 1).toFixed(0)
+        var font = "font-family: '" + AzTheme.fontFamily + "'; font-size: " + overlay._textPx + "px;"
+        var gap = Math.max(0, Math.round(overlay._linePx - overlay._textPx * 1.5))
 
-        message = message.replace(new RegExp("<#E>", "g"),
-                                  "color: " + qgcPal.warningText + "; font: " + pt + "pt monospace;")
-        message = message.replace(new RegExp("<#I>", "g"),
-                                  "color: " + qgcPal.warningText + "; font: " + pt + "pt monospace;")
-        message = message.replace(new RegExp("<#N>", "g"),
-                                  "color: " + qgcPal.text + "; font: " + pt + "pt monospace;")
+        message = message.replace(new RegExp("<#E>", "g"), "color: " + AzTheme.statusRed + "; " + font)
+        message = message.replace(new RegExp("<#I>", "g"), "color: " + AzTheme.warningText + "; " + font)
+        message = message.replace(new RegExp("<#N>", "g"), "color: " + AzTheme.textCard + "; " + font)
+        message = message.replace(new RegExp(" \\]", "g"), "]")
+        message = message.replace(new RegExp("<font style=", "g"), "<p style=\"margin-top: 0; margin-bottom: " + gap + "px;\"><font style=")
+        message = message.replace(new RegExp("</font><br/>", "g"), "</font></p>")
         return message
     }
 
-    // ----------------------------
-    // BACKDROP (klik + wheel ud)
-    // ----------------------------
-    MouseArea {
-        id: backdrop
-        anchors.fill: parent
-        enabled: overlay.visible
-        acceptedButtons: Qt.AllButtons
-        hoverEnabled: true
-        preventStealing: true
-        propagateComposedEvents: false
+    // RichText ignores Text.linkColor, so links get their colour from a style block.
+    readonly property string _linkStyle: "<style>a { color: " + AzTheme.linkText + "; text-decoration: none; }</style>"
 
-        function clickedOutsidePanel(mx, my) {
-            return !(mx >= panel.x && mx <= (panel.x + panel.width) &&
-                     my >= panel.y && my <= (panel.y + panel.height))
+    function _sensorStatusText(status) {
+        if (status === "Normal")   return qsTr("Normal")
+        if (status === "Error")    return qsTr("Xəta")
+        if (status === "Disabled") return qsTr("Söndürülüb")
+        return status ? status : qsTr("Naməlum")
+    }
+
+    function _sensorStatusColor(status) {
+        if (status === "Normal") return AzTheme.statusGreen
+        if (status === "Error")  return AzTheme.statusRed
+        return AzTheme.textSecondary
+    }
+
+    // ---------------- Arming (fixed) ----------------
+    fixedContent: Item {
+        width:  overlay.contentWidth
+        height: armButton.height
+
+        Text {
+            anchors.left:           parent.left
+            anchors.leftMargin:     AzTheme.px(10)
+            anchors.right:          armButton.left
+            anchors.rightMargin:    AzTheme.px(12)
+            anchors.verticalCenter: parent.verticalCenter
+            wrapMode:               Text.Wrap
+            maximumLineCount:       2
+            elide:                  Text.ElideRight
+            text: {
+                if (!_activeVehicle)       return qsTr("Aparat qoşulmayıb.")
+                if (_activeVehicle.armed)  return qsTr("Motorlar aktivdir.")
+                return qsTr("Uçuş üçün motorları aktivləşdirin.")
+            }
+            color:          AzTheme.textPrimary
+            opacity:        _activeVehicle ? 1 : 0.6
+            font.family:    AzTheme.fontFamily
+            font.pixelSize: overlay._textPx
         }
 
-        onWheel: (wheel) => { wheel.accepted = true }
-        onPressed:  (m)=> { m.accepted = true }
-        onReleased: (m)=> { m.accepted = true }
-
-        onClicked: (m)=> {
-            m.accepted = true
-            if (clickedOutsidePanel(m.x, m.y)) overlay.close()
+        AzButton {
+            id:                  armButton
+            anchors.right:       parent.right
+            anchors.rightMargin: AzTheme.px(20)
+            text:                _activeVehicle && _activeVehicle.armed ? qsTr("DISARM") : qsTr("ARM")
+            danger:              !!(_activeVehicle && _activeVehicle.armed)
+            enabled:             !!(_activeVehicle && (_activeVehicle.armed || canArmNow()))
+            onClicked: {
+                if (!_activeVehicle) return
+                if (_activeVehicle.armed) mainWindow.disarmVehicleRequest()
+                else if (canArmNow()) mainWindow.armVehicleRequest()
+            }
         }
     }
 
-    // ✅ Pinch udulsun (iki barmaq gesture pəncərəni dəyişməsin)
-    PinchHandler {
-        enabled: overlay.visible
-        target: null
-        acceptedDevices: PointerDevice.TouchScreen | PointerDevice.TouchPad
-        grabPermissions: PointerHandler.CanTakeOverFromAnything
+    // ---------------- Vehicle Message Panel ----------------
+    AzSectionTitle {
+        text: qsTr("Aparat mesajları")
     }
 
-    // ----------------------------
-    // PANEL
-    // ----------------------------
-    Rectangle {
-        id: panel
-        width: overlay._panelW
-        height: Math.round(_clamp(contentCol.implicitHeight + overlay._pad * 2, overlay._panelHMin, overlay._panelHMax))
+    Item {
+        width:  overlay.contentWidth
+        height: messageGroup.height
 
-        radius: 12
-        color: "#2A2A2A"
-        border.width: 1
-        border.color: "#6E6E6E"
-        clip: true
+        AzGroup {
+            id:              messageGroup
+            width:           parent.width
+            height:          overlay._hasMessages
+                             ? Math.round(overlay._clamp(messageText.contentHeight + 2 * verticalPadding, overlay._linePx * 2, AzTheme.px(182)))
+                             : overlay._linePx + 2 * verticalPadding
+            verticalPadding: AzTheme.px(12)
+            dividers:        false
+            clip:            true
 
-        // ✅ SideMenu bitən yerdən + gap
-        x: Math.round(overlay._clamp(overlay._panelLeftX,
-                                     overlay._margin,
-                                     overlay.width - width - overlay._margin))
+            Flickable {
+                id:                 messageFlick
+                x:                  overlay._groupPad
+                width:              messageGroup.width - overlay._groupPad - trashButton.width - AzTheme.px(32)
+                height:             messageGroup.height - 2 * messageGroup.verticalPadding
+                clip:               true
+                flickableDirection: Flickable.VerticalFlick
+                boundsBehavior:     Flickable.StopAtBounds
+                contentWidth:       width
+                contentHeight:      messageText.contentHeight
+                interactive:        contentHeight > height + 2
 
-        y: Math.round(overlay._clamp(overlay._topInset + overlay._margin,
-                                     overlay._margin,
-                                     overlay.height - height - overlay._margin))
+                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
-        Rectangle {
-            id: closeIcon
-            width:  overlay._closeSize + 10
-            height: width
-            radius: width / 2
-            anchors.top: parent.top
-            anchors.right: parent.right
-            anchors.topMargin: 6
-            anchors.rightMargin: 6
-            color: closeMouse.containsMouse ? "#4A4848" : "transparent"
-            z: 10
+                TextEdit {
+                    id:             messageText
+                    width:          messageFlick.width
+                    height:         contentHeight
+                    visible:        overlay._hasMessages
+                    readOnly:       true
+                    selectByMouse:  true
+                    textFormat:     TextEdit.RichText
+                    wrapMode:       TextEdit.Wrap
+                    color:          AzTheme.textCard
+                    font.family:    AzTheme.fontFamily
+                    font.pixelSize: overlay._textPx
+                    text:           overlay._vehicleMessagesHtml
+                    onLinkActivated: function(link) { handleLinkActivated(link) }
+                }
 
-            Behavior on color { ColorAnimation { duration: 110 } }
-
-            Image {
-                source: "qrc:/res/AZSHIELD_ICON/TopStatusPanel_Cixis.svg"
-                width:  overlay._closeSize
-                height: overlay._closeSize
-                anchors.centerIn: parent
-                fillMode: Image.PreserveAspectFit
-            }
-
-            MouseArea {
-                id: closeMouse
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: overlay.close()
+                Text {
+                    height:            messageFlick.height
+                    verticalAlignment: Text.AlignVCenter
+                    visible:           !overlay._hasMessages
+                    text:              _activeVehicle ? qsTr("Mesaj yoxdur") : qsTr("Heç bir aparat qoşulmayıb")
+                    color:             AzTheme.textSecondary
+                    font.family:       AzTheme.fontFamily
+                    font.pixelSize:    overlay._textPx
+                }
             }
         }
 
-        // ----------------------------
-        // OUTER SCROLL
-        // ----------------------------
-        QGCFlickable {
-            id: contentFlick
-            anchors.fill: parent
-            anchors.margins: overlay._pad
-            clip: true
+        AzIconButton {
+            id:                  trashButton
+            anchors.right:       parent.right
+            anchors.rightMargin: AzTheme.px(26)
+            y:                   messageGroup.verticalPadding + (overlay._linePx - height) / 2 + AzTheme.px(12)
+            visible:             overlay._hasMessages
+            iconSource:          "qrc:/res/AZSHIELD_ICON/v2/popup_trash.svg"
+            iconSize:            AzTheme.px(20)
+            onClicked: {
+                if (_activeVehicle) _activeVehicle.clearMessages()
+                Qt.callLater(function() { overlay._refreshVehicleMessages(true) })
+            }
+        }
+    }
 
-            flickableDirection: Flickable.VerticalFlick
-            boundsBehavior: Flickable.StopAtBounds
+    // ---------------- Overall Status ----------------
+    AzSectionTitle {
+        visible: overallGroup.visible
+        text:    qsTr("Ümumi Vəziyyət")
+    }
 
-            contentWidth: width
-            contentHeight: contentCol.implicitHeight
-            interactive: contentHeight > height + 2
+    AzGroup {
+        id:              overallGroup
+        width:           overlay.contentWidth
+        visible:         !!(_activeVehicle && _checksSupported &&
+                            _activeVehicle.healthAndArmingCheckReport.problemsForCurrentMode.count > 0)
+        verticalPadding: AzTheme.px(6)
+        dividerInset:    AzTheme.px(8)
 
-            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+        Repeater {
+            model: _activeVehicle ? _activeVehicle.healthAndArmingCheckReport.problemsForCurrentMode : null
 
-            WheelHandler {
-                target: contentFlick
-                acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-                onWheel: (wheel) => {
-                    var maxY = Math.max(0, contentFlick.contentHeight - contentFlick.height)
-                    wheel.accepted = true
-                    if (maxY <= 0) return
-                    var dy = overlay._wheelDeltaY(wheel)
-                    contentFlick.contentY = overlay._clamp(contentFlick.contentY - dy, 0, maxY)
+            delegate: Item {
+                width:  overallGroup.width
+                height: problemText.y * 2 + problemText.height + (object.expanded ? descriptionText.height + AzTheme.px(4) : 0)
+
+                readonly property bool _hasDescription: object.description !== ""
+
+                Text {
+                    id:            problemText
+                    x:             overlay._groupPad
+                    y:             Math.max(AzTheme.px(6), (overlay._linePx - implicitHeight) / 2)
+                    width:         parent.width - x - (chevron.visible ? chevron.width + AzTheme.px(16) : overlay._groupPad)
+                    wrapMode:      Text.Wrap
+                    textFormat:    Text.RichText
+                    text:          overlay._linkStyle + object.message
+                    color: {
+                        if (object.severity === "error")   return AzTheme.statusRed
+                        if (object.severity === "warning") return AzTheme.warningText
+                        return AzTheme.textCard
+                    }
+                    font.family:    AzTheme.fontFamily
+                    font.pixelSize: overlay._textPx
+                    onLinkActivated: function(link) { handleLinkActivated(link) }
+                }
+
+                AzIconButton {
+                    id:                     chevron
+                    anchors.right:          parent.right
+                    anchors.rightMargin:    AzTheme.px(16)
+                    anchors.verticalCenter: problemText.verticalCenter
+                    visible:                parent._hasDescription
+                    iconSource:             "qrc:/res/AZSHIELD_ICON/v2/popup_chevron.svg"
+                    iconSize:               AzTheme.px(20)
+                    rotation:               object.expanded ? 180 : 0
+                    onClicked:              object.expanded = !object.expanded
+                }
+
+                MouseArea {
+                    anchors.fill: problemText
+                    enabled:      parent._hasDescription
+                    cursorShape:  Qt.PointingHandCursor
+                    onClicked: {
+                        var link = problemText.linkAt(mouseX, mouseY)
+                        if (link) handleLinkActivated(link)
+                        else object.expanded = !object.expanded
+                    }
+                }
+
+                Text {
+                    id:             descriptionText
+                    x:              overlay._groupPad
+                    y:              problemText.y + problemText.height + AzTheme.px(4)
+                    width:          parent.width - x - overlay._groupPad
+                    visible:        object.expanded
+                    wrapMode:       Text.Wrap
+                    textFormat:     Text.RichText
+                    text:           overlay._linkStyle + object.description
+                    color:          AzTheme.textCard
+                    font.family:    AzTheme.fontFamily
+                    font.pixelSize: overlay._textPx
+                    onLinkActivated: function(link) { handleLinkActivated(link) }
+
+                    HoverHandler { cursorShape: descriptionText.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor }
                 }
             }
+        }
+    }
 
-            ColumnLayout {
-                id: contentCol
-                width: contentFlick.width
-                spacing: overlay._gap
+    // ---------------- Sensor Status ----------------
+    AzSectionTitle {
+        visible: sensorGroup.visible
+        text:    qsTr("Sensor Vəziyyəti")
+    }
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: overlay._gap
-                    Rectangle {
-                        width:  Math.round(overlay._fontPx)
-                        height: Math.round(overlay._fontPx * 0.9)
-                        radius: 4
-                        color:  (_activeVehicle && _activeVehicle.armed) ? "#00C853" : "#4A4A4A"
+    AzGroup {
+        id:              sensorGroup
+        width:           overlay.contentWidth
+        visible:         !!(_activeVehicle && _activeVehicle.sysStatusSensorInfo && _activeVehicle.sysStatusSensorInfo.sensorNames &&
+                            _activeVehicle.sysStatusSensorInfo.sensorNames.length > 0)
+        verticalPadding: AzTheme.px(6)
+        dividerInset:    AzTheme.px(8)
 
-                        Behavior on color { ColorAnimation { duration: 130 } }
-                    }
+        Repeater {
+            model: sensorGroup.visible ? _activeVehicle.sysStatusSensorInfo.sensorNames.length : 0
 
-                    QGCLabel {
-                        Layout.fillWidth: true
-                        text: _activeVehicle ? qsTr("Arm") : qsTr("Əlaqə yaradılmayıb")
-                        font.bold: true
-                        color: "white"
-                        elide: Text.ElideRight
-                    }
+            delegate: Item {
+                id:     sensorRow
+                width:  sensorGroup.width
+                height: overlay._linePx
+
+                readonly property string _status: _activeVehicle && _activeVehicle.sysStatusSensorInfo.sensorStatus
+                                                  ? _activeVehicle.sysStatusSensorInfo.sensorStatus[index] : ""
+                readonly property color  _color:  overlay._sensorStatusColor(_status)
+
+                Text {
+                    x:                      overlay._groupPad
+                    anchors.verticalCenter: parent.verticalCenter
+                    width:                  statusColumn.x - x - AzTheme.px(12)
+                    elide:                  Text.ElideRight
+                    text:                   _activeVehicle ? _activeVehicle.sysStatusSensorInfo.sensorNames[index] : ""
+                    color:                  AzTheme.textCard
+                    font.family:            AzTheme.fontFamily
+                    font.pixelSize:         overlay._textPx
                 }
 
-                Rectangle {
-                    Layout.fillWidth: true
-                    height: Math.round(Math.max(48, overlay._fontPx * 2.6))
-                    radius: 10
-                    color: "#333333"
-                    border.width: 1
-                    border.color: "#4A4A4A"
+                // Dot and state in a fixed column, so the states line up.
+                Item {
+                    id:                     statusColumn
+                    anchors.right:          parent.right
+                    anchors.rightMargin:    overlay._groupPad
+                    anchors.verticalCenter: parent.verticalCenter
+                    width:                  statusDot.width + AzTheme.px(10) + widestStatus.advanceWidth
+                    height:                 statusText.implicitHeight
 
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: overlay._gap
-                        spacing: overlay._gap
-
-                        QGCLabel {
-                            Layout.fillWidth: true
-                            text: _activeVehicle ? qsTr("Uçuş üçün Motorları aktivləşdirin") : qsTr("Təyyarə Yoxdur")
-                            color: "white"
-                            verticalAlignment: Text.AlignVCenter
-                            opacity: _activeVehicle ? 1 : 0.6
-                            wrapMode: Text.Wrap
-                        }
-
-                        QGCButton {
-                            text: _activeVehicle && _activeVehicle.armed ? qsTr("Disarm") : qsTr("Arm")
-                            enabled: _activeVehicle && (_activeVehicle.armed || canArmNow())
-                            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                            onClicked: {
-                                if (!_activeVehicle) return
-                                if (_activeVehicle.armed) mainWindow.disarmVehicleRequest()
-                                else if (canArmNow()) mainWindow.armVehicleRequest()
-                            }
-                        }
-                    }
-                }
-
-                // ---------------- Vehicle Message Panel ----------------
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 6
-                    visible: true
-
-                    QGCLabel {
-                        Layout.fillWidth: true
-                        text: qsTr("Təyyarə Mesajı")
-                        font.bold: true
-                        color: "white"
-                        horizontalAlignment: Text.AlignHCenter
+                    TextMetrics {
+                        id:             widestStatus
+                        font:           statusText.font
+                        text:           qsTr("Söndürülüb")
                     }
 
                     Rectangle {
-                        Layout.fillWidth: true
-                        radius: 8
-                        color: "#1E1E1E"
-                        border.color: "#4A4A4A"
-                        clip: true
-
-                        Layout.preferredHeight: Math.round(overlay._clamp(overlay._panelH * 0.30,
-                                                                          overlay._fontPx * 5,
-                                                                          overlay._fontPx * 9))
-
-                        QGCFlickable {
-                            id: messageFlick
-                            anchors.fill: parent
-                            anchors.margins: overlay._gap
-                            clip: true
-
-                            flickableDirection: Flickable.VerticalFlick
-                            boundsBehavior: Flickable.StopAtBounds
-
-                            contentWidth: width
-                            contentHeight: messageText.contentHeight + 2
-                            interactive: contentHeight > height + 2
-
-                            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
-
-                            WheelHandler {
-                                target: messageFlick
-                                acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-                                onWheel: (wheel) => {
-                                    var maxY = Math.max(0, messageFlick.contentHeight - messageFlick.height)
-                                    wheel.accepted = true
-                                    if (maxY <= 0) return
-                                    var dy = overlay._wheelDeltaY(wheel)
-                                    messageFlick.contentY = overlay._clamp(messageFlick.contentY - dy, 0, maxY)
-                                }
-                            }
-
-                            TextEdit {
-                                id: messageText
-                                width: messageFlick.width
-                                height: contentHeight
-                                readOnly: true
-                                selectByMouse: true
-                                textFormat: TextEdit.RichText
-                                wrapMode: TextEdit.Wrap
-                                color: "white"
-
-                                text: overlay._vehicleMessagesHtml
-                                onLinkActivated: function(link) { handleLinkActivated(link) }
-                            }
-                        }
-
-                        Rectangle {
-                            anchors.right: parent.right
-                            anchors.top: parent.top
-                            anchors.margins: 8
-                            width: Math.round(overlay._clamp(overlay._fontPx * 1.25, 18, 26))
-                            height: width
-                            radius: width / 2
-                            color: "#333333"
-                            border.color: "#4A4A4A"
-
-                            QGCColoredImage {
-                                anchors.centerIn: parent
-                                width: parent.width * 0.60
-                                height: width
-                                source: "/res/TrashDelete.svg"
-                                fillMode: Image.PreserveAspectFit
-                                color: "white"
-                            }
-
-                            QGCMouseArea {
-                                fillItem: parent
-                                onClicked: {
-                                    if (_activeVehicle) _activeVehicle.clearMessages()
-                                    Qt.callLater(function() { overlay._refreshVehicleMessages(true) })
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // ---------------- Overall Status ----------------
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 6
-                    visible: _activeVehicle && _checksSupported &&
-                             _activeVehicle.healthAndArmingCheckReport.problemsForCurrentMode.count > 0
-
-                    QGCLabel {
-                        Layout.fillWidth: true
-                        text: qsTr("Ümumi Vəziyyət")
-                        font.bold: true
-                        color: "white"
-                        horizontalAlignment: Text.AlignHCenter
+                        id:                     statusDot
+                        anchors.verticalCenter: parent.verticalCenter
+                        width:                  Math.max(5, AzTheme.px(6))
+                        height:                 width
+                        radius:                 width / 2
+                        color:                  sensorRow._color
                     }
 
-                    Rectangle {
-                        Layout.fillWidth: true
-                        radius: 8
-                        color: "#1E1E1E"
-                        border.color: "#4A4A4A"
-                        Layout.preferredHeight: overallStatusCol.implicitHeight + (overlay._gap * 2)
-
-                        ColumnLayout {
-                            id: overallStatusCol
-                            anchors.fill: parent
-                            anchors.margins: overlay._gap
-                            spacing: overlay._gap
-
-                            Repeater {
-                                model: _activeVehicle ? _activeVehicle.healthAndArmingCheckReport.problemsForCurrentMode : null
-
-                                delegate: ColumnLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 4
-
-                                    RowLayout {
-                                        Layout.fillWidth: true
-                                        spacing: 6
-
-                                        QGCLabel {
-                                            Layout.fillWidth: true
-                                            text: object.message
-                                            textFormat: TextEdit.RichText
-                                            color: {
-                                                if (object.severity === "error")   return "#FF6B6B"
-                                                if (object.severity === "warning") return "#FFA500"
-                                                return "white"
-                                            }
-                                            wrapMode: Text.Wrap
-                                            onLinkActivated: function(link) { handleLinkActivated(link) }
-                                        }
-
-                                        QGCColoredImage {
-                                            Layout.preferredWidth: 16
-                                            Layout.preferredHeight: 16
-                                            source: "/qmlimages/arrow-down.png"
-                                            color: "white"
-                                            visible: object.description !== ""
-
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                cursorShape: Qt.PointingHandCursor
-                                                onClicked: object.expanded = !object.expanded
-                                            }
-                                        }
-                                    }
-
-                                    QGCLabel {
-                                        Layout.fillWidth: true
-                                        text: object.description
-                                        textFormat: TextEdit.RichText
-                                        color: "#CCCCCC"
-                                        wrapMode: Text.Wrap
-                                        visible: object.expanded
-                                        onLinkActivated: function(link) { handleLinkActivated(link) }
-                                    }
-
-                                    Rectangle {
-                                        Layout.fillWidth: true
-                                        height: 1
-                                        color: "#3A3A3A"
-                                        visible: index < (_activeVehicle.healthAndArmingCheckReport.problemsForCurrentMode.count - 1)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // ---------------- Sensor Status ----------------
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 6
-                    visible: _activeVehicle && _activeVehicle.sysStatusSensorInfo && _activeVehicle.sysStatusSensorInfo.sensorNames
-
-                    QGCLabel {
-                        Layout.fillWidth: true
-                        text: qsTr("Sensor Vəziyyəti")
-                        font.bold: true
-                        color: "white"
-                        horizontalAlignment: Text.AlignHCenter
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        radius: 8
-                        color: "#1E1E1E"
-                        border.color: "#4A4A4A"
-                        clip: true
-
-                        Layout.preferredHeight: Math.min(sensorList.contentHeight + 6,
-                                                         Math.round(overlay._clamp(overlay._panelH * 0.28,
-                                                                                   overlay._fontPx * 4.5,
-                                                                                   overlay._fontPx * 8)))
-
-                        ListView {
-                            id: sensorList
-                            anchors.fill: parent
-                            anchors.margins: 2
-                            spacing: 3
-                            clip: true
-
-                            model: (_activeVehicle && _activeVehicle.sysStatusSensorInfo && _activeVehicle.sysStatusSensorInfo.sensorNames)
-                                   ? _activeVehicle.sysStatusSensorInfo.sensorNames.length : 0
-
-                            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
-
-                            WheelHandler {
-                                target: sensorList
-                                acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-                                onWheel: (wheel) => {
-                                    var maxY = Math.max(0, sensorList.contentHeight - sensorList.height)
-                                    wheel.accepted = true
-                                    if (maxY <= 0) return
-                                    var dy = overlay._wheelDeltaY(wheel)
-                                    sensorList.contentY = overlay._clamp(sensorList.contentY - dy, 0, maxY)
-                                }
-                            }
-
-                            delegate: Rectangle {
-                                width: sensorList.width
-                                height: 26
-                                radius: 4
-                                color: "#3D3D3D"
-                                border.color: "#5E5E5E"
-
-                                Row {
-                                    anchors.fill: parent
-                                    anchors.margins: 4
-                                    spacing: 6
-
-                                    QGCLabel {
-                                        text: _activeVehicle.sysStatusSensorInfo.sensorNames[index]
-                                        color: "white"
-                                        verticalAlignment: Text.AlignVCenter
-                                        elide: Text.ElideRight
-                                        width: sensorList.width - pillRect.width - 26
-                                    }
-
-                                    Rectangle {
-                                        id: pillRect
-                                        radius: 3
-                                        height: 18
-                                        width: Math.max(78, statusText.implicitWidth + 16)
-                                        color: {
-                                            if (!_activeVehicle.sysStatusSensorInfo.sensorStatus) return "#444444"
-                                            const val = _activeVehicle.sysStatusSensorInfo.sensorStatus[index]
-                                            if (val === "Normal")   return "#415247"
-                                            if (val === "Error")     return "#5A2F2F"
-                                            if (val === "Disabled") return "#444444"
-                                            return "#444444"
-                                        }
-                                        border.color: "#9d9d9d"
-                                        border.width: 0.5
-
-                                        QGCLabel {
-                                            id: statusText
-                                            anchors.centerIn: parent
-                                            color: "white"
-                                            text: _activeVehicle.sysStatusSensorInfo.sensorStatus
-                                                  ? _activeVehicle.sysStatusSensorInfo.sensorStatus[index] : "Unknown"
-                                            font.pointSize: Math.max(8, overlay._fontPt - 2)
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    Text {
+                        id:                     statusText
+                        anchors.left:           statusDot.right
+                        anchors.leftMargin:     AzTheme.px(10)
+                        anchors.right:          parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        elide:                  Text.ElideRight
+                        text:                   overlay._sensorStatusText(sensorRow._status)
+                        color:                  sensorRow._color
+                        font.family:            AzTheme.fontFamily
+                        font.pixelSize:         overlay._textPx
                     }
                 }
             }

@@ -43,17 +43,13 @@ QGCButton {
     // ekranda hər ölçü yığcamlaşır.
     readonly property bool _compact:    ScreenTools.isShortScreen
 
-    property int _horizontalPadding:    ScreenTools.defaultFontPixelWidth * (_compact ? 0.7 : 1)
-    property int _verticalPadding:      Math.round(ScreenTools.defaultFontPixelHeight * (_compact ? 0.24 : 0.5))
-    property real _stateFlagWidth:      ScreenTools.defaultFontPixelWidth * (_compact ? 2.5 : 4)
-
     readonly property int _statePending:    0   ///< Telemetry check is failing or manual check not yet verified, user can click to make it pass
     readonly property int _stateFailed:     1   ///< Telemetry check is failing, user cannot click to make it pass
     readonly property int _statePassed:     2   ///< Check has passed
 
-    readonly property color _passedColor:   "#86cc6a"
-    readonly property color _pendingColor:  "#f7a81f"
-    readonly property color _failedColor:   "#c31818"
+    readonly property color _passedColor:   AzTheme.statusGreen
+    readonly property color _pendingColor:  AzTheme.statusOrange
+    readonly property color _failedColor:   AzTheme.statusRed
 
     property string _text: "<b>" + name +"</b>: " +
                            ((_telemetryState !== _statePassed) ?
@@ -67,30 +63,41 @@ QGCButton {
                                           _pendingColor :
                                           _failedColor))
 
-    width:          ScreenTools.defaultFontPixelWidth * (_compact ? 29 : 40)
-    topPadding:     _verticalPadding
-    bottomPadding:  _verticalPadding
-    leftPadding:    (_horizontalPadding * 2) + _stateFlagWidth
-    rightPadding:   _horizontalPadding
+    // The group sets its width; standing alone the button keeps the old size.
+    width:          parent && parent.width > 0 ? parent.width : ScreenTools.defaultFontPixelWidth * (_compact ? 29 : 40)
+    topPadding:     AzTheme.px(12)
+    bottomPadding:  AzTheme.px(12)
+    leftPadding:    AzTheme.px(28)
+    rightPadding:   AzTheme.px(16)
 
+    // A panel row of the AzShield design with a coloured state bar on its left edge.
     background: Rectangle {
-        color:          qgcPal.button
-        border.color:   qgcPal.button;
+        radius:         AzTheme.px(8)
+        border.width:   1
+        border.color:   checkButton.hovered ? AzTheme.cardHoverBorder : AzTheme.groupBorder
+        gradient: Gradient {
+            GradientStop { position: 0; color: checkButton.pressed ? AzTheme.buttonTop : AzTheme.groupFill }
+            GradientStop { position: 1; color: checkButton.pressed ? AzTheme.buttonBottom : AzTheme.groupFill }
+        }
 
         Rectangle {
-            color:          _color
-            anchors.left:   parent.left
-            anchors.top:    parent.top
-            anchors.bottom: parent.bottom
-            width:          _stateFlagWidth
+            x:      AzTheme.px(10)
+            y:      AzTheme.px(10)
+            width:  Math.max(3, AzTheme.px(4))
+            height: parent.height - 2 * y
+            radius: width / 2
+            color:  _color
         }
     }
 
-    contentItem: QGCLabel {
+    contentItem: Text {
         wrapMode:               Text.WordWrap
-        horizontalAlignment:    Text.AlignHCenter
-        color:                  qgcPal.buttonText
-        font.pointSize:         checkButton._compact ? ScreenTools.smallFontPointSize : ScreenTools.defaultFontPointSize
+        horizontalAlignment:    Text.AlignLeft
+        verticalAlignment:      Text.AlignVCenter
+        textFormat:             Text.StyledText
+        color:                  AzTheme.textCard
+        font.family:            AzTheme.fontFamily
+        font.pixelSize:         AzTheme.fontPx(AzTheme.popupTextSize)
         text:                   _text
     }
 

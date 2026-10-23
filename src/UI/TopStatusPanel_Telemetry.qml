@@ -1,69 +1,18 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
 
 import QGroundControl
 import QGroundControl.Controls
 
-Rectangle {
+AzPopupFrame {
     id: telemetryOverlay
-    anchors.fill: parent
-    z: 100
-    color: "#00000000"     // istəsən "#00000080" et -> arxanı azca qaraldacaq
-    clip: true
 
-    // Loader idarəsi üçün
-    property bool panelVisible: true
-    visible: panelVisible
+    title: qsTr("Telemetriya")
 
-    // ✅ TopStatusPanel-dən gələcək anchor
-    property Item anchorItem: null
-    property Item topPanelItem: null
+    onCloseRequested: closePanel()
 
     // ---- Vehicle ----
     readonly property var _activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
-
-    // ---- Responsive helpers ----
-    readonly property bool _hasScreenTools: (typeof ScreenTools !== "undefined")
-    readonly property real _fontH: _hasScreenTools ? ScreenTools.defaultFontPixelHeight : Math.max(12, Qt.application.font.pixelSize)
-    readonly property real _fontW: _hasScreenTools ? ScreenTools.defaultFontPixelWidth  : Math.max(8,  Qt.application.font.pixelSize * 0.60)
-
-    function _clamp(v, lo, hi) { return Math.max(lo, Math.min(v, hi)) }
-
-    readonly property bool _compact: (width < 950) || (height < 720) || (_hasScreenTools && ScreenTools.isShortScreen)
-
-    readonly property real _edgePad:  Math.max(10, _fontW * 1.0)
-    readonly property real _dropGap:  Math.max(18, _fontH * 1.3)
-
-    // Panel top bar-a yapışmasın
-    readonly property real _minTopClearance: topPanelItem
-                                            ? (topPanelItem.height + _dropGap)
-                                            : _edgePad
-
-    // Böyük ekranda daha “geniş” olsun (sənin istədiyin kimi)
-    readonly property real _panelW: {
-        var maxAvail = width - _edgePad * 2
-
-        // Kiçik ekranda tam en olmasın (dar panel)
-        if (_compact) {
-            return Math.max(320, Math.min(420, maxAvail))   // 420-ni istəsən 380 elə
-        }
-
-        // Böyük ekranda daha geniş ola bilər
-        return Math.min(450, maxAvail)
-    }
-
-
-    // Hündürlük: böyükdə 640, kiçikdə ekrana görə
-    readonly property real _panelH: Math.min(
-                                        height - _edgePad * 2,
-                                        _compact ? Math.round(height * 0.80) : 640
-                                   )
-
-    readonly property real _headerH:   Math.max(40, Math.round(_fontH * 2.4))
-    readonly property real _rowH:      Math.max(50, Math.round(_fontH * 2.7))
-    readonly property real _innerPad:  Math.max(10, _fontW * 1.05)
-    readonly property real _gap:       Math.max(10, _fontH * 0.65)
+    readonly property real _lrssi: _activeVehicle ? _activeVehicle.telemetryLRSSI : 0
 
     function closePanel() {
         panelVisible = false
@@ -73,426 +22,102 @@ Rectangle {
         }
     }
 
-    function reposition() {
-        if (!popup) return
-
-        var x = Math.round((width - popup.width) / 2)
-        var y = _minTopClearance
-
-        if (anchorItem) {
-            // anchor-un altından aç
-            var p = anchorItem.mapToItem(telemetryOverlay, anchorItem.width / 2, anchorItem.height)
-            x = p.x - popup.width / 2
-            y = p.y + _dropGap
-
-            // aşağı sığmırsa yuxarı aç
-            if (y + popup.height + _edgePad > telemetryOverlay.height) {
-                var pTop = anchorItem.mapToItem(telemetryOverlay, anchorItem.width / 2, 0)
-                y = pTop.y - _dropGap - popup.height
-            }
-        }
-
-        // top paneli kəsməsin
-        y = Math.max(y, _minTopClearance)
-
-        // kənarlardan çıxmasın
-        x = _clamp(x, _edgePad, telemetryOverlay.width  - _edgePad - popup.width)
-        y = _clamp(y, _edgePad, telemetryOverlay.height - _edgePad - popup.height)
-
-        popup.x = Math.round(x)
-        popup.y = Math.round(y)
+    function rssiColor(v) {
+        if (!_activeVehicle || v === 0) return AzTheme.textCard
+        if (v >= -60) return AzTheme.statusGreen
+        if (v >= -70) return AzTheme.statusYellow
+        if (v >= -80) return AzTheme.statusOrange
+        return AzTheme.statusRed
     }
 
-    Component.onCompleted: Qt.callLater(reposition)
-    onVisibleChanged: if (visible) Qt.callLater(reposition)
-    onAnchorItemChanged: Qt.callLater(reposition)
-    onTopPanelItemChanged: Qt.callLater(reposition)
-    onWidthChanged: if (visible) Qt.callLater(reposition)
-    onHeightChanged: if (visible) Qt.callLater(reposition)
-
-    // ✅ Click outside -> close
-    MouseArea {
-        anchors.fill: parent
-        onClicked: closePanel()
+    function dbmText(v) {
+        if (!_activeVehicle) return qsTr("Aparat yoxdur")
+        return v !== 0 ? (v + " dBm") : qsTr("Əlaqə yoxdur")
     }
 
-    Rectangle {
-        id: popup
-        width: telemetryOverlay._panelW
-        height: telemetryOverlay._panelH
-        radius: 8
-        color: "#1E1E1E"
-        border.width: 1
-        border.color: "#333333"
-        clip: true
-        z: 2
+    function countText(v) {
+        return _activeVehicle ? String(v) : qsTr("Aparat yoxdur")
+    }
 
-        // ✅ Wheel event map-a keçməsin
-        MouseArea {
-            anchors.fill: parent
-            hoverEnabled: true
-            acceptedButtons: Qt.NoButton   // klikləri bloklamır
-            onWheel: function(wheel) {
-                wheel.accepted = true
-            }
+    AzGroup {
+        width: telemetryOverlay.contentWidth
+
+        AzInfoRow {
+            label:      qsTr("Yerli RSSI")
+            value:      telemetryOverlay.dbmText(telemetryOverlay._lrssi)
+            valueColor: telemetryOverlay.rssiColor(telemetryOverlay._lrssi)
         }
+        AzInfoRow {
+            readonly property real rssi: _activeVehicle ? _activeVehicle.telemetryRRSSI : 0
+            label:      qsTr("Uzaq RSSI")
+            value:      telemetryOverlay.dbmText(rssi)
+            valueColor: telemetryOverlay.rssiColor(rssi)
+        }
+        AzInfoRow { label: qsTr("RX səhvləri");        value: telemetryOverlay.countText(_activeVehicle ? _activeVehicle.telemetryRXErrors : 0) }
+        AzInfoRow { label: qsTr("Düzəldilən səhvlər"); value: telemetryOverlay.countText(_activeVehicle ? _activeVehicle.telemetryFixed : 0) }
+        AzInfoRow { label: qsTr("TX bufer");           value: telemetryOverlay.countText(_activeVehicle ? _activeVehicle.telemetryTXBuffer : 0) }
+        AzInfoRow { label: qsTr("Yerli səs-küy");      value: telemetryOverlay.dbmText(_activeVehicle ? _activeVehicle.telemetryLNoise : 0) }
+        AzInfoRow { label: qsTr("Uzaq səs-küy");       value: telemetryOverlay.dbmText(_activeVehicle ? _activeVehicle.telemetryRNoise : 0) }
 
-        // ---------------- HEADER ----------------
-        Rectangle {
-            id: header
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            height: telemetryOverlay._headerH
-            color: "#3d3b3b"
+        // Local RSSI from -100 dBm (empty) to -30 dBm (full).
+        Item {
+            id:     signalRow
+            width:  parent.width
+            height: AzTheme.px(AzTheme.groupRowHeight)
 
-            QGCLabel {
-                anchors.centerIn: parent
-                text: qsTr("TELEMETRİYA")
-                font.pointSize: (typeof ScreenTools !== "undefined") ? ScreenTools.mediumFontPointSize : 12
-                font.bold: true
-                color: "white"
+            readonly property bool  _noLink: !telemetryOverlay._activeVehicle || telemetryOverlay._lrssi === 0
+
+            Text {
+                anchors.left:           parent.left
+                anchors.leftMargin:     AzTheme.px(AzTheme.groupPadding)
+                anchors.verticalCenter: parent.verticalCenter
+                text: {
+                    if (signalRow._noLink) return qsTr("Telemetriya yoxdur")
+                    var rssi = telemetryOverlay._lrssi
+                    if (rssi >= -60) return qsTr("Əla siqnal")
+                    if (rssi >= -70) return qsTr("Yaxşı siqnal")
+                    if (rssi >= -80) return qsTr("Orta siqnal")
+                    return qsTr("Zəif siqnal")
+                }
+                color:          signalRow._noLink ? AzTheme.textSecondary : telemetryOverlay.rssiColor(telemetryOverlay._lrssi)
+                font.family:    AzTheme.fontFamily
+                font.weight:    Font.Medium
+                font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
             }
 
             Rectangle {
-                id: closeButton
-                width: Math.max(24, Math.round(telemetryOverlay._fontH * 1.6))
-                height: width
+                id:                     rssiTrack
+                anchors.right:          parent.right
+                anchors.rightMargin:    AzTheme.px(AzTheme.groupPadding)
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.right: parent.right
-                anchors.rightMargin: telemetryOverlay._innerPad
-                color: "transparent"
+                width:                  Math.min(AzTheme.px(240), parent.width * 0.5)
+                height:                 AzTheme.px(10)
+                radius:                 height / 2
+                color:                  AzTheme.pillBottom
+                border.width:           1
+                border.color:           AzTheme.groupBorder
 
-                Text {
-                    anchors.centerIn: parent
-                    text: "×"
-                    color: "#CCCCCC"
-                    font.pixelSize: Math.max(18, Math.round(telemetryOverlay._fontH * 1.35))
-                    font.bold: true
-                }
+                Rectangle {
+                    x:      1
+                    y:      1
+                    height: parent.height - 2
+                    radius: height / 2
+                    width:  signalRow._noLink ? 0
+                                                  : Math.max(0, Math.min(1, (telemetryOverlay._lrssi + 100) / 70)) * (parent.width - 2)
+                    color:  telemetryOverlay.rssiColor(telemetryOverlay._lrssi)
 
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: closePanel()
+                    Behavior on width { NumberAnimation { duration: 500 } }
                 }
             }
         }
+    }
 
-        // ---------------- BODY (scrollable) ----------------
-        Flickable {
-            id: bodyFlick
-            anchors.top: header.bottom
-            anchors.bottom: parent.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.margins: telemetryOverlay._innerPad
-
-            clip: true
-            boundsBehavior: Flickable.StopAtBounds
-            flickableDirection: Flickable.VerticalFlick
-
-            contentWidth: width
-            contentHeight: bodyCol.implicitHeight
-            interactive: contentHeight > height + 2
-
-            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
-            ScrollBar.horizontal: ScrollBar { policy: ScrollBar.AlwaysOff }
-
-            ColumnLayout {
-                id: bodyCol
-                width: bodyFlick.width
-                spacing: telemetryOverlay._gap
-
-                function rssiColor(v) {
-                    if (!telemetryOverlay._activeVehicle || v === 0) return "#CCCCCC"
-                    if (v >= -60) return "#00FF00"
-                    if (v >= -70) return "#FFFF00"
-                    if (v >= -80) return "#FFA500"
-                    return "#FF0000"
-                }
-
-                // ----- helper row template (copy/paste style) -----
-                Rectangle {
-                    Layout.fillWidth: true
-                    height: telemetryOverlay._rowH
-                    radius: 6
-                    color: "#3A3A3A"
-                    border.color: "#4A4A4A"
-
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: telemetryOverlay._innerPad
-
-                        QGCLabel {
-                            text: qsTr("Yerli RSSI:")
-                            color: "white"
-                            Layout.fillWidth: true
-                            elide: Text.ElideRight
-                            maximumLineCount: 1
-                        }
-
-                        QGCLabel {
-                            text: telemetryOverlay._activeVehicle
-                                  ? (telemetryOverlay._activeVehicle.telemetryLRSSI !== 0
-                                     ? telemetryOverlay._activeVehicle.telemetryLRSSI + " dBm"
-                                     : qsTr("Əlaqə yoxdur"))
-                                  : qsTr("Aktiv aparat yoxdur")
-                            color: telemetryOverlay._activeVehicle
-                                   ? bodyCol.rssiColor(telemetryOverlay._activeVehicle.telemetryLRSSI)
-                                   : "#CCCCCC"
-                            font.bold: true
-                        }
-                    }
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    height: telemetryOverlay._rowH
-                    radius: 6
-                    color: "#3A3A3A"
-                    border.color: "#4A4A4A"
-
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: telemetryOverlay._innerPad
-
-                        QGCLabel {
-                            text: qsTr("Uzaq RSSI:")
-                            color: "white"
-                            Layout.fillWidth: true
-                            elide: Text.ElideRight
-                            maximumLineCount: 1
-                        }
-
-                        QGCLabel {
-                            text: telemetryOverlay._activeVehicle
-                                  ? (telemetryOverlay._activeVehicle.telemetryRRSSI !== 0
-                                     ? telemetryOverlay._activeVehicle.telemetryRRSSI + " dBm"
-                                     : qsTr("Əlaqə yoxdur"))
-                                  : qsTr("Aktiv aparat yoxdur")
-                            color: telemetryOverlay._activeVehicle
-                                   ? bodyCol.rssiColor(telemetryOverlay._activeVehicle.telemetryRRSSI)
-                                   : "#CCCCCC"
-                            font.bold: true
-                        }
-                    }
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    height: telemetryOverlay._rowH
-                    radius: 6
-                    color: "#3A3A3A"
-                    border.color: "#4A4A4A"
-
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: telemetryOverlay._innerPad
-
-                        QGCLabel {
-                            text: qsTr("RX Səhvləri:")
-                            color: "white"
-                            Layout.fillWidth: true
-                            elide: Text.ElideRight
-                            maximumLineCount: 1
-                        }
-
-                        QGCLabel {
-                            text: telemetryOverlay._activeVehicle ? telemetryOverlay._activeVehicle.telemetryRXErrors : qsTr("Aktiv aparat yoxdur")
-                            color: "#CCCCCC"
-                            font.bold: true
-                        }
-                    }
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    height: telemetryOverlay._rowH
-                    radius: 6
-                    color: "#3A3A3A"
-                    border.color: "#4A4A4A"
-
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: telemetryOverlay._innerPad
-
-                        QGCLabel {
-                            text: qsTr("Düzəldilən Səhvlər:")
-                            color: "white"
-                            Layout.fillWidth: true
-                            elide: Text.ElideRight
-                            maximumLineCount: 1
-                        }
-
-                        QGCLabel {
-                            text: telemetryOverlay._activeVehicle ? telemetryOverlay._activeVehicle.telemetryFixed : qsTr("Aktiv aparat yoxdur")
-                            color: "#CCCCCC"
-                            font.bold: true
-                        }
-                    }
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    height: telemetryOverlay._rowH
-                    radius: 6
-                    color: "#3A3A3A"
-                    border.color: "#4A4A4A"
-
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: telemetryOverlay._innerPad
-
-                        QGCLabel {
-                            text: qsTr("TX Buffer:")
-                            color: "white"
-                            Layout.fillWidth: true
-                            elide: Text.ElideRight
-                            maximumLineCount: 1
-                        }
-
-                        QGCLabel {
-                            text: telemetryOverlay._activeVehicle ? telemetryOverlay._activeVehicle.telemetryTXBuffer : qsTr("Aktiv aparat yoxdur")
-                            color: "#CCCCCC"
-                            font.bold: true
-                        }
-                    }
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    height: telemetryOverlay._rowH
-                    radius: 6
-                    color: "#3A3A3A"
-                    border.color: "#4A4A4A"
-
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: telemetryOverlay._innerPad
-
-                        QGCLabel {
-                            text: qsTr("Yerli Səs-Küy:")
-                            color: "white"
-                            Layout.fillWidth: true
-                            elide: Text.ElideRight
-                            maximumLineCount: 1
-                        }
-
-                        QGCLabel {
-                            text: telemetryOverlay._activeVehicle
-                                  ? (telemetryOverlay._activeVehicle.telemetryLNoise !== 0
-                                     ? telemetryOverlay._activeVehicle.telemetryLNoise + " dBm"
-                                     : qsTr("Əlaqə yoxdur"))
-                                  : qsTr("Aktiv aparat yoxdur")
-                            color: "#CCCCCC"
-                            font.bold: true
-                        }
-                    }
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    height: telemetryOverlay._rowH
-                    radius: 6
-                    color: "#3A3A3A"
-                    border.color: "#4A4A4A"
-
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: telemetryOverlay._innerPad
-
-                        QGCLabel {
-                            text: qsTr("Uzaq Səs-Küy:")
-                            color: "white"
-                            Layout.fillWidth: true
-                            elide: Text.ElideRight
-                            maximumLineCount: 1
-                        }
-
-                        QGCLabel {
-                            text: telemetryOverlay._activeVehicle
-                                  ? (telemetryOverlay._activeVehicle.telemetryRNoise !== 0
-                                     ? telemetryOverlay._activeVehicle.telemetryRNoise + " dBm"
-                                     : qsTr("Əlaqə yoxdur"))
-                                  : qsTr("Aktiv aparat yoxdur")
-                            color: "#CCCCCC"
-                            font.bold: true
-                        }
-                    }
-                }
-
-                // ✅ RSSI BAR — saxladım, sadəcə Layout ilə
-                Rectangle {
-                    Layout.fillWidth: true
-                    height: telemetryOverlay._rowH
-                    color: "#2A2A2A"
-                    border.color: "#3A3A3A"
-                    border.width: 2
-                    radius: 6
-
-                    Rectangle {
-                        id: rssiBar
-                        anchors.left: parent.left
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        anchors.margins: 2
-
-                        width: {
-                            if (!telemetryOverlay._activeVehicle || telemetryOverlay._activeVehicle.telemetryLRSSI === 0) return 0
-                            var rssi = telemetryOverlay._activeVehicle.telemetryLRSSI
-                            var normalized = Math.max(0, Math.min(1, (rssi + 100) / 70))
-                            return normalized * (parent.width - 4)
-                        }
-
-                        color: {
-                            if (!telemetryOverlay._activeVehicle || telemetryOverlay._activeVehicle.telemetryLRSSI === 0) return "#3A3A3A"
-                            var rssi = telemetryOverlay._activeVehicle.telemetryLRSSI
-                            if (rssi >= -60) return "#00FF00"
-                            if (rssi >= -70) return "#FFFF00"
-                            if (rssi >= -80) return "#FFA500"
-                            return "#FF0000"
-                        }
-                        radius: 4
-
-                        Behavior on width { NumberAnimation { duration: 500 } }
-                    }
-
-                    QGCLabel {
-                        anchors.centerIn: parent
-                        text: {
-                            if (!telemetryOverlay._activeVehicle || telemetryOverlay._activeVehicle.telemetryLRSSI === 0) return qsTr("Telemetri Yoxdur")
-                            var rssi = telemetryOverlay._activeVehicle.telemetryLRSSI
-                            if (rssi >= -60) return qsTr("Əla Siqnal")
-                            if (rssi >= -70) return qsTr("Yaxşı Siqnal")
-                            if (rssi >= -80) return qsTr("Orta Siqnal")
-                            return qsTr("Zəif Siqnal")
-                        }
-                        color: "#2A2A2A"
-                        font.bold: true
-                    }
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: Math.max(60, Math.round(telemetryOverlay._fontH * 3.2))
-                    color: "#3A3A3A"
-                    radius: 6
-
-                    QGCLabel {
-                        anchors.fill: parent
-                        anchors.margins: 10
-                        text: qsTr("Telemetriya RSSI dəyərləri siqnal gücünü göstərir. Daha yüksək dəyərlər daha yaxşıdır.")
-                        wrapMode: Text.WordWrap
-                        color: "white"
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        font.pointSize: 8
-                    }
-                }
-
-                Item { Layout.preferredHeight: 2; Layout.fillWidth: true }
-            }
-        }
+    Text {
+        width:          telemetryOverlay.contentWidth
+        wrapMode:       Text.WordWrap
+        text:           qsTr("Telemetriya RSSI dəyərləri siqnal gücünü göstərir. Daha yüksək dəyərlər daha yaxşıdır.")
+        color:          AzTheme.textSecondary
+        font.family:    AzTheme.fontFamily
+        font.pixelSize: AzTheme.fontPx(13)
     }
 }

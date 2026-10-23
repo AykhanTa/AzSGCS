@@ -34,11 +34,17 @@ Item {
 
 
     property bool _pendingOpenStatusOverlay: false
+    property Item _statusAnchorItem: null
 
     property bool flightModePopupVisible: false
     property Item flightModePopupAnchorItem: null
 
     function openFlightModePopup(anchorItem) {
+        if (flightModePopupVisible) {
+            closeFlightModePopup()
+            return
+        }
+
         const loaderExists = typeof settingsLoader !== "undefined" && settingsLoader !== null
         if (loaderExists) {
             settingsLoader.source = ""
@@ -453,7 +459,7 @@ Item {
         return ""
     }
 
-    function openMessageOverlay() {
+    function openMessageOverlay(anchorItem) {
         if (topStatusPanel.flightModePopupVisible) {
             topStatusPanel.closeFlightModePopup()
         }
@@ -473,8 +479,10 @@ Item {
 
         topStatusPanel.hasNewMessages = false
         topStatusPanel._pendingOpenStatusOverlay = true
+        topStatusPanel._statusAnchorItem = anchorItem ? anchorItem : null
 
         if (statusMessageLoader.item && statusMessageLoader.item.open) {
+            statusMessageLoader.item.anchorItem = topStatusPanel._statusAnchorItem
             statusMessageLoader.item.open()
             topStatusPanel._pendingOpenStatusOverlay = false
         } else {
@@ -655,30 +663,26 @@ Item {
         }
     }
 
-    function openChecklist() {
+    function openChecklist(anchorItem) {
+        const loaderExists = (typeof settingsLoader !== "undefined") && settingsLoader !== null
+        if (!loaderExists) return
+
+        const src = _uiQrcBase + "TopStatusPanel_Checklist.qml"
+
+        if (settingsLoader.source && settingsLoader.source.toString().includes("TopStatusPanel_Checklist.qml")) {
+            settingsLoader.source = ""
+            return
+        }
 
         if (_veh) {
             _veh.checkListState = Vehicle.CheckListFailed
         }
 
-        var comp = Qt.createComponent("qrc:/qml/QGroundControl/FlightDisplay/FlyViewPreFlightChecklistPopup.qml")
-
-        function createPopup() {
-            var obj = comp.createObject(_mw ? _mw : topStatusPanel)
-            if (obj && obj.open) {
-                obj.open()
-            }
-        }
-
-        if (comp.status === Component.Ready) {
-            createPopup()
-        } else {
-            comp.statusChanged.connect(function() {
-                if (comp.status === Component.Ready) {
-                    createPopup()
-                }
-            })
-        }
+        settingsLoader.setSource(src, {
+            panelVisible: true,
+            anchorItem: anchorItem,
+            topPanelItem: topStatusPanel
+        })
     }
 
     readonly property var _activeVeh: QGroundControl.multiVehicleManager.activeVehicle
@@ -817,12 +821,46 @@ Item {
     readonly property string _settingsSource:     _hasSettingsLoader && settingsLoader.source ? settingsLoader.source.toString() : ""
     readonly property bool   _settingsPanelShown: _hasSettingsLoader && settingsLoader.item ? settingsLoader.item.panelVisible !== false : false
 
+    // The settings loader file names each card's panels live in (its settings included).
+    readonly property var _settingsFilesOf: ({
+        "checklist": "TopStatusPanel_Checklist",
+        "flightMode": "TopStatusPanel_UcusRejimi",
+        "rcSignal":   "TopStatusPanel_RCSignal",
+        "telemetry":  "TopStatusPanel_Telemetry",
+        "battery":    "TopStatusPanel_Battery",
+        "gps":        "TopStatusPanel_GPS"
+    })
+
+    // Only one card panel is open at a time: before a card toggles its own panel, every
+    // other card's panel closes.
+    function closeOtherPanels(blockId) {
+        if (blockId !== "status" && statusMessageLoader.item && statusMessageLoader.item.visible) {
+            statusMessageLoader.item.close()
+        }
+        if (blockId !== "flightMode" && flightModePopupVisible) {
+            closeFlightModePopup()
+        }
+        if (_hasSettingsLoader && _settingsSource !== "") {
+            var keep = _settingsFilesOf[blockId]
+            if (!keep || _settingsSource.indexOf(keep) < 0) {
+                settingsLoader.source = ""
+            }
+        }
+        if (blockId !== "vehicle" && vehicleSelectorLoader.item && vehicleSelectorLoader.item.panelVisible) {
+            vehicleSelectorLoader.item.panelVisible = false
+        }
+        if (blockId !== "udpPosition" && udpPanelLoader.item && udpPanelLoader.item.panelVisible) {
+            udpPanelLoader.item.panelVisible = false
+        }
+    }
+
     function blockPanelOpen(blockId) {
         function settingsShows(fileName) {
             return _settingsPanelShown && _settingsSource.indexOf(fileName) >= 0
         }
         switch (blockId) {
         case "status":      return !!(statusMessageLoader.item && statusMessageLoader.item.visible)
+        case "checklist":   return settingsShows("TopStatusPanel_Checklist")
         case "flightMode":  return flightModePopupVisible || settingsShows("TopStatusPanel_UcusRejimi")
         case "rcSignal":    return settingsShows("TopStatusPanel_RCSignal")
         case "telemetry":   return settingsShows("TopStatusPanel_Telemetry")
@@ -1129,9 +1167,7 @@ Item {
                 onClicked: {
                     if (!block.isClickable) return
 
-                    if (block.blockId !== "flightMode" && topStatusPanel.flightModePopupVisible) {
-                        topStatusPanel.closeFlightModePopup()
-                    }
+                    topStatusPanel.closeOtherPanels(block.blockId)
 
                     if (block.blockId === "disconnect") {
                         topStatusPanel.disconnectVehicle()
@@ -1139,7 +1175,7 @@ Item {
                     }
 
                     if (block.blockId === "status") {
-                        topStatusPanel.openMessageOverlay()
+                        topStatusPanel.openMessageOverlay(block)
                         return
                     }
 
@@ -1149,7 +1185,7 @@ Item {
                     }
 
                     if (block.blockId === "checklist") {
-                        topStatusPanel.openChecklist()
+                        topStatusPanel.openChecklist(block)
                         return
                     }
 
@@ -1573,6 +1609,7 @@ Item {
             if (item.hasOwnProperty("statusPanelItem")) {
                 item.statusPanelItem = topStatusPanel
             }
+            item.anchorItem = topStatusPanel._statusAnchorItem
 
             if (topStatusPanel._pendingOpenStatusOverlay && item.open) {
                 item.open()
@@ -1619,8 +1656,8 @@ Item {
 
         property var anchorItemRef: null
 
-        // ÖNƏMLİ: anchors.fill YOX — panel öz ölçüsündə olsun
         parent: (_mw && _mw.contentItem) ? _mw.contentItem : topStatusPanel
+        anchors.fill: parent
 
         active:      false
         asynchronous: false
@@ -1642,6 +1679,7 @@ Item {
         property var anchorItemRef: null
 
         parent: (_mw && _mw.contentItem) ? _mw.contentItem : topStatusPanel
+        anchors.fill: parent
 
         active:       false
         asynchronous: false

@@ -22,6 +22,12 @@ Column  {
     property bool   passed: false
     property bool   failed: false
 
+    // Every button of the group takes this width. PreFlightCheckList sets it to its own
+    // width when the list is given one; the default is the old fixed button width.
+    property real   contentWidth: ScreenTools.defaultFontPixelWidth * (_compact ? 29 : 40)
+
+    width: contentWidth
+
     // Düymələrlə eyni yığcamlıq eşiyi, yoxsa aralıqlar tək başına yer yeyir.
     readonly property bool _compact: ScreenTools.isShortScreen
 
@@ -49,24 +55,53 @@ Column  {
         }
     }
 
-    SectionHeader {
-        id:             header
-        anchors.left:   parent.left
-        anchors.right:  parent.right
-        // Üç qrup başlığı kiçik ekranda siyahı hündürlüyünün dörddə birini
-        // yeyirdi. Toxunma sahəsi hələ də rahat qalacaq qədər saxlanılıb.
-        headerHeight:   checkGroup._compact ? Math.max(32, ScreenTools.defaultFontPixelHeight * 1.7)
-                                            : Math.max(40, ScreenTools.defaultFontPixelHeight * 2.2)
-        _sectionSpacer: ScreenTools.defaultFontPixelWidth * (checkGroup._compact ? 0.25 : 0.5)
-        // Qrup adları cümlədir ("Zəhmət olmasa aparatı burada işə salın") və dar panelə
-        // sığmayanda kəsilirdi.
-        shrinkToFit:    true
-        text:           name + (passed ? qsTr(" (passed)") : "")
-        color:          failed ? qgcPal.statusFailedText : (passed ? qgcPal.statusPassedText : qgcPal.statusPendingText)
+    // Group heading: the name in the state colour and a chevron; a click folds it.
+    Item {
+        id:     header
+        width:  checkGroup.width
+        height: Math.max(AzTheme.px(40), headerText.implicitHeight + AzTheme.px(12))
+
+        property bool checked: true
+
+        Text {
+            id:                     headerText
+            anchors.left:           parent.left
+            anchors.right:          headerChevron.left
+            anchors.rightMargin:    AzTheme.px(8)
+            anchors.verticalCenter: parent.verticalCenter
+            // Qrup adları cümlədir ("Zəhmət olmasa aparatı burada işə salın") və dar
+            // panelə sığmayanda kəsilirdi.
+            wrapMode:               Text.WordWrap
+            text:                   name + (passed ? qsTr(" (passed)") : "")
+            color:                  failed ? AzTheme.statusRed : (passed ? AzTheme.statusGreen : AzTheme.textCard)
+            font.family:            AzTheme.fontFamily
+            font.weight:            Font.Medium
+            font.pixelSize:         AzTheme.fontPx(16)
+        }
+
+        QGCColoredImage {
+            id:                     headerChevron
+            anchors.right:          parent.right
+            anchors.rightMargin:    AzTheme.px(4)
+            anchors.verticalCenter: parent.verticalCenter
+            width:                  AzTheme.px(20)
+            height:                 width
+            sourceSize.height:      height
+            source:                 "qrc:/res/AZSHIELD_ICON/v2/popup_chevron.svg"
+            color:                  AzTheme.textCard
+            rotation:               header.checked ? 180 : 0
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            cursorShape:  Qt.PointingHandCursor
+            onClicked:    header.checked = !header.checked
+        }
     }
 
     Column {
         id:         innerColumn
+        width:      checkGroup.width
         spacing:    ScreenTools.defaultFontPixelHeight * (checkGroup._compact ? 0.28 : 0.5)
         visible:    header.checked
 

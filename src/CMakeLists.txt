@@ -44,6 +44,7 @@ qt_add_qml_module(QGroundControlModule
     QML_FILES UI/SideMenu_Tehlukesizlik.qml
     QML_FILES UI/TopStatusMessage.qml
     QML_FILES UI/TopStatusPanel_Battery.qml
+    QML_FILES UI/TopStatusPanel_Checklist.qml
     QML_FILES UI/TopStatusPanel_Battery_Settings.qml
     QML_FILES UI/TopStatusPanel_GPS_Settings.qml
     QML_FILES UI/TopStatusPanel_RCSignal.qml

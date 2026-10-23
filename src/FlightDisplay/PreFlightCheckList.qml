@@ -45,6 +45,9 @@ ColumnLayout {
     property bool allChecksPassed: false
     property var  vehicleCopy:     globals.activeVehicle
 
+    // Width for the groups and their buttons; 0 keeps their own fixed width.
+    property real listWidth: 0
+
     function restartChecklist() {
         delayedGroupPassed.stop()
 
@@ -172,26 +175,20 @@ ColumnLayout {
     // Header/title of checklist
     RowLayout {
         Layout.fillWidth: true
-        height:           ScreenTools.defaultFontPixelHeight * (checkListRoot._compact ? 1.15 : 1.75)
         spacing:          0
 
-        QGCLabel {
+        Text {
             Layout.fillWidth: true
-            text:             allChecksPassed ? qsTr("(Keçdi)") : qsTr("Davam edir")
-            font.pointSize:   checkListRoot._compact ? ScreenTools.defaultFontPointSize : ScreenTools.mediumFontPointSize
+            text:             allChecksPassed ? qsTr("Keçdi") : qsTr("Davam edir")
+            color:            allChecksPassed ? AzTheme.statusGreen : AzTheme.textSecondary
+            font.family:      AzTheme.fontFamily
+            font.pixelSize:   AzTheme.fontPx(AzTheme.popupTextSize)
         }
 
-        QGCButton {
-            width:            ScreenTools.defaultFontPixelHeight * (checkListRoot._compact ? 1.0 : 1.2)
-            height:           ScreenTools.defaultFontPixelHeight * (checkListRoot._compact ? 1.0 : 1.2)
+        AzIconButton {
             Layout.alignment: Qt.AlignVCenter
+            iconSource:       "/qmlimages/MapSyncBlack.svg"
             onClicked:        restartChecklist()
-
-            QGCColoredImage {
-                source:       "/qmlimages/MapSyncBlack.svg"
-                color:        qgcPal.buttonText
-                anchors.fill: parent
-            }
         }
     }
 
@@ -199,5 +196,13 @@ ColumnLayout {
     Repeater {
         id:    checkListRepeater
         model: modelContainer.item ? modelContainer.item.model : null
+
+        onItemAdded: (index, item) => {
+            if (item.contentWidth === undefined) {
+                return
+            }
+            var ownWidth = item.contentWidth
+            item.contentWidth = Qt.binding(function() { return checkListRoot.listWidth > 0 ? checkListRoot.listWidth : ownWidth })
+        }
     }
 }

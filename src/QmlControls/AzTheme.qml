@@ -89,4 +89,39 @@ QtObject {
     readonly property color statusOrange:    "#FF9F1A"
     readonly property color statusYellow:    "#FFD43B"
     readonly property color modeChangeGlow:  Qt.rgba(238 / 255, 204 / 255, 68 / 255, 0.30)
+
+    // ---- Top bar panels (the "Status" and "RC Siqnalı" mock-ups) ----
+    // No CSS for these yet: lengths are measured on the mock-ups, colours sampled. The
+    // card uses the panel gradient; groups are flat #191D20 boxes split by 1 px lines.
+    readonly property real  popupWidth:      578
+    readonly property real  popupMaxHeight:  640
+    readonly property real  popupRadius:     12
+    readonly property real  popupPadding:    20
+    readonly property real  popupGap:        16      // between the header, sections and groups
+    readonly property real  popupDrop:       8       // below the top bar
+    readonly property color popupShadow:     Qt.rgba(0, 0, 0, 0.35)
+    readonly property real  popupTitleSize:  18
+    readonly property real  popupTextSize:   14
+    readonly property color groupFill:       "#191D20"
+    readonly property color groupBorder:     "#353A3F"
+    readonly property real  groupRadius:     8
+    readonly property real  groupRowHeight:  56
+    readonly property real  groupLineHeight: 34      // message, problem and sensor lines
+    readonly property real  groupPadding:    20
+    readonly property color pillTop:         "#171A1D"
+    readonly property color pillBottom:      "#0F1214"
+    readonly property real  pillWidth:       116
+    readonly property real  pillHeight:      36
+    readonly property color buttonTop:       "#2A2D31"
+    readonly property color buttonBottom:    "#1F2225"
+    readonly property color buttonBorder:    "#3E4347"
+    readonly property real  buttonHeight:    40
+    readonly property color dangerTop:       "#5A1F24"
+    readonly property color dangerBottom:    "#3A1418"
+    readonly property color dangerBorder:    "#8C2A31"
+    // Problems and messages: errors are statusRed, warnings this yellow, and the
+    // parameter link in a problem's description the pale one.
+    readonly property color warningText:     "#E3D21A"
+    readonly property color linkText:        "#FFFABF"
+    readonly property color mutedText:       "#6F757B"
 }

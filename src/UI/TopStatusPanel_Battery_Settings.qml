@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 
 import QGroundControl
@@ -9,146 +8,25 @@ import QGroundControl.FactControls
 /// Batareya tənzimləmələri — göstərilən dəyər, rəngləmə hədləri və aşağı batareya failsafe.
 /// Məzmun BatteryIndicator.qml / PX4BatteryIndicator.qml ilə eynidir, yalnız
 /// TopStatusPanel-in öz panel dizaynına salınıb.
-Rectangle {
+AzPopupFrame {
     id: root
 
-    anchors.fill: parent
-    color: "#00000040"
-    z: 100
-    visible: true
+    title: qsTr("Batareya Tənzimləmələri")
 
-    // TopStatusPanel-dən ötürülənlər
-    property Item anchorItem: null
-    property Item topPanelItem: null
+    onCloseRequested: close()
 
     property var _activeVehicle:   QGroundControl.multiVehicleManager.activeVehicle
     property var _batterySettings: QGroundControl.settingsManager.batteryIndicatorSettings
 
-    readonly property string _azIconBase: "qrc:/res/AZSHIELD_ICON/"
-
-    readonly property bool _compact: (width < 900) || (height < 650)
-    readonly property real _m:       Math.max(8, ScreenTools.defaultFontPixelHeight * (_compact ? 0.65 : 0.85))
-    readonly property real _rowH:    Math.max(40, ScreenTools.defaultFontPixelHeight * 2.2)
-    readonly property real _ctrlW:   Math.max(120, Math.min(210, panel.width * 0.40))
+    readonly property real _groupPad: AzTheme.px(AzTheme.groupPadding)
 
     FactPanelController { id: controller }
-
-    function _clamp(v, lo, hi) { return Math.max(lo, Math.min(v, hi)) }
-
-    function reposition() {
-        var gap    = Math.round(_m * 1.2)
-        var margin = Math.round(_m * 1.2)
-
-        var x = (root.width  - panel.width)  / 2
-        var y = (root.height - panel.height) / 2
-
-        if (anchorItem) {
-            var p = anchorItem.mapToItem(root, 0, anchorItem.height)
-            x = p.x + anchorItem.width / 2 - panel.width / 2
-            y = p.y + gap
-        } else if (topPanelItem) {
-            y = topPanelItem.height + gap
-        }
-
-        panel.x = _clamp(x, margin, root.width  - panel.width  - margin)
-        panel.y = _clamp(y, margin, root.height - panel.height - margin)
-    }
 
     function close() {
         if (typeof settingsLoader !== "undefined" && settingsLoader) {
             settingsLoader.source = ""
         } else {
-            root.visible = false
-        }
-    }
-
-    Component.onCompleted: Qt.callLater(reposition)
-
-    onWidthChanged:      Qt.callLater(reposition)
-    onHeightChanged:     Qt.callLater(reposition)
-    onAnchorItemChanged: Qt.callLater(reposition)
-
-    Connections {
-        target: panel
-        function onHeightChanged() { Qt.callLater(root.reposition) }
-    }
-
-    // Panel açıq olduqda arxadakı xəritəyə heç bir mouse hadisəsi keçməməlidir
-    MouseArea {
-        anchors.fill: parent
-        hoverEnabled: true
-        acceptedButtons: Qt.AllButtons
-        preventStealing: true
-        onWheel: (wheel) => { wheel.accepted = true }
-        onPressed: (mouse) => { mouse.accepted = true }
-        onReleased: (mouse) => { mouse.accepted = true }
-        onClicked: (mouse) => {
-            mouse.accepted = true
-            if (mouse.button === Qt.LeftButton) {
-                root.close()
-            }
-        }
-    }
-
-    // ==========================================================
-    // Təkrar istifadə olunan hissələr
-    // ==========================================================
-
-    /// Etiket solda, kontrol sağda
-    component SettingRow: Rectangle {
-        id: srow
-
-        property alias label:  srowLabel.text
-        property real  pad:    10
-        property real  ctrlW:  150
-        property real  rowH:   40
-        default property alias content: srowContent.data
-
-        implicitWidth:  parent ? parent.width : 0
-        implicitHeight: rowH
-        radius: 8
-        color:  "#2A2A2A"
-
-        QGCLabel {
-            id: srowLabel
-            anchors.left:           parent.left
-            anchors.leftMargin:     srow.pad
-            anchors.right:          srowContent.left
-            anchors.rightMargin:    srow.pad * 0.6
-            anchors.verticalCenter: parent.verticalCenter
-            color:                  "#FFFFFF"
-            elide:                  Text.ElideRight
-        }
-
-        Item {
-            id: srowContent
-            anchors.right:          parent.right
-            anchors.rightMargin:    srow.pad
-            anchors.verticalCenter: parent.verticalCenter
-            width:                  srow.ctrlW
-            height:                 Math.max(26, srow.rowH - 12)
-        }
-    }
-
-    /// Bölmə başlığı
-    component GroupTitle: RowLayout {
-        property alias title: gtLabel.text
-
-        Layout.fillWidth: true
-        spacing: 8
-
-        Rectangle {
-            width:  3
-            height: gtLabel.implicitHeight
-            radius: 1.5
-            color:  "#00C853"
-        }
-
-        QGCLabel {
-            id:               gtLabel
-            Layout.fillWidth: true
-            color:            "#FFFFFF"
-            font.bold:        true
+            root.panelVisible = false
         }
     }
 
@@ -159,330 +37,206 @@ Rectangle {
         property string caption:    ""
         property var    thresholdFact: null
 
-        spacing: Math.max(6, ScreenTools.defaultFontPixelHeight * 0.4)
+        spacing: AzTheme.px(8)
 
         QGCColoredImage {
             Layout.alignment:       Qt.AlignHCenter
-            Layout.preferredWidth:  Math.max(36, ScreenTools.defaultFontPixelHeight * 2.4)
+            Layout.preferredWidth:  AzTheme.px(36)
             Layout.preferredHeight: Layout.preferredWidth
             source:                 iconSource
             color:                  iconColor
             fillMode:               Image.PreserveAspectFit
         }
 
-        QGCLabel {
+        Text {
             Layout.alignment:       Qt.AlignHCenter
-            Layout.preferredHeight: Math.max(28, ScreenTools.defaultFontPixelHeight * 1.7)
+            Layout.preferredHeight: AzTheme.px(32)
             text:                   caption
-            color:                  "#E4E4E4"
+            color:                  AzTheme.textSecondary
             verticalAlignment:      Text.AlignVCenter
             visible:                thresholdFact === null
+            font.family:            AzTheme.fontFamily
+            font.pixelSize:         AzTheme.fontPx(AzTheme.popupTextSize)
         }
 
         FactTextField {
             Layout.alignment:       Qt.AlignHCenter
-            Layout.preferredWidth:  Math.max(56, ScreenTools.defaultFontPixelWidth * 6.5)
-            Layout.preferredHeight: Math.max(28, ScreenTools.defaultFontPixelHeight * 1.7)
+            Layout.preferredWidth:  AzTheme.px(64)
+            Layout.preferredHeight: AzTheme.px(32)
             fact:                   thresholdFact
             visible:                thresholdFact !== null
         }
     }
 
-    // ==========================================================
-    // Panel
-    // ==========================================================
-    Rectangle {
-        id: panel
+    // ---------------- Göstərilən dəyər ----------------
+    AzSectionTitle { text: qsTr("Batareya Göstəricisi") }
 
-        width:  Math.min(_compact ? 480 : 560, root.width - Math.round(_m * 4))
+    AzGroup {
+        width: root.contentWidth
 
-        // Hündürlük məzmuna görədir — altda boş sahə qalmasın
-        readonly property real _wantedH: titleBar.height + contentCol.implicitHeight + _m * 2
-        height: Math.min(_wantedH, root.height - Math.round(_m * 4))
+        AzSettingRow {
+            label: qsTr("Göstərilən dəyər")
 
-        color:  "#2A2A2A"
-        radius: 12
-        border.width: 1
-        border.color: "#6E6E6E"
-        clip:   true
-
-        // Panelin özünə klik onu bağlamasın və arxaya da keçməsin
-        MouseArea {
-            anchors.fill: parent
-            hoverEnabled: true
-            acceptedButtons: Qt.AllButtons
-            preventStealing: true
-            onWheel: (wheel) => { wheel.accepted = true }
-            onPressed: (mouse) => { mouse.accepted = true }
-            onReleased: (mouse) => { mouse.accepted = true }
-            onClicked: (mouse) => { mouse.accepted = true }
+            FactComboBox {
+                anchors.fill:   parent
+                fact:           _batterySettings.valueDisplay
+                indexModel:     false
+                sizeToContents: false
+            }
         }
 
-        // ================= Başlıq =================
+        // Rəng pillələri — 100% / həd1 / həd2 / aşağı / kritik
         Item {
-            id: titleBar
-            width: parent.width
-            height: Math.max(44, ScreenTools.defaultFontPixelHeight * 2.4)
-            anchors.top: parent.top
+            width:  parent.width
+            height: colorSteps.implicitHeight + colorCaption.height + 3 * root._groupPad
 
-            QGCLabel {
-                anchors.centerIn: parent
-                text:             qsTr("Batareya Tənzimləmələri")
-                color:            "#FFFFFF"
-                font.bold:        true
+            Text {
+                id:             colorCaption
+                x:              root._groupPad
+                y:              root._groupPad
+                text:           qsTr("Rəngləmə")
+                color:          AzTheme.textSecondary
+                font.family:    AzTheme.fontFamily
+                font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
             }
 
-            Rectangle {
-                width:  28; height: 28
-                radius: width / 2
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.right:          parent.right
-                anchors.rightMargin:    10
-                color: closeMouse.containsMouse ? "#4A4848" : "transparent"
+            RowLayout {
+                id:      colorSteps
+                x:       root._groupPad
+                y:       colorCaption.y + colorCaption.height + root._groupPad
+                width:   parent.width - 2 * root._groupPad
+                spacing: AzTheme.px(12)
 
-                Behavior on color { ColorAnimation { duration: 110 } }
-
-                Image {
-                    source:  _azIconBase + "TopStatusPanel_Cixis.svg"
-                    width:   18; height: 18
-                    anchors.centerIn: parent
-                    fillMode: Image.PreserveAspectFit
+                ColorStep {
+                    Layout.fillWidth: true
+                    iconSource: "/qmlimages/BatteryGreen.svg"
+                    iconColor:  qgcPal.colorGreen
+                    caption:    qsTr("100%")
                 }
 
-                MouseArea {
-                    id: closeMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape:  Qt.PointingHandCursor
-                    onClicked:    root.close()
+                ColorStep {
+                    Layout.fillWidth: true
+                    iconSource:    "/qmlimages/BatteryYellowGreen.svg"
+                    iconColor:     qgcPal.colorYellowGreen
+                    thresholdFact: _batterySettings.threshold1
+                }
+
+                ColorStep {
+                    Layout.fillWidth: true
+                    iconSource:    "/qmlimages/BatteryYellow.svg"
+                    iconColor:     qgcPal.colorYellow
+                    thresholdFact: _batterySettings.threshold2
+                }
+
+                ColorStep {
+                    Layout.fillWidth: true
+                    iconSource: "/qmlimages/BatteryOrange.svg"
+                    iconColor:  qgcPal.colorOrange
+                    caption:    qsTr("Aşağı")
+                }
+
+                ColorStep {
+                    Layout.fillWidth: true
+                    iconSource: "/qmlimages/BatteryCritical.svg"
+                    iconColor:  qgcPal.colorRed
+                    caption:    qsTr("Kritik")
                 }
             }
+        }
+    }
 
-            Rectangle {
-                anchors.left:        parent.left
-                anchors.right:       parent.right
-                anchors.bottom:      parent.bottom
-                anchors.leftMargin:  _m
-                anchors.rightMargin: _m
-                height: 1
-                color:  "#4A4A4A"
+    // ---------------- Aşağı batareya failsafe ----------------
+    AzSectionTitle {
+        text:    qsTr("Aşağı Batareya Failsafe")
+        visible: !!_activeVehicle
+    }
+
+    AzGroup {
+        width:   root.contentWidth
+        visible: !!_activeVehicle
+
+        AzSettingRow {
+            label:   qsTr("Təyyarə Hərəkəti")
+            visible: lowBatActCombo.fact !== null
+
+            FactComboBox {
+                id:             lowBatActCombo
+                anchors.fill:   parent
+                fact:           controller.getParameterFact(-1, "COM_LOW_BAT_ACT", false)
+                indexModel:     false
+                sizeToContents: false
             }
         }
 
-        QGCFlickable {
-            id: contentFlick
-            anchors.top:        titleBar.bottom
-            anchors.left:       parent.left
-            anchors.right:      parent.right
-            anchors.bottom:     parent.bottom
-            anchors.margins:    _m
-            clip:               true
-            flickableDirection: Flickable.VerticalFlick
-            contentWidth:       width
-            contentHeight:      contentCol.implicitHeight
-
-            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+        Item {
+            width:   parent.width
+            height:  failsafeSliders.implicitHeight + 2 * root._groupPad
+            visible: lowBatActCombo.fact !== null
 
             ColumnLayout {
-                id:      contentCol
-                width:   contentFlick.width
-                spacing: Math.max(8, _m * 0.8)
+                id:      failsafeSliders
+                x:       root._groupPad
+                y:       root._groupPad
+                width:   parent.width - 2 * root._groupPad
+                spacing: AzTheme.px(12)
 
-                // ---------------- Göstərilən dəyər ----------------
-                GroupTitle { title: qsTr("Batareya Göstəricisi") }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: displayCol.implicitHeight + _m * 1.4
-                    radius: 10
-                    color:  "#1E1E1E"
-                    border.width: 1
-                    border.color: "#4A4A4A"
-
-                    ColumnLayout {
-                        id: displayCol
-                        anchors.left:    parent.left
-                        anchors.right:   parent.right
-                        anchors.top:     parent.top
-                        anchors.margins: _m * 0.7
-                        spacing:         Math.max(6, _m * 0.6)
-
-                        SettingRow {
-                            Layout.fillWidth:       true
-                            Layout.preferredHeight: _rowH
-                            label: qsTr("Göstərilən dəyər")
-                            pad:   _m
-                            ctrlW: _ctrlW
-                            rowH:  _rowH
-
-                            FactComboBox {
-                                anchors.fill:   parent
-                                fact:           _batterySettings.valueDisplay
-                                indexModel:     false
-                                sizeToContents: false
-                            }
-                        }
-
-                        QGCLabel {
-                            Layout.fillWidth: true
-                            Layout.topMargin: 2
-                            text:  qsTr("Rəngləmə")
-                            color: "#B9B9B9"
-                        }
-
-                        // Rəng pillələri — 100% / həd1 / həd2 / aşağı / kritik
-                        RowLayout {
-                            Layout.fillWidth: true
-                            Layout.topMargin: Math.max(4, _m * 0.3)
-                            spacing:          Math.max(10, _m)
-
-                            ColorStep {
-                                Layout.fillWidth: true
-                                iconSource: "/qmlimages/BatteryGreen.svg"
-                                iconColor:  qgcPal.colorGreen
-                                caption:    qsTr("100%")
-                            }
-
-                            ColorStep {
-                                Layout.fillWidth: true
-                                iconSource:    "/qmlimages/BatteryYellowGreen.svg"
-                                iconColor:     qgcPal.colorYellowGreen
-                                thresholdFact: _batterySettings.threshold1
-                            }
-
-                            ColorStep {
-                                Layout.fillWidth: true
-                                iconSource:    "/qmlimages/BatteryYellow.svg"
-                                iconColor:     qgcPal.colorYellow
-                                thresholdFact: _batterySettings.threshold2
-                            }
-
-                            ColorStep {
-                                Layout.fillWidth: true
-                                iconSource: "/qmlimages/BatteryOrange.svg"
-                                iconColor:  qgcPal.colorOrange
-                                caption:    qsTr("Aşağı")
-                            }
-
-                            ColorStep {
-                                Layout.fillWidth: true
-                                iconSource: "/qmlimages/BatteryCritical.svg"
-                                iconColor:  qgcPal.colorRed
-                                caption:    qsTr("Kritik")
-                            }
-                        }
-                    }
+                FactSlider {
+                    Layout.fillWidth:  true
+                    label:             qsTr("Xəbərdarlıq Səviyyəsi")
+                    fact:              controller.getParameterFact(-1, "BAT_LOW_THR", false)
+                    visible:           fact !== null
+                    majorTickStepSize: 5
                 }
 
-                // ---------------- Aşağı batareya failsafe ----------------
-                GroupTitle {
-                    title:   qsTr("Aşağı Batareya Failsafe")
-                    visible: _activeVehicle
+                FactSlider {
+                    Layout.fillWidth:  true
+                    label:             qsTr("Kritik Səviyyə")
+                    fact:              controller.getParameterFact(-1, "BAT_CRIT_THR", false)
+                    visible:           fact !== null
+                    majorTickStepSize: 5
                 }
 
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: failsafeCol.implicitHeight + _m * 1.4
-                    radius: 10
-                    color:  "#1E1E1E"
-                    border.width: 1
-                    border.color: "#4A4A4A"
-                    visible: _activeVehicle
-
-                    ColumnLayout {
-                        id: failsafeCol
-                        anchors.left:    parent.left
-                        anchors.right:   parent.right
-                        anchors.top:     parent.top
-                        anchors.margins: _m * 0.7
-                        spacing:         Math.max(6, _m * 0.6)
-
-                        SettingRow {
-                            Layout.fillWidth:       true
-                            Layout.preferredHeight: _rowH
-                            label: qsTr("Təyyarə Hərəkəti")
-                            pad:   _m
-                            ctrlW: _ctrlW
-                            rowH:  _rowH
-                            visible: lowBatActCombo.fact !== null
-
-                            FactComboBox {
-                                id:             lowBatActCombo
-                                anchors.fill:   parent
-                                fact:           controller.getParameterFact(-1, "COM_LOW_BAT_ACT", false)
-                                indexModel:     false
-                                sizeToContents: false
-                            }
-                        }
-
-                        FactSlider {
-                            Layout.fillWidth:  true
-                            label:             qsTr("Xəbərdarlıq Səviyyəsi")
-                            fact:              controller.getParameterFact(-1, "BAT_LOW_THR", false)
-                            visible:           fact !== null
-                            majorTickStepSize: 5
-                        }
-
-                        FactSlider {
-                            Layout.fillWidth:  true
-                            label:             qsTr("Kritik Səviyyə")
-                            fact:              controller.getParameterFact(-1, "BAT_CRIT_THR", false)
-                            visible:           fact !== null
-                            majorTickStepSize: 5
-                        }
-
-                        FactSlider {
-                            Layout.fillWidth:  true
-                            label:             qsTr("Fövqəladə Səviyyə")
-                            fact:              controller.getParameterFact(-1, "BAT_EMERGEN_THR", false)
-                            visible:           fact !== null
-                            majorTickStepSize: 5
-                        }
-
-                        QGCLabel {
-                            Layout.fillWidth: true
-                            text:     qsTr("Failsafe parametrləri təyyarədən oxunmayıb.")
-                            color:    "#B9B9B9"
-                            wrapMode: Text.WordWrap
-                            visible:  lowBatActCombo.fact === null
-                        }
-                    }
+                FactSlider {
+                    Layout.fillWidth:  true
+                    label:             qsTr("Fövqəladə Səviyyə")
+                    fact:              controller.getParameterFact(-1, "BAT_EMERGEN_THR", false)
+                    visible:           fact !== null
+                    majorTickStepSize: 5
                 }
+            }
+        }
 
-                // ---------------- Enerji konfiqurasiyası ----------------
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: _rowH
-                    Layout.bottomMargin: _m
-                    radius: 10
-                    color:  "#1E1E1E"
-                    border.width: 1
-                    border.color: "#4A4A4A"
-                    visible: _activeVehicle
+        Text {
+            x:                 root._groupPad
+            width:             parent.width - 2 * root._groupPad
+            height:            implicitHeight + 2 * root._groupPad
+            verticalAlignment: Text.AlignVCenter
+            text:              qsTr("Failsafe parametrləri təyyarədən oxunmayıb.")
+            color:             AzTheme.textSecondary
+            wrapMode:          Text.WordWrap
+            visible:           lowBatActCombo.fact === null
+            font.family:       AzTheme.fontFamily
+            font.pixelSize:    AzTheme.fontPx(AzTheme.popupTextSize)
+        }
+    }
 
-                    RowLayout {
-                        anchors.fill:        parent
-                        anchors.leftMargin:  _m
-                        anchors.rightMargin: _m
-                        spacing:             _m * 0.6
+    // ---------------- Enerji konfiqurasiyası ----------------
+    AzGroup {
+        width:   root.contentWidth
+        visible: !!_activeVehicle
 
-                        QGCLabel {
-                            Layout.fillWidth: true
-                            text:  qsTr("Təyyarə Enerjisi")
-                            color: "#FFFFFF"
-                            elide: Text.ElideRight
-                        }
+        AzSettingRow {
+            label:        qsTr("Təyyarə Enerjisi")
+            controlWidth: configureButton.implicitWidth
 
-                        QGCButton {
-                            text: qsTr("Konfiqurasiya et")
-                            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                            onClicked: {
-                                root.close()
-                                // Aparat Qurğusu → Enerji (menyu idx 6)
-                                mainWindow.showVehicleSetupPage(6)
-                            }
-                        }
-                    }
+            AzButton {
+                id:        configureButton
+                height:    parent.height
+                text:      qsTr("Konfiqurasiya et")
+                onClicked: {
+                    root.close()
+                    // Aparat Qurğusu → Enerji (menyu idx 6)
+                    mainWindow.showVehicleSetupPage(6)
                 }
             }
         }
