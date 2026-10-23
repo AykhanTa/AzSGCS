@@ -35,7 +35,7 @@ ToolStripActionList {
     property bool altPanelVisible:   false
     property bool speedPanelVisible: false
 
-    // FlyViewToolStrip.qml panelin yerini button-a görə hesablamaq üçün
+    // FlyViewActionFlyout.qml paneli düymənin yanında açmaq üçün
     property var changeAltActionRef:   changeAltAction
     property var changeSpeedActionRef: changeSpeedAction
 
@@ -93,33 +93,33 @@ ToolStripActionList {
         _activeVehicle.flightMode = "Hold"
     }
 
+    readonly property string _iconBase: "qrc:/res/AZSHIELD_ICON/v2/"
+
+    // The six commands of the design come first; the checklist and gripper only show
+    // when they apply. `current` marks the command whose flight mode is active.
     model: [
-        ToolStripAction {
-            id: view3DIcon
-            property bool _viewer3DEnabled: QGroundControl.settingsManager.viewer3DSettings.enabled.rawValue
-            property bool _is3DViewOpen:    viewer3DWindow && viewer3DWindow.isOpen
-
-            visible:    _viewer3DEnabled
-            text:       _is3DViewOpen ? qsTr("Fly") : qsTr("3D View")
-            iconSource: _is3DViewOpen ? "/qml/images/PaperPlane.svg" : "/qml/QGroundControl/Viewer3D/City3DMapIcon.svg"
-
-            onTriggered: {
-                if (!viewer3DWindow) return
-                if (_is3DViewOpen) viewer3DWindow.close()
-                else viewer3DWindow.open()
-            }
+        GuidedActionTakeoff {
+            text:       qsTr("Qalxış")
+            iconSource: _root._iconBase + "fly_takeoff.svg"
         },
 
-        PreFlightCheckListShowAction { onTriggered: _root.displayPreFlightChecklist() },
+        GuidedActionLand {
+            property bool current: !!_root._activeVehicle && _root._activeVehicle.flightMode === _root._activeVehicle.landFlightMode
+            text:       qsTr("Eniş")
+            iconSource: _root._iconBase + "fly_land.svg"
+        },
 
-        GuidedActionTakeoff { },
-        GuidedActionLand   { },
-        GuidedActionRTL    { },
+        GuidedActionRTL {
+            property bool current: !!_root._activeVehicle && _root._activeVehicle.flightMode === _root._activeVehicle.rtlFlightMode
+            text:       qsTr("Qayıt")
+            iconSource: _root._iconBase + "fly_rtl.svg"
+        },
 
         ToolStripAction {
             id: holdAction
+            property bool current: !!_activeVehicle && (_activeVehicle.flightMode === "Hold" || _activeVehicle.flightMode === _activeVehicle.pauseFlightMode)
             text: qsTr("Hold")
-            iconSource: "qrc:/res/AZSHIELD_ICON/Hold.svg"
+            iconSource: _root._iconBase + "fly_hold.svg"
             enabled: _activeVehicle &&
                      _activeVehicle.armed &&
                      _activeVehicle.flying &&
@@ -134,8 +134,8 @@ ToolStripActionList {
 
         ToolStripAction {
             id: changeAltAction
-            text: qsTr("Altitude")
-            iconSource: "qrc:/res/AZSHIELD_ICON/Altitude.svg"
+            text: qsTr("Yüksəklik")
+            iconSource: _root._iconBase + "fly_altitude.svg"
             onTriggered: {
                 _root.altPanelVisible   = !_root.altPanelVisible
                 _root.speedPanelVisible = false
@@ -144,13 +144,15 @@ ToolStripActionList {
 
         ToolStripAction {
             id: changeSpeedAction
-            text: qsTr("Speed")
-            iconSource: "qrc:/res/AZSHIELD_ICON/Speed.svg"
+            text: qsTr("Sürət")
+            iconSource: _root._iconBase + "fly_speed.svg"
             onTriggered: {
                 _root.speedPanelVisible = !_root.speedPanelVisible
                 _root.altPanelVisible   = false
             }
         },
+
+        PreFlightCheckListShowAction { onTriggered: _root.displayPreFlightChecklist() },
 
         GuidedActionGripper { }
     ]

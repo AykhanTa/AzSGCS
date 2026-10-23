@@ -25,7 +25,7 @@ qt_add_qml_module(FlightDisplayModule
         FlyViewMap.qml
         FlyViewMissionCompleteDialog.qml
         FlyViewPreFlightChecklistPopup.qml
-        FlyViewToolStrip.qml
+        FlyViewActionFlyout.qml
         FlyViewToolStripActionList.qml
         FlyViewTopRightColumnLayout.qml
         FlyViewTopRightPanel.qml
@@ -65,5 +65,4 @@ qt_add_qml_module(FlightDisplayModule
         VehicleWarnings.qml
         VirtualJoystick.qml
     NO_PLUGIN
-    QML_FILES HorizontalToolStrip.qml
 )

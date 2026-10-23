@@ -8,6 +8,7 @@ Item {
     property string text
     property bool   danger: false
     property real   minimumWidth: AzTheme.px(90)
+    property real   textSize:     AzTheme.popupTextSize
 
     signal clicked()
 
@@ -42,7 +43,7 @@ Item {
         color:            AzTheme.textCard
         font.family:      AzTheme.fontFamily
         font.weight:      Font.Medium
-        font.pixelSize:   AzTheme.fontPx(AzTheme.popupTextSize)
+        font.pixelSize:   AzTheme.fontPx(control.textSize)
     }
 
     MouseArea {

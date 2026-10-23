@@ -162,8 +162,6 @@ Item {
         spacing:            _layoutSpacing
         transformOrigin:    Item.TopRight
 
-        // ✅ Kiçik ekranda sağdakı ToolStripRight GİZLƏNSİN
-        showRightToolStrip: !_compactUi
 
         readonly property real _availW: _root.width  - (_layoutMargin * 2)
         readonly property real _availH: _root.height - (_layoutMargin * 2)
@@ -184,34 +182,37 @@ Item {
         property real rightEdgeBottomInset:     width  * scale + _layoutMargin
     }
 
-    // ✅ Kiçik ekranda solda column toolstrip (SideMenu enindən sonra başlayır)
-    FlyViewToolStrip {
+    // Flight commands opening from the side menu's "Uçuş Paneli": just right of the menu,
+    // level with that menu row (the menu's rows start 100 px down, 70 px apart).
+    FlyViewActionFlyout {
         id: toolStrip
         z: QGroundControl.zOrderWidgets
 
-        visible: _compactUi
+        visible: mainWindow.showFlightPanel
                  && !QGroundControl.videoManager.fullScreen
                  && mainWindow.isFlyViewActive
 
-        verticalMode: true
+        width:  implicitWidth
+        height: implicitHeight
 
-        // ✅ eni bir az da dar
-        width: Math.max(88, ScreenTools.defaultFontPixelHeight * 5.2)
+        anchors.left:       parent.left
+        anchors.leftMargin: (parentToolInsets ? parentToolInsets.leftEdgeCenterInset : 0) + AzTheme.px(8)
 
-        anchors.left: parent.left
-        anchors.top: parent.top
+        readonly property real _topInset: (topStatusPanelRef && topStatusPanelRef.visible) ? topStatusPanelRef.height : 0
+        property real _sceneY: 0
 
-        anchors.leftMargin: (parentToolInsets ? parentToolInsets.leftEdgeCenterInset : 0) + _layoutMargin
-        anchors.topMargin:  (topStatusPanelRef && topStatusPanelRef.visible)
-                            ? (topStatusPanelRef.height + _layoutMargin)
-                            : _layoutMargin
+        y: Math.max(_topInset + AzTheme.px(8), AzTheme.px(170) - _sceneY)
 
-        // ✅ hündürlük kontentə görə + lazım olsa scroll üçün cap
-        readonly property real _maxH: _root.height
-                                      - anchors.topMargin
-                                      - ((parentToolInsets ? parentToolInsets.bottomEdgeLeftInset : 0) + _layoutMargin)
+        function _updateSceneY() { _sceneY = _root.mapToItem(null, 0, 0).y }
+        Component.onCompleted: _updateSceneY()
+        onVisibleChanged:      if (visible) _updateSceneY()
 
-        height: Math.min(implicitHeight, Math.max(120, _maxH))
+        onDisplayPreFlightChecklist: {
+            preFlightChecklistLoader.active = true
+            if (preFlightChecklistLoader.item) {
+                preFlightChecklistLoader.item.open()
+            }
+        }
     }
 
     // Skydroid pod shortcuts down the right edge, like Skydroid's own ground station.

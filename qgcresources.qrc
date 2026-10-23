@@ -38,6 +38,12 @@
         <file alias="AZSHIELD_ICON/v2/cam_video.svg">resources/AZSHIELD_ICON/v2/cam_video.svg</file>
         <file alias="AZSHIELD_ICON/v2/cam_photo.svg">resources/AZSHIELD_ICON/v2/cam_photo.svg</file>
         <file alias="AZSHIELD_ICON/v2/cam_thermal.svg">resources/AZSHIELD_ICON/v2/cam_thermal.svg</file>
+        <file alias="AZSHIELD_ICON/v2/fly_takeoff.svg">resources/AZSHIELD_ICON/v2/fly_takeoff.svg</file>
+        <file alias="AZSHIELD_ICON/v2/fly_land.svg">resources/AZSHIELD_ICON/v2/fly_land.svg</file>
+        <file alias="AZSHIELD_ICON/v2/fly_rtl.svg">resources/AZSHIELD_ICON/v2/fly_rtl.svg</file>
+        <file alias="AZSHIELD_ICON/v2/fly_hold.svg">resources/AZSHIELD_ICON/v2/fly_hold.svg</file>
+        <file alias="AZSHIELD_ICON/v2/fly_altitude.svg">resources/AZSHIELD_ICON/v2/fly_altitude.svg</file>
+        <file alias="AZSHIELD_ICON/v2/fly_speed.svg">resources/AZSHIELD_ICON/v2/fly_speed.svg</file>
         <file alias="action.svg">resources/action.svg</file>
         <file alias="AntennaRC.svg">resources/Antenna_RC.svg</file>
         <file alias="AntennaT.svg">resources/Antenna_T.svg</file>
