@@ -223,7 +223,7 @@ Item {
         anchors.right:          parent.right
         anchors.rightMargin:    _besideStack ? (_totalToolInsets.rightEdgeCenterInset + _margin) : _margin
 
-        readonly property real _margin:     _root._layoutMargin
+        readonly property real _margin:     AzTheme.px(20)
         readonly property real _topInset:   (_root.topStatusPanelRef && _root.topStatusPanelRef.visible) ? _root.topStatusPanelRef.height : 0
         readonly property var  _settings:   QGroundControl.settingsManager.skydroidGimbalSettings
 
