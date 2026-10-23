@@ -589,9 +589,7 @@ ApplicationWindow {
 
         anchors.horizontalCenter: contentArea.horizontalCenter
         anchors.bottom: contentArea.bottom
-       // anchors.bottomMargin: Math.max(12, ScreenTools.defaultFontPixelHeight * 1.1)
-
-        anchors.bottomMargin: 4
+        anchors.bottomMargin: AzTheme.px(20)
 
         visible: flyView.visible && !planView.visible && !overlayOpen && !toolDrawer.visible
 

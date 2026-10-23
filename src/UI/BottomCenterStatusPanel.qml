@@ -1,9 +1,14 @@
 import QtQuick
-import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Effects
 
 import QGroundControl.Controls
-import QtQuick.Layouts
 
+/// The ammunition panel ("Mərmi") at the bottom centre of the fly view.
+///
+/// Collapsed it is the design's AmmunitionPanel: an 80x40 pill with an arrow, the
+/// panel gradient, radius 17 and a deep shadow. The arrow opens the slots panel above
+/// it and turns down.
 Item {
     id: root
 
@@ -12,22 +17,16 @@ Item {
     property string panelTitle: "Status Panel"
 
     readonly property int totalSlots: 10
-    readonly property real expandedPanelHeight: 220
-    readonly property real collapsedPanelHeight: 42
-    readonly property real panelRadius: 10
-    readonly property color panelColor: "#2f2f2f"
-    readonly property color borderColor: "#3d3d3d"
-    readonly property color textColor: "white"
-    readonly property color subTextColor: "#A9A9A9"
-    readonly property color readyColor: "#19d56b"
-    readonly property color warningColor: "#FC0101"
-    readonly property color emptyColor: "#777777"
 
-    readonly property real headerHeight: 42
-    readonly property real toggleWidth: 46
-    readonly property real toggleHeight: 22
-    readonly property real dotSize: 32
-    readonly property real panelPadding: 14
+    readonly property color readyColor:   AzTheme.statusGreen
+    readonly property color warningColor: AzTheme.statusRed
+    readonly property color emptyColor:   "#3A3F44"
+
+    readonly property real toggleWidth:  AzTheme.px(80)
+    readonly property real toggleHeight: AzTheme.px(40)
+    readonly property real dotSize:      AzTheme.px(32)
+    readonly property real panelPadding: AzTheme.px(16)
+    readonly property real panelGap:     AzTheme.px(8)
 
     readonly property int availableCount: {
         if (!statusStates) return 0
@@ -47,7 +46,7 @@ Item {
     }
 
     width: 500
-    height: expanded ? (bodyRect.y + bodyRect.height) : toggleRect.height
+    height: expanded ? (bodyCard.height + panelGap + toggleRect.height) : toggleRect.height
     implicitWidth: width
     implicitHeight: height
 
@@ -63,8 +62,8 @@ Item {
     }
 
     function _glowColorForState(stateValue) {
-        if (stateValue === 1) return Qt.rgba(1.0, 0.01, 0.01, 0.35)
-        if (stateValue === 0) return Qt.rgba(0.1, 0.84, 0.42, 0.25)
+        if (stateValue === 1) return Qt.rgba(1.0, 0.2, 0.26, 0.35)
+        if (stateValue === 0) return Qt.rgba(0.0, 0.71, 0.27, 0.25)
         return "transparent"
     }
 
@@ -101,332 +100,284 @@ Item {
         statusStates = newStates
     }
 
-    // ─── Toggle düyməsi ───
-    Rectangle {
+    /// Panel gradient card with the AmmunitionPanel shadow and top highlight.
+    component PanelFace: Item {
+        id: face
+
+        property real radius
+
+        RectangularShadow {
+            anchors.fill: faceBackground
+            offset.y:     AzTheme.px(18)
+            blur:         AzTheme.px(42)
+            radius:       face.radius
+            color:        Qt.rgba(0, 0, 0, 0.58)
+        }
+
+        AzGradientRect {
+            id:            faceBackground
+            anchors.fill:  parent
+            angle:         AzTheme.panelGradientAngle
+            startColor:    AzTheme.panelGradientStart
+            startPosition: AzTheme.panelGradientStartPos
+            endColor:      AzTheme.panelGradientEnd
+            endPosition:   AzTheme.panelGradientEndPos
+            radius:        face.radius
+            borderColor:   AzTheme.panelBorder
+            borderWidth:   1
+        }
+
+        // inset 0 0.84px 0 rgba(255, 255, 255, 0.035)
+        Rectangle {
+            x:      face.radius
+            y:      1
+            width:  face.width - 2 * face.radius
+            height: 1
+            color:  Qt.rgba(1, 1, 1, 0.035)
+        }
+    }
+
+    // ─── Toggle (the design's AmmunitionPanel) ───
+    Item {
         id: toggleRect
         z: 2
         width: root.toggleWidth
         height: root.toggleHeight
-        radius: height / 2
-        color: root.panelColor
-        border.color: root.borderColor
-        border.width: 1
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
+        anchors.bottom: parent.bottom
 
-        // An icon, not a glyph. This used to be U+2304/U+2303, the arrowheads from
-        // Miscellaneous Technical, which Roboto does not carry -- so on Android the
-        // only thing marking the control was an empty circle.
+        PanelFace {
+            anchors.fill: parent
+            radius:       AzTheme.px(17)
+        }
+
+        Rectangle {
+            anchors.fill:    parent
+            anchors.margins: 1
+            radius:          AzTheme.px(17) - 1
+            color:           Qt.rgba(1, 1, 1, toggleMouse.pressed ? 0.08 : 0.04)
+            visible:         toggleMouse.containsMouse || toggleMouse.pressed
+        }
+
         QGCColoredImage {
-            anchors.centerIn: parent
-            width:  Math.round(parent.height * 0.42)
-            height: width
+            anchors.centerIn:  parent
+            width:             AzTheme.px(16)
+            height:            width
             sourceSize.height: height
-            fillMode: Image.PreserveAspectFit
-            source: root.expanded ? "/res/chevron-down.svg" : "/res/chevron-up.svg"
-            color: root.textColor
+            fillMode:          Image.PreserveAspectFit
+            source:            "qrc:/res/AZSHIELD_ICON/v2/popup_chevron.svg"
+            color:             AzTheme.textCard
+            rotation:          root.expanded ? 0 : 180
+
+            Behavior on rotation { NumberAnimation { duration: 150 } }
         }
 
         MouseArea {
+            id: toggleMouse
             anchors.fill: parent
+            hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onClicked: root.expanded = !root.expanded
         }
     }
 
-    // ─── Əsas panel gövdəsi ───
-    Rectangle {
-        id: bodyRect
-        y: root.toggleHeight / 2
+    // ─── Slots panel, above the toggle ───
+    Item {
+        id: bodyCard
         width: root.width
-        height: root.expanded ? root.expandedPanelHeight : 0
-        radius: root.panelRadius
-        color: root.panelColor
-        border.color: root.borderColor
-        border.width: 1
-        clip: true
-        visible: height > 0
+        height: bodyColumn.implicitHeight + 2 * root.panelPadding
+        anchors.bottom: toggleRect.top
+        anchors.bottomMargin: root.panelGap
+        visible: root.expanded
+        opacity: root.expanded ? 1 : 0
 
-        Behavior on height {
-            NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+        Behavior on opacity { NumberAnimation { duration: 140 } }
+
+        PanelFace {
+            anchors.fill: parent
+            radius:       AzTheme.px(14)
         }
 
-        // ─── Header ───
-        Item {
-            id: headerRow
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.leftMargin: 18
-            anchors.rightMargin: 18
-            anchors.topMargin: 6
-            height: root.headerHeight
+        MouseArea {
+            anchors.fill:    parent
+            acceptedButtons: Qt.AllButtons
+            onWheel:         (wheel) => { wheel.accepted = true }
+        }
 
-            Column {
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: 2
+        ColumnLayout {
+            id: bodyColumn
+            x: root.panelPadding
+            y: root.panelPadding
+            width: parent.width - 2 * root.panelPadding
+            spacing: AzTheme.px(12)
+
+            // ─── Header ───
+            RowLayout {
+                Layout.fillWidth: true
 
                 Text {
-                    text: root.panelTitle
-                    color: root.textColor
-                    font.pixelSize: 15
-                    font.bold: true
+                    Layout.fillWidth: true
+                    text:             root.panelTitle
+                    color:            AzTheme.textCard
+                    font.family:      AzTheme.fontFamily
+                    font.weight:      Font.Medium
+                    font.pixelSize:   AzTheme.fontPx(AzTheme.popupTitleSize)
                 }
-
-                Rectangle {
-                    width: parent.children[0].contentWidth
-                    height: 1
-                    color: root.subTextColor
-                    opacity: 0.5
-                }
-            }
-
-            Column {
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: 2
 
                 Row {
-                    anchors.right: parent.right
-                    spacing: 0
+                    Layout.alignment: Qt.AlignVCenter
 
                     Text {
-                        id: activeCountText
-                        text: root.availableCount.toString()
-                        color: root.textColor
-                        font.pixelSize: 22
-                        font.bold: true
-                        anchors.baseline: totalCountText.baseline
+                        id:             activeCountText
+                        text:           root.availableCount.toString()
+                        color:          AzTheme.textCard
+                        font.family:    AzTheme.fontFamily
+                        font.weight:    Font.DemiBold
+                        font.pixelSize: AzTheme.fontPx(20)
                     }
 
                     Text {
-                        id: totalCountText
-                        text: "/" + root.totalSlots
-                        color: root.subTextColor
-                        font.pixelSize: 13
+                        anchors.baseline: activeCountText.baseline
+                        text:             "/" + root.totalSlots
+                        color:            AzTheme.textSecondary
+                        font.family:      AzTheme.fontFamily
+                        font.pixelSize:   AzTheme.fontPx(14)
                     }
                 }
-
-                Rectangle {
-                    width: activeCountText.contentWidth + totalCountText.contentWidth
-                    height: 1
-                    color: root.subTextColor
-                    opacity: 0.5
-                    anchors.right: parent.right
-                }
-            }
-        }
-
-        // ─── LED-lər + Buttonlar ───
-        Item {
-            id: contentArea
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: headerRow.bottom
-            anchors.bottom: parent.bottom
-            anchors.leftMargin: root.panelPadding
-            anchors.rightMargin: root.panelPadding
-            anchors.bottomMargin: root.panelPadding
-            clip: true
-            visible: root.expanded
-            opacity: root.expanded ? 1.0 : 0.0
-
-            Behavior on opacity {
-                NumberAnimation { duration: 120 }
             }
 
-            // ── LED Grid ──
-            GridLayout {
-                id: ledGrid
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                width: parent.width - buttonColumn.width - 16
-                columns: 5
-                columnSpacing: 14
-                rowSpacing: 10
+            // ─── LED-lər + Buttonlar ───
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: AzTheme.px(16)
 
-                Repeater {
-                    model: root.totalSlots
+                GridLayout {
+                    id: ledGrid
+                    Layout.fillWidth: true
+                    columns: 5
+                    columnSpacing: AzTheme.px(10)
+                    rowSpacing: AzTheme.px(10)
 
-                    Item {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 52
+                    Repeater {
+                        model: root.totalSlots
 
                         Item {
-                            id: ledItem
-                            anchors.centerIn: parent
-                            width: root.dotSize
-                            height: root.dotSize
+                            id: ledCell
 
-                            property int currentState: root._stateAt(index)
+                            required property int index
 
-                            // ── Glow effekti ──
-                            Rectangle {
-                                id: glowRect
-                                anchors.centerIn: parent
-                                width: root.dotSize * 1.6
-                                height: width
-                                radius: width / 2
-                                color: root._glowColorForState(ledItem.currentState)
-                                visible: ledItem.currentState !== 2
-                                opacity: 1.0
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: root.dotSize * 1.5
 
-                                SequentialAnimation on opacity {
-                                    running: ledItem.currentState === 1
-                                    loops: Animation.Infinite
-                                    alwaysRunToEnd: false
-                                    NumberAnimation { to: 0.10; duration: 500 }
-                                    NumberAnimation { to: 1.00; duration: 500 }
-                                }
-                            }
-
-                            // ── Əsas LED dairəsi ──
-                            Rectangle {
-                                id: mainDot
+                            Item {
+                                id: ledItem
                                 anchors.centerIn: parent
                                 width: root.dotSize
                                 height: root.dotSize
-                                radius: root.dotSize / 2
-                                color: root._colorForState(ledItem.currentState)
-                                border.color: "#111111"
-                                border.width: 1
-                                opacity: 1.0
 
-                                SequentialAnimation on opacity {
-                                    running: ledItem.currentState === 1
-                                    loops: Animation.Infinite
-                                    alwaysRunToEnd: false
-                                    NumberAnimation { to: 0.25; duration: 500 }
-                                    NumberAnimation { to: 1.00; duration: 500 }
-                                }
+                                property int currentState: root._stateAt(ledCell.index)
 
-                                // ── Nömrə — dairənin içində ──
-                                Text {
+                                // ── Glow effekti ──
+                                Rectangle {
+                                    id: glowRect
                                     anchors.centerIn: parent
-                                    text: (index + 1 < 10 ? "0" : "") + (index + 1)
-                                    color: ledItem.currentState === 2 ? "#444444" : "#1a1a1a"
-                                    font.pixelSize: 10
-                                    font.bold: true
-                                }
-                            }
+                                    width: root.dotSize * 1.5
+                                    height: width
+                                    radius: width / 2
+                                    color: root._glowColorForState(ledItem.currentState)
+                                    visible: ledItem.currentState !== 2
+                                    opacity: 1.0
 
-                            // State dəyişdikdə opacity-ni sıfırla
-                            onCurrentStateChanged: {
-                                if (currentState !== 1) {
-                                    glowRect.opacity = 1.0
-                                    mainDot.opacity  = 1.0
+                                    SequentialAnimation on opacity {
+                                        running: ledItem.currentState === 1
+                                        loops: Animation.Infinite
+                                        alwaysRunToEnd: false
+                                        NumberAnimation { to: 0.10; duration: 500 }
+                                        NumberAnimation { to: 1.00; duration: 500 }
+                                    }
                                 }
-                            }
 
-                            // ← DƏYİŞDİRİLDİ: boş slot kliklənsə heç nə etmə
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: ledItem.currentState === 2
-                                                 ? Qt.ArrowCursor
-                                                 : Qt.PointingHandCursor
-                                onClicked: if (ledItem.currentState !== 2) root._cycleState(index)
+                                // ── Əsas LED dairəsi ──
+                                Rectangle {
+                                    id: mainDot
+                                    anchors.centerIn: parent
+                                    width: root.dotSize
+                                    height: root.dotSize
+                                    radius: root.dotSize / 2
+                                    color: root._colorForState(ledItem.currentState)
+                                    border.color: ledItem.currentState === 2 ? AzTheme.groupBorder : Qt.rgba(0, 0, 0, 0.4)
+                                    border.width: 1
+                                    opacity: 1.0
+
+                                    SequentialAnimation on opacity {
+                                        running: ledItem.currentState === 1
+                                        loops: Animation.Infinite
+                                        alwaysRunToEnd: false
+                                        NumberAnimation { to: 0.25; duration: 500 }
+                                        NumberAnimation { to: 1.00; duration: 500 }
+                                    }
+
+                                    // ── Nömrə — dairənin içində ──
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: (ledCell.index + 1 < 10 ? "0" : "") + (ledCell.index + 1)
+                                        color: ledItem.currentState === 2 ? AzTheme.mutedText : "#0E1113"
+                                        font.family: AzTheme.fontFamily
+                                        font.weight: Font.DemiBold
+                                        font.pixelSize: AzTheme.fontPx(11)
+                                    }
+                                }
+
+                                // State dəyişdikdə opacity-ni sıfırla
+                                onCurrentStateChanged: {
+                                    if (currentState !== 1) {
+                                        glowRect.opacity = 1.0
+                                        mainDot.opacity  = 1.0
+                                    }
+                                }
+
+                                // ← DƏYİŞDİRİLDİ: boş slot kliklənsə heç nə etmə
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: ledItem.currentState === 2
+                                                     ? Qt.ArrowCursor
+                                                     : Qt.PointingHandCursor
+                                    onClicked: if (ledItem.currentState !== 2) root._cycleState(ledCell.index)
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            // ── Buttonlar ──
-            Column {
-                id: buttonColumn
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                width: 100
-                spacing: 8
+                // ── Buttonlar ──
+                ColumnLayout {
+                    Layout.alignment:      Qt.AlignVCenter
+                    Layout.preferredWidth: AzTheme.px(124)
+                    Layout.fillWidth:      false
+                    spacing: AzTheme.px(8)
 
-                // Hamısını Seç
-                Rectangle {
-                    width: parent.width
-                    height: 34
-                    radius: 6
-                    color: buttonSelectAll.containsMouse ? "#5ab76b" : "#4CAF50"
-                    border.color: "#3a8f42"
-                    border.width: 1
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: qsTr("Hamısını Seç")
-                        color: "white"
-                        font.pixelSize: 12
-                        font.bold: true
-                    }
-
-                    MouseArea {
-                        id: buttonSelectAll
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
+                    AzButton {
+                        Layout.fillWidth: true
+                        text:      qsTr("Hamısını Seç")
                         onClicked: root.selectAll()
                     }
 
-                    Behavior on color { ColorAnimation { duration: 120 } }
-                }
-
-                // Atma (warning → ready)
-                Rectangle {
-                    width: parent.width
-                    height: 34
-                    radius: 6
-                    opacity: root.hasSelected ? 1.0 : 0.4
-                    color: (root.hasSelected && buttonUnselect.containsMouse) ? "#6a89a0" : "#546E7A"
-                    border.color: "#3d5260"
-                    border.width: 1
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "Atma"
-                        color: "white"
-                        font.pixelSize: 12
-                        font.bold: true
+                    // Atma (warning → ready)
+                    AzButton {
+                        Layout.fillWidth: true
+                        text:      qsTr("Atma")
+                        enabled:   root.hasSelected
+                        onClicked: root.unselectAll()
                     }
 
-                    MouseArea {
-                        id: buttonUnselect
-                        anchors.fill: parent
-                        hoverEnabled: root.hasSelected
-                        cursorShape: root.hasSelected ? Qt.PointingHandCursor : Qt.ArrowCursor
-                        onClicked: if (root.hasSelected) root.unselectAll()
+                    // At (warning → empty)
+                    AzButton {
+                        Layout.fillWidth: true
+                        text:      qsTr("At")
+                        danger:    true
+                        enabled:   root.hasSelected
+                        onClicked: root.discardSelected()
                     }
-
-                    Behavior on color { ColorAnimation { duration: 120 } }
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
-                }
-
-                // At (warning → empty)
-                Rectangle {
-                    width: parent.width
-                    height: 34
-                    radius: 6
-                    opacity: root.hasSelected ? 1.0 : 0.4
-                    color: (root.hasSelected && buttonDiscard.containsMouse) ? "#e64a3a" : "#D32F2F"
-                    border.color: "#a12424"
-                    border.width: 1
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "At"
-                        color: "white"
-                        font.pixelSize: 12
-                        font.bold: true
-                    }
-
-                    MouseArea {
-                        id: buttonDiscard
-                        anchors.fill: parent
-                        hoverEnabled: root.hasSelected
-                        cursorShape: root.hasSelected ? Qt.PointingHandCursor : Qt.ArrowCursor
-                        onClicked: if (root.hasSelected) root.discardSelected()
-                    }
-
-                    Behavior on color { ColorAnimation { duration: 120 } }
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
                 }
             }
         }
