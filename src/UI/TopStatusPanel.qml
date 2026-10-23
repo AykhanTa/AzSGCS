@@ -65,22 +65,36 @@ Item {
 
     function _clamp(v, lo, hi) { return Math.max(lo, Math.min(v, hi)) }
 
-    // Figma "StatusBar": 80 px tall, padding 8/12, 280x64 cards 8 px apart, and the
-    // 62 px kebab column at the right end. AzTheme.px() scales them with the window.
+    // Figma "StatusBar" (padding 12, cards 8 px apart, 62 px kebab column at the right
+    // end), made lower than the 80/64 px of the frame: the bar is 64 px and the cards
+    // 52 px. AzTheme.px() scales all of it with the window.
     readonly property real _padH:      AzTheme.px(12)
-    readonly property real _blockW:    AzTheme.px(280)
-    readonly property real _blockH:    AzTheme.px(64)
+    readonly property real _blockMaxW: AzTheme.px(280)
+
+    // One width for every card: the longest title plus a little room, at most the
+    // frame's 280 px. Titles do not change at run time, so the cards do not jump when
+    // a value does; a caption longer than the card is elided.
+    readonly property real _blockW: {
+        var widest = 0
+        var cards = statusRow.children
+        for (var i = 0; i < cards.length; ++i) {
+            if (cards[i].naturalWidth !== undefined) {
+                widest = Math.max(widest, cards[i].naturalWidth)
+            }
+        }
+        return Math.min(_blockMaxW, widest + AzTheme.px(20))
+    }
+    readonly property real _blockH:    AzTheme.px(52)
     readonly property real _blockGap:  AzTheme.px(8)
     readonly property real _menuW:     AzTheme.px(62)
     readonly property real _progressH: Math.max(2, AzTheme.px(2))
 
-    height: AzTheme.px(80)
+    height: AzTheme.px(64)
     z: 200
 
     property bool userHidden: false
     visible: !userHidden && !_planVisible
 
-    signal minimizeRequested()
     signal exitRequested()
 
     property string disconnectButtonText: qsTr("Bağlantını kəs")
@@ -872,6 +886,12 @@ Item {
             readonly property color accentColor: isStatusBlock ? topStatusPanel.statusAccent(currentStatus) : iconColor
             readonly property color glowColor:   isStatusBlock ? topStatusPanel.statusGlow(currentStatus) : modeChangeGlow
 
+            // Width this card's title needs: icon at 20, text 12 after it, 16 to the right
+            // edge (28 on the status card, which has the dot there). All cards take the
+            // widest of these (topStatusPanel._blockW).
+            readonly property real _rightInset:   AzTheme.px(isStatusBlock ? 28 : 16)
+            readonly property real naturalWidth:  Math.ceil(blockIcon.x + blockIcon.width + AzTheme.px(12) + titleText.implicitWidth + _rightInset)
+
             width:  topStatusPanel._blockW
             height: topStatusPanel._blockH
 
@@ -1010,7 +1030,7 @@ Item {
                 id:                           blockIcon
                 x:                            AzTheme.px(20)
                 anchors.verticalCenter:       parent.verticalCenter
-                anchors.verticalCenterOffset: -AzTheme.px(8)
+                anchors.verticalCenterOffset: -AzTheme.px(6)
                 width:                        AzTheme.px(block.iconW)
                 height:                       AzTheme.px(block.iconH)
                 source:                       block.icon
@@ -1029,12 +1049,13 @@ Item {
             }
 
             Text {
+                id:                           titleText
                 anchors.left:                 blockIcon.right
                 anchors.leftMargin:           AzTheme.px(12)
                 anchors.right:                parent.right
-                anchors.rightMargin:          AzTheme.px(block.isStatusBlock ? 28 : 16)
+                anchors.rightMargin:          block._rightInset
                 anchors.verticalCenter:       parent.verticalCenter
-                anchors.verticalCenterOffset: -AzTheme.px(13)
+                anchors.verticalCenterOffset: -AzTheme.px(11)
                 text:                         block.label
                 color:                        AzTheme.textCard
                 font.family:                  AzTheme.fontFamily
@@ -1044,12 +1065,13 @@ Item {
             }
 
             Text {
+                id:                           valueTextItem
                 anchors.left:                 blockIcon.right
                 anchors.leftMargin:           AzTheme.px(12)
                 anchors.right:                parent.right
-                anchors.rightMargin:          AzTheme.px(16)
+                anchors.rightMargin:          block._rightInset
                 anchors.verticalCenter:       parent.verticalCenter
-                anchors.verticalCenterOffset: AzTheme.px(12)
+                anchors.verticalCenterOffset: AzTheme.px(10)
                 color:                        AzTheme.textSecondary
                 font.family:                  AzTheme.fontFamily
                 font.pixelSize:               AzTheme.fontPx(14)
@@ -1074,7 +1096,7 @@ Item {
                 id:      statusDot
                 visible: block.isStatusBlock
                 x:       parent.width - AzTheme.px(20)
-                y:       AzTheme.px(11)
+                y:       AzTheme.px(9)
                 width:   Math.max(4, AzTheme.px(7))
                 height:  width
                 radius:  width / 2
@@ -1175,14 +1197,20 @@ Item {
         contentWidth:  statusRow.implicitWidth
         contentHeight: height
 
-        // Land on a card boundary instead of stopping mid-card.
+        // Land on the nearest card's left edge instead of stopping mid-card.
         onMovementEnded: {
-            var step = topStatusPanel._blockW + statusRow.spacing
-            if (step <= 0) {
-                return
+            var target = contentX
+            var bestDistance = Infinity
+            for (var i = 0; i < statusRow.children.length; ++i) {
+                var cardX = statusRow.children[i].x - statusRow.leftPadding
+                var distance = Math.abs(cardX - contentX)
+                if (distance < bestDistance) {
+                    bestDistance = distance
+                    target = cardX
+                }
             }
             var maxX = Math.max(0, contentWidth - width)
-            statusSnap.to = Math.min(maxX, Math.max(0, Math.round(contentX / step) * step))
+            statusSnap.to = Math.min(maxX, Math.max(0, target))
             statusSnap.restart()
         }
 
@@ -1460,11 +1488,7 @@ Item {
                 spacing: AzTheme.px(2)
 
                 Repeater {
-                    // Minimising means nothing on the tablets, which run full screen.
-                    model: ScreenTools.isMobile
-                           ? [ { action: "exit",     text: qsTr("Çıxış"),            icon: "menu_exit.svg" } ]
-                           : [ { action: "minimize", text: qsTr("Pəncərəni kiçilt"), icon: "menu_minimize.svg" },
-                               { action: "exit",     text: qsTr("Çıxış"),            icon: "menu_exit.svg" } ]
+                    model: [ { text: qsTr("Çıxış"), icon: "menu_exit.svg" } ]
 
                     delegate: Item {
                         width:  AzTheme.px(220)
@@ -1508,11 +1532,7 @@ Item {
                             cursorShape:  Qt.PointingHandCursor
                             onClicked: {
                                 windowMenu.close()
-                                if (modelData.action === "minimize") {
-                                    topStatusPanel.minimizeRequested()
-                                } else {
-                                    topStatusPanel.exitRequested()
-                                }
+                                topStatusPanel.exitRequested()
                             }
                         }
                     }

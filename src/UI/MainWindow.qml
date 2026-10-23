@@ -525,10 +525,6 @@ ApplicationWindow {
             mainWindow._closeChecksToSkip = 0
             mainWindow.close()
         }
-
-        onMinimizeRequested: {
-            mainWindow.showMinimized()
-        }
     }
 
     // Overlay Loaders (contentArea mərkəzinə bağlandı, offset-lər responsiv)

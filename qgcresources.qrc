@@ -28,7 +28,6 @@
         <file alias="AZSHIELD_ICON/v2/top_gps.svg">resources/AZSHIELD_ICON/v2/top_gps.svg</file>
         <file alias="AZSHIELD_ICON/v2/top_vehicle.svg">resources/AZSHIELD_ICON/v2/top_vehicle.svg</file>
         <file alias="AZSHIELD_ICON/v2/top_udp.svg">resources/AZSHIELD_ICON/v2/top_udp.svg</file>
-        <file alias="AZSHIELD_ICON/v2/menu_minimize.svg">resources/AZSHIELD_ICON/v2/menu_minimize.svg</file>
         <file alias="AZSHIELD_ICON/v2/menu_exit.svg">resources/AZSHIELD_ICON/v2/menu_exit.svg</file>
         <file alias="action.svg">resources/action.svg</file>
         <file alias="AntennaRC.svg">resources/Antenna_RC.svg</file>
