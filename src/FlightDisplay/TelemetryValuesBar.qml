@@ -24,15 +24,15 @@ Item {
     property alias settingsGroup:          factValueGrid.settingsGroup
     property alias specificVehicleForCard: factValueGrid.specificVehicleForCard
 
-    // Panelin daxili padding-i
-    readonly property real _toolsMargin: Math.max(6, ScreenTools.defaultFontPixelWidth * 0.75)
+    // Card padding of the design (282 px card, 20 px sides)
+    readonly property real _toolsMargin: AzTheme.px(20)
 
     // ✅ parent.width istifadə etmə (binding loop yarada bilər)
     readonly property real _windowW: (control.window && control.window.width > 0) ? control.window.width : Screen.width
 
     // Panel width clamp
-    readonly property real _targetW:  (ScreenTools.defaultFontPixelHeight * 17.1) + extraWidth
-    readonly property real _minW:     Math.max(240, ScreenTools.defaultFontPixelHeight * 14.5)
+    readonly property real _targetW:  AzTheme.px(282) + extraWidth
+    readonly property real _minW:     240
     readonly property real _maxW:     Math.max(_minW,
                                               Math.min(ScreenTools.defaultFontPixelHeight * 26.0,
                                                        _windowW - (_toolsMargin * 2)))
@@ -47,20 +47,24 @@ Item {
     // ✅ Outer yerləşdirmə yoxdur (anchors YOXDUR) — parent idarə edəcək
     clip: true
 
-    Rectangle {
-        id: backgroundRect
-        anchors.fill: parent
-        color: "#3D3B3B"
-        border.color: "white"
-        border.width: 1
-        radius: 3
+    AzGradientRect {
+        id:            backgroundRect
+        anchors.fill:  parent
+        angle:         AzTheme.panelGradientAngle
+        startColor:    AzTheme.panelGradientStart
+        startPosition: AzTheme.panelGradientStartPos
+        endColor:      AzTheme.panelGradientEnd
+        endPosition:   AzTheme.panelGradientEndPos
+        radius:        AzTheme.px(14)
+        borderColor:   AzTheme.panelBorder
+        borderWidth:   1
     }
 
     ColumnLayout {
         id: mainLayout
         anchors.fill: parent
         anchors.margins: _toolsMargin
-        spacing: Math.max(6, ScreenTools.defaultFontPixelWidth * 0.75)
+        spacing: AzTheme.px(12)
 
         // Lock icon row (unlock olanda görünür)
         RowLayout {
@@ -76,7 +80,7 @@ Item {
                 height:             width
                 sourceSize.width:   width
                 fillMode:           Image.PreserveAspectFit
-                color:              qgcPal.text
+                color:              AzTheme.textCard
 
                 QGCMouseArea {
                     anchors.fill:    parent
@@ -120,8 +124,6 @@ Item {
             mouse.accepted = true
         }
     }
-
-    QGCPalette { id: qgcPal; colorGroupEnabled: true }
 }
 
 

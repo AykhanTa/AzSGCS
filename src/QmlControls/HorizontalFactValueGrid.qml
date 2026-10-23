@@ -49,9 +49,10 @@ HorizontalFactValueGridTemplate {
 
     readonly property bool _compact: ScreenTools.isMobile || _maxContentW < 340
 
-    // Sütun qrupları arası boşluq və label/value arası boşluq
-    readonly property real _groupSpacing: Math.max(4, ScreenTools.defaultFontPixelWidth * (_compact ? 0.55 : 0.80))
-    readonly property real _innerGap:     Math.max(4, ScreenTools.defaultFontPixelWidth * (_compact ? 0.35 : 0.45))
+    // Between columns, between a name and its reading, and between values in a column.
+    readonly property real _groupSpacing: AzTheme.px(16)
+    readonly property real _innerGap:     AzTheme.px(12)
+    readonly property real _rowGap:       AzTheme.px(16)
 
     // columns count (length və ya count ola bilər)
     function _modelCount(m) {
@@ -76,25 +77,14 @@ HorizontalFactValueGridTemplate {
         _maxContentW - (_colButtonsW > 0 ? (_colButtonsW + _groupSpacing) : 0)
     )
 
+    // The design fits three columns into a 282 px card.
+    readonly property real _minColW: AzTheme.px(72)
+
     // Hər sütun qrupuna düşən en (grid eninə görə)
     readonly property real _perColW: Math.max(
-        110,
+        _minColW,
         Math.floor((_gridMaxW - ((_colCount - 1) * _groupSpacing)) / _colCount)
     )
-
-    // Label/value minimum enləri
-    readonly property real _minLabelW: Math.max(32, ScreenTools.defaultFontPixelWidth * 3.8)
-    readonly property real _minValueW: Math.max(54, ScreenTools.defaultFontPixelWidth * 6.0)
-
-    // Value üçün ideal pay
-    readonly property real _idealValueW: Math.floor(_perColW * 0.56)
-
-    // Value çox böyüməsin ki, label-a yer qalsın
-    readonly property real _maxValueW: Math.max(_minValueW, _perColW - _minLabelW - _innerGap)
-
-    // Son enlər (cəm = _perColW daxilində qalır)
-    readonly property real valueCellW: Math.min(Math.max(_minValueW, _idealValueW), _maxValueW)
-    readonly property real labelCellW: Math.max(_minLabelW, _perColW - valueCellW - _innerGap)
 
     // Auto-fit üçün row limiti
     property int _rowMax: _compact ? 6 : 4
@@ -171,7 +161,7 @@ HorizontalFactValueGridTemplate {
 
     // ✅ minimum column eni ilə panelə sığan maksimum column sayı (overflow olmasın)
     readonly property int _maxAllowedColumns: {
-        var minCol = 110
+        var minCol = _minColW
         var w = _gridMaxW
         var sp = _groupSpacing
         // colCount*minCol + (colCount-1)*sp <= w
@@ -208,37 +198,32 @@ HorizontalFactValueGridTemplate {
                     Repeater {
                         model: _root.columns
 
-                        GridLayout {
+                        // One column of the card: each value is its name over its reading.
+                        ColumnLayout {
                             Layout.preferredWidth: _perColW
                             Layout.maximumWidth:   _perColW
+                            Layout.alignment:      Qt.AlignTop
+                            spacing:               _rowGap
 
-                            rows:           object.count
-                            columns:        2
-                            flow:           GridLayout.TopToBottom
-                            rowSpacing:     0
-                            columnSpacing:  _innerGap
-
-                            // LABEL
                             Repeater {
                                 model: object
-                                InstrumentValueLabel {
-                                    Layout.preferredWidth: labelCellW
-                                    Layout.maximumWidth:   labelCellW
-                                    Layout.fillHeight:     true
-                                    clip: true
-                                    instrumentValueData: object
-                                }
-                            }
 
-                            // VALUE
-                            Repeater {
-                                model: object
-                                InstrumentValueValue {
-                                    Layout.preferredWidth: valueCellW
-                                    Layout.maximumWidth:   valueCellW
-                                    Layout.fillHeight:     true
-                                    clip: true
-                                    instrumentValueData: object
+                                ColumnLayout {
+                                    // Lets the edit hit test find the value under the click.
+                                    property var instrumentValueData: object
+
+                                    Layout.fillWidth: true
+                                    spacing:          _innerGap
+                                    clip:             true
+
+                                    InstrumentValueLabel {
+                                        Layout.fillWidth:    true
+                                        instrumentValueData: object
+                                    }
+
+                                    InstrumentValueValue {
+                                        instrumentValueData: object
+                                    }
                                 }
                             }
                         }
