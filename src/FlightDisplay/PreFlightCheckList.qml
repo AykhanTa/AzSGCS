@@ -27,7 +27,7 @@ ColumnLayout {
     // Siyahının elementləri ilə eyni yığcamlıq eşiyi.
     readonly property bool _compact: ScreenTools.isShortScreen
 
-    spacing: ScreenTools.defaultFontPixelWidth * (_compact ? 0.45 : 0.8)
+    spacing: AzTheme.px(12)
 
     property real _verticalMargin: ScreenTools.defaultFontPixelHeight * (_compact ? 0.3 : 0.5)
 

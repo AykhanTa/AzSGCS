@@ -9,6 +9,7 @@
 
 import QtQuick
 import QtQml.Models
+import QtQuick.Layouts
 
 import QGroundControl
 import QGroundControl.Controls
@@ -26,12 +27,15 @@ Column  {
     // width when the list is given one; the default is the old fixed button width.
     property real   contentWidth: ScreenTools.defaultFontPixelWidth * (_compact ? 29 : 40)
 
-    width: contentWidth
+    // The list is a ColumnLayout, which sizes its children from their layout hints and
+    // would otherwise squeeze the group to its implicit width.
+    width:                  contentWidth
+    Layout.preferredWidth:  contentWidth
 
     // Düymələrlə eyni yığcamlıq eşiyi, yoxsa aralıqlar tək başına yer yeyir.
     readonly property bool _compact: ScreenTools.isShortScreen
 
-    spacing: ScreenTools.defaultFontPixelHeight * (_compact ? 0.28 : 0.5)
+    spacing: AzTheme.px(8)
 
     property alias _checked: header.checked
 
@@ -59,7 +63,7 @@ Column  {
     Item {
         id:     header
         width:  checkGroup.width
-        height: Math.max(AzTheme.px(40), headerText.implicitHeight + AzTheme.px(12))
+        height: Math.max(AzTheme.px(32), headerText.implicitHeight + AzTheme.px(8))
 
         property bool checked: true
 
@@ -102,7 +106,7 @@ Column  {
     Column {
         id:         innerColumn
         width:      checkGroup.width
-        spacing:    ScreenTools.defaultFontPixelHeight * (checkGroup._compact ? 0.28 : 0.5)
+        spacing:    AzTheme.px(8)
         visible:    header.checked
 
         function buttonPassedChanged() {

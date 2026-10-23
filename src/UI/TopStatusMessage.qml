@@ -13,6 +13,7 @@ AzPopupFrame {
     panelVisible: false
     topPanelItem: statusPanelItem
     title:        qsTr("Status")
+    cardWidth:    AzTheme.px(480)
 
     onCloseRequested: close()
 
@@ -165,7 +166,7 @@ AzPopupFrame {
         AzButton {
             id:                  armButton
             anchors.right:       parent.right
-            anchors.rightMargin: AzTheme.px(20)
+            anchors.rightMargin: AzTheme.px(10)
             text:                _activeVehicle && _activeVehicle.armed ? qsTr("DISARM") : qsTr("ARM")
             danger:              !!(_activeVehicle && _activeVehicle.armed)
             enabled:             !!(_activeVehicle && (_activeVehicle.armed || canArmNow()))
