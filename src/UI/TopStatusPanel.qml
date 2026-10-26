@@ -53,20 +53,18 @@ Item {
         flightModePopupAnchorItem = anchorItem
         flightModePopupVisible = true
 
-        if (flightModePopupLoader.item) {
-            flightModePopupLoader.item.anchorItem    = flightModePopupAnchorItem
-            flightModePopupLoader.item.activeVehicle = topStatusPanel._veh
-            flightModePopupLoader.item.statusPanel   = topStatusPanel
-
-            if (flightModePopupLoader.item.hasOwnProperty("reposition")) {
-                flightModePopupLoader.item.reposition()
-            }
-        }
+        flightModePopupLoader.setSource(_uiQrcBase + "TopStatusPanel_UcusRejimi.qml", {
+            anchorItem:   anchorItem,
+            topPanelItem: topStatusPanel,
+            hostPanel:    topStatusPanel,
+            statusPanel:  topStatusPanel
+        })
     }
 
     function closeFlightModePopup() {
         flightModePopupVisible = false
         flightModePopupAnchorItem = null
+        flightModePopupLoader.source = ""
     }
 
     function _clamp(v, lo, hi) { return Math.max(lo, Math.min(v, hi)) }
@@ -1624,30 +1622,11 @@ Item {
         parent: (_mw && _mw.contentItem) ? _mw.contentItem : topStatusPanel
         anchors.fill: parent
 
+        // The source is set by openFlightModePopup() with the panel's anchor as initial
+        // properties: set after an asynchronous load, the card would first show at the
+        // left edge and then jump under the "Uçuş Rejimi" card.
         active: topStatusPanel.flightModePopupVisible
         asynchronous: true
-        source: _uiQrcBase + "TopStatusPanel_UcusRejimi.qml"
-
-        onLoaded: {
-            if (!item) return
-
-            if (item.hasOwnProperty("anchorItem"))
-                item.anchorItem = topStatusPanel.flightModePopupAnchorItem
-
-            if (item.hasOwnProperty("topPanelItem"))
-                item.topPanelItem = topStatusPanel
-
-            if (item.hasOwnProperty("hostPanel"))
-                item.hostPanel = topStatusPanel
-
-            if (item.hasOwnProperty("statusPanel"))
-                item.statusPanel = topStatusPanel
-
-            item.statusPanel = topStatusPanel
-
-            if (item.hasOwnProperty("reposition"))
-                item.reposition()
-        }
     }
 
 

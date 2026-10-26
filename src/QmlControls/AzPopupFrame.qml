@@ -39,12 +39,12 @@ Item {
     property real _barBottom: 0
     property real _leftBound: _edge
     // The card stays hidden until it has been placed under its button. A Loader (an
-    // asynchronous one above all) shows the panel before it has a size or an anchor,
-    // and the card would flash at the left edge for a frame.
+    // asynchronous one above all) shows the panel before it has a size, an anchor and
+    // the top bar, and the card would flash at the left edge or over the bar.
     property bool _placed: false
 
     function reposition() {
-        if (!visible || width <= 0 || (!anchorItem && !placeTimer.expired)) {
+        if (!visible || width <= 0 || ((!anchorItem || !topPanelItem) && !placeTimer.expired)) {
             return
         }
 
@@ -70,12 +70,13 @@ Item {
     onWidthChanged:         reposition()
     onHeightChanged:        reposition()
     onAnchorItemChanged:    { reposition(); Qt.callLater(reposition) }
-    onTopPanelItemChanged:  reposition()
+    onTopPanelItemChanged:  { reposition(); Qt.callLater(reposition) }
 
-    // A panel opened without a button is placed at the left edge once this runs out.
+    // A panel opened without a button or top bar is placed anyway once this runs out.
+    // It is long enough for a slow (Debug) asynchronous load to hand its anchor over.
     Timer {
         id:       placeTimer
-        interval: 150
+        interval: 1000
         property bool expired: false
         onTriggered: { expired = true; root.reposition() }
         function arm() { expired = false; restart() }
