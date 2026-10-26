@@ -12,6 +12,7 @@ AzPopupFrame {
     id: root
 
     title: qsTr("Batareya Tənzimləmələri")
+    cardWidth: AzTheme.px(AzTheme.popupWideWidth)
 
     onCloseRequested: close()
 

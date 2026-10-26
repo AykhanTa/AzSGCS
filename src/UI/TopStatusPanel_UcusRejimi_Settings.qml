@@ -12,6 +12,7 @@ AzPopupFrame {
     id: root
 
     title: qsTr("Uçuş Rejimi Tənzimləmələri")
+    cardWidth: AzTheme.px(AzTheme.popupWideWidth)
 
     onCloseRequested: close()
 

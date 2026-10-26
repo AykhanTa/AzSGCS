@@ -7,7 +7,6 @@ AzPopupFrame {
     id: overlay
 
     title:     qsTr("RC Siqnalı")
-    cardWidth: AzTheme.px(AzTheme.popupWidth)
 
     onCloseRequested: closePopup()
 

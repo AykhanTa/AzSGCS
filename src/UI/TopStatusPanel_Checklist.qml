@@ -8,7 +8,7 @@ AzPopupFrame {
     id: root
 
     title:     qsTr("Uçuşdan əvvəl yoxlama")
-    cardWidth: AzTheme.px(480)
+    cardWidth: AzTheme.px(AzTheme.popupWideWidth)
 
     onCloseRequested: closePanel()
 

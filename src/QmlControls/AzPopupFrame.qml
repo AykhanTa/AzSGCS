@@ -38,9 +38,13 @@ Item {
     readonly property real _edge: AzTheme.px(12)
     property real _barBottom: 0
     property real _leftBound: _edge
+    // The card stays hidden until it has been placed under its button. A Loader (an
+    // asynchronous one above all) shows the panel before it has a size or an anchor,
+    // and the card would flash at the left edge for a frame.
+    property bool _placed: false
 
     function reposition() {
-        if (!visible) {
+        if (!visible || width <= 0 || (!anchorItem && !placeTimer.expired)) {
             return
         }
 
@@ -50,14 +54,32 @@ Item {
         var x = anchorItem ? anchorItem.mapToItem(root, 0, 0).x : _leftBound
         card.x = Math.round(Math.max(_leftBound, Math.min(x, width - card.width - _edge)))
         card.y = Math.round(_barBottom + AzTheme.px(AzTheme.popupDrop))
+        _placed = true
     }
 
-    Component.onCompleted:  Qt.callLater(reposition)
-    onVisibleChanged:       if (visible) Qt.callLater(reposition)
-    onWidthChanged:         Qt.callLater(reposition)
-    onHeightChanged:        Qt.callLater(reposition)
-    onAnchorItemChanged:    Qt.callLater(reposition)
-    onTopPanelItemChanged:  Qt.callLater(reposition)
+    Component.onCompleted:  { reposition(); placeTimer.arm() }
+    onVisibleChanged: {
+        if (visible) {
+            reposition()
+            Qt.callLater(reposition)
+            placeTimer.arm()
+        } else {
+            _placed = false
+        }
+    }
+    onWidthChanged:         reposition()
+    onHeightChanged:        reposition()
+    onAnchorItemChanged:    { reposition(); Qt.callLater(reposition) }
+    onTopPanelItemChanged:  reposition()
+
+    // A panel opened without a button is placed at the left edge once this runs out.
+    Timer {
+        id:       placeTimer
+        interval: 150
+        property bool expired: false
+        onTriggered: { expired = true; root.reposition() }
+        function arm() { expired = false; restart() }
+    }
 
     // Two-finger gestures over the panel must not zoom the map underneath.
     PinchHandler {
@@ -80,13 +102,14 @@ Item {
     }
 
     Item {
-        id:     card
-        width:  Math.min(root.cardWidth, root.width - root._leftBound - root._edge)
+        id:      card
+        visible: root._placed
+        width:   Math.min(root.cardWidth, root.width - root._leftBound - root._edge)
         height: Math.min(root.maxCardHeight,
                          root.height - y - root._edge,
                          flick.y + body.implicitHeight + root._pad)
 
-        onWidthChanged: Qt.callLater(root.reposition)
+        onWidthChanged: root.reposition()
 
         RectangularShadow {
             anchors.fill: cardBackground

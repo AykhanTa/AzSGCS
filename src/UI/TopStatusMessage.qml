@@ -13,7 +13,7 @@ AzPopupFrame {
     panelVisible: false
     topPanelItem: statusPanelItem
     title:        qsTr("Status")
-    cardWidth:    AzTheme.px(480)
+    cardWidth:    AzTheme.px(AzTheme.popupWideWidth)
 
     onCloseRequested: close()
 

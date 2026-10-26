@@ -94,7 +94,8 @@ QtObject {
     // No CSS for these yet: colours are sampled from the mock-ups, lengths measured on
     // them and then tightened a little on request (padding, rows, pills, buttons). The
     // card uses the panel gradient; groups are flat #191D20 boxes split by 1 px lines.
-    readonly property real  popupWidth:      578
+    readonly property real  popupWidth:      400     // the info panels (RC, GPS, Batareya)
+    readonly property real  popupWideWidth:  480     // Status, Yoxlama and the settings panels
     readonly property real  popupMaxHeight:  640
     readonly property real  popupRadius:     12
     readonly property real  popupPadding:    16

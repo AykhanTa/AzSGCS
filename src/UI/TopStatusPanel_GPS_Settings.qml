@@ -9,6 +9,7 @@ AzPopupFrame {
     id: overlay
 
     title: qsTr("RTK GPS Tənzimləmələri")
+    cardWidth: AzTheme.px(AzTheme.popupWideWidth)
 
     onCloseRequested: {
         if (typeof settingsLoader !== "undefined" && settingsLoader) {
