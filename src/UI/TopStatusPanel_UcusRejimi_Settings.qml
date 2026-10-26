@@ -65,27 +65,32 @@ AzPopupFrame {
                 property real prevValue: 0
 
                 onClicked: {
-                    if (!limit.fact) {
+                    var slider = limitSliderLoader.item as FactSlider
+                    if (!limit.fact || !slider) {
                         return
                     }
                     if (checked) {
-                        limitSlider.setValue(prevValue !== 0 ? prevValue : limitSlider.to)
+                        slider.setValue(prevValue !== 0 ? prevValue : slider.to)
                     } else {
-                        prevValue = limitSlider.value
-                        limitSlider.setValue(0)
+                        prevValue = slider.value
+                        slider.setValue(0)
                     }
                 }
             }
         }
 
-        FactSlider {
-            id:                limitSlider
-            Layout.fillWidth:  true
-            fact:              limit.fact
-            visible:           limit.fact !== null
-            to:                limit.to
-            majorTickStepSize: limit.tickStep
-            enabled:           limit.fact && limit.fact.value > 0
+        // Built only when the parameter exists: without it the slider has no limits.
+        Loader {
+            id:               limitSliderLoader
+            Layout.fillWidth: true
+            active:           limit.fact !== null
+
+            sourceComponent: FactSlider {
+                fact:              limit.fact
+                to:                limit.to
+                majorTickStepSize: limit.tickStep
+                enabled:           limit.fact && limit.fact.value > 0
+            }
         }
     }
 
@@ -111,21 +116,28 @@ AzPopupFrame {
         visible: _activeVehicle && _px4
 
         Item {
-            width:  parent.width
-            height: rtlSlider.implicitHeight + 2 * root._groupPad
+            id:      rtlRow
+            width:   parent.width
+            height:  rtlSliderLoader.height + 2 * root._groupPad
+            visible: rtlFact !== null
 
-            FactSlider {
-                id:                rtlSlider
-                x:                 root._groupPad
-                y:                 root._groupPad
-                width:             parent.width - 2 * root._groupPad
-                label:             qsTr("RTL Hündürlüyü")
-                fact:              controller.getParameterFact(-1, "RTL_RETURN_ALT", false)
-                visible:           fact !== null
-                to:                (fact && fact.maxIsDefaultForType)
-                                   ? QGroundControl.unitsConversion.metersToAppSettingsVerticalDistanceUnits(121.92)
-                                   : (fact ? fact.max : 100)
-                majorTickStepSize: 10
+            property var rtlFact: controller.getParameterFact(-1, "RTL_RETURN_ALT", false)
+
+            Loader {
+                id:     rtlSliderLoader
+                x:      root._groupPad
+                y:      root._groupPad
+                width:  parent.width - 2 * root._groupPad
+                active: rtlRow.rtlFact !== null
+
+                sourceComponent: FactSlider {
+                    label:             qsTr("RTL Hündürlüyü")
+                    fact:              rtlRow.rtlFact
+                    to:                rtlRow.rtlFact.maxIsDefaultForType
+                                       ? QGroundControl.unitsConversion.metersToAppSettingsVerticalDistanceUnits(121.92)
+                                       : rtlRow.rtlFact.max
+                    majorTickStepSize: 10
+                }
             }
         }
     }

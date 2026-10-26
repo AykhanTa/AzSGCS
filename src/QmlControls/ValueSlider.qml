@@ -62,7 +62,13 @@ Control {
     property real   _firstTickPixelOffset:  _indicatorCenterPos - ((from - _majorTickMinValue) / _sliderValuePerPixel)
     property real   _firstPixelValue:       _majorTickMinValue - (_firstTickPixelOffset * _sliderValuePerPixel)
 
-    property int     _cMajorTicks: (_majorTickMaxValue - _majorTickMinValue) / majorTickStepSize + 1
+    // A Fact without real limits (a missing parameter falls back to the type's range)
+    // would ask the Repeaters for hundreds of millions of ticks and hang the UI.
+    readonly property int _maxMajorTicks: 1000
+    property int     _cMajorTicks: {
+        var count = (_majorTickMaxValue - _majorTickMinValue) / majorTickStepSize + 1
+        return (isFinite(count) && count > 0 && count <= _maxMajorTicks) ? count : 0
+    }
 
     // Calculate the slider width such that we can flick through the full range of the slider
     property real   _sliderContentSize: ((to - _firstPixelValue) / _sliderValuePerPixel) + (background.width - _indicatorCenterPos)
