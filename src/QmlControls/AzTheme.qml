@@ -117,9 +117,14 @@ QtObject {
     readonly property color buttonBottom:    "#1F2225"
     readonly property color buttonBorder:    "#3E4347"
     readonly property real  buttonHeight:    36
-    readonly property color dangerTop:       "#5A1F24"
-    readonly property color dangerBottom:    "#3A1418"
-    readonly property color dangerBorder:    "#8C2A31"
+    // The ammunition panel's red "At" button.
+    readonly property color dangerTop:         "#CD2B35"
+    readonly property color dangerBottom:      "#AD151F"
+    readonly property color dangerBorder:      "#E04650"
+    readonly property color dangerHoverBorder: "#F27A81"
+    // Ammunition slot rings
+    readonly property color slotReady:         "#0E9F7A"
+    readonly property color slotEmpty:         "#3A3F44"
     // Problems and messages: errors are statusRed, warnings this yellow, and the
     // parameter link in a problem's description the pale one.
     readonly property color warningText:     "#E3D21A"

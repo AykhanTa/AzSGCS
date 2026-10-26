@@ -585,7 +585,7 @@ ApplicationWindow {
         id: bottomCenterStatusPanel
         z: 85
 
-        width: Math.min(500, contentArea.width - 24)
+        width: Math.min(AzTheme.px(603), contentArea.width - 24)
 
         anchors.horizontalCenter: contentArea.horizontalCenter
         anchors.bottom: contentArea.bottom
