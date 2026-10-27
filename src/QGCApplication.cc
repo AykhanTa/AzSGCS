@@ -29,6 +29,7 @@
 
 #include "ExternalPositionManager.h"
 #include "SkydroidGimbalController.h"
+#include "AmmoLauncherController.h"
 
 #include "QGCLogging.h"
 #include "AudioOutput.h"
@@ -350,6 +351,22 @@ void QGCApplication::_initForNormalAppBoot()
             // activeVehicleChanged only fires on a change, so a vehicle that is
             // already active by the time we get here would never be picked up.
             skydroidGimbal->setVehicle(MultiVehicleManager::instance()->activeVehicle());
+
+            // The ammunition launcher under the vehicle. It talks its own 5 byte protocol
+            // through MAVLink TUNNEL messages and follows the active vehicle.
+            auto *ammoLauncher = new AmmoLauncherController(this);
+            _qmlAppEngine->rootContext()->setContextProperty(
+                "ammoLauncher", ammoLauncher);
+
+            QObject::connect(
+                MultiVehicleManager::instance(),
+                &MultiVehicleManager::activeVehicleChanged,
+                this,
+                [ammoLauncher](Vehicle *v) {
+                    ammoLauncher->setVehicle(v);
+                }
+                );
+            ammoLauncher->setVehicle(MultiVehicleManager::instance()->activeVehicle());
 
 
             // Image provider for Optical Flow

@@ -105,6 +105,7 @@ target_include_directories(QGroundControlModule PRIVATE
 )
 
 add_subdirectory(ADSB)
+add_subdirectory(AmmoLauncher)
 add_subdirectory(AnalyzeView)
 add_subdirectory(Android)
 add_subdirectory(API)

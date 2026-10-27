@@ -84,6 +84,9 @@ add_qgc_test(NTRIPSourceTableControllerTest)
 add_qgc_test(NTRIPConnectionStatsTest)
 add_qgc_test(NTRIPGgaProviderTest)
 
+add_subdirectory(AmmoLauncher)
+add_qgc_test(AmmoLauncherTest)
+
 add_subdirectory(Gimbal)
 add_qgc_test(SkydroidGimbalTest)
 

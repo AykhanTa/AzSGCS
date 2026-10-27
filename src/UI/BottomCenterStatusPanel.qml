@@ -8,16 +8,24 @@ import QGroundControl.Controls
 ///
 /// Collapsed it is the design's AmmunitionPanel: an 80x40 pill with an arrow, the
 /// panel gradient, radius 17 and a deep shadow. Open, it is the "Mərmi" mock-up: a
-/// 603x217 card with the arrow on top, the title and count, ten slots drawn as two
-/// thin rings around a dark disc, and the actions on the right with a red "At".
+/// 603x217 card with the arrow on top, the title and count, the launcher's state and
+/// its ARM button, the slots drawn as two thin rings around a dark disc (two rows of
+/// 4, 5 or 6), and the actions on the right with a red "At".
 Item {
     id: root
 
-    property var statusStates: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    property bool expanded: false
+    /// The AmmoLauncherController ("ammoLauncher"). The launcher's heartbeat gives the
+    /// slot count (8, 10 or 12); the slots, arming and firing all go through it.
+    property var    launcher: null
+    property bool   expanded: false
     property string panelTitle: "Status Panel"
 
-    readonly property int totalSlots: 10
+    readonly property int  totalSlots:   launcher ? launcher.slotCount : 0
+    readonly property var  statusStates: launcher ? launcher.slotStates : []
+    readonly property bool connected:    !!launcher && launcher.connected
+    readonly property bool armed:        !!launcher && launcher.armed
+    readonly property bool busy:         !!launcher && launcher.busy
+    readonly property int  columns:      Math.max(1, Math.ceil(totalSlots / 2))
 
     readonly property real pillWidth:   AzTheme.px(80)
     readonly property real pillHeight:  AzTheme.px(40)
@@ -25,71 +33,41 @@ Item {
     readonly property real ringSize:    AzTheme.px(44)
     readonly property real innerSize:   AzTheme.px(35)
 
-    readonly property int availableCount: {
-        if (!statusStates) return 0
-        var count = 0
-        for (var i = 0; i < totalSlots; i++) {
-            if (i < statusStates.length && statusStates[i] !== 2) count++
-        }
-        return count
-    }
-
-    readonly property bool hasSelected: {
-        if (!statusStates) return false
-        for (var i = 0; i < totalSlots; i++) {
-            if (i < statusStates.length && statusStates[i] === 1) return true
-        }
-        return false
-    }
+    readonly property int availableCount: _countOf(0) + _countOf(1)
+    readonly property bool hasSelected:   _countOf(1) > 0
+    readonly property bool hasReady:      _countOf(0) > 0
 
     width: 603
     height: expanded ? panelHeight : pillHeight
     implicitWidth: width
     implicitHeight: height
 
+    function _countOf(stateValue) {
+        var count = 0
+        for (var i = 0; i < statusStates.length; i++) {
+            if (statusStates[i] === stateValue) count++
+        }
+        return count
+    }
+
     function _stateAt(index) {
         if (!statusStates || index < 0 || index >= statusStates.length) return 2
         return statusStates[index]
     }
 
-    // 0 ready, 1 selected to fire, 2 empty
+    // 0 ready, 1 selected to fire, 2 empty (fired)
     function _ringColor(stateValue) {
         if (stateValue === 1) return AzTheme.statusRed
         if (stateValue === 2) return AzTheme.slotEmpty
         return AzTheme.slotReady
     }
 
-    // ← DƏYİŞDİRİLDİ: boş slot (2) klikləndikdə heç nə etmə
-    function _cycleState(index) {
-        var newStates = []
-        for (var i = 0; i < statusStates.length; i++) newStates.push(statusStates[i])
-        var current = newStates[index]
-        if (current === 0)      newStates[index] = 1
-        else if (current === 1) newStates[index] = 2
-        // state === 2 isə — toxunma
-        statusStates = newStates
-    }
-
-    // ← DƏYİŞDİRİLDİ: boş (2) slotları keçmə
-    function selectAll() {
-        var newStates = []
-        for (var i = 0; i < statusStates.length; i++)
-            newStates.push(statusStates[i] === 2 ? 2 : 1)
-        statusStates = newStates
-    }
-
-    function unselectAll() {
-        var newStates = []
-        for (var i = 0; i < statusStates.length; i++)
-            newStates.push(statusStates[i] === 1 ? 0 : statusStates[i])
-        statusStates = newStates
-    }
-
-    function discardSelected() {
-        var newStates = []
-        for (var i = 0; i < statusStates.length; i++)
-            newStates.push(statusStates[i] === 1 ? 2 : statusStates[i])
-        statusStates = newStates
+    // Red armed, green ready to arm, orange on the ground, grey without the launcher.
+    function _statusColor() {
+        if (!connected) return AzTheme.mutedText
+        if (armed)      return AzTheme.statusRed
+        if (!launcher.flying) return AzTheme.statusOrange
+        return AzTheme.statusGreen
     }
 
     /// Panel gradient card with the AmmunitionPanel shadow and top highlight.
@@ -177,6 +155,18 @@ Item {
 
         HoverHandler { id: pillHover }
 
+        // The launcher is armed: visible even with the panel closed.
+        Rectangle {
+            anchors.right:          parent.right
+            anchors.rightMargin:    AzTheme.px(12)
+            anchors.verticalCenter: parent.verticalCenter
+            width:                  Math.max(6, AzTheme.px(8))
+            height:                 width
+            radius:                 width / 2
+            color:                  AzTheme.statusRed
+            visible:                root.armed
+        }
+
         ArrowButton {
             anchors.fill: parent
             onClicked:    root.expanded = true
@@ -210,28 +200,17 @@ Item {
             onClicked:                root.expanded = false
         }
 
-        // ─── Title and count ───
-        Text {
-            x:                      AzTheme.px(20)
-            anchors.verticalCenter: parent.top
-            anchors.verticalCenterOffset: AzTheme.px(57)
-            text:                   root.panelTitle
-            color:                  AzTheme.textCard
-            font.family:            AzTheme.fontFamily
-            font.weight:            Font.Medium
-            font.pixelSize:         AzTheme.fontPx(16)
-        }
-
+        // ─── Title, count, launcher state and ARM ───
         Row {
-            anchors.right:                parent.right
-            anchors.rightMargin:          AzTheme.px(24)
+            x:                            AzTheme.px(20)
             anchors.verticalCenter:       parent.top
             anchors.verticalCenterOffset: AzTheme.px(57)
             spacing:                      AzTheme.px(3)
 
             Text {
-                id:             countText
-                text:           root.availableCount.toString()
+                id:             titleText
+                rightPadding:   AzTheme.px(7)
+                text:           root.panelTitle
                 color:          AzTheme.textCard
                 font.family:    AzTheme.fontFamily
                 font.weight:    Font.Medium
@@ -239,7 +218,18 @@ Item {
             }
 
             Text {
-                anchors.baseline: countText.baseline
+                anchors.baseline: titleText.baseline
+                visible:          root.totalSlots > 0
+                text:             root.availableCount.toString()
+                color:            AzTheme.textCard
+                font.family:      AzTheme.fontFamily
+                font.weight:      Font.Medium
+                font.pixelSize:   AzTheme.fontPx(16)
+            }
+
+            Text {
+                anchors.baseline: titleText.baseline
+                visible:          root.totalSlots > 0
                 text:             "/" + root.totalSlots
                 color:            AzTheme.textSecondary
                 font.family:      AzTheme.fontFamily
@@ -247,100 +237,161 @@ Item {
             }
         }
 
+        Row {
+            anchors.right:                parent.right
+            anchors.rightMargin:          AzTheme.px(24)
+            anchors.verticalCenter:       parent.top
+            anchors.verticalCenterOffset: AzTheme.px(57)
+            spacing:                      AzTheme.px(12)
+
+            Row {
+                anchors.verticalCenter: parent.verticalCenter
+                spacing:                AzTheme.px(6)
+
+                Rectangle {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width:                  Math.max(6, AzTheme.px(8))
+                    height:                 width
+                    radius:                 width / 2
+                    color:                  root._statusColor()
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text:                   root.launcher ? root.launcher.statusText : qsTr("Qoşulmayıb")
+                    color:                  AzTheme.textSecondary
+                    font.family:            AzTheme.fontFamily
+                    font.pixelSize:         AzTheme.fontPx(13)
+                }
+            }
+
+            // The launcher's own arming, not the vehicle's. ARM only in flight; DISARM
+            // stays available whenever the launcher is armed.
+            AzButton {
+                anchors.verticalCenter: parent.verticalCenter
+                width:     AzTheme.px(153)
+                height:    AzTheme.px(32)
+                text:      root.armed ? qsTr("DISARM") : qsTr("ARM")
+                danger:    root.armed
+                enabled:   root.armed || (!!root.launcher && root.launcher.canArm)
+                onClicked: root.armed ? root.launcher.disarm() : root.launcher.arm()
+            }
+        }
+
         // ─── Slots and actions ───
         RowLayout {
             x:       AzTheme.px(20)
-            y:       AzTheme.px(74)
+            y:       AzTheme.px(80)
             width:   parent.width - AzTheme.px(20) - AzTheme.px(24)
             spacing: AzTheme.px(16)
 
-            GridLayout {
-                Layout.fillWidth: true
-                columns:          5
-                columnSpacing:    0
-                rowSpacing:       0
+            Item {
+                Layout.fillWidth:       true
+                Layout.preferredHeight: AzTheme.px(128)
 
-                Repeater {
-                    model: root.totalSlots
+                Text {
+                    anchors.centerIn:    parent
+                    width:               parent.width
+                    visible:             root.totalSlots === 0
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode:            Text.WordWrap
+                    text:                qsTr("Buraxıcı qoşulmayıb")
+                    color:               AzTheme.mutedText
+                    font.family:         AzTheme.fontFamily
+                    font.pixelSize:      AzTheme.fontPx(14)
+                }
 
-                    Item {
-                        id: slot
+                GridLayout {
+                    anchors.fill:  parent
+                    visible:       root.totalSlots > 0
+                    opacity:       root.connected ? 1 : 0.45
+                    columns:       root.columns
+                    columnSpacing: 0
+                    rowSpacing:    0
 
-                        required property int index
-                        readonly property int  slotState: root._stateAt(index)
-                        readonly property color ringColor: root._ringColor(slotState)
-
-                        Layout.fillWidth:       true
-                        Layout.preferredHeight: AzTheme.px(64)
+                    Repeater {
+                        model: root.totalSlots
 
                         Item {
-                            id:               rings
-                            anchors.centerIn: parent
-                            width:            root.ringSize
-                            height:           width
+                            id: slot
 
-                            // Soft glow just outside the outer ring
-                            Rectangle {
+                            required property int index
+                            readonly property int   slotState: root._stateAt(index)
+                            readonly property color ringColor: root._ringColor(slotState)
+                            readonly property bool  clickable: root.connected && !root.busy && slotState !== 2
+
+                            Layout.fillWidth:       true
+                            Layout.preferredHeight: AzTheme.px(64)
+
+                            Item {
+                                id:               rings
                                 anchors.centerIn: parent
-                                width:            parent.width + AzTheme.px(6)
+                                width:            root.ringSize
                                 height:           width
-                                radius:           width / 2
-                                color:            Qt.rgba(slot.ringColor.r, slot.ringColor.g, slot.ringColor.b, 0.10)
-                                visible:          slot.slotState !== 2
-                            }
 
-                            Rectangle {
-                                anchors.fill: parent
-                                radius:       width / 2
-                                color:        "transparent"
-                                border.width: Math.max(1, AzTheme.px(1.5))
-                                border.color: slot.ringColor
-                            }
+                                // Soft glow just outside the outer ring
+                                Rectangle {
+                                    anchors.centerIn: parent
+                                    width:            parent.width + AzTheme.px(6)
+                                    height:           width
+                                    radius:           width / 2
+                                    color:            Qt.rgba(slot.ringColor.r, slot.ringColor.g, slot.ringColor.b, 0.10)
+                                    visible:          slot.slotState !== 2
+                                }
 
-                            Rectangle {
-                                anchors.centerIn: parent
-                                width:            root.innerSize
-                                height:           width
-                                radius:           width / 2
-                                border.width:     Math.max(1, AzTheme.px(1.5))
-                                border.color:     slot.ringColor
-                                gradient: Gradient {
-                                    GradientStop { position: 0; color: "#23272B" }
-                                    GradientStop { position: 1; color: "#16191C" }
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius:       width / 2
+                                    color:        "transparent"
+                                    border.width: Math.max(1, AzTheme.px(1.5))
+                                    border.color: slot.ringColor
+                                }
+
+                                Rectangle {
+                                    anchors.centerIn: parent
+                                    width:            root.innerSize
+                                    height:           width
+                                    radius:           width / 2
+                                    border.width:     Math.max(1, AzTheme.px(1.5))
+                                    border.color:     slot.ringColor
+                                    gradient: Gradient {
+                                        GradientStop { position: 0; color: "#23272B" }
+                                        GradientStop { position: 1; color: "#16191C" }
+                                    }
+                                }
+
+                                // Selected slots blink until they are unselected or fired.
+                                SequentialAnimation on opacity {
+                                    running:        slot.slotState === 1
+                                    loops:          Animation.Infinite
+                                    alwaysRunToEnd: false
+                                    NumberAnimation { to: 0.35; duration: 500 }
+                                    NumberAnimation { to: 1.00; duration: 500 }
+                                }
+
+                                Connections {
+                                    target: slot
+                                    function onSlotStateChanged() {
+                                        if (slot.slotState !== 1) rings.opacity = 1
+                                    }
                                 }
                             }
 
-                            // Selected slots blink until they are kept or fired.
-                            SequentialAnimation on opacity {
-                                running:        slot.slotState === 1
-                                loops:          Animation.Infinite
-                                alwaysRunToEnd: false
-                                NumberAnimation { to: 0.35; duration: 500 }
-                                NumberAnimation { to: 1.00; duration: 500 }
+                            Text {
+                                anchors.centerIn: rings
+                                text:             (slot.index + 1 < 10 ? "0" : "") + (slot.index + 1)
+                                color:            slot.slotState === 2 ? AzTheme.mutedText : AzTheme.textCard
+                                font.family:      AzTheme.fontFamily
+                                font.weight:      Font.Medium
+                                font.pixelSize:   AzTheme.fontPx(13)
                             }
 
-                            Connections {
-                                target: slot
-                                function onSlotStateChanged() {
-                                    if (slot.slotState !== 1) rings.opacity = 1
-                                }
+                            MouseArea {
+                                anchors.fill: rings
+                                enabled:      slot.clickable
+                                cursorShape:  slot.clickable ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                onClicked:    root.launcher.toggleSlot(slot.index)
                             }
-                        }
-
-                        Text {
-                            anchors.centerIn: rings
-                            text:             (slot.index + 1 < 10 ? "0" : "") + (slot.index + 1)
-                            color:            slot.slotState === 2 ? AzTheme.mutedText : AzTheme.textCard
-                            font.family:      AzTheme.fontFamily
-                            font.weight:      Font.Medium
-                            font.pixelSize:   AzTheme.fontPx(13)
-                        }
-
-                        // ← DƏYİŞDİRİLDİ: boş slot kliklənsə heç nə etmə
-                        MouseArea {
-                            anchors.fill: rings
-                            cursorShape:  slot.slotState === 2 ? Qt.ArrowCursor : Qt.PointingHandCursor
-                            onClicked:    if (slot.slotState !== 2) root._cycleState(slot.index)
                         }
                     }
                 }
@@ -357,27 +408,28 @@ Item {
                     Layout.fillWidth:       true
                     Layout.preferredHeight: AzTheme.px(34)
                     text:      qsTr("Hamısını Seç")
-                    onClicked: root.selectAll()
+                    enabled:   root.connected && !root.busy && root.hasReady
+                    onClicked: root.launcher.selectAll()
                 }
 
-                // Atma (warning → ready)
+                // Atma: the selection goes back to ready
                 AzButton {
                     Layout.fillWidth:       true
                     Layout.preferredHeight: AzTheme.px(34)
                     text:      qsTr("Atma")
-                    enabled:   root.hasSelected
-                    onClicked: root.unselectAll()
+                    enabled:   !root.busy && root.hasSelected
+                    onClicked: root.launcher.clearSelection()
                 }
 
-                // At (warning → empty)
+                // At: only while the launcher is armed
                 AzButton {
                     Layout.fillWidth:       true
                     Layout.preferredHeight: AzTheme.px(34)
                     text:       qsTr("At")
                     iconSource: "qrc:/res/AZSHIELD_ICON/v2/ammo_fire.svg"
                     danger:     true
-                    enabled:    root.hasSelected
-                    onClicked:  root.discardSelected()
+                    enabled:    !!root.launcher && root.launcher.canFire
+                    onClicked:  root.launcher.fire()
                 }
             }
         }

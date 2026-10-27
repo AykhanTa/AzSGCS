@@ -15,6 +15,9 @@
 #include "ADSBTest.h"
 #include "SkydroidGimbalTest.h"
 
+// AmmoLauncher
+#include "AmmoLauncherTest.h"
+
 // AnalyzeView
 #include "ExifParserTest.h"
 // #include "GeoTagControllerTest.h"
@@ -132,6 +135,9 @@ int QGCUnitTest::runTests(bool stress, const QStringList& unitTests)
     // ADSB
     UT_REGISTER_TEST(ADSBTest)
     UT_REGISTER_TEST(SkydroidGimbalTest)
+
+    // AmmoLauncher
+    UT_REGISTER_TEST(AmmoLauncherTest)
 
     // AnalyzeView
     UT_REGISTER_TEST(ExifParserTest)

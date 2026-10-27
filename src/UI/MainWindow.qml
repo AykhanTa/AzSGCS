@@ -226,7 +226,6 @@ ApplicationWindow {
     property bool isFlyViewActive: false
     property bool showMultiVehiclePanel: true
 
-    property var bottomCenterPanelStates: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
     readonly property real _topBottomMargins: ScreenTools.defaultFontPixelHeight * 0.5
 
@@ -594,7 +593,13 @@ ApplicationWindow {
         visible: flyView.visible && !planView.visible && !overlayOpen && !toolDrawer.visible
 
         panelTitle: qsTr("Mərmi")
-        statusStates: mainWindow.bottomCenterPanelStates
+        launcher:   typeof ammoLauncher !== "undefined" ? ammoLauncher : null
+    }
+
+    // Refused or unanswered launcher commands and a lost launcher link.
+    Connections {
+        target: typeof ammoLauncher !== "undefined" ? ammoLauncher : null
+        function onCommandFailed(message) { mainWindow.showCriticalVehicleMessage(message) }
     }
 
     MessageDialog {
