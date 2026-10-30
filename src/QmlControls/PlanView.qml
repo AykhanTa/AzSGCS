@@ -209,6 +209,74 @@ Item {
     // item editors take the new design's look (see QGCTextField._az).
     readonly property bool azInputStyle: true
 
+    // Terrain profile / mission statistics / hide, as small map buttons: the card
+    // gradient, the side menu's selected box on the one showing.
+    // A row of the Fayl panel's file and vehicle actions
+    component ActionRow: MissionMenuButton {
+        Layout.fillWidth:       true
+        Layout.preferredHeight: AzTheme.px(38)
+    }
+
+    component StatusButton: Item {
+        id: statusButton
+
+        property string iconSource
+        property bool   checked: false
+        property string toolTipText
+
+        signal clicked()
+
+        implicitWidth:  AzTheme.px(40)
+        implicitHeight: implicitWidth
+
+        AzGradientRect {
+            anchors.fill:  parent
+            visible:       !statusButton.checked
+            angle:         AzTheme.cardGradientAngle
+            startColor:    AzTheme.cardGradientStart
+            startPosition: AzTheme.cardGradientStartPos
+            endColor:      AzTheme.cardGradientEnd
+            endPosition:   AzTheme.cardGradientEndPos
+            radius:        AzTheme.px(AzTheme.menuSelectedRadius)
+            borderColor:   statusMouse.containsMouse ? AzTheme.cardHoverBorder : AzTheme.cardBorder
+            borderWidth:   1
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            visible:      statusButton.checked
+            radius:       AzTheme.px(AzTheme.menuSelectedRadius)
+            border.width: 1
+            border.color: AzTheme.menuSelectedBorder
+            gradient: Gradient {
+                GradientStop { position: 0; color: AzTheme.menuSelectedTop }
+                GradientStop { position: 1; color: AzTheme.menuSelectedBottom }
+            }
+        }
+
+        QGCColoredImage {
+            anchors.centerIn:  parent
+            width:             AzTheme.px(20)
+            height:            width
+            sourceSize.height: height
+            fillMode:          Image.PreserveAspectFit
+            source:            statusButton.iconSource
+            color:             statusButton.checked ? AzTheme.textPrimary : AzTheme.textCard
+        }
+
+        MouseArea {
+            id:           statusMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape:  Qt.PointingHandCursor
+            onClicked:    statusButton.clicked()
+        }
+
+        ToolTip.visible: statusMouse.containsMouse && toolTipText !== ""
+        ToolTip.text:    toolTipText
+        ToolTip.delay:   400
+    }
+
     // Sağ panelin yığılma vəziyyəti
     property bool planControlColapsed: false
 
@@ -1226,74 +1294,35 @@ Item {
             ColumnLayout {
                 id: missionStatsButtonLayout
                 Layout.alignment: Qt.AlignBottom
-                spacing: 0
+                Layout.rightMargin: AzTheme.px(6)
+                spacing: AzTheme.px(4)
 
-                property real _buttonImplicitWidth: ScreenTools.defaultFontPixelHeight * 1.5
-                property real _buttonImageMargins: _buttonImplicitWidth * 0.15
-
-                Rectangle {
+                StatusButton {
                     id: terrainButton
-                    implicitWidth: missionStatsButtonLayout._buttonImplicitWidth
-                    implicitHeight: implicitWidth
-                    color: checked ? qgcPal.buttonHighlight : qgcPal.button
-                    property bool checked: true
-
-                    QGCColoredImage {
-                        anchors.margins: missionStatsButtonLayout._buttonImageMargins
-                        anchors.fill: parent
-                        source: "/res/terrain.svg"
-                        color: parent.checked ? qgcPal.buttonHighlightText : qgcPal.buttonText
-                    }
-
-                    QGCMouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            terrainButton.checked = true
-                            missionStatsButton.checked = false
-                        }
+                    iconSource:  "qrc:/res/AZSHIELD_ICON/v2/plan_terrain.svg"
+                    toolTipText: qsTr("Relyef profili")
+                    checked:     true
+                    onClicked: {
+                        terrainButton.checked = true
+                        missionStatsButton.checked = false
                     }
                 }
 
-                Rectangle {
+                StatusButton {
                     id: missionStatsButton
-                    implicitWidth: missionStatsButtonLayout._buttonImplicitWidth
-                    implicitHeight: implicitWidth
-                    color: checked ? qgcPal.buttonHighlight : qgcPal.button
-                    property bool checked: false
-
-                    QGCColoredImage {
-                        anchors.margins: missionStatsButtonLayout._buttonImageMargins
-                        anchors.fill: parent
-                        source:"qrc:/res/AZSHIELD_ICON/sliders.svg"
-                        color: parent.checked ? qgcPal.buttonHighlightText : qgcPal.buttonText
-                    }
-
-                    QGCMouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            missionStatsButton.checked = true
-                            terrainButton.checked = false
-                        }
+                    iconSource:  "qrc:/res/AZSHIELD_ICON/v2/plan_stats.svg"
+                    toolTipText: qsTr("Missiya statistikası")
+                    onClicked: {
+                        missionStatsButton.checked = true
+                        terrainButton.checked = false
                     }
                 }
 
-                Rectangle {
+                StatusButton {
                     id: bottomStatusOpenCloseButton
-                    implicitWidth: missionStatsButtonLayout._buttonImplicitWidth
-                    implicitHeight: implicitWidth
-                    color: qgcPal.button
-
-                    QGCColoredImage {
-                        anchors.margins: missionStatsButtonLayout._buttonImageMargins
-                        anchors.fill: parent
-                        source:"qrc:/res/AZSHIELD_ICON/chevron-double-left.svg"
-                        color: qgcPal.buttonText
-                    }
-
-                    QGCMouseArea {
-                        anchors.fill: parent
-                        onClicked: missionStatus._toggleMissionStatusVisibility()
-                    }
+                    iconSource:  "qrc:/res/AZSHIELD_ICON/chevron-double-left.svg"
+                    toolTipText: qsTr("Gizlət")
+                    onClicked:   missionStatus._toggleMissionStatusVisibility()
                 }
             }
 
@@ -1517,32 +1546,37 @@ Item {
     Component {
         id: syncDropPanel
 
+        // The "Fayl" tool's panel: plan templates as small cards, then the file and
+        // vehicle actions as rows of the top bar's window menu.
         ColumnLayout {
             id: columnHolder
-            spacing: _margin
+            width: AzTheme.px(300)
+            spacing: AzTheme.px(8)
 
             property string _overwriteText: qsTr("Plan overwrite")
 
             Rectangle {
                 id: warningBackground
                 Layout.fillWidth: true
-                implicitHeight: warningLabel.implicitHeight + 16
+                implicitHeight: warningLabel.implicitHeight + AzTheme.px(20)
                 visible: _planMasterController.dirty
-                color: "#2A2A2A"
-                radius: 5
+                radius: AzTheme.px(AzTheme.groupRadius)
+                color: Qt.rgba(1, 159 / 255, 26 / 255, 0.10)
+                border.width: 1
+                border.color: Qt.rgba(1, 159 / 255, 26 / 255, 0.55)
 
-                QGCLabel {
+                Text {
                     id: warningLabel
                     anchors.fill: parent
-                    anchors.margins: 8
+                    anchors.margins: AzTheme.px(10)
                     wrapMode: Text.Wrap
-                    horizontalAlignment: Text.AlignLeft
                     verticalAlignment: Text.AlignVCenter
                     text: globals.activeVehicle ?
                           qsTr("Saxlanmamış dəyişiklikləriniz var. Siz təyyarənizə yükləməli və ya faylda saxlamalısınız.") :
                           qsTr("Saxlanmamış dəyişiklikləriniz var.")
-                    color: "white"
-                    font.pointSize: ScreenTools.defaultFontPointSize
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.pixelSize: AzTheme.fontPx(13)
                 }
             }
 
@@ -1556,73 +1590,62 @@ Item {
 
             GridLayout {
                 columns: 2
-                columnSpacing: _margin
-                rowSpacing: _margin
+                columnSpacing: AzTheme.px(8)
+                rowSpacing: AzTheme.px(8)
                 Layout.fillWidth: true
                 visible: createSection.checked
 
                 Repeater {
                     model: _planMasterController.planCreators
 
-                    Rectangle {
-                        id: button
-                        width: 140
-                        height: 155
-                        color: mouseArea.containsMouse ? "#3A3A3A" : "#2A2A2A"
-                        radius: 6
-                        border.color: mouseArea.containsMouse ? qgcPal.buttonHighlight : qgcPal.button
-                        border.width: mouseArea.containsMouse ? 1 : 0.5
+                    Item {
+                        id: creatorCard
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 1
+                        Layout.preferredHeight: AzTheme.px(150)
 
-                        Behavior on color { ColorAnimation { duration: 150 } }
-                        Behavior on border.color { ColorAnimation { duration: 150 } }
-                        Behavior on border.width { NumberAnimation { duration: 150 } }
-
-                        Rectangle {
-                            id: imageContainer
-                            width: 135
-                            height: 105
-                            anchors.top: parent.top
-                            anchors.topMargin: 2.5
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            color: "transparent"
-                            radius: 6
-
-                            Image {
-                                id: planCreatorImage
-                                anchors.fill: parent
-                                source: object.imageResource
-                                sourceSize.width: width
-                                sourceSize.height: height
-                                fillMode: Image.PreserveAspectFit
-                                mipmap: true
-                            }
+                        AzGradientRect {
+                            anchors.fill:  parent
+                            angle:         AzTheme.cardGradientAngle
+                            startColor:    AzTheme.cardGradientStart
+                            startPosition: AzTheme.cardGradientStartPos
+                            endColor:      AzTheme.cardGradientEnd
+                            endPosition:   AzTheme.cardGradientEndPos
+                            radius:        AzTheme.px(10)
+                            borderColor:   mouseArea.containsMouse ? AzTheme.cardHoverBorder : AzTheme.cardBorder
+                            borderWidth:   1
                         }
 
-                        Item {
-                            id: textContainer
-                            anchors.top: imageContainer.bottom
+                        Image {
+                            id: planCreatorImage
+                            anchors.top: parent.top
+                            anchors.topMargin: AzTheme.px(8)
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: parent.width - AzTheme.px(16)
+                            height: AzTheme.px(96)
+                            source: object.imageResource
+                            sourceSize.width: width
+                            sourceSize.height: height
+                            fillMode: Image.PreserveAspectFit
+                            mipmap: true
+                        }
+
+                        Text {
+                            anchors.top: planCreatorImage.bottom
                             anchors.bottom: parent.bottom
                             anchors.left: parent.left
                             anchors.right: parent.right
-                            anchors.margins: 4
-
-                            Column {
-                                id: textColumn
-                                anchors.centerIn: parent
-                                spacing: 2
-
-                                Repeater {
-                                    model: object.name.split(" ")
-
-                                    QGCLabel {
-                                        anchors.horizontalCenter: parent.horizontalCenter
-                                        text: modelData
-                                        color: mouseArea.containsMouse ? qgcPal.buttonHighlightText : qgcPal.buttonText
-                                        font.pointSize: ScreenTools.defaultFontPointSize
-                                        font.bold: true
-                                    }
-                                }
-                            }
+                            anchors.margins: AzTheme.px(6)
+                            text: object.name
+                            color: mouseArea.containsMouse ? AzTheme.textPrimary : AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(13)
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            wrapMode: Text.WordWrap
+                            maximumLineCount: 2
+                            elide: Text.ElideRight
                         }
 
                         QGCMouseArea {
@@ -1661,152 +1684,55 @@ Item {
             }
 
             ColumnLayout {
-                spacing: _margin
+                spacing: AzTheme.px(2)
                 Layout.fillWidth: true
                 visible: storageSection.checked
 
-                Rectangle {
-                    Layout.preferredWidth: 300
-                    Layout.preferredHeight: 42
-                    color: openButton.enabled ? "#2A2A2A" : "#1A1A1A"
-                    radius: 4
-                    border.width: 0.5
-                    border.color: openButton.enabled ? qgcPal.button : "#404040"
-
-                    QGCButton {
-                        id: openButton
-                        anchors.fill: parent
-                        anchors.margins: 1
-                        text: qsTr("Aç...")
-                        enabled: !_planMasterController.syncInProgress
-
-                        contentItem: QGCLabel {
-                            text: openButton.text
-                            color: openButton.enabled ? qgcPal.buttonText : "#808080"
-                            verticalAlignment: Text.AlignVCenter
-                            horizontalAlignment: Text.AlignLeft
-                            leftPadding: 12
-                            font.pointSize: ScreenTools.defaultFontPointSize
-                        }
-
-                        background: Rectangle { color: "transparent"; radius: 3 }
-
-                        onClicked: {
-                            dropPanel.hide()
-                            if (_planMasterController.dirty) {
-                                showLoadFromFileOverwritePrompt(columnHolder._overwriteText)
-                            } else {
-                                _planMasterController.loadFromSelectedFile()
-                            }
+                ActionRow {
+                    text: qsTr("Aç...")
+                    enabled: !_planMasterController.syncInProgress
+                    onClicked: {
+                        dropPanel.hide()
+                        if (_planMasterController.dirty) {
+                            showLoadFromFileOverwritePrompt(columnHolder._overwriteText)
+                        } else {
+                            _planMasterController.loadFromSelectedFile()
                         }
                     }
                 }
 
-                Rectangle {
-                    Layout.preferredWidth: 300
-                    Layout.preferredHeight: 42
-                    color: saveButton.enabled ? "#2A2A2A" : "#1A1A1A"
-                    radius: 4
-                    border.width: 0.5
-                    border.color: saveButton.enabled ? qgcPal.button : "#404040"
-
-                    QGCButton {
-                        id: saveButton
-                        anchors.fill: parent
-                        anchors.margins: 1
-                        text: qsTr("Saxla")
-                        enabled: !_planMasterController.syncInProgress && _planMasterController.currentPlanFile !== ""
-
-                        contentItem: QGCLabel {
-                            text: saveButton.text
-                            color: saveButton.enabled ? qgcPal.buttonText : "#808080"
-                            verticalAlignment: Text.AlignVCenter
-                            horizontalAlignment: Text.AlignLeft
-                            leftPadding: 12
-                            font.pointSize: ScreenTools.defaultFontPointSize
-                        }
-
-                        background: Rectangle { color: "transparent"; radius: 3 }
-
-                        onClicked: {
-                            dropPanel.hide()
-                            if(_planMasterController.currentPlanFile !== "") {
-                                _planMasterController.saveToCurrent()
-                            } else {
-                                _planMasterController.saveToSelectedFile()
-                            }
-                        }
-                    }
-                }
-
-                Rectangle {
-                    Layout.preferredWidth: 300
-                    Layout.preferredHeight: 42
-                    color: saveAsButton.enabled ? "#2A2A2A" : "#1A1A1A"
-                    radius: 4
-                    border.width: 0.5
-                    border.color: saveAsButton.enabled ? qgcPal.button : "#404040"
-
-                    QGCButton {
-                        id: saveAsButton
-                        anchors.fill: parent
-                        anchors.margins: 1
-                        text: qsTr("Fərqli saxla...")
-                        enabled: !_planMasterController.syncInProgress && _planMasterController.containsItems
-
-                        contentItem: QGCLabel {
-                            text: saveAsButton.text
-                            color: saveAsButton.enabled ? qgcPal.buttonText : "#808080"
-                            verticalAlignment: Text.AlignVCenter
-                            horizontalAlignment: Text.AlignLeft
-                            leftPadding: 12
-                            font.pointSize: ScreenTools.defaultFontPointSize
-                        }
-
-                        background: Rectangle { color: "transparent"; radius: 3 }
-
-                        onClicked: {
-                            dropPanel.hide()
+                ActionRow {
+                    text: qsTr("Saxla")
+                    enabled: !_planMasterController.syncInProgress && _planMasterController.currentPlanFile !== ""
+                    onClicked: {
+                        dropPanel.hide()
+                        if(_planMasterController.currentPlanFile !== "") {
+                            _planMasterController.saveToCurrent()
+                        } else {
                             _planMasterController.saveToSelectedFile()
                         }
                     }
                 }
 
-                Rectangle {
-                    Layout.preferredWidth: 300
-                    Layout.preferredHeight: 42
-                    color: saveKmlButton.enabled ? "#2A2A2A" : "#1A1A1A"
-                    radius: 4
-                    border.width: 0.5
-                    border.color: saveKmlButton.enabled ? qgcPal.button : "#404040"
+                ActionRow {
+                    text: qsTr("Fərqli saxla...")
+                    enabled: !_planMasterController.syncInProgress && _planMasterController.containsItems
+                    onClicked: {
+                        dropPanel.hide()
+                        _planMasterController.saveToSelectedFile()
+                    }
+                }
 
-                    QGCButton {
-                        id: saveKmlButton
-                        anchors.fill: parent
-                        anchors.margins: 1
-                        text: qsTr("Missiya yol nöqtələrini KML olaraq yadda saxlayın...")
-                        enabled: !_planMasterController.syncInProgress && _visualItems.count > 1
-
-                        contentItem: QGCLabel {
-                            text: saveKmlButton.text
-                            color: saveKmlButton.enabled ? qgcPal.buttonText : "#808080"
-                            verticalAlignment: Text.AlignVCenter
-                            horizontalAlignment: Text.AlignLeft
-                            leftPadding: 12
-                            font.pointSize: ScreenTools.defaultFontPointSize
-                            wrapMode: Text.Wrap
+                ActionRow {
+                    text: qsTr("KML kimi yadda saxla...")
+                    enabled: !_planMasterController.syncInProgress && _visualItems.count > 1
+                    onClicked: {
+                        if (_visualItems.count < 2) {
+                            mainWindow.showMessageDialog(qsTr("KML"), qsTr("KML yaratmaq üçün ən azı bir missiya elementi lazımdır."))
+                            return
                         }
-
-                        background: Rectangle { color: "transparent"; radius: 3 }
-
-                        onClicked: {
-                            if (_visualItems.count < 2) {
-                                mainWindow.showMessageDialog(qsTr("KML"), qsTr("You need at least one item to create a KML."))
-                                return
-                            }
-                            dropPanel.hide()
-                            _planMasterController.saveKmlToSelectedFile()
-                        }
+                        dropPanel.hide()
+                        _planMasterController.saveKmlToSelectedFile()
                     }
                 }
             }
@@ -1814,108 +1740,40 @@ Item {
             SectionHeader {
                 id: vehicleSection
                 Layout.fillWidth: true
-                text: qsTr("Vehicle")
+                text: qsTr("Təyyarə")
                 checked: false
+                visible: !QGroundControl.corePlugin.options.disableVehicleConnection
             }
 
             ColumnLayout {
-                spacing: _margin
+                spacing: AzTheme.px(2)
                 Layout.fillWidth: true
-                visible: vehicleSection.checked
+                visible: vehicleSection.checked && vehicleSection.visible
 
-                Rectangle {
-                    Layout.preferredWidth: 300
-                    Layout.preferredHeight: 42
-                    color: uploadButton.enabled ? "#2A2A2A" : "#1A1A1A"
-                    radius: 6
-                    visible: !QGroundControl.corePlugin.options.disableVehicleConnection
-
-                    QGCButton {
-                        id: uploadButton
-                        anchors.fill: parent
-                        anchors.margins: 1
-                        text: qsTr("Upload")
-                        enabled: !_planMasterController.offline && !_planMasterController.syncInProgress && _planMasterController.containsItems
-
-                        contentItem: QGCLabel {
-                            text: uploadButton.text
-                            color: uploadButton.enabled ? qgcPal.buttonText : "#808080"
-                            verticalAlignment: Text.AlignVCenter
-                            horizontalAlignment: Text.AlignLeft
-                            leftPadding: 12
-                            font.pointSize: ScreenTools.defaultFontPointSize
-                        }
-
-                        background: Rectangle { color: "transparent"; radius: 3 }
-
-                        onClicked: {
-                            dropPanel.hide()
-                            _planMasterController.upload()
-                        }
+                ActionRow {
+                    text: qsTr("Təyyarəyə yüklə")
+                    enabled: !_planMasterController.offline && !_planMasterController.syncInProgress && _planMasterController.containsItems
+                    onClicked: {
+                        dropPanel.hide()
+                        _planMasterController.upload()
                     }
                 }
 
-                Rectangle {
-                    Layout.preferredWidth: 300
-                    Layout.preferredHeight: 42
-                    color: downloadButton.enabled ? "#2A2A2A" : "#1A1A1A"
-                    radius: 6
-                    visible: !QGroundControl.corePlugin.options.disableVehicleConnection
-
-                    QGCButton {
-                        id: downloadButton
-                        anchors.fill: parent
-                        anchors.margins: 1
-                        text: qsTr("Download")
-                        enabled: !_planMasterController.offline && !_planMasterController.syncInProgress
-
-                        contentItem: QGCLabel {
-                            text: downloadButton.text
-                            color: downloadButton.enabled ? qgcPal.buttonText : "#808080"
-                            verticalAlignment: Text.AlignVCenter
-                            horizontalAlignment: Text.AlignLeft
-                            leftPadding: 12
-                            font.pointSize: ScreenTools.defaultFontPointSize
-                        }
-
-                        background: Rectangle { color: "transparent"; radius: 3 }
-
-                        onClicked: {
-                            dropPanel.hide()
-                            downloadClicked(columnHolder._overwriteText)
-                        }
+                ActionRow {
+                    text: qsTr("Təyyarədən endir")
+                    enabled: !_planMasterController.offline && !_planMasterController.syncInProgress
+                    onClicked: {
+                        dropPanel.hide()
+                        downloadClicked(columnHolder._overwriteText)
                     }
                 }
 
-                Rectangle {
-                    Layout.preferredWidth: 300
-                    Layout.preferredHeight: 42
-                    color: clearButton.enabled ? "#2A2A2A" : "#1A1A1A"
-                    radius: 6
-                    visible: !QGroundControl.corePlugin.options.disableVehicleConnection
-
-                    QGCButton {
-                        id: clearButton
-                        anchors.fill: parent
-                        anchors.margins: 1
-                        text: qsTr("Clear")
-                        enabled: !_planMasterController.offline && !_planMasterController.syncInProgress
-
-                        contentItem: QGCLabel {
-                            text: clearButton.text
-                            color: clearButton.enabled ? qgcPal.buttonText : "#808080"
-                            verticalAlignment: Text.AlignVCenter
-                            horizontalAlignment: Text.AlignLeft
-                            leftPadding: 12
-                            font.pointSize: ScreenTools.defaultFontPointSize
-                        }
-
-                        background: Rectangle { color: "transparent"; radius: 3 }
-
-                        onClicked: {
-                            dropPanel.hide()
-                            clearButtonClicked()
-                        }
+                ActionRow {
+                    text: qsTr("Təyyarədən təmizlə")
+                    enabled: !_planMasterController.offline && !_planMasterController.syncInProgress
+                    onClicked: {
+                        dropPanel.hide()
+                        clearButtonClicked()
                     }
                 }
             }

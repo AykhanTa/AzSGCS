@@ -24,10 +24,16 @@ Rectangle {
 
 
 
-    color: Qt.rgba(_windowColor.r, _windowColor.g, _windowColor.b, 0.8)
+    // The status card of the top bar
+    radius:       AzTheme.px(12)
+    border.width: 1
+    border.color: AzTheme.cardBorder
+    gradient: Gradient {
+        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+    }
 
     property var   _planMasterController: planMasterController
-    property color _windowColor: QGroundControl.globalPalette.window
     property var   _currentMissionItem: _planMasterController.missionController.currentPlanViewItem
 
     property var  missionItems:         _controllerValid ? _planMasterController.missionController.visualItems : undefined
@@ -57,10 +63,7 @@ Rectangle {
     readonly property real  _valueFontSize:    ScreenTools.defaultFontPointSize * 1.10 * _fontScale
 
     readonly property real  _separatorThickness: Math.max(1, Math.round(ScreenTools.defaultFontPixelHeight * 0.06))
-    readonly property color _separatorColor: Qt.rgba(QGroundControl.globalPalette.text.r,
-                                                     QGroundControl.globalPalette.text.g,
-                                                     QGroundControl.globalPalette.text.b,
-                                                     0.25)
+    readonly property color _separatorColor: AzTheme.groupBorder
 
     // ✅ Cədvəl görkəmi üçün
     readonly property real _cellVMargin: ScreenTools.defaultFontPixelHeight * 0.18

@@ -36,7 +36,7 @@ import QGroundControl.Controls
 
 Rectangle {
     id:         root
-    radius:     12
+    radius:     AzTheme.px(12)
     // ❗ Kök elementə opacity vermək oxları və yazıları da solğunlaşdırırdı —
     //    əvəzinə yalnız fon qatı yarımşəffafdır, məzmun tam kəskin qalır.
     color:      "transparent"
@@ -44,21 +44,22 @@ Rectangle {
 
     property var missionController
 
-    // Dizayn rəngləri
-    readonly property color panelBg:     "#141414"
-    readonly property color panelBorder: "#6E6E6E"
-    readonly property color plotBg:      "#1E1E1E"
-    readonly property color gridColor:   "#3A3A3A"
-    readonly property color labelColor:  "#CFCFCF"
-    readonly property color accentColor: "#00C853"
+    // The status card of the top bar; the plot is one of its group boxes.
+    readonly property color panelBorder: AzTheme.cardBorder
+    readonly property color plotBg:      AzTheme.groupFill
+    readonly property color gridColor:   AzTheme.groupBorder
+    readonly property color labelColor:  AzTheme.textSecondary
+    readonly property color accentColor: AzTheme.statusGreen
 
     Rectangle {
         anchors.fill:   parent
         radius:         root.radius
-        color:          root.panelBg
-        opacity:        0.92
         border.width:   1
         border.color:   root.panelBorder
+        gradient: Gradient {
+            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+        }
     }
 
     signal setCurrentSeqNum(int seqNum)
