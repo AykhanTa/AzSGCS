@@ -18,14 +18,20 @@ QGCFlickable {
     property var controller ///< RallyPointController
 
     readonly property real  _margin: ScreenTools.defaultFontPixelWidth / 2
-    readonly property real  _radius: ScreenTools.defaultFontPixelWidth / 2
+    readonly property real  _radius: AzTheme.px(12)
 
     Rectangle {
         id:     outerEditorRect
         width:  parent.width
         height: 180//innerEditorRect.y + innerEditorRect.height + (_margin * 2)
-        radius: _radius
-        color:  qgcPal.missionItemEditor
+        // A mission item card of the Missiya tab
+        radius:       _radius
+        border.width: 1
+        border.color: AzTheme.cardBorder
+        gradient: Gradient {
+            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+        }
 
         QGCLabel {
             id:                 editorLabel
@@ -43,8 +49,10 @@ QGCFlickable {
             anchors.right:      parent.right
             anchors.top:        editorLabel.bottom
             height:             76//infoLabel.height + (_margin * 2)
-            color:              qgcPal.windowShadeDark
-            radius:             _radius
+            color:              AzTheme.groupFill
+            border.width:       1
+            border.color:       AzTheme.groupBorder
+            radius:             AzTheme.px(AzTheme.groupRadius)
 
             QGCLabel {
                 y:15

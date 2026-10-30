@@ -24,15 +24,21 @@ QGCFlickable {
 
     readonly property real  _editFieldWidth:    Math.min(width - _margin * 2, ScreenTools.defaultFontPixelWidth * 15)
     readonly property real  _margin:            ScreenTools.defaultFontPixelWidth / 2
-    readonly property real  _radius:            ScreenTools.defaultFontPixelWidth / 2
+    readonly property real  _radius:            AzTheme.px(12)
 
     Rectangle {
         id:     geoFenceEditorRect
         anchors.left:   parent.left
         anchors.right:  parent.right
         height: geoFenceItems.y + geoFenceItems.height + (_margin * 2)
-        radius: _radius
-        color:  qgcPal.missionItemEditor
+        // A mission item card of the Missiya tab
+        radius:       _radius
+        border.width: 1
+        border.color: AzTheme.cardBorder
+        gradient: Gradient {
+            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+        }
 
         QGCLabel {
             id:                 geoFenceLabel
@@ -51,8 +57,7 @@ QGCFlickable {
             anchors.right:      parent.right
             anchors.top:        geoFenceLabel.bottom
             height:             fenceColumn.y + fenceColumn.height + (_margin * 2)
-            color:              "#3D3B3B"//qgcPal.windowShadeDark
-            radius:             _radius
+            color:              "transparent"
 
             Column {
                 id:                 fenceColumn
@@ -130,7 +135,7 @@ QGCFlickable {
                         anchors.right: parent.right
                         height: fenceButtons.height + 20
                         radius: 3
-                        color: "#3D3B3B"
+                        color: "transparent"
                         visible: insertSection.checked
 
                         Column {
@@ -147,11 +152,10 @@ QGCFlickable {
                                 anchors.right: parent.right
                                 height: 40
                                 radius: 3
-                                color: "#3D3B3B"
+                                color: "transparent"
 
                                 QGCButton {
                                     anchors.fill: parent
-                                     backgroundColor: "#2A2A2A"
                                     text: qsTr("Polygon Fence")
                                     onClicked: {
                                         var rect = Qt.rect(flightMap.centerViewport.x, flightMap.centerViewport.y, flightMap.centerViewport.width, flightMap.centerViewport.height)
@@ -168,11 +172,10 @@ QGCFlickable {
                                 anchors.right: parent.right
                                 height: 40
                                 radius: 3
-                                color: "#3D3B3B"
+                                color: "transparent"
 
                                 QGCButton {
                                     anchors.fill: parent
-                                    backgroundColor: "#2A2A2A"
                                     text: qsTr("Circular Fence")
                                     onClicked: {
                                         var rect = Qt.rect(flightMap.centerViewport.x, flightMap.centerViewport.y, flightMap.centerViewport.width, flightMap.centerViewport.height)
@@ -211,7 +214,7 @@ QGCFlickable {
                             Layout.minimumWidth:  0
                             horizontalAlignment:  Text.AlignHCenter
                             elide:                Text.ElideRight
-                             color: "#FFFFFF"
+                             color: AzTheme.textCard
                         }
 
                         Repeater {
@@ -231,7 +234,7 @@ QGCFlickable {
                                       width: 16
                                       height: 16
                                       radius: 8
-                                      color: "#FFFFFF"
+                                      color: AzTheme.textCard
                                       Behavior on x { NumberAnimation { duration: 100 } }
                                   }
 
@@ -250,7 +253,7 @@ QGCFlickable {
                             Layout.minimumWidth:  0
                             horizontalAlignment:  Text.AlignHCenter
                             elide:                Text.ElideRight
-                             color: "#FFFFFF"
+                             color: AzTheme.textCard
                         }
 
                         Repeater {
@@ -279,7 +282,7 @@ QGCFlickable {
                             Layout.minimumWidth:  0
                             horizontalAlignment:  Text.AlignHCenter
                             elide:                Text.ElideRight
-                             color: "#FFFFFF"
+                             color: AzTheme.textCard
                         }
 
                         Repeater {
@@ -300,7 +303,7 @@ QGCFlickable {
                                       source: "qrc:/res/AZSHIELD_ICON/trash.svg"
                                       width: 20
                                       height: 20
-                                      color: "#FFFFFF"
+                                      color: AzTheme.textCard
                                   }
                               }
                           }
@@ -333,7 +336,7 @@ QGCFlickable {
                             Layout.minimumWidth:  0
                             horizontalAlignment:  Text.AlignHCenter
                             elide:                Text.ElideRight
-                            color: "#FFFFFF"
+                            color: AzTheme.textCard
                         }
 
                         // Repeater {
@@ -362,7 +365,7 @@ QGCFlickable {
                                     width: 16
                                     height: 16
                                     radius: 8
-                                    color: "#FFFFFF"
+                                    color: AzTheme.textCard
                                     Behavior on x { NumberAnimation { duration: 100 } }
                                 }
 
@@ -381,7 +384,7 @@ QGCFlickable {
                             Layout.minimumWidth:  0
                             horizontalAlignment:  Text.AlignHCenter
                             elide:                Text.ElideRight
-                             color: "#FFFFFF"
+                             color: AzTheme.textCard
                         }
 
                         Repeater {
@@ -410,7 +413,7 @@ QGCFlickable {
                             Layout.minimumWidth:  0
                             horizontalAlignment:  Text.AlignHCenter
                             elide:                Text.ElideRight
-                             color: "#FFFFFF"
+                             color: AzTheme.textCard
                         }
 
                         Repeater {
@@ -437,7 +440,7 @@ QGCFlickable {
                             Layout.minimumWidth:  0
                             horizontalAlignment:  Text.AlignHCenter
                             elide:                Text.ElideRight
-                            color: "#FFFFFF"
+                            color: AzTheme.textCard
                         }
 
                         Repeater {
@@ -447,7 +450,7 @@ QGCFlickable {
                                 implicitWidth:  30
                                 implicitHeight: 30
                                 radius: 3
-                                color: "#3D3B3B"
+                                color: "transparent"
                                 Layout.alignment: Qt.AlignHCenter
 
                                 QGCColoredImage {
@@ -455,7 +458,7 @@ QGCFlickable {
                                     source: "qrc:/res/AZSHIELD_ICON/trash.svg"
                                     width: 20
                                     height: 20
-                                    color: "#FFFFFF"
+                                    color: AzTheme.textCard
                                 }
 
                                 MouseArea {

@@ -205,6 +205,10 @@ Item {
         colorGroupEnabled: true
     }
 
+    // The text fields, combo boxes, check boxes, labels and section headers of the
+    // item editors take the new design's look (see QGCTextField._az).
+    readonly property bool azInputStyle: true
+
     // Sağ panelin yığılma vəziyyəti
     property bool planControlColapsed: false
 

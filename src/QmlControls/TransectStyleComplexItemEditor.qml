@@ -16,7 +16,7 @@ Rectangle {
     id:         _root
     height:     childrenRect.y + childrenRect.height + _margin
     width:      availableWidth
-    color:      qgcPal.windowShadeDark
+    color:      "transparent"
     radius:     _radius
 
     property bool   transectAreaDefinitionComplete: true

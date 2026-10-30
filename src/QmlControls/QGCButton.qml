@@ -17,7 +17,7 @@ Button {
     leftPadding:    _horizontalPadding
     rightPadding:   _horizontalPadding
     focusPolicy:    Qt.ClickFocus
-    font.family:    ScreenTools.normalFontFamily
+    font.family:    _az ? AzTheme.fontFamily : ScreenTools.normalFontFamily
     text:           ""
 
     property bool   primary:        false                               ///< primary button for a group of buttons
@@ -39,22 +39,31 @@ Button {
 
     property bool   _showHighlight:     enabled && (pressed | checked)
 
+    // The new design's look (AzButton's) for screens that ask for it by declaring
+    // `readonly property bool azInputStyle: true` on their root (the Plan view so far);
+    // a primary button is the green one there.
+    readonly property bool _az: typeof azInputStyle !== "undefined" && azInputStyle === true
+
     property int _horizontalPadding:    ScreenTools.defaultFontPixelWidth * 2
     property int _verticalPadding:      Math.round(ScreenTools.defaultFontPixelHeight * heightFactor)
 
     QGCPalette { id: qgcPal; colorGroupEnabled: enabled }
     background: Rectangle {
         id:             backRect
-        radius:         backRadius
+        radius:         control._az ? AzTheme.px(8) : backRadius
         implicitWidth:  ScreenTools.implicitButtonWidth
         implicitHeight: ScreenTools.implicitButtonHeight
-        border.width:   showBorder ? 1 : 0
-        border.color:   qgcPal.buttonBorder
-        color:          primary ? qgcPal.primaryButton : qgcPal.button
+        border.width:   (control._az || showBorder) ? 1 : 0
+        border.color:   control._az ? (primary ? (control.hovered ? AzTheme.positiveHoverBorder : AzTheme.positiveBorder)
+                                               : (control.hovered && control.enabled ? AzTheme.cardHoverBorder : AzTheme.buttonBorder))
+                                    : qgcPal.buttonBorder
+        color:          control._az ? (primary ? AzTheme.positiveBottom : AzTheme.buttonBottom)
+                                    : (primary ? qgcPal.primaryButton : qgcPal.button)
+        opacity:        (control._az && !control.enabled) ? 0.45 : 1
 
         Rectangle {
             anchors.fill:   parent
-            color:          qgcPal.buttonHighlight
+            color:          control._az ? Qt.rgba(1, 1, 1, 0.3) : qgcPal.buttonHighlight
             opacity:        _showHighlight ? 1 : control.enabled && control.hovered ? .2 : 0
             radius:         parent.radius
         }
@@ -83,11 +92,13 @@ Button {
                 font.family:            control.font.family
                 font.weight:            fontWeight
               //  color:                  _showHighlight ? qgcPal.buttonHighlightText : (primary ? qgcPal.primaryButtonText : qgcPal.buttonText)
-                color: _showHighlight
-                       ? qgcPal.buttonHighlightText
-                       : (control.forceTextColor
-                            ? control.forcedTextColor
-                            : (primary ? qgcPal.primaryButtonText : qgcPal.buttonText))
+                color: control._az
+                       ? (control.forceTextColor ? control.forcedTextColor : (primary ? AzTheme.textPrimary : AzTheme.textCard))
+                       : (_showHighlight
+                          ? qgcPal.buttonHighlightText
+                          : (control.forceTextColor
+                               ? control.forcedTextColor
+                               : (primary ? qgcPal.primaryButtonText : qgcPal.buttonText)))
 
 
                 visible:                control.text !== ""

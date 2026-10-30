@@ -16,11 +16,11 @@ CheckBox {
     leftPadding:    0
     rightPadding:   0
 
-    property var            color:          "#FFFFFF"
+    property var            color:          _az ? AzTheme.textCard : "#FFFFFF"
     property bool           showSpacer:     true
     property ButtonGroup    buttonGroup:    null
 
-    property color accentColor:    "#00C853"
+    property color accentColor:    _az ? AzTheme.statusGreen : "#00C853"
 
     /// Başlıq zolağının hündürlüyü. Yığcam yerlərdə (məs. uçuşdan əvvəl yoxlama
     /// siyahısı) kiçildilə bilsin deyə açıq saxlanılıb; default dəyər dəyişməyib.
@@ -31,6 +31,10 @@ CheckBox {
 
     property real  _pad:           Math.max(8, ScreenTools.defaultFontPixelWidth * 0.9)
     property real  _sectionSpacer: ScreenTools.defaultFontPixelWidth / 2
+    // The new design's look for screens that ask for it by declaring
+    // `readonly property bool azInputStyle: true` on their root (the Plan view so far);
+    // everywhere else the control keeps its old look.
+    readonly property bool _az: typeof azInputStyle !== "undefined" && azInputStyle === true
 
     onButtonGroupChanged: {
         if (buttonGroup) {
@@ -50,7 +54,10 @@ CheckBox {
             anchors.bottom: parent.bottom
             height:         control.headerHeight
             radius:         8
-            color:          headerHover.hovered ? "#3A3A3A" : "#2A2A2A"
+            // Az: a group box of the top bar panels, its outline brighter on hover
+            color:          control._az ? AzTheme.groupFill : (headerHover.hovered ? "#3A3A3A" : "#2A2A2A")
+            border.width:   control._az ? 1 : 0
+            border.color:   headerHover.hovered ? AzTheme.cardHoverBorder : AzTheme.groupBorder
 
             Behavior on color { ColorAnimation { duration: 120 } }
 
@@ -76,7 +83,8 @@ CheckBox {
                 anchors.verticalCenter: parent.verticalCenter
                 text:                   control.text
                 color:                  control.color
-                font.bold:              true
+                font.bold:              !control._az
+                font.weight:            control._az ? Font.Medium : Font.Bold
                 font.pointSize:         ScreenTools.defaultFontPointSize
                 fontSizeMode:           control.shrinkToFit ? Text.HorizontalFit : Text.FixedSize
                 minimumPointSize:       ScreenTools.defaultFontPointSize * 0.75
@@ -88,10 +96,11 @@ CheckBox {
                 anchors.right:          parent.right
                 anchors.rightMargin:    control._pad
                 anchors.verticalCenter: parent.verticalCenter
-                width:                  Math.max(10, ScreenTools.defaultFontPixelHeight * 0.45)
+                width:                  control._az ? AzTheme.px(16) : Math.max(10, ScreenTools.defaultFontPixelHeight * 0.45)
                 height:                 width
-                source:                 "/res/DropArrow.svg"
-                color:                  "#CFCFCF"
+                sourceSize.height:      height
+                source:                 control._az ? "qrc:/res/AZSHIELD_ICON/v2/popup_chevron.svg" : "/res/DropArrow.svg"
+                color:                  control._az ? AzTheme.textSecondary : "#CFCFCF"
                 rotation:               control.checked ? 180 : 0
 
                 Behavior on rotation { NumberAnimation { duration: 140 } }

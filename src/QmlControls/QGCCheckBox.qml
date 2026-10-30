@@ -10,7 +10,7 @@ CheckBox {
     spacing:        _noText ? 0 : ScreenTools.defaultFontPixelWidth
     focusPolicy:    Qt.ClickFocus
 
-    property color  textColor:          _qgcPal.text
+    property color  textColor:          _az ? AzTheme.textCard : _qgcPal.text
     property bool   textBold:           false
     property real   textFontPointSize:  ScreenTools.defaultFontPointSize
     /// Opt in where the row is tall enough for two lines; the default keeps every
@@ -19,6 +19,10 @@ CheckBox {
 
     property var    _qgcPal: QGCPalette { colorGroupEnabled: enabled }
     property bool   _noText: text === ""
+    // The new design's look for screens that ask for it by declaring
+    // `readonly property bool azInputStyle: true` on their root (the Plan view so far);
+    // everywhere else the control keeps its old look.
+    readonly property bool _az: typeof azInputStyle !== "undefined" && azInputStyle === true
 
     property ButtonGroup buttonGroup: null
     onButtonGroupChanged: {
@@ -35,7 +39,7 @@ CheckBox {
         text:               control.text
         font.pointSize:     textFontPointSize
         font.bold:          control.textBold
-        font.family:        ScreenTools.normalFontFamily
+        font.family:        control._az ? AzTheme.fontFamily : ScreenTools.normalFontFamily
         color:              control.textColor
         // Where the control is narrower than its label -- an anchored checkbox in a
         // form row, say -- the text used to keep painting straight over whatever sat
@@ -44,7 +48,7 @@ CheckBox {
         elide:              Text.ElideRight
     }
 
-    property color accentColor: "#00C853"
+    property color accentColor: _az ? AzTheme.statusGreen : "#00C853"
 
     HoverHandler { id: checkHover; enabled: control.enabled }
 
@@ -53,7 +57,7 @@ CheckBox {
         implicitHeight: implicitWidth
         x:              control.leftPadding
         y:              parent.height / 2 - height / 2
-        radius:         4
+        radius:         control._az ? AzTheme.px(5) : 4
         opacity:        control.checkedState === Qt.PartiallyChecked ? 0.5 : 1
 
         // İşarələnmiş qutu yaşıl dolur, boş qutu şəffaf qalır — beləliklə
@@ -61,17 +65,18 @@ CheckBox {
         color: control.checked
                ? (control.enabled ? control.accentColor : "#5A5A5A")
                : "transparent"
-        border.width: 2
+        border.width: control._az ? 1.5 : 2
         border.color: control.checked
                       ? (control.enabled ? control.accentColor : "#5A5A5A")
-                      : (control.enabled && checkHover.hovered ? control.accentColor : "#8A8A8A")
+                      : (control.enabled && checkHover.hovered ? control.accentColor
+                                                               : (control._az ? AzTheme.cardHoverBorder : "#8A8A8A"))
 
         Behavior on color        { ColorAnimation { duration: 120 } }
         Behavior on border.color { ColorAnimation { duration: 120 } }
 
         QGCColoredImage {
             source:             "/qmlimages/checkbox-check.svg"
-            color:              "#101010"
+            color:              control._az ? AzTheme.textPrimary : "#101010"
             mipmap:             true
             fillMode:           Image.PreserveAspectFit
             width:              parent.implicitWidth * 0.7

@@ -12,8 +12,14 @@ import QGroundControl.FactControls
 Rectangle {
     id:     root
     height: _currentItem ? valuesRect.y + valuesRect.height + (_margin * 2) : titleBar.y - titleBar.height + _margin
-    color:  _currentItem ? qgcPal.missionItemEditor : qgcPal.windowShade
-    radius: _radius
+    // A mission item card of the Missiya tab: green border while it is the current one
+    radius:       _radius
+    border.width: 1
+    border.color: _currentItem ? AzTheme.statusGreen : AzTheme.cardBorder
+    gradient: Gradient {
+        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+    }
 
     signal clicked()
 
@@ -24,7 +30,7 @@ Rectangle {
     property color  _outerTextColor:    qgcPal.text // _currentItem ? "black" : qgcPal.text
 
     readonly property real  _margin:            ScreenTools.defaultFontPixelWidth / 2
-    readonly property real  _radius:            ScreenTools.defaultFontPixelWidth / 2
+    readonly property real  _radius:            AzTheme.px(12)
     readonly property real  _titleHeight:       ScreenTools.defaultFontPixelHeight * 2
 
     QGCPalette { id: qgcPal; colorGroupEnabled: true }
@@ -87,9 +93,11 @@ Rectangle {
         anchors.right:      parent.right
         anchors.top:        titleBar.bottom
         height:             valuesGrid.height + (_margin * 2)
-        color:              qgcPal.windowShadeDark
+        color:              AzTheme.groupFill
+        border.width:       1
+        border.color:       AzTheme.groupBorder
         visible:            _currentItem
-        radius:             _radius
+        radius:             AzTheme.px(AzTheme.groupRadius)
 
         GridLayout {
             id:                 valuesGrid

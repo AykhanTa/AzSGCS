@@ -83,7 +83,7 @@ Column {
             width:  parent.width
             height: root._rowH
             radius: 6
-            color:  "#2A2A2A"
+            color:  AzTheme.groupFill
             clip:   true
 
             FactComboBox {
@@ -106,7 +106,7 @@ Column {
             width:  parent.width
             height: root._rowH
             radius: 6
-            color:  "#2A2A2A"
+            color:  AzTheme.groupFill
             clip:   true
             visible: _camera.cameraAction.rawValue === 1
 
@@ -138,7 +138,7 @@ Column {
             width:  parent.width
             height: root._rowH
             radius: 6
-            color:  "#2A2A2A"
+            color:  AzTheme.groupFill
             clip:   true
             visible: _camera.cameraAction.rawValue === 2
 
@@ -170,7 +170,7 @@ Column {
             width:  parent.width
             height: root._rowH
             radius: 6
-            color:  "#2A2A2A"
+            color:  AzTheme.groupFill
             clip:   true
             visible: _camera.cameraModeSupported
 
@@ -213,7 +213,7 @@ Column {
             width:  parent.width
             height: root._rowH
             radius: 6
-            color:  "#2A2A2A"
+            color:  AzTheme.groupFill
             clip:   true
 
             RowLayout {

@@ -8,13 +8,13 @@ import QGroundControl.Controls
 
 TextField {
     id:                 control
-    color:              qgcPal.textFieldText
-    selectionColor:     qgcPal.textFieldText
-    selectedTextColor:  qgcPal.textField
+    color:              _az ? AzTheme.textCard : qgcPal.textFieldText
+    selectionColor:     _az ? AzTheme.statusBlue : qgcPal.textFieldText
+    selectedTextColor:  _az ? AzTheme.textPrimary : qgcPal.textField
     activeFocusOnPress: true
     antialiasing:       true
     font.pointSize:     ScreenTools.defaultFontPointSize
-    font.family:        ScreenTools.normalFontFamily
+    font.family:        _az ? AzTheme.fontFamily : ScreenTools.normalFontFamily
     inputMethodHints:   numericValuesOnly && !ScreenTools.isiOS ?
                             Qt.ImhFormattedNumbersOnly:  // Forces use of virtual numeric keyboard instead of full keyboard
                             Qt.ImhNone                   // iOS numeric keyboard has no done button, we can't use it.
@@ -31,6 +31,11 @@ TextField {
     property bool   numericValuesOnly:  false   // true: Used as hint for mobile devices to show numeric only keyboard
     property alias  textColor:          control.color
     property bool   validationError:    false
+
+    // The new design's look for screens that ask for it by declaring
+    // `readonly property bool azInputStyle: true` on their root (the Plan view so far);
+    // everywhere else the control keeps its old look.
+    readonly property bool _az: typeof azInputStyle !== "undefined" && azInputStyle === true
 
     property real _helpLayoutWidth: 0
     property real _marginPadding:   ScreenTools.defaultFontPixelHeight / 3
@@ -84,10 +89,13 @@ TextField {
     }
 
     background: Rectangle {
-        border.width:   control.validationError ? 2 : (qgcPal.globalTheme === QGCPalette.Light ? 1 : 0)
-        border.color:   control.validationError ? qgcPal.colorRed : qgcPal.buttonBorder
-        radius:         ScreenTools.buttonBorderRadius
-        color:          qgcPal.textField
+        // Az: the dark pill of the top bar panels, blue while editing
+        border.width:   control.validationError ? 2 : ((control._az || qgcPal.globalTheme === QGCPalette.Light) ? 1 : 0)
+        border.color:   control.validationError ? (control._az ? AzTheme.statusRed : qgcPal.colorRed)
+                                                : (control._az ? (control.activeFocus ? AzTheme.activeBorder : AzTheme.panelBorder)
+                                                               : qgcPal.buttonBorder)
+        radius:         control._az ? AzTheme.px(8) : ScreenTools.buttonBorderRadius
+        color:          control._az ? AzTheme.pillBottom : qgcPal.textField
         implicitWidth:  ScreenTools.implicitTextFieldWidth
         implicitHeight: ScreenTools.implicitTextFieldHeight
 
@@ -129,9 +137,9 @@ TextField {
                 Layout.alignment:   Qt.AlignVCenter
                 text:               control.extraUnitsLabel
                 font.pointSize:     ScreenTools.smallFontPointSize
-                font.family:        ScreenTools.normalFontFamily
+                font.family:        control.font.family
                 antialiasing:       true
-                color:              control.color
+                color:              control._az ? AzTheme.textSecondary : control.color
                 visible:            control.showUnits && text !== ""
             }
 
@@ -140,9 +148,9 @@ TextField {
                 Layout.alignment:   Qt.AlignVCenter
                 text:               control.unitsLabel
                 font.pointSize:     control.activeFocus ? ScreenTools.smallFontPointSize : ScreenTools.defaultFontPointSize
-                font.family:        ScreenTools.normalFontFamily
+                font.family:        control.font.family
                 antialiasing:       true
-                color:              control.color
+                color:              control._az ? AzTheme.textSecondary : control.color
                 visible:            control.showUnits && text !== ""
             }
         }

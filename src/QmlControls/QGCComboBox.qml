@@ -180,7 +180,7 @@ T.ComboBox {
     padding:        ScreenTools.comboBoxPadding
     spacing:        ScreenTools.defaultFontPixelWidth
     font.pointSize: ScreenTools.defaultFontPointSize
-    font.family:    ScreenTools.normalFontFamily
+    font.family:    _az ? AzTheme.fontFamily : ScreenTools.normalFontFamily
 
     // Mətn ox ilə sıxılmasın deyə bir az əlavə nəfəslik saxlanılır
     implicitWidth:  Math.max(background ? background.implicitWidth : 0,
@@ -201,6 +201,10 @@ T.ComboBox {
     property real   _popupWidth:    width
     property bool   _onCompleted:   false
     property bool   _showBorder:    qgcPal.globalTheme === QGCPalette.Light
+    // The new design's look for screens that ask for it by declaring
+    // `readonly property bool azInputStyle: true` on their root (the Plan view so far);
+    // everywhere else the control keeps its old look.
+    readonly property bool _az: typeof azInputStyle !== "undefined" && azInputStyle === true
 
     // Popup üçün limitlər
     readonly property real _popupMaxWidth:  Math.max(control.width, Math.min(control.Window ? (control.Window.width - 12) : 600, ScreenTools.defaultFontPixelWidth * 42))
@@ -315,7 +319,7 @@ T.ComboBox {
             font.family:        control.font.family
             font.pointSize:     control.font.pointSize
             font.bold:          _isCurrent
-            color:              "#FFFFFF"
+            color:              control._az ? AzTheme.textCard : "#FFFFFF"
             leftPadding:        control.itemPad
             rightPadding:       control.itemPad
             verticalAlignment:  Text.AlignVCenter
@@ -323,8 +327,8 @@ T.ComboBox {
         }
 
         background: Rectangle {
-            radius: 6
-            color:  _isHot ? "#3A3A3A" : "transparent"
+            radius: control._az ? AzTheme.px(6) : 6
+            color:  _isHot ? (control._az ? Qt.rgba(1, 1, 1, 0.06) : "#3A3A3A") : "transparent"
 
             Behavior on color { ColorAnimation { duration: 100 } }
 
@@ -344,7 +348,7 @@ T.ComboBox {
         highlighted: control.highlightedIndex === index
     }
 
-    property color accentColor: "#00C853"
+    property color accentColor: _az ? AzTheme.statusGreen : "#00C853"
     property real  itemPad:     Math.max(8, ScreenTools.defaultFontPixelWidth * 0.9)
 
     // ✅ parent yox → control (null problemi bitir)
@@ -352,10 +356,10 @@ T.ComboBox {
         anchors.rightMargin:    control.padding
         anchors.right:          control.right
         anchors.verticalCenter: control.verticalCenter
-        height:                 ScreenTools.defaultFontPixelWidth
+        height:                 control._az ? AzTheme.px(14) : ScreenTools.defaultFontPixelWidth
         width:                  height
-        source:                 "/qmlimages/arrow-down.png"
-        color:                  control.popup.visible ? control.accentColor : "#E0E0E0"
+        source:                 control._az ? "qrc:/res/AZSHIELD_ICON/v2/popup_chevron.svg" : "/qmlimages/arrow-down.png"
+        color:                  control.popup.visible ? control.accentColor : (control._az ? AzTheme.textSecondary : "#E0E0E0")
         rotation:               control.popup.visible ? 180 : 0
 
         Behavior on rotation { NumberAnimation { duration: 140 } }
@@ -368,19 +372,23 @@ T.ComboBox {
         anchors.horizontalCenter:   centeredLabel ? control.horizontalCenter : undefined
         text:                       control.alternateText === "" ? control.currentText : control.alternateText
         font:                       control.font
-        color:                      "#FFFFFF"
+        color:                      control._az ? AzTheme.textCard : "#FFFFFF"
         elide:                      Text.ElideRight
     }
 
     HoverHandler { id: comboHover; enabled: control.enabled }
 
+    // Az: the dark pill of the top bar panels; blue outline while its list is open
     background: Rectangle {
-        color:          control.down ? "#454545"
-                                     : (control.enabled && comboHover.hovered ? "#3F3F3F" : "#333333")
-        border.color:   (control.enabled && (comboHover.hovered || control.popup.visible))
-                        ? control.accentColor : "#5D5B5B"
+        color:          control._az ? AzTheme.pillBottom
+                                    : (control.down ? "#454545"
+                                                    : (control.enabled && comboHover.hovered ? "#3F3F3F" : "#333333"))
+        border.color:   control._az ? (control.popup.visible ? AzTheme.activeBorder
+                                                             : (control.enabled && comboHover.hovered ? AzTheme.cardHoverBorder : AzTheme.panelBorder))
+                                    : ((control.enabled && (comboHover.hovered || control.popup.visible))
+                                       ? control.accentColor : "#5D5B5B")
         border.width:   1
-        radius:         6
+        radius:         control._az ? AzTheme.px(8) : 6
         opacity:        control.enabled ? 1.0 : 0.5
 
         Behavior on color        { ColorAnimation { duration: 120 } }
@@ -416,10 +424,10 @@ T.ComboBox {
         padding: control.itemPad * 0.5
 
         background: Rectangle {
-            color:          "#242424"
-            border.color:   "#6E6E6E"
+            color:          control._az ? AzTheme.menuSelectedBottom : "#242424"
+            border.color:   control._az ? AzTheme.panelBorder : "#6E6E6E"
             border.width:   1
-            radius:         10
+            radius:         control._az ? AzTheme.px(AzTheme.popupRadius) : 10
         }
     }
 }

@@ -28,11 +28,8 @@ Rectangle {
     id:                 valuesRect
     width:              availableWidth
     height:             valuesColumn.implicitHeight + (_pad * 2)
-    color:              "#3D3B3B"
+    color:              "transparent"
     visible:            missionItem.isCurrentItem
-    radius:             12
-    border.width:       1
-    border.color:       "#9D9D9D"
 
     property var    _masterControler:               masterController
     property var    _missionController:             _masterControler.missionController
@@ -89,10 +86,12 @@ Rectangle {
         property real   rowH:    38
         default property alias content: srowContent.data
 
-        width:  parent ? parent.width : 0
-        height: rowH
-        radius: 8
-        color:  "#2A2A2A"
+        width:        parent ? parent.width : 0
+        height:       rowH
+        radius:       AzTheme.px(AzTheme.groupRadius)
+        color:        AzTheme.groupFill
+        border.width: 1
+        border.color: AzTheme.groupBorder
 
         QGCLabel {
             id: srowLabel
@@ -101,8 +100,8 @@ Rectangle {
             anchors.right:          srowContent.left
             anchors.rightMargin:    srow.pad * 0.6
             anchors.verticalCenter: parent.verticalCenter
-            color:                  "#FFFFFF"
-            font.pointSize:         ScreenTools.defaultFontPointSize
+            color:                  AzTheme.textCard
+            font.pixelSize:         AzTheme.fontPx(13)
             elide:                  Text.ElideRight
             maximumLineCount:       2
             wrapMode:               Text.WordWrap
@@ -139,8 +138,10 @@ Rectangle {
             anchors.right:  parent.right
             anchors.top:    parent.top
             height:         Math.max(40, ScreenTools.defaultFontPixelHeight * 2.2)
-            radius:         8
-            color:          secMouse.containsMouse ? "#3A3A3A" : "#2A2A2A"
+            radius:         AzTheme.px(AzTheme.groupRadius)
+            color:          AzTheme.groupFill
+            border.width:   1
+            border.color:   secMouse.containsMouse ? AzTheme.cardHoverBorder : AzTheme.groupBorder
 
             Behavior on color { ColorAnimation { duration: 120 } }
 
@@ -152,7 +153,7 @@ Rectangle {
                 width:                  3
                 height:                 parent.height * 0.55
                 radius:                 1.5
-                color:                  "#00C853"
+                color:                  AzTheme.statusGreen
                 visible:                sec.expanded
             }
 
@@ -163,9 +164,9 @@ Rectangle {
                 anchors.rightMargin:    sec.pad * 0.5
                 anchors.verticalCenter: parent.verticalCenter
                 text:                   sec.title
-                color:                  "#FFFFFF"
-                font.bold:              true
-                font.pointSize:         ScreenTools.defaultFontPointSize
+                color:                  AzTheme.textCard
+                font.weight:            Font.Medium
+                font.pixelSize:         AzTheme.fontPx(14)
                 elide:                  Text.ElideRight
             }
 
@@ -176,8 +177,8 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 width:                  Math.max(10, ScreenTools.defaultFontPixelHeight * 0.45)
                 height:                 width
-                source:                 "/res/DropArrow.svg"
-                color:                  "#CFCFCF"
+                source:                 "qrc:/res/AZSHIELD_ICON/v2/popup_chevron.svg"
+                color:                  AzTheme.textSecondary
                 rotation:               sec.expanded ? 180 : 0
 
                 Behavior on rotation { NumberAnimation { duration: 140 } }
@@ -208,8 +209,8 @@ Rectangle {
         width:               parent ? parent.width : 0
         wrapMode:            Text.WordWrap
         horizontalAlignment: Text.AlignLeft
-        font.pointSize:      ScreenTools.defaultFontPointSize * 0.95
-        color:               "#B9B9B9"
+        font.pixelSize:      AzTheme.fontPx(12)
+        color:               AzTheme.textSecondary
     }
 
     // ==========================================================
@@ -232,34 +233,35 @@ Rectangle {
 
             Rectangle {
                 anchors.fill:   parent
-                radius:         6
-                color:          altModeMouse.containsMouse ? "#4A4A4A" : "#3D3B3B"
+                radius:         AzTheme.px(8)
+                color:          AzTheme.pillBottom
                 border.width:   1
-                border.color:   "#5D5B5B"
+                border.color:   altModeMouse.containsMouse ? AzTheme.cardHoverBorder : AzTheme.panelBorder
 
                 Behavior on color { ColorAnimation { duration: 120 } }
 
                 QGCLabel {
                     id:                     altModeLabel
                     anchors.left:           parent.left
-                    anchors.leftMargin:     6
+                    anchors.leftMargin:     AzTheme.px(8)
                     anchors.right:          altModeArrow.left
                     anchors.rightMargin:    4
                     anchors.verticalCenter: parent.verticalCenter
                     text:                   QGroundControl.altitudeModeShortDescription(_missionController.globalAltitudeMode)
-                    font.pointSize:         ScreenTools.defaultFontPointSize
+                    font.pixelSize:         AzTheme.fontPx(13)
                     elide:                  Text.ElideRight
                 }
 
                 QGCColoredImage {
                     id:                     altModeArrow
                     anchors.right:          parent.right
-                    anchors.rightMargin:    6
+                    anchors.rightMargin:    AzTheme.px(8)
                     anchors.verticalCenter: parent.verticalCenter
-                    width:                  Math.max(9, ScreenTools.defaultFontPixelHeight * 0.4)
+                    width:                  AzTheme.px(14)
                     height:                 width
-                    source:                 "/res/DropArrow.svg"
-                    color:                  altModeLabel.color
+                    sourceSize.height:      height
+                    source:                 "qrc:/res/AZSHIELD_ICON/v2/popup_chevron.svg"
+                    color:                  AzTheme.textSecondary
                 }
 
                 MouseArea {
@@ -315,9 +317,11 @@ Rectangle {
             // that suits one screen, the row grows to whatever the wrapped label
             // needs - two lines on a G30, three on the narrower G20.
             height:     Math.max(valuesRect._rowH, flightSpeedCheckBox.implicitHeight + valuesRect._pad)
-            radius:     8
-            color:      "#2A2A2A"
-            visible:    _showFlightSpeed
+            radius:       AzTheme.px(AzTheme.groupRadius)
+            color:        AzTheme.groupFill
+            border.width: 1
+            border.color: AzTheme.groupBorder
+            visible:      _showFlightSpeed
 
             QGCCheckBox {
                 id:                     flightSpeedCheckBox
@@ -385,13 +389,6 @@ Rectangle {
                         indexModel:     false
                         sizeToContents: false
                         visible:        _allowFWVehicleTypeSelection
-
-                        background: Rectangle {
-                            color:          "#3D3B3B"
-                            radius:         6
-                            border.color:   "#5D5B5B"
-                            border.width:   1
-                        }
                     }
 
                     QGCLabel {
@@ -418,13 +415,6 @@ Rectangle {
                         indexModel:     false
                         sizeToContents: false
                         visible:        _allowFWVehicleTypeSelection
-
-                        background: Rectangle {
-                            color:          "#3D3B3B"
-                            radius:         6
-                            border.color:   "#5D5B5B"
-                            border.width:   1
-                        }
                     }
 
                     QGCLabel {
@@ -496,7 +486,6 @@ Rectangle {
                 QGCButton {
                     width:           parent.width
                     text:            qsTr("Xəritə Mərkəzinə Ayarlayın")
-                    backgroundColor: "#474747"
                     onClicked:       missionItem.coordinate = map.center
                 }
             }
