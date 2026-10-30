@@ -4,55 +4,55 @@ import QtQuick.Controls
 import QGroundControl
 import QGroundControl.Controls
 
-/// Plan görünüşündəki qat seçicisi (Mission / Fence / Rally) üçün seqment düyməsi.
-/// Aktiv olan doldurulmuş, digərləri sadəcə konturludur — beləliklə hansının
-/// seçili olduğu bir baxışda görünür.
+/// A segment of the Plan view's layer selector (Missiya / Fence / Ralli). The active one
+/// is the side menu's selected box with white text; the others are flat, their text
+/// grey, a faint tint on hover.
 TabButton {
     id: control
 
     focusPolicy: Qt.ClickFocus
 
-    property color accentColor:  "#00C853"
-    property color inactiveText: "#DDDDDD"
-    property color panelColor:   "#2A2A2A"
-
     readonly property bool _active: checked
 
-    topPadding:    _verticalPadding
-    bottomPadding: _verticalPadding
-    leftPadding:   _horizontalPadding
-    rightPadding:  _horizontalPadding
-
-    property int _horizontalPadding: Math.round(ScreenTools.defaultFontPixelWidth * 1.0)
-    property int _verticalPadding:   Math.round(ScreenTools.defaultFontPixelHeight * 0.5)
-
-    implicitHeight: Math.max(34, ScreenTools.defaultFontPixelHeight * 2.1)
+    padding:        0
+    leftPadding:    AzTheme.px(10)
+    rightPadding:   AzTheme.px(10)
+    implicitHeight: AzTheme.px(36)
+    opacity:        enabled ? 1.0 : 0.45
 
     HoverHandler { id: hoverHandler; enabled: control.enabled }
 
-    background: Rectangle {
-        radius: height / 2
-        color: control._active
-               ? control.accentColor
-               : (control.enabled && hoverHandler.hovered ? "#3A3A3A" : control.panelColor)
-        border.width: control._active ? 0 : 1
-        border.color: control.enabled ? "#6E6E6E" : "#4A4A4A"
-        opacity: control.enabled ? 1.0 : 0.45
+    // linear-gradient(180deg, #30353A, #202428), 1 px #5D646B, radius 8
+    background: Item {
+        Rectangle {
+            anchors.fill: parent
+            visible:      control._active
+            radius:       AzTheme.px(AzTheme.menuSelectedRadius)
+            border.width: 1
+            border.color: AzTheme.menuSelectedBorder
+            gradient: Gradient {
+                GradientStop { position: 0; color: AzTheme.menuSelectedTop }
+                GradientStop { position: 1; color: AzTheme.menuSelectedBottom }
+            }
+        }
 
-        Behavior on color { ColorAnimation { duration: 130 } }
+        Rectangle {
+            anchors.fill: parent
+            visible:      !control._active && hoverHandler.hovered
+            radius:       AzTheme.px(AzTheme.menuSelectedRadius)
+            color:        Qt.rgba(1, 1, 1, 0.05)
+        }
     }
 
     contentItem: Text {
-        text: control.text
-        color: control._active ? "#0E0E0E" : control.inactiveText
-        font.family: ScreenTools.normalFontFamily
-        font.pointSize: ScreenTools.defaultFontPointSize
-        font.bold: true
+        text:                control.text
+        color:               control._active ? AzTheme.textPrimary
+                                             : (hoverHandler.hovered ? AzTheme.textCard : AzTheme.textSecondary)
+        font.family:         AzTheme.fontFamily
+        font.weight:         Font.Medium
+        font.pixelSize:      AzTheme.fontPx(14)
         horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
-        elide: Text.ElideRight
-        opacity: control.enabled ? 1.0 : 0.6
-
-        Behavior on color { ColorAnimation { duration: 130 } }
+        verticalAlignment:   Text.AlignVCenter
+        elide:               Text.ElideRight
     }
 }

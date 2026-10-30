@@ -4,53 +4,53 @@ import QtQuick.Controls
 import QGroundControl
 import QGroundControl.Controls
 
-/// Plan görünüşündəki açılan menyular (hamburger) üçün sətir düyməsi.
-/// Standart QGCButton-dan fərqli olaraq mətn sola dayaqlıdır və menyu
-/// sətri kimi görünür — hover-də yaşıl sol kənar yaranır.
+/// A row of the Plan view's drop-down menus (a mission item's hamburger), as the top
+/// bar's window menu draws them: left-aligned text, a faint tint on hover and the side
+/// menu's selected box while pressed.
 Button {
     id: control
 
     focusPolicy: Qt.ClickFocus
     padding:     0
 
-    property color accentColor: "#00C853"
+    implicitHeight: AzTheme.px(38)
+    implicitWidth:  Math.max(AzTheme.px(260), contentItem.implicitWidth)
+    opacity:        enabled ? 1.0 : 0.45
 
-    implicitHeight: Math.max(34, ScreenTools.defaultFontPixelHeight * 1.9)
-    // Mətnin tam sığması üçün — menyu bəndləri kəsilməsin
-    implicitWidth:  Math.max(260, contentItem.implicitWidth + _pad * 2)
-
-    readonly property real _pad: Math.max(8, ScreenTools.defaultFontPixelWidth * 0.9)
+    readonly property real _pad: AzTheme.px(12)
 
     HoverHandler { id: hoverHandler; enabled: control.enabled }
 
-    background: Rectangle {
-        radius: 8
-        color: control.down ? "#454545"
-                            : (control.enabled && hoverHandler.hovered ? "#3A3A3A" : "#333333")
-        opacity: control.enabled ? 1.0 : 0.45
-
-        Behavior on color { ColorAnimation { duration: 120 } }
+    background: Item {
+        Rectangle {
+            anchors.fill: parent
+            visible:      control.down
+            radius:       AzTheme.px(AzTheme.menuSelectedRadius)
+            border.width: 1
+            border.color: AzTheme.menuSelectedBorder
+            gradient: Gradient {
+                GradientStop { position: 0; color: AzTheme.menuSelectedTop }
+                GradientStop { position: 1; color: AzTheme.menuSelectedBottom }
+            }
+        }
 
         Rectangle {
-            anchors.left:           parent.left
-            anchors.leftMargin:     1
-            anchors.verticalCenter: parent.verticalCenter
-            width:                  3
-            height:                 parent.height * 0.55
-            radius:                 1.5
-            color:                  control.accentColor
-            visible:                control.enabled && (hoverHandler.hovered || control.down)
+            anchors.fill: parent
+            visible:      !control.down && hoverHandler.hovered
+            radius:       AzTheme.px(AzTheme.menuSelectedRadius)
+            color:        Qt.rgba(1, 1, 1, 0.06)
         }
     }
 
-    contentItem: QGCLabel {
+    contentItem: Text {
         text:                control.text
-        color:               "#FFFFFF"
-        font.pointSize:      ScreenTools.defaultFontPointSize
+        color:               AzTheme.textCard
+        font.family:         AzTheme.fontFamily
+        font.pixelSize:      AzTheme.fontPx(AzTheme.popupTextSize)
         verticalAlignment:   Text.AlignVCenter
         horizontalAlignment: Text.AlignLeft
         leftPadding:         control._pad
         rightPadding:        control._pad
-        opacity:             control.enabled ? 1.0 : 0.6
+        elide:               Text.ElideRight
     }
 }

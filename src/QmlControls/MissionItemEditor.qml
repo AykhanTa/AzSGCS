@@ -12,19 +12,21 @@ import QGroundControl.FactControls
 
 
 
-/// Mission item edit control
+/// Mission item edit control: a status card of the top bar, opaque because it sits on
+/// the map. The current item has a green border and badge (green is the current
+/// waypoint on the map too); an item not ready to send has an orange one.
 Rectangle {
     id:             _root
     height:         _currentItem ? (editorLoader.y + editorLoader.height + _innerMargin) : (topRowLayout.y + topRowLayout.height + _margin)
-    // Kartlar xəritənin üstündə oturduğu üçün fon tam qeyri-şəffafdır —
-    // əks halda altdakı xəritə mətni oxunmaz edir.
-    color:          _currentItem ? "#3D3B3B" : (_hoverHandler.hovered ? "#343434" : "#2B2B2B")
     radius:         _radius
-    opacity:        1.0
-    border.width:   _readyForSave ? 1 : 2
-    border.color:   _readyForSave ? (_currentItem ? "#00C853" : "#5A5A5A") : qgcPal.warningText
-
-    Behavior on color { ColorAnimation { duration: 130 } }
+    border.width:   _readyForSave ? 1 : 1.5
+    border.color:   !_readyForSave ? AzTheme.statusOrange
+                                   : (_currentItem ? AzTheme.statusGreen
+                                                   : (_hoverHandler.hovered ? AzTheme.cardHoverBorder : AzTheme.cardBorder))
+    gradient: Gradient {
+        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+    }
 
     HoverHandler { id: _hoverHandler }
 
@@ -40,16 +42,17 @@ Rectangle {
     property var    _masterController:          masterController
     property var    _missionController:         _masterController.missionController
     property bool   _currentItem:               missionItem.isCurrentItem
-    property color  _outerTextColor:            _currentItem ? qgcPal.primaryButtonText : qgcPal.text
+    property color  _outerTextColor:            _currentItem ? AzTheme.textPrimary : AzTheme.textCard
     property bool   _noMissionItemsAdded:       ListView.view.model.count === 1
     property real   _sectionSpacer:             ScreenTools.defaultFontPixelWidth / 2  // spacing between section headings
     property bool   _singleComplexItem:         _missionController.complexMissionItemNames.length === 1
     property bool   _readyForSave:              missionItem.readyForSaveState === VisualMissionItem.ReadyForSave
 
     readonly property real  _editFieldWidth:    Math.min(width - _innerMargin * 2, ScreenTools.defaultFontPixelWidth * 12)
-    readonly property real  _margin:            ScreenTools.defaultFontPixelWidth * 0.7
+    readonly property real  _margin:            AzTheme.px(10)
     readonly property real  _innerMargin:       2
-    readonly property real  _radius:            10
+    readonly property real  _radius:            AzTheme.px(12)
+    readonly property real  _badgeSize:         AzTheme.px(26)
     readonly property real  _hamburgerSize:     commandPicker.height * 0.75
     readonly property real  _trashSize:         commandPicker.height * 0.75
     readonly property bool  _waypointsOnlyMode: QGroundControl.corePlugin.options.missionWaypointsOnly
@@ -99,42 +102,46 @@ Rectangle {
         Rectangle {
             id:                     sequenceBadge
             Layout.alignment:       Qt.AlignVCenter
-            implicitWidth:          Math.max(20, ScreenTools.defaultFontPixelHeight * 1.35)
+            implicitWidth:          _badgeSize
             implicitHeight:         implicitWidth
             radius:                 width / 2
-            color:                  _currentItem ? "#00C853" : "#4A4A4A"
+            color:                  _currentItem ? AzTheme.statusGreen : AzTheme.groupFill
+            border.width:           _currentItem ? 0 : 1
+            border.color:           AzTheme.cardBorder
             visible:                _readyForSave
 
             Behavior on color { ColorAnimation { duration: 130 } }
 
-            QGCLabel {
+            Text {
                 anchors.centerIn:   parent
                 text:               missionItem.sequenceNumber === 0 ? "S" : missionItem.sequenceNumber
-                color:              _currentItem ? "#0E0E0E" : "#E4E4E4"
-                font.bold:          true
-                font.pointSize:     ScreenTools.smallFontPointSize
+                color:              _currentItem ? AzTheme.textPrimary : AzTheme.textCard
+                font.family:        AzTheme.fontFamily
+                font.weight:        Font.Medium
+                font.pixelSize:     AzTheme.fontPx(12)
             }
         }
 
         Rectangle {
             id:                     notReadyForSaveIndicator
             Layout.alignment:       Qt.AlignVCenter
-            implicitWidth:          Math.max(20, ScreenTools.defaultFontPixelHeight * 1.35)
+            implicitWidth:          _badgeSize
             implicitHeight:         implicitWidth
             border.width:           1
-            border.color:           qgcPal.warningText
-            color:                  "white"
+            border.color:           AzTheme.statusOrange
+            color:                  Qt.rgba(1, 159 / 255, 26 / 255, 0.12)
             radius:                 width / 2
             visible:                !_readyForSave
 
-            QGCLabel {
+            Text {
                 id:                 readyForSaveLabel
                 anchors.centerIn:   parent
                 //: Indicator in Plan view to show mission item is not ready for save/send
                 text:               qsTr("?")
-                color:              qgcPal.warningText
-                font.bold:          true
-                font.pointSize:     ScreenTools.smallFontPointSize
+                color:              AzTheme.statusOrange
+                font.family:        AzTheme.fontFamily
+                font.weight:        Font.Medium
+                font.pixelSize:     AzTheme.fontPx(13)
             }
         }
 
@@ -146,22 +153,35 @@ Rectangle {
             // Preferred width is the whole name; the layout shrinks it from here
             // and the label elides rather than spilling past the buttons.
             implicitWidth:          innerLayout.implicitWidth
-            implicitHeight:         ScreenTools.implicitComboBoxHeight
+            implicitHeight:         AzTheme.px(34)
             visible:                !commandLabel.visible
+
+            // The command picker on the dark pill of the top bar panels
+            Rectangle {
+                anchors.fill: parent
+                radius:       AzTheme.px(8)
+                border.width: 1
+                border.color: commandMouse.containsMouse ? AzTheme.cardHoverBorder : AzTheme.panelBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.pillTop }
+                    GradientStop { position: 1; color: AzTheme.pillBottom }
+                }
+            }
 
             RowLayout {
                 id:                     innerLayout
                 anchors.left:           parent.left
                 anchors.right:          parent.right
+                anchors.leftMargin:     AzTheme.px(10)
+                anchors.rightMargin:    AzTheme.px(8)
                 anchors.verticalCenter: parent.verticalCenter
-                spacing:                _padding
+                spacing:                AzTheme.px(8)
 
-                property real _padding: ScreenTools.comboBoxPadding
-
-                QGCLabel {
+                Text {
                     text:                missionItem.commandName
-                    font.bold:           true
-                    font.pointSize:      ScreenTools.defaultFontPointSize
+                    font.family:         AzTheme.fontFamily
+                    font.weight:         Font.Medium
+                    font.pixelSize:      AzTheme.fontPx(14)
                     color:               _outerTextColor
                     elide:               Text.ElideRight
                     Layout.fillWidth:    true
@@ -169,19 +189,21 @@ Rectangle {
                 }
 
                 QGCColoredImage {
-                    height:             ScreenTools.defaultFontPixelWidth
-                    width:              height
-                    fillMode:           Image.PreserveAspectFit
-                    smooth:             true
-                    antialiasing:       true
-                    color:              qgcPal.text
-                    source:             "/qmlimages/arrow-down.png"
+                    Layout.preferredWidth:  AzTheme.px(16)
+                    Layout.preferredHeight: AzTheme.px(16)
+                    sourceSize.height:      AzTheme.px(16)
+                    fillMode:               Image.PreserveAspectFit
+                    color:                  AzTheme.textSecondary
+                    source:                 "qrc:/res/AZSHIELD_ICON/v2/popup_chevron.svg"
                 }
             }
 
-            QGCMouseArea {
-                fillItem:   parent
-                onClicked:  commandDialog.createObject(mainWindow).open()
+            MouseArea {
+                id:           commandMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape:  Qt.PointingHandCursor
+                onClicked:    commandDialog.createObject(mainWindow).open()
             }
 
             Component {
@@ -196,18 +218,19 @@ Rectangle {
             }
         }
 
-        QGCLabel {
+        Text {
             id:                     commandLabel
             Layout.alignment:       Qt.AlignVCenter
             Layout.fillWidth:       true
             Layout.minimumWidth:    0
-            Layout.preferredHeight: ScreenTools.implicitComboBoxHeight
+            Layout.preferredHeight: AzTheme.px(34)
             visible:                !missionItem.isCurrentItem || !missionItem.isSimpleItem || _waypointsOnlyMode || missionItem.isTakeoffItem
             verticalAlignment:      Text.AlignVCenter
             text:                   missionItem.commandName
             color:                  _outerTextColor
-            font.bold:              true
-            font.pointSize:         ScreenTools.defaultFontPointSize
+            font.family:            AzTheme.fontFamily
+            font.weight:            Font.Medium
+            font.pixelSize:         AzTheme.fontPx(14)
             elide:                  Text.ElideRight
         }
     }
@@ -218,53 +241,33 @@ Rectangle {
         anchors.margins:        _margin
         anchors.right:          parent.right
         anchors.verticalCenter: topRowLayout.verticalCenter
-        spacing:                _margin * 0.8
+        spacing:                AzTheme.px(2)
 
-        QGCColoredImage {
+        AzIconButton {
             id:                     deleteButton
             anchors.verticalCenter: parent.verticalCenter
-            height:                 _hamburgerSize
-            width:                  height
-            sourceSize.height:      height
-            fillMode:               Image.PreserveAspectFit
-            mipmap:                 true
-            smooth:                 true
-            color:                  deleteMouse.containsMouse ? qgcPal.warningText : qgcPal.text
+            iconSize:               AzTheme.px(18)
+            iconSource:             "qrc:/res/AZSHIELD_ICON/v2/popup_trash.svg"
+            iconColor:              AzTheme.textSecondary
             visible:                _currentItem && missionItem.sequenceNumber !== 0
-            source:                 "/res/TrashDelete.svg"
-
-            MouseArea {
-                id:             deleteMouse
-                anchors.fill:   parent
-                hoverEnabled:   true
-                cursorShape:    Qt.PointingHandCursor
-                onClicked:      remove()
-            }
+            onClicked:              remove()
         }
 
-        QGCColoredImage {
+        AzIconButton {
             id:                     hamburger
             anchors.verticalCenter: parent.verticalCenter
-            width:                  _hamburgerSize
-            height:                 _hamburgerSize
-            sourceSize.height:      _hamburgerSize
-            source:                 "qrc:/qmlimages/Hamburger.svg"
+            iconSize:               AzTheme.px(18)
+            iconSource:             "qrc:/res/AZSHIELD_ICON/v2/plan_menu.svg"
+            iconColor:              AzTheme.textSecondary
             visible:                missionItem.isCurrentItem && missionItem.sequenceNumber !== 0
-            color:                  hamburgerMouse.containsMouse ? "#00C853" : qgcPal.text
 
-            MouseArea {
-                id:             hamburgerMouse
-                anchors.fill:   parent
-                hoverEnabled:   true
-                cursorShape:    Qt.PointingHandCursor
-                onClicked: {
-                    currentItemScope.focus = true
-                    var position = Qt.point(width / 2, height / 2)
-                    // For some strange reason using mainWindow in mapToItem doesn't work, so we use globals.parent instead which also gets us mainWindow
-                    position = mapToItem(globals.parent, position)
-                    var dropPanel = hamburgerMenuDropPanelComponent.createObject(mainWindow, { clickRect: Qt.rect(position.x, position.y, 0, 0) })
-                    dropPanel.open()
-                }
+            onClicked: {
+                currentItemScope.focus = true
+                var position = Qt.point(width / 2, height / 2)
+                // For some strange reason using mainWindow in mapToItem doesn't work, so we use globals.parent instead which also gets us mainWindow
+                position = mapToItem(globals.parent, position)
+                var dropPanel = hamburgerMenuDropPanelComponent.createObject(mainWindow, { clickRect: Qt.rect(position.x, position.y, 0, 0) })
+                dropPanel.open()
             }
         }
     }
@@ -274,6 +277,8 @@ Rectangle {
 
         DropPanel {
             id: hamburgerMenuDropPanel
+            panelColor:  AzTheme.menuSelectedBottom
+            panelBorder: AzTheme.panelBorder
 
             sourceComponent: Component {
                 ColumnLayout {
@@ -294,12 +299,12 @@ Rectangle {
                             width:  Math.max(20, ScreenTools.defaultFontPixelHeight * 1.35)
                             height: width
                             radius: width / 2
-                            color:  "#00C853"
+                            color:  AzTheme.statusGreen
 
                             QGCLabel {
                                 anchors.centerIn:   parent
                                 text:               missionItem.sequenceNumber
-                                color:              "#0E0E0E"
+                                color:              AzTheme.textPrimary
                                 font.bold:          true
                                 font.pointSize:     ScreenTools.smallFontPointSize
                             }
@@ -318,7 +323,7 @@ Rectangle {
                     Rectangle {
                         Layout.fillWidth:       true
                         Layout.preferredHeight: 1
-                        color:                  "#4A4A4A"
+                        color:                  AzTheme.panelBorder
                     }
 
                     MissionMenuButton {
@@ -363,7 +368,7 @@ Rectangle {
                     Rectangle {
                         Layout.fillWidth:       true
                         Layout.preferredHeight: 1
-                        color:                  "#4A4A4A"
+                        color:                  AzTheme.panelBorder
                         visible:                QGroundControl.corePlugin.showAdvancedUI
                     }
 

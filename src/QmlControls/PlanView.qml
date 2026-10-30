@@ -182,6 +182,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
+import QtQuick.Effects
 import QtLocation
 import QtPositioning
 import QtQuick.Layouts
@@ -243,7 +244,7 @@ Item {
     // ✅ Sağ panel responsiv eni + collapse handle (kontent eninə uyğun, artıq boşluq yoxdur)
     // Yığma düyməsi üçün ayrılan sol zolaq — düymənin diametrindən bir az geniş,
     // artıq boşluq yaratmasın deyə mümkün qədər dar saxlanılır.
-    readonly property real _rightPanelHandleWidth: Math.round(ScreenTools.defaultFontPixelHeight * 1.7)
+    readonly property real _rightPanelHandleWidth: AzTheme.px(46)
 
     // What the content would like, and the most the window can spare for it.
     // 32 font widths is the 320px this used to hard code. The cap matters on a
@@ -949,28 +950,46 @@ Item {
                 anchors.bottom: parent.bottom
                 width: _rightPanelHandleWidth
 
-                Rectangle {
+                // A round map button: the card gradient with its border and shadow.
+                Item {
                     id: rightPanelToggleButton
-                    width: Math.round(_rightPanelHandleWidth * 1.05)
+                    width: AzTheme.px(36)
                     height: width
-                    radius: width / 2
                     anchors.top: parent.top
-                    anchors.topMargin: _toolsMargin
+                    anchors.topMargin: _toolsMargin + Math.max(0, (layerSelector.height - height) / 2)
                     anchors.horizontalCenter: parent.horizontalCenter
 
-                    color: toggleMouse.containsMouse ? "#00C853" : "#1E1E1E"
-                    border.width: 1
-                    border.color: toggleMouse.containsMouse ? "#00C853" : "#6E6E6E"
+                    RectangularShadow {
+                        anchors.fill: toggleBackground
+                        offset.y:     AzTheme.px(4)
+                        blur:         AzTheme.px(12)
+                        radius:       toggleBackground.radius
+                        color:        AzTheme.cardShadow
+                    }
 
-                    Behavior on color { ColorAnimation { duration: 130 } }
+                    AzGradientRect {
+                        id:            toggleBackground
+                        anchors.fill:  parent
+                        angle:         AzTheme.cardGradientAngle
+                        startColor:    toggleMouse.pressed ? AzTheme.menuSelectedTop : AzTheme.cardGradientStart
+                        startPosition: AzTheme.cardGradientStartPos
+                        endColor:      toggleMouse.pressed ? AzTheme.menuSelectedBottom : AzTheme.cardGradientEnd
+                        endPosition:   AzTheme.cardGradientEndPos
+                        radius:        width / 2
+                        borderColor:   toggleMouse.containsMouse ? AzTheme.cardHoverBorder : AzTheme.cardBorder
+                        borderWidth:   1
+                    }
 
                     QGCColoredImage {
-                        anchors.margins: parent.width * 0.28
-                        anchors.fill: parent
+                        anchors.centerIn: parent
+                        width: AzTheme.px(16)
+                        height: width
+                        sourceSize.height: height
+                        fillMode: Image.PreserveAspectFit
                         source: planControlColapsed
                                 ? "qrc:/res/AZSHIELD_ICON/chevron-double-left.svg"
                                 : "qrc:/res/AZSHIELD_ICON/chevron-double-right.svg"
-                        color: toggleMouse.containsMouse ? "#0E0E0E" : "#E4E4E4"
+                        color: AzTheme.textCard
                     }
 
                     MouseArea {
@@ -1003,33 +1022,51 @@ Item {
 
                 Column {
                     id:                 rightControls
-                    spacing:            ScreenTools.defaultFontPixelHeight * 0.5
+                    spacing:            AzTheme.px(8)
                     anchors.left:       parent.left
                     anchors.right:      parent.right
                     anchors.top:        parent.top
 
-                    // Qat seçicisi — bütün stil Mission_Panel.qml daxilindədir,
-                    // burada yalnız mətn və aktivlik şərtləri qalır.
-                    Rectangle {
+                    // Layer selector: a segmented control on the dark pill of the top bar
+                    // panels; the segments themselves are Mission_Panel.
+                    Item {
                         id: layerSelector
 
                         // ❗ visible-i uşaq elementə bağlamaq olmaz (effektiv görünürlük
                         //    geri oxunduğu üçün binding loop yaranır) — ortaq şərt saxlanılır.
                         readonly property bool selectorVisible: QGroundControl.corePlugin.options.enablePlanViewSelector && !_utmspEnabled
-                        readonly property real segPad: Math.max(3, ScreenTools.defaultFontPixelWidth * 0.25)
+                        readonly property real segPad: AzTheme.px(4)
 
                         width:   parent.width
                         height:  selectorVisible ? (layerTabBar.implicitHeight + segPad * 2) : 0
                         visible: selectorVisible
-                        radius:  height / 2
-                        color:   "#1E1E1E"
-                        border.width: 1
-                        border.color: "#4A4A4A"
 
-                        QGCTabBar {
+                        RectangularShadow {
+                            anchors.fill: selectorBackground
+                            offset.y:     AzTheme.px(8)
+                            blur:         AzTheme.px(20)
+                            radius:       selectorBackground.radius
+                            color:        AzTheme.cardShadow
+                        }
+
+                        Rectangle {
+                            id:           selectorBackground
+                            anchors.fill: parent
+                            radius:       AzTheme.px(12)
+                            border.width: 1
+                            border.color: AzTheme.panelBorder
+                            gradient: Gradient {
+                                GradientStop { position: 0; color: AzTheme.pillTop }
+                                GradientStop { position: 1; color: AzTheme.pillBottom }
+                            }
+                        }
+
+                        TabBar {
                             id: layerTabBar
                             anchors.fill:        parent
                             anchors.margins:     layerSelector.segPad
+                            spacing:             AzTheme.px(4)
+                            background:          Item { }
                             Component.onCompleted: currentIndex = 0
 
                             Mission_Panel {
@@ -1053,9 +1090,9 @@ Item {
                         id:         layerTabBarUTMSP
                         width:      parent.width
                         visible:    QGroundControl.corePlugin.options.enablePlanViewSelector && _utmspEnabled
-                        QGCTabButton { text: qsTr("Mission") }
-                        QGCTabButton { text: qsTr("Rally"); enabled: _rallyPointController.supported }
-                        QGCTabButton { id: utmspbutton; text: qsTr("UTM-Adapter"); visible: _utmspEnabled }
+                        Mission_Panel { text: qsTr("Mission") }
+                        Mission_Panel { text: qsTr("Rally"); enabled: _rallyPointController.supported }
+                        Mission_Panel { id: utmspbutton; text: qsTr("UTM-Adapter"); visible: _utmspEnabled }
                     }
                 }
 
@@ -1074,7 +1111,7 @@ Item {
                     QGCListView {
                         id:                 missionItemEditorListView
                         anchors.fill:       parent
-                        spacing:            ScreenTools.defaultFontPixelHeight / 4
+                        spacing:            AzTheme.px(8)
                         orientation:        ListView.Vertical
                         model:              _missionController.visualItems
                         cacheBuffer:        Math.max(height * 2, 0)
