@@ -319,12 +319,13 @@ Item {
     readonly property real _rightPanelHandleWidth: AzTheme.px(46)
 
     // What the content would like, and the most the window can spare for it.
-    // 32 font widths is the 320px this used to hard code. The cap matters on a
-    // tablet: the G30 lays out in 853 logical pixels, where a fixed 320 took 40%
-    // of the width for the item list. It does not bind on a desktop window.
+    // 40 font widths leaves the editors' labels room beside their fields (32 wrapped
+    // "Bütün yüksəkliklər" onto two lines). The cap matters on a tablet: the G30
+    // lays out in 853 logical pixels, where a fixed 320 took 40% of the width for
+    // the item list. It does not bind on a desktop window.
     readonly property real _rightPanelPreferredContentWidth: Math.min(
-                                                                 ScreenTools.defaultFontPixelWidth * 32,
-                                                                 width * 0.26
+                                                                 ScreenTools.defaultFontPixelWidth * 40,
+                                                                 width * 0.30
                                                              )
 
     // Ekranda sağ panel üçün qalan real yer (ToolStrip + marginlər çıxılır)
