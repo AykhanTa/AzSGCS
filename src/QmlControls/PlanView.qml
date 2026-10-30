@@ -583,27 +583,12 @@ Item {
         anchors.top:    planToolBar.bottom
         anchors.bottom: parent.bottom
 
-        Rectangle {
-            anchors.fill: parent
-            color: "black"
-            z: -1
-        }
-
-        Rectangle {
-            anchors {
-                left: parent.left
-                top: parent.top
-                bottom: parent.bottom
-            }
-            width: 80
-            color: "black"
-        }
-
+        // The map runs from the tool strip's edge to the right of the window; the strip,
+        // the top bar and the right panel cast their shadows onto it.
         FlightMap {
             id:                         editorMap
             anchors.fill:               parent
-            anchors.leftMargin:         75
-            anchors.topMargin:          11
+            anchors.leftMargin:         toolStrip.width
             mapName:                    "MissionEditor"
             allowGCSLocationCenter:     true
             allowVehicleLocationCenter: true
@@ -808,14 +793,11 @@ Item {
             anchors.margins:    0
             anchors.left:       parent.left
             anchors.top:        parent.top
-            anchors.topMargin:  5
             anchors.bottom:     parent.bottom
             // Alət lentindən açılan panellər (Fayl, Pattern, Mərkəz...) missiya
             // statusu / terrain diaqramının (zOrderWidgets + 5) üstündə olmalıdır,
             // əks halda panelin aşağı hissəsi diaqramın altında qalır.
             z:                  QGroundControl.zOrderWidgets + 6
-            topRightRadius: 6
-            bottomRightRadius: 6
 
             readonly property int fileButtonIndex:      0
             readonly property int takeoffButtonIndex:   1
@@ -837,13 +819,13 @@ Item {
                         enabled:                !_planMasterController.syncInProgress
                         visible:                true
                         showAlternateIcon:      _planMasterController.dirty
-                        iconSource:             "/qmlimages/MapSync.svg"
-                        alternateIconSource:    "/qmlimages/MapSync.svg"
+                        iconSource:             "qrc:/res/AZSHIELD_ICON/v2/plan_file.svg"
+                        alternateIconSource:    "qrc:/res/AZSHIELD_ICON/v2/plan_file.svg"
                         dropPanelComponent:     syncDropPanel
                     },
                     ToolStripAction {
                         text:       qsTr("Takeoff")
-                        iconSource: "/res/takeoff.svg"
+                        iconSource: "qrc:/res/AZSHIELD_ICON/v2/fly_takeoff.svg"
                         enabled:    _missionController.isInsertTakeoffValid
                         visible:    (toolStrip._isMissionLayer || toolStrip._isUtmspLayer) && !_planMasterController.controllerVehicle.rover
                         onTriggered: {
@@ -855,14 +837,14 @@ Item {
                     ToolStripAction {
                         id:                 addWaypointRallyPointAction
                         text:               _editingLayer == _layerRallyPoints ? qsTr("Rally Point") : qsTr("Waypoint")
-                        iconSource:         "/qmlimages/MapAddMission.svg"
+                        iconSource:         "qrc:/res/AZSHIELD_ICON/v2/plan_waypoint.svg"
                         enabled:            toolStrip._isRallyLayer ? true : _missionController.flyThroughCommandsAllowed
                         visible:            toolStrip._isRallyLayer || toolStrip._isMissionLayer || toolStrip._isUtmspLayer
                         checkable:          true
                     },
                     ToolStripAction {
                         text:               _missionController.isROIActive ? qsTr("ROI Ləğv et") : qsTr("ROI")
-                        iconSource:         "/qmlimages/MapAddMission.svg"
+                        iconSource:         "qrc:/res/AZSHIELD_ICON/v2/plan_roi.svg"
                         enabled:            !_missionController.onlyInsertTakeoffValid
                         visible:            toolStrip._isMissionLayer && _planMasterController.controllerVehicle.roiModeSupported
                         checkable:          !_missionController.isROIActive
@@ -878,7 +860,7 @@ Item {
                     },
                     ToolStripAction {
                         text:               _singleComplexItem ? _missionController.complexMissionItemNames[0] : qsTr("Pattern")
-                        iconSource:         "/qmlimages/MapDrawShape.svg"
+                        iconSource:         "qrc:/res/AZSHIELD_ICON/v2/plan_pattern.svg"
                         enabled:            _missionController.flyThroughCommandsAllowed
                         visible:            toolStrip._isMissionLayer
                         dropPanelComponent: _singleComplexItem ? undefined : patternDropPanel
@@ -895,7 +877,9 @@ Item {
                                     : _missionController.isInsertLandValid && _missionController.hasLandItem
                                       ? qsTr("Alt Land")
                                       : qsTr("Land")
-                        iconSource: "/res/rtl.svg"
+                        iconSource: _planMasterController.controllerVehicle.multiRotor
+                                    ? "qrc:/res/AZSHIELD_ICON/v2/fly_rtl.svg"
+                                    : "qrc:/res/AZSHIELD_ICON/v2/fly_land.svg"
                         enabled:    _missionController.isInsertLandValid
                         visible:    toolStrip._isMissionLayer || toolStrip._isUtmspLayer
                         onTriggered: {
@@ -905,7 +889,7 @@ Item {
                     },
                     ToolStripAction {
                         text:               qsTr("Mərkəz")
-                        iconSource:         "/qmlimages/MapCenter.svg"
+                        iconSource:         "qrc:/res/AZSHIELD_ICON/v2/plan_center.svg"
                         enabled:            true
                         visible:            true
                         dropPanelComponent: centerMapDropPanel
@@ -914,7 +898,7 @@ Item {
                     // ✅ Stats düyməsi yalnız missionStatus gizlidirsə ToolStrip-də görünsün
                     ToolStripAction {
                         text: qsTr("Stats")
-                        iconSource: "qrc:/res/AZSHIELD_ICON/chevron-double-right.svg"
+                        iconSource: "qrc:/res/AZSHIELD_ICON/v2/plan_stats.svg"
                         visible: missionStatus.hidden
                                  && (toolStrip._isMissionLayer || toolStrip._isUtmspLayer)
                                  && QGroundControl.corePlugin.options.showMissionStatus
@@ -1384,94 +1368,93 @@ Item {
     Component {
         id: patternDropPanel
 
-        Rectangle {
-            id: patternPanel
+        // Rows of the top bar's window menu: a faint tint on hover, the side menu's
+        // selected box while pressed.
+        Column {
+            id:      patternPanel
+            width:   AzTheme.px(260)
+            spacing: AzTheme.px(4)
 
-            readonly property real pad:  Math.max(10, ScreenTools.defaultFontPixelWidth)
-            readonly property real rowH: Math.max(40, ScreenTools.defaultFontPixelHeight * 2.2)
-            readonly property real gap:  Math.max(5,  ScreenTools.defaultFontPixelHeight * 0.3)
+            Text {
+                width:          parent.width
+                bottomPadding:  AzTheme.px(6)
+                text:           qsTr("Kompleks nümunə yaradın")
+                color:          AzTheme.textCard
+                font.family:    AzTheme.fontFamily
+                font.weight:    Font.Medium
+                font.pixelSize: AzTheme.fontPx(AzTheme.popupTitleSize - 2)
+                wrapMode:       Text.WordWrap
+            }
 
-            // Ölçülər məzmundan hesablanır — nümunə sayı dəyişəndə boşluq qalmır
-            width:  Math.max(230, ScreenTools.defaultFontPixelWidth * 28)
-            height: patternColumn.implicitHeight + pad * 2
-            color:  "#2A2A2A"
-            radius: 12
-            border.width: 1
-            border.color: "#6E6E6E"
+            Rectangle {
+                width:  parent.width
+                height: 1
+                color:  AzTheme.panelBorder
+            }
 
-            Column {
-                id: patternColumn
-                anchors.left:    parent.left
-                anchors.right:   parent.right
-                anchors.top:     parent.top
-                anchors.margins: patternPanel.pad
-                spacing:         patternPanel.gap
+            Item { width: 1; height: AzTheme.px(2) }
 
-                QGCLabel {
-                    width:               parent.width
-                    text:                qsTr("Kompleks nümunə yaradın")
-                    color:               "#FFFFFF"
-                    font.bold:           true
-                    font.pointSize:      ScreenTools.defaultFontPointSize
-                    horizontalAlignment: Text.AlignHCenter
-                    wrapMode:            Text.WordWrap
-                    bottomPadding:       patternPanel.gap
-                }
+            Repeater {
+                model: _missionController.complexMissionItemNames
 
-                Rectangle {
-                    width:  parent.width
-                    height: 1
-                    color:  "#4A4A4A"
-                }
-
-                Item { width: 1; height: patternPanel.gap * 0.5 }
-
-                Repeater {
-                    model: _missionController.complexMissionItemNames
+                Item {
+                    width:  patternPanel.width
+                    height: AzTheme.px(40)
 
                     Rectangle {
-                        id:     patternButton
-                        width:  patternColumn.width
-                        height: patternPanel.rowH
-                        radius: 8
-                        color:  patternMouseArea.pressed ? "#565454"
-                                                         : (patternMouseArea.containsMouse ? "#4A4848" : "#3D3B3B")
-
-                        Behavior on color { ColorAnimation { duration: 110 } }
-
-                        Rectangle {
-                            anchors.left:           parent.left
-                            anchors.leftMargin:     2
-                            anchors.verticalCenter: parent.verticalCenter
-                            width:                  3
-                            height:                 parent.height * 0.6
-                            radius:                 1.5
-                            color:                  "#00C853"
-                            visible:                patternMouseArea.containsMouse
+                        anchors.fill: parent
+                        radius:       AzTheme.px(AzTheme.menuSelectedRadius)
+                        visible:      patternMouseArea.pressed
+                        border.width: 1
+                        border.color: AzTheme.menuSelectedBorder
+                        gradient: Gradient {
+                            GradientStop { position: 0; color: AzTheme.menuSelectedTop }
+                            GradientStop { position: 1; color: AzTheme.menuSelectedBottom }
                         }
+                    }
 
-                        QGCLabel {
-                            anchors.left:           parent.left
-                            anchors.leftMargin:     patternPanel.pad
-                            anchors.right:          parent.right
-                            anchors.rightMargin:    patternPanel.pad
-                            anchors.verticalCenter: parent.verticalCenter
-                            text:                   modelData
-                            color:                  "#FFFFFF"
-                            font.pointSize:         ScreenTools.defaultFontPointSize
-                            elide:                  Text.ElideRight
-                        }
+                    Rectangle {
+                        anchors.fill: parent
+                        radius:       AzTheme.px(AzTheme.menuSelectedRadius)
+                        visible:      patternMouseArea.containsMouse && !patternMouseArea.pressed
+                        color:        Qt.rgba(1, 1, 1, 0.06)
+                    }
 
-                        QGCMouseArea {
-                            id: patternMouseArea
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
+                    QGCColoredImage {
+                        id:                     patternIcon
+                        anchors.left:           parent.left
+                        anchors.leftMargin:     AzTheme.px(10)
+                        anchors.verticalCenter: parent.verticalCenter
+                        width:                  AzTheme.px(18)
+                        height:                 width
+                        sourceSize.height:      height
+                        fillMode:               Image.PreserveAspectFit
+                        source:                 "qrc:/res/AZSHIELD_ICON/v2/plan_pattern.svg"
+                        color:                  AzTheme.textSecondary
+                    }
 
-                            onClicked: {
-                                insertComplexItemAfterCurrent(modelData)
-                                dropPanel.hide()
-                            }
+                    Text {
+                        anchors.left:           patternIcon.right
+                        anchors.leftMargin:     AzTheme.px(10)
+                        anchors.right:          parent.right
+                        anchors.rightMargin:    AzTheme.px(10)
+                        anchors.verticalCenter: parent.verticalCenter
+                        text:                   modelData
+                        color:                  AzTheme.textCard
+                        font.family:            AzTheme.fontFamily
+                        font.pixelSize:         AzTheme.fontPx(AzTheme.popupTextSize)
+                        elide:                  Text.ElideRight
+                    }
+
+                    MouseArea {
+                        id:           patternMouseArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape:  Qt.PointingHandCursor
+
+                        onClicked: {
+                            insertComplexItemAfterCurrent(modelData)
+                            dropPanel.hide()
                         }
                     }
                 }

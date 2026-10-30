@@ -69,6 +69,8 @@ Item {
         Text {
             id:                     label
             anchors.verticalCenter: parent.verticalCenter
+            // An icon-only button keeps its icon centred.
+            visible:                control.text !== ""
             text:                   control.text
             color:                  (control.danger || control.positive) ? AzTheme.textPrimary : AzTheme.textCard
             font.family:            AzTheme.fontFamily

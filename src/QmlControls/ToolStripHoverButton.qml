@@ -1,61 +1,41 @@
-// import QtQuick
-// import QtQuick.Controls
-
-// import QGroundControl
-// import QGroundControl.Controls
-
-
-
-
 import QtQuick
 import QtQuick.Controls
 
 import QGroundControl
 import QGroundControl.Controls
 
+// A tool of the Plan view's strip: the icon over its name, on the side menu's item
+// style. A checked tool (its panel open, or Waypoint waiting for a map click) gets the
+// side menu's selected box, hover its faint outline. An orange dot on the icon marks
+// an action that has something pending (the plan's unsaved changes on "Fayl").
 Button {
     id:             control
-    width:          contentLayoutItem.contentWidth + (contentMargins * 2)
-    height:         width
+    padding:        0
     hoverEnabled:   !ScreenTools.isMobile
-    enabled:        toolStripAction.enabled
-    visible:        toolStripAction.visible
-    imageSource:    toolStripAction.showAlternateIcon ? modelData.alternateIconSource : modelData.iconSource
-    text:           toolStripAction.text
-    checked:        toolStripAction.checked
-    checkable:      toolStripAction.dropPanelComponent || modelData.checkable
+    enabled:        toolStripAction ? toolStripAction.enabled : true
+    visible:        toolStripAction ? toolStripAction.visible : true
+    imageSource:    toolStripAction ? (toolStripAction.showAlternateIcon ? toolStripAction.alternateIconSource : toolStripAction.iconSource) : ""
+    text:           toolStripAction ? toolStripAction.text : ""
+    checked:        toolStripAction ? toolStripAction.checked : false
+    checkable:      toolStripAction ? (!!toolStripAction.dropPanelComponent || toolStripAction.checkable) : false
+    opacity:        enabled ? 1 : 0.35
 
     property var    toolStripAction:    undefined
     property var    dropPanel:          undefined
-    property alias  radius:             buttonBkRect.radius
-    property alias  fontPointSize:      innerText.font.pointSize
-    property alias  imageSource:        innerImage.source
-    property alias  contentWidth:       innerText.contentWidth
+    property real   radius:             AzTheme.px(AzTheme.menuSelectedRadius)
+    property string imageSource
+    property real   iconSize:           AzTheme.px(24)
 
-
-    property real iconSize: ScreenTools.defaultFontPixelHeight * 1.6
-    property real textSize: ScreenTools.defaultFontPixelHeight *0.5
-
-    property bool forceImageScale11: false
-    property real imageScale:        forceImageScale11 && (text == "") ? 0.6 : 0.5
-    property real contentMargins:    innerText.height * 0.15
-    property real verticalOffset:    3
-
-    property color accentColor: "#00C853"
-
-    // From the palette, because the strip behind this sits on qgcPal.toolbarBackground
-    // and that is white under the light theme the Plan view uses. The old #E4E4E4 was
-    // picked for a dark strip and came out invisible there -- so the only icons that
-    // showed were the disabled ones, still painted a darker #7E7E7E.
-    property color _currentContentColor:  (checked || pressed)
-                                          ? accentColor
-                                          : qgcPal.text   // already dimmed when disabled,
-                                                          // via colorGroupEnabled below
-    property color _currentContentColorSecondary:  (checked || pressed) ? "#FFFFFF" : accentColor
+    readonly property bool _highlighted: checked || pressed
+    readonly property bool _pending:     !!toolStripAction && toolStripAction.showAlternateIcon
 
     signal dropped(int index)
 
-    onCheckedChanged: toolStripAction.checked = checked
+    onCheckedChanged: {
+        if (toolStripAction) {
+            toolStripAction.checked = checked
+        }
+    }
 
     onClicked: {
         if (mainWindow.allowViewSwitch()) {
@@ -63,7 +43,7 @@ Button {
             if (!toolStripAction.dropPanelComponent) {
                 toolStripAction.triggered(this)
             } else if (checked) {
-                var panelEdgeTopPoint = mapToItem(_root, width, 0)
+                var panelEdgeTopPoint = mapToItem(dropPanel.toolStrip, width, 0)
                 dropPanel.show(panelEdgeTopPoint, toolStripAction.dropPanelComponent, this)
                 checked = true
                 control.dropped(index)
@@ -73,99 +53,84 @@ Button {
         }
     }
 
-    QGCPalette { id: qgcPal; colorGroupEnabled: control.enabled }
-
     contentItem: Item {
-        id:                 contentLayoutItem
-        anchors.fill:       parent
-        anchors.margins:    contentMargins
-        anchors.topMargin:  contentMargins + 2
-
         Column {
-            anchors.centerIn:   parent
-            anchors.verticalCenterOffset: control.verticalOffset
-            spacing:        contentMargins * 1.2
+            anchors.centerIn: parent
+            width:            parent.width - AzTheme.px(6)
+            spacing:          AzTheme.px(5)
 
-            Image {
-                id:                         innerImageColorful
-                height:                     control.iconSize * 0.8
-                width:                      control.iconSize * 0.8
-                smooth:                     true
-                mipmap:                     true
-                fillMode:                   Image.PreserveAspectFit
-                antialiasing:               true
-                sourceSize.height:          height
-                sourceSize.width:           width
-                anchors.horizontalCenter:   parent.horizontalCenter
-                source:                     control.imageSource
-                visible:                    source != "" && modelData.fullColorIcon
-            }
+            Item {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width:                    control.iconSize
+                height:                   control.iconSize
 
-            QGCColoredImage {
-                id:                         innerImage
-                height:                     control.iconSize * 0.8
-                width:                      control.iconSize * 0.8
-                smooth:                     true
-                mipmap:                     true
-                color:                      _currentContentColor
-                fillMode:                   Image.PreserveAspectFit
-                antialiasing:               true
-                sourceSize.height:          height
-                sourceSize.width:           width
-                anchors.horizontalCenter:   parent.horizontalCenter
-                visible:                    source != "" && !modelData.fullColorIcon
+                Image {
+                    anchors.fill:      parent
+                    sourceSize.width:  width
+                    sourceSize.height: height
+                    fillMode:          Image.PreserveAspectFit
+                    mipmap:            true
+                    source:            control.imageSource
+                    visible:           source != "" && !!control.toolStripAction && control.toolStripAction.fullColorIcon
+                }
 
                 QGCColoredImage {
-                    id:                         innerImageSecondColor
-                    source:                     modelData.alternateIconSource
-                    height:                     control.iconSize * 0.8
-                    width:                      control.iconSize * 0.8
-                    smooth:                     true
-                    mipmap:                     true
-                    color:                      _currentContentColorSecondary
-                    fillMode:                   Image.PreserveAspectFit
-                    antialiasing:               true
-                    sourceSize.height:          height
-                    sourceSize.width:           width
-                    anchors.horizontalCenter:   parent.horizontalCenter
-                    visible:                    source != "" && modelData.biColorIcon
+                    anchors.fill:      parent
+                    sourceSize.height: height
+                    fillMode:          Image.PreserveAspectFit
+                    source:            control.imageSource
+                    color:             control._highlighted ? AzTheme.textPrimary : AzTheme.textCard
+                    visible:           source != "" && !(control.toolStripAction && control.toolStripAction.fullColorIcon)
+                }
+
+                Rectangle {
+                    anchors.horizontalCenter: parent.right
+                    anchors.verticalCenter:   parent.top
+                    width:                    Math.max(6, AzTheme.px(8))
+                    height:                   width
+                    radius:                   width / 2
+                    color:                    AzTheme.statusOrange
+                    visible:                  control._pending
                 }
             }
 
-            QGCLabel {
-                id:                         innerText
-                text:                       control.text
-                color:                      _currentContentColor
-                anchors.horizontalCenter:   parent.horizontalCenter
-                font.bold:                  true
-                font.pointSize:             control.textSize
-                horizontalAlignment:        Text.AlignHCenter
-                wrapMode:                   Text.WrapAtWordBoundaryOrAnywhere
-                maximumLineCount:           2
+            Text {
+                width:               parent.width
+                text:                control.text
+                visible:             text !== ""
+                color:               control._highlighted ? AzTheme.textPrimary : AzTheme.textCard
+                font.family:         AzTheme.fontFamily
+                font.pixelSize:      AzTheme.fontPx(11)
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode:            Text.WordWrap
+                maximumLineCount:    2
+                elide:               Text.ElideRight
+                lineHeight:          0.9
             }
         }
     }
 
-    background: Rectangle {
-        id:             buttonBkRect
-        anchors.fill:   parent
-        // Tints of the text colour rather than fixed greys, for the same reason: a
-        // #333333 hover behind a dark icon hides it once the strip is light.
-        color:          control.pressed ? Qt.rgba(qgcPal.text.r, qgcPal.text.g, qgcPal.text.b, 0.22)
-                                        : (control.checked ? Qt.rgba(qgcPal.text.r, qgcPal.text.g, qgcPal.text.b, 0.16)
-                                                           : ((control.enabled && control.hovered) ? Qt.rgba(qgcPal.text.r, qgcPal.text.g, qgcPal.text.b, 0.10) : "transparent"))
-
-        Behavior on color { ColorAnimation { duration: 120 } }
-
-        // Seçili aləti bildirən yaşıl sol kənar
+    // linear-gradient(180deg, #30353A, #202428), 1 px #5D646B, radius 8
+    background: Item {
         Rectangle {
-            anchors.left:           parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            width:                  3
-            height:                 parent.height * 0.6
-            radius:                 1.5
-            color:                  control.accentColor
-            visible:                control.checked || control.pressed
+            anchors.fill: parent
+            visible:      control._highlighted
+            radius:       control.radius
+            border.width: 1
+            border.color: AzTheme.menuSelectedBorder
+            gradient: Gradient {
+                GradientStop { position: 0; color: AzTheme.menuSelectedTop }
+                GradientStop { position: 1; color: AzTheme.menuSelectedBottom }
+            }
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            visible:      !control._highlighted && control.hovered && control.enabled
+            radius:       control.radius
+            color:        Qt.rgba(1, 1, 1, 0.04)
+            border.width: 1
+            border.color: AzTheme.panelBorder
         }
     }
 }

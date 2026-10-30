@@ -1,39 +1,25 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Effects
 
 import QGroundControl
-
-
 import QGroundControl.Controls
 
-Rectangle {
-    id:         _root
-    color:      qgcPal.toolbarBackground
-    width:      70
-    height:     956
-    radius:     ScreenTools.defaultFontPixelWidth / 2
+// The Plan view's tool strip, on the collapsed side menu of the fly view: 80 px wide,
+// the 155deg panel gradient with a 1 px right border and its shadow on the map.
+Item {
+    id:     _root
+    width:  AzTheme.px(80)
 
-    Rectangle {
-            anchors {
-                right: parent.right
-                top: parent.top
-                bottom: parent.bottom
-            }
-            width: 2
-            color: "black"
-        }
-
-
-    property alias  model:              repeater.model
-    property real   maxHeight           ///< Maximum height for control, determines whether text is hidden to make control shorter
-    property alias  title:              titleLabel.text
-    property var    fontSize:           ScreenTools.smallFontPointSize
+    property alias  model:  repeater.model
 
     property var _dropPanel: dropPanel
 
     function simulateClick(buttonIndex) {
-        buttonIndex = buttonIndex + 1 // skip over title label
-        var button = toolStripColumn.children[buttonIndex]
+        var button = repeater.itemAt(buttonIndex) as ToolStripHoverButton
+        if (!button) {
+            return
+        }
         if (button.checkable) {
             button.checked = !button.checked
         }
@@ -42,18 +28,50 @@ Rectangle {
 
     signal dropped(int index)
 
-    // 80 is the height a button wants. When the strip cannot fit them all they
-    // share out what there is instead, down to a floor that still takes a touch:
-    // the strip does scroll, but an action below the fold reads as missing, and
-    // on the Plan view that hid the button for reopening the bottom panel.
+    readonly property real _sideMargin: AzTheme.px(8)
+
+    // 64 is the height a tool wants. When the strip cannot fit them all they share out
+    // what there is instead, down to a floor that still takes a touch: the strip does
+    // scroll, but a tool below the fold reads as missing, and on the Plan view that hid
+    // the button for reopening the bottom panel.
     readonly property real _buttonHeight: {
-        var count = repeater.count
-        if (count <= 0) {
-            return 80
+        var count = 0
+        for (var i = 0; i < repeater.count; i++) {
+            var button = repeater.itemAt(i)
+            if (button && button.visible) {
+                count++
+            }
         }
-        var room = flickable.height - (titleLabel.visible ? titleLabel.height : 0)
-                   - (toolStripColumn.spacing * count)
-        return Math.max(ScreenTools.minTouchPixels * 1.6, Math.min(80, room / count))
+        if (count <= 0) {
+            return AzTheme.px(64)
+        }
+        var room = flickable.height - (toolStripColumn.spacing * (count - 1))
+        return Math.max(ScreenTools.minTouchPixels * 1.2, Math.min(AzTheme.px(64), room / count))
+    }
+
+    RectangularShadow {
+        anchors.fill: stripBackground
+        offset.x:     AzTheme.px(12)
+        blur:         AzTheme.px(35)
+        color:        AzTheme.panelShadow
+    }
+
+    AzGradientRect {
+        id:            stripBackground
+        anchors.fill:  parent
+        angle:         AzTheme.panelGradientAngle
+        startColor:    AzTheme.panelGradientStart
+        startPosition: AzTheme.panelGradientStartPos
+        endColor:      AzTheme.panelGradientEnd
+        endPosition:   AzTheme.panelGradientEndPos
+    }
+
+    Rectangle {
+        anchors.top:    parent.top
+        anchors.bottom: parent.bottom
+        anchors.right:  parent.right
+        width:          1
+        color:          AzTheme.panelBorder
     }
 
     DeadMouseArea {
@@ -62,42 +80,28 @@ Rectangle {
 
     QGCFlickable {
         id:                 flickable
-        anchors.margins:    ScreenTools.defaultFontPixelWidth * 0.4
-        anchors.top:        parent.top
-        anchors.left:       parent.left
-        anchors.right:      parent.right
-        height:             parent.height - anchors.margins * 2
+        anchors.fill:       parent
+        anchors.topMargin:  AzTheme.px(12)
+        anchors.bottomMargin: AzTheme.px(12)
         contentHeight:      toolStripColumn.height
         flickableDirection: Flickable.VerticalFlick
         clip:               true
 
         Column {
-            id:             toolStripColumn
-            anchors.left:   parent.left
-            anchors.right:  parent.right
-            spacing:        ScreenTools.defaultFontPixelWidth * 0.25
-
-            QGCLabel {
-                id:                     titleLabel
-                anchors.left:           parent.left
-                anchors.right:          parent.right
-                horizontalAlignment:    Text.AlignHCenter
-                font.pointSize:         ScreenTools.mediumFontPointSize
-                visible:                title != ""
-            }
+            id:      toolStripColumn
+            x:       _root._sideMargin
+            width:   flickable.width - (2 * _root._sideMargin)
+            spacing: AzTheme.px(6)
 
             Repeater {
                 id: repeater
 
                 ToolStripHoverButton {
                     id:                 buttonTemplate
-                    anchors.left:       toolStripColumn.left
-                    anchors.right:      toolStripColumn.right
+                    width:              toolStripColumn.width
                     height:             _root._buttonHeight
-                    radius:             ScreenTools.defaultFontPixelWidth / 2
-                    fontPointSize:      _root.fontSize
                     toolStripAction:    modelData
-                    dropPanel:          _dropPanel
+                    dropPanel:          _root._dropPanel
                     onDropped: (index) => _root.dropped(index)
 
                     onCheckedChanged: {
@@ -106,7 +110,7 @@ Rectangle {
                             for (var i=0; i<repeater.count; i++) {
                                 if (i != index) {
                                     var button = repeater.itemAt(i)
-                                    if (button.checked) {
+                                    if (button && button.checked) {
                                         button.checked = false
                                     }
                                 }
@@ -123,5 +127,3 @@ Rectangle {
         toolStrip:  _root
     }
 }
-
-

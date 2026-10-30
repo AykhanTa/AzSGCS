@@ -1,60 +1,112 @@
-
-
-
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Effects
 import QtQuick.Layouts
 import QtQuick.Dialogs
 
 import QGroundControl
 import QGroundControl.Controls
 
-Rectangle {
+// Top bar of the Plan view, on the fly view's top bar: the 155deg panel gradient, 64 px
+// high, with its shadow on the map. A home card at the left goes back to the fly view.
+Item {
     id: _root
     width: parent.width
-    height: ScreenTools.toolbarHeight
-    color: qgcPal.toolbarBackground
+    height: AzTheme.px(64)
 
     property var planMasterController
 
     property var _activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
     property real _controllerProgressPct: planMasterController.missionController.progressPct
 
+    readonly property real _padH: AzTheme.px(12)
+
     QGCPalette { id: qgcPal }
 
-    /// Bottom single pixel divider
-    Rectangle {
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        height: 1
-        color: "black"
-        visible: qgcPal.globalTheme === QGCPalette.Light
+    RectangularShadow {
+        anchors.fill: barBackground
+        offset.y:     AzTheme.px(8)
+        blur:         AzTheme.px(16)
+        color:        AzTheme.topBarShadow
     }
 
-    QGCToolBarButton {
-        id: qgcButton
-        height: parent.height
-        icon.source: "qrc:/res/AZSHIELD_ICON/Home.svg"
-        // Not a logo: the artwork is a single white glyph, so on the Plan toolbar,
-        // which is light, it was white on white. Tinted with the toolbar text
-        // colour instead, like every other button here.
-        onClicked: {
-                        if (mainWindow.allowViewSwitch()) {
-                            mainWindow.showFlyView()
-                        }
+    AzGradientRect {
+        id:            barBackground
+        anchors.fill:  parent
+        angle:         AzTheme.panelGradientAngle
+        startColor:    AzTheme.panelGradientStart
+        startPosition: AzTheme.panelGradientStartPos
+        endColor:      AzTheme.panelGradientEnd
+        endPosition:   AzTheme.panelGradientEndPos
+    }
+
+    Rectangle {
+        anchors.left:   parent.left
+        anchors.right:  parent.right
+        anchors.bottom: parent.bottom
+        height:         1
+        color:          AzTheme.panelBorder
+    }
+
+    // Back to the fly view, on the status card style.
+    Item {
+        id:                     homeButton
+        anchors.left:           parent.left
+        anchors.leftMargin:     _root._padH
+        anchors.verticalCenter: parent.verticalCenter
+        width:                  AzTheme.px(44)
+        height:                 width
+
+        AzGradientRect {
+            anchors.fill:  parent
+            angle:         AzTheme.cardGradientAngle
+            startColor:    homeMouse.pressed ? AzTheme.menuSelectedTop : AzTheme.cardGradientStart
+            startPosition: AzTheme.cardGradientStartPos
+            endColor:      homeMouse.pressed ? AzTheme.menuSelectedBottom : AzTheme.cardGradientEnd
+            endPosition:   AzTheme.cardGradientEndPos
+            radius:        AzTheme.px(10)
+            borderColor:   homeMouse.containsMouse ? AzTheme.cardHoverBorder : AzTheme.cardBorder
+            borderWidth:   1
         }
+
+        QGCColoredImage {
+            anchors.centerIn:  parent
+            width:             AzTheme.px(22)
+            height:            width
+            sourceSize.height: height
+            fillMode:          Image.PreserveAspectFit
+            source:            "qrc:/res/AZSHIELD_ICON/v2/menu_home.svg"
+            color:             AzTheme.textCard
+        }
+
+        MouseArea {
+            id:           homeMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape:  Qt.PointingHandCursor
+            onClicked: {
+                if (mainWindow.allowViewSwitch()) {
+                    mainWindow.showFlyView()
+                }
+            }
+        }
+
+        ToolTip.visible: homeMouse.containsMouse
+        ToolTip.text:    qsTr("Ana Səhifə")
+        ToolTip.delay:   400
     }
 
     QGCFlickable {
         id: toolsFlickable
-        anchors.bottomMargin: 1
-        anchors.left: qgcButton.right
+        anchors.left: homeButton.right
+        anchors.leftMargin: _root._padH
         anchors.top: parent.top
         anchors.bottom: parent.bottom
+        anchors.bottomMargin: 1
         anchors.right: parent.right
-        contentWidth: toolIndicators.width
+        contentWidth: toolIndicators.width + _root._padH
         flickableDirection: Flickable.HorizontalFlick
+        clip: true
 
         PlanToolBarIndicators {
             id: toolIndicators
@@ -69,9 +121,9 @@ Rectangle {
         id: progressBar
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        height: 4
+        height: Math.max(2, AzTheme.px(3))
         width: _controllerProgressPct * parent.width
-        color: qgcPal.colorGreen
+        color: AzTheme.statusGreen
         visible: false
 
         onVisibleChanged: {
