@@ -4,13 +4,15 @@ import QGroundControl.Controls
 
 // The panel button of the mock-ups ("ARM"): radius 8, a dark vertical gradient with a
 // 1 px border. `danger` is the bright red variant of the ammunition panel's "At" button,
-// used for DISARM, Stop and the like. An optional icon sits left of the text.
+// used for DISARM, Stop and the like; `positive` the green one of the confirmation
+// dialog's "Bəli". An optional icon sits left of the text.
 Item {
     id: control
 
     property string text
     property string iconSource
     property bool   danger: false
+    property bool   positive: false
     property real   minimumWidth: AzTheme.px(90)
     property real   textSize:     AzTheme.popupTextSize
 
@@ -25,17 +27,25 @@ Item {
         radius:       AzTheme.px(8)
         border.width: 1
         border.color: mouseArea.containsMouse && control.enabled
-                      ? (control.danger ? AzTheme.dangerHoverBorder : AzTheme.cardHoverBorder)
-                      : (control.danger ? AzTheme.dangerBorder : AzTheme.buttonBorder)
+                      ? (control.danger ? AzTheme.dangerHoverBorder
+                                        : control.positive ? AzTheme.positiveHoverBorder : AzTheme.cardHoverBorder)
+                      : (control.danger ? AzTheme.dangerBorder
+                                        : control.positive ? AzTheme.positiveBorder : AzTheme.buttonBorder)
         gradient: Gradient {
-            GradientStop { position: 0; color: control.danger ? AzTheme.dangerTop : AzTheme.buttonTop }
-            GradientStop { position: 1; color: control.danger ? AzTheme.dangerBottom : AzTheme.buttonBottom }
+            GradientStop {
+                position: 0
+                color: control.danger ? AzTheme.dangerTop : control.positive ? AzTheme.positiveTop : AzTheme.buttonTop
+            }
+            GradientStop {
+                position: 1
+                color: control.danger ? AzTheme.dangerBottom : control.positive ? AzTheme.positiveBottom : AzTheme.buttonBottom
+            }
         }
 
         Rectangle {
             anchors.fill:    parent
             radius:          parent.radius
-            color:           control.danger ? Qt.rgba(0, 0, 0, 0.12) : Qt.rgba(1, 1, 1, 0.06)
+            color:           (control.danger || control.positive) ? Qt.rgba(0, 0, 0, 0.12) : Qt.rgba(1, 1, 1, 0.06)
             visible:         mouseArea.pressed
         }
     }
@@ -60,7 +70,7 @@ Item {
             id:                     label
             anchors.verticalCenter: parent.verticalCenter
             text:                   control.text
-            color:                  control.danger ? AzTheme.textPrimary : AzTheme.textCard
+            color:                  (control.danger || control.positive) ? AzTheme.textPrimary : AzTheme.textCard
             font.family:            AzTheme.fontFamily
             font.weight:            Font.Medium
             font.pixelSize:         AzTheme.fontPx(control.textSize)

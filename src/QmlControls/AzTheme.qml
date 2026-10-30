@@ -123,6 +123,11 @@ QtObject {
     readonly property color dangerBottom:      "#AD151F"
     readonly property color dangerBorder:      "#E04650"
     readonly property color dangerHoverBorder: "#F27A81"
+    // The confirmation dialog's green "Bəli" button.
+    readonly property color positiveTop:         "#12A34C"
+    readonly property color positiveBottom:      "#0B7B37"
+    readonly property color positiveBorder:      "#3DBE6E"
+    readonly property color positiveHoverBorder: "#6FD896"
     // Ammunition slot rings
     readonly property color slotReady:         "#0E9F7A"
     readonly property color slotEmpty:         "#3A3F44"

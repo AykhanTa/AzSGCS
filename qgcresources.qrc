@@ -30,6 +30,7 @@
         <file alias="AZSHIELD_ICON/v2/top_udp.svg">resources/AZSHIELD_ICON/v2/top_udp.svg</file>
         <file alias="AZSHIELD_ICON/v2/menu_exit.svg">resources/AZSHIELD_ICON/v2/menu_exit.svg</file>
         <file alias="AZSHIELD_ICON/v2/popup_close.svg">resources/AZSHIELD_ICON/v2/popup_close.svg</file>
+        <file alias="AZSHIELD_ICON/v2/popup_info.svg">resources/AZSHIELD_ICON/v2/popup_info.svg</file>
         <file alias="AZSHIELD_ICON/v2/popup_chevron.svg">resources/AZSHIELD_ICON/v2/popup_chevron.svg</file>
         <file alias="AZSHIELD_ICON/v2/popup_trash.svg">resources/AZSHIELD_ICON/v2/popup_trash.svg</file>
         <file alias="AZSHIELD_ICON/v2/popup_settings.svg">resources/AZSHIELD_ICON/v2/popup_settings.svg</file>
