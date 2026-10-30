@@ -15,7 +15,8 @@ Item {
     visible:    false
 
     anchors.top:              parent.top
-    anchors.topMargin:        50
+    // Just under the top bar, at the same drop as the top bar panels.
+    anchors.topMargin:        AzTheme.px(AzTheme.popupDrop)
     anchors.horizontalCenter: parent.horizontalCenter
 
     property var    guidedController
