@@ -10,7 +10,7 @@ import QGroundControl.UTMSP
 /// the panel card of the new design.
 Item {
     id:         _root
-    width:      Math.min(AzTheme.px(400), parent ? parent.width - 2 * AzTheme.px(16) : AzTheme.px(400))
+    width:      Math.min(AzTheme.px(340), parent ? parent.width - 2 * AzTheme.px(16) : AzTheme.px(340))
     height:     card.height
     visible:    false
 
@@ -35,8 +35,8 @@ Item {
     property bool   utmspSliderTrigger
     property bool   _utmspEnabled:                       QGroundControl.utmspSupported
 
-    readonly property real _pad: AzTheme.px(24)
-    readonly property real _gap: AzTheme.px(16)
+    readonly property real _pad: AzTheme.px(18)
+    readonly property real _gap: AzTheme.px(12)
 
     Component.onCompleted: guidedController.confirmDialog = this
 
@@ -139,7 +139,7 @@ Item {
             startPosition: AzTheme.panelGradientStartPos
             endColor:      AzTheme.panelGradientEnd
             endPosition:   AzTheme.panelGradientEndPos
-            radius:        AzTheme.px(16)
+            radius:        AzTheme.px(14)
             borderColor:   AzTheme.panelBorder
             borderWidth:   1
         }
@@ -165,7 +165,7 @@ Item {
                 wrapMode:            Text.WordWrap
                 color:               AzTheme.textCard
                 font.family:         AzTheme.fontFamily
-                font.pixelSize:      AzTheme.fontPx(17)
+                font.pixelSize:      AzTheme.fontPx(15)
                 lineHeight:          1.15
             }
 
@@ -185,20 +185,20 @@ Item {
 
             Row {
                 width:   parent.width
-                spacing: AzTheme.px(12)
+                spacing: AzTheme.px(10)
 
                 AzButton {
                     width:     (parent.width - parent.spacing) / 2
-                    height:    AzTheme.px(44)
-                    textSize:  17
+                    height:    AzTheme.px(38)
+                    textSize:  15
                     text:      qsTr("Xeyr")
                     onClicked: confirmCancelled()
                 }
 
                 AzButton {
                     width:     (parent.width - parent.spacing) / 2
-                    height:    AzTheme.px(44)
-                    textSize:  17
+                    height:    AzTheme.px(38)
+                    textSize:  15
                     text:      qsTr("Bəli")
                     positive:  !_root._emergencyAction
                     danger:    _root._emergencyAction
@@ -211,7 +211,7 @@ Item {
 
                 QGCColoredImage {
                     anchors.verticalCenter: parent.verticalCenter
-                    width:                  AzTheme.px(16)
+                    width:                  AzTheme.px(14)
                     height:                 width
                     sourceSize.height:      height
                     fillMode:               Image.PreserveAspectFit
@@ -224,7 +224,7 @@ Item {
                     text:                   qsTr("Klaviatura: [B] Bəli, [X] Xeyr, [Esc] Ləğv")
                     color:                  AzTheme.mutedText
                     font.family:            AzTheme.fontFamily
-                    font.pixelSize:         AzTheme.fontPx(13)
+                    font.pixelSize:         AzTheme.fontPx(12)
                 }
             }
         }
