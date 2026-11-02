@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Dialogs
+import QtQuick.Effects
 import QtQuick.Layouts
 import QtQuick.Window
 
@@ -788,14 +789,12 @@ ApplicationWindow {
     Popup {
         id: connectionListPopup
 
-        readonly property real _rowHeight: Math.max(50, ScreenTools.defaultFontPixelHeight * 3.1)
-        // Sized from what is in the list, on every platform. The mobile branch took a
-        // flat 92% by 84% of the window whatever the content, so on a tablet a dialog
-        // holding one row -- or none, which is the usual case -- covered the screen.
-        // The clamps below still widen it on a phone, where 56% would be too narrow.
-        readonly property real _targetPopupWidth: mainWindow.width * 0.56
-        readonly property real _targetPopupHeight: _rowHeight * Math.max(1, Math.min(_visibleManualConnectionCount(), 6))
-                                                   + ScreenTools.defaultFontPixelHeight * 6.5
+        // The panel card of the confirmation dialog: the title and ✕, one group box row
+        // per link with its state and a connect / disconnect button, then the actions.
+        readonly property real _pad:       AzTheme.px(18)
+        readonly property real _rowHeight: AzTheme.px(AzTheme.groupRowHeight + 8)
+        readonly property real _rowGap:    AzTheme.px(8)
+        readonly property int  _rowCount:  _visibleManualConnectionCount()
 
         function _visibleManualConnectionCount() {
             if (!_linkManager || !_linkManager.linkConfigurations) {
@@ -812,15 +811,8 @@ ApplicationWindow {
             return count
         }
 
-        width: Math.min(mainWindow.width * 0.96,
-                        Math.max(ScreenTools.defaultFontPixelWidth * 42,
-                                 Math.min(_targetPopupWidth,
-                                          ScreenTools.defaultFontPixelWidth * 78)))
-
-        height: Math.min(mainWindow.height * 0.90,
-                         Math.max(ScreenTools.defaultFontPixelHeight * 14,
-                                  Math.min(_targetPopupHeight,
-                                           ScreenTools.defaultFontPixelHeight * 42)))
+        width:  Math.min(mainWindow.width - 2 * AzTheme.px(16), AzTheme.px(520))
+        height: Math.min(mainWindow.height - 2 * AzTheme.px(16), popupColumn.implicitHeight + 2 * _pad)
 
         x: Math.round((mainWindow.width - width) * 0.5)
         y: Math.round((mainWindow.height - height) * 0.5)
@@ -830,212 +822,225 @@ ApplicationWindow {
         padding: 0
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-        background: Rectangle {
-            color: "#3D3B3B"
-            radius: 8
-            border.color: "#FFFFFF"
-            border.width: 2
+        background: Item {
+            RectangularShadow {
+                anchors.fill: popupCard
+                offset.y:     AzTheme.px(12)
+                blur:         AzTheme.px(32)
+                radius:       popupCard.radius
+                color:        AzTheme.popupShadow
+            }
+
+            AzGradientRect {
+                id:            popupCard
+                anchors.fill:  parent
+                angle:         AzTheme.panelGradientAngle
+                startColor:    AzTheme.panelGradientStart
+                startPosition: AzTheme.panelGradientStartPos
+                endColor:      AzTheme.panelGradientEnd
+                endPosition:   AzTheme.panelGradientEndPos
+                radius:        AzTheme.px(14)
+                borderColor:   AzTheme.panelBorder
+                borderWidth:   1
+            }
         }
 
         property var _autoConnectSettings: QGroundControl.settingsManager.autoConnectSettings
         property bool _udpAutoConnectState: _autoConnectSettings ? _autoConnectSettings.autoConnectUDP.value : false
 
         ColumnLayout {
+            id: popupColumn
             anchors.fill: parent
-            anchors.margins: 10
-            spacing: 10
+            anchors.margins: connectionListPopup._pad
+            spacing: AzTheme.px(AzTheme.popupGap)
 
-            QGCLabel {
-                text: qsTr("Əlaqəni Seçin")
-                color: "white"
-                font.pixelSize: 18
-                font.bold: true
-                Layout.alignment: Qt.AlignHCenter
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: AzTheme.px(8)
+
+                Text {
+                    Layout.fillWidth: true
+                    text: qsTr("Əlaqəni Seçin")
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
+                    font.pixelSize: AzTheme.fontPx(AzTheme.popupTitleSize)
+                    elide: Text.ElideRight
+                }
+
+                AzIconButton {
+                    iconSource: "qrc:/res/AZSHIELD_ICON/v2/popup_close.svg"
+                    iconSize:   AzTheme.px(18)
+                    onClicked:  connectionListPopup.close()
+                }
             }
 
+            // No manual link configured yet
             Rectangle {
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                color: "#2A2A2A"
-                radius: 6
+                Layout.preferredHeight: AzTheme.px(96)
+                visible: connectionListPopup._rowCount === 0
+                radius: AzTheme.px(AzTheme.groupRadius)
+                color: AzTheme.groupFill
+                border.width: 1
+                border.color: AzTheme.groupBorder
 
-                ListView {
-                    id: connectionListView
+                Text {
                     anchors.fill: parent
-                    anchors.margins: 5
-                    clip: true
-                    spacing: 4
-                    boundsBehavior: Flickable.StopAtBounds
+                    anchors.margins: AzTheme.px(16)
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    wrapMode: Text.WordWrap
+                    text: qsTr("Bağlantı yoxdur. \"Konfiqurasiya\" ilə yeni bağlantı əlavə edin.")
+                    color: AzTheme.mutedText
+                    font.family: AzTheme.fontFamily
+                    font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
+                }
+            }
 
-                    model: _linkManager ? _linkManager.linkConfigurations : []
+            ListView {
+                id: connectionListView
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredHeight: connectionListPopup._rowCount * (connectionListPopup._rowHeight + spacing)
+                visible: connectionListPopup._rowCount > 0
+                clip: true
+                spacing: connectionListPopup._rowGap
+                boundsBehavior: Flickable.StopAtBounds
 
-                    delegate: Rectangle {
-                        id: delegateItem
-                        width: connectionListView.width
-                        color: "transparent"
+                model: _linkManager ? _linkManager.linkConfigurations : []
 
-                        property string linkName: object && object.name ? object.name.toLowerCase() : ""
-                        property bool _isUdpLink: linkName.indexOf("udp") !== -1
-                        property bool isConnected: object && object.link ? true : false
+                delegate: Item {
+                    id: delegateItem
+                    width: connectionListView.width
 
-                        visible: !_isUdpLink
-                        height: _isUdpLink ? 0 : connectionListPopup._rowHeight
+                    property string linkName: object && object.name ? object.name.toLowerCase() : ""
+                    property bool _isUdpLink: linkName.indexOf("udp") !== -1
+                    property bool isConnected: object && object.link ? true : false
 
-                        Rectangle {
+                    visible: !_isUdpLink
+                    height: _isUdpLink ? 0 : connectionListPopup._rowHeight
+
+                    Rectangle {
+                        anchors.fill: parent
+                        visible: !delegateItem._isUdpLink
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
+
+                        RowLayout {
                             anchors.fill: parent
-                            anchors.margins: delegateItem._isUdpLink ? 0 : 2
-                            visible: !delegateItem._isUdpLink
-                            color: index % 2 === 0 ? "#3D3B3B" : "#2A2A2A"
-                            radius: 4
+                            anchors.leftMargin: AzTheme.px(AzTheme.groupPadding)
+                            anchors.rightMargin: AzTheme.px(10)
+                            spacing: AzTheme.px(12)
 
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.margins: 10
-                                spacing: 10
+                            Column {
+                                Layout.fillWidth: true
+                                spacing: AzTheme.px(2)
 
-                                QGCLabel {
-                                    Layout.fillWidth: true
+                                Text {
+                                    width: parent.width
                                     text: object.name
-                                    color: "white"
-                                    font.pixelSize: 14
-                                    font.bold: true
+                                    color: AzTheme.textCard
+                                    font.family: AzTheme.fontFamily
+                                    font.weight: Font.Medium
+                                    font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
                                     elide: Text.ElideRight
                                 }
 
-                                QGCLabel {
-                                    id: statusLabel
-                                    text: delegateItem.isConnected ? qsTr("Əlaqə qurulub") : qsTr("Əlaqə qurulmayıb")
-                                    color: delegateItem.isConnected ? "#4CAF50" : "#F44336"
-                                    font.pixelSize: 12
-                                }
+                                Row {
+                                    spacing: AzTheme.px(6)
 
-                                Rectangle {
-                                    id: connectButton
-                                    width: 90
-                                    height: 30
-                                    radius: 4
-                                    color: delegateItem.isConnected ? "#F44336" : "#4CAF50"
-                                    border.color: "#FFFFFF"
-                                    border.width: 1
-
-                                    QGCLabel {
-                                        id: connectButtonLabel
-                                        anchors.centerIn: parent
-                                        text: delegateItem.isConnected ? qsTr("Əlaqəni kəs") : qsTr("Əlaqəni qur")
-                                        color: "white"
-                                        font.pixelSize: 10
-                                        font.bold: true
+                                    Rectangle {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: Math.max(6, AzTheme.px(8))
+                                        height: width
+                                        radius: width / 2
+                                        color: delegateItem.isConnected ? AzTheme.statusGreen : AzTheme.statusRed
                                     }
 
-                                    QGCMouseArea {
-                                        anchors.fill: parent
-                                        onClicked: {
-                                            //console.log("Butona tıklandı - Mevcut durum:", delegateItem.isConnected, "Bağlantı adı:", object.name)
+                                    Text {
+                                        id: statusLabel
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: delegateItem.isConnected ? qsTr("Əlaqə qurulub") : qsTr("Əlaqə qurulmayıb")
+                                        color: AzTheme.textSecondary
+                                        font.family: AzTheme.fontFamily
+                                        font.pixelSize: AzTheme.fontPx(12)
+                                    }
+                                }
+                            }
 
-                                            if (autoConnectBlocker.running) {
-                                                //console.log("AutoConnect blok aktif, işlem engellendi")
-                                                return
-                                            }
+                            AzButton {
+                                id: connectButton
+                                Layout.preferredWidth: AzTheme.px(132)
+                                Layout.preferredHeight: AzTheme.px(34)
+                                text: delegateItem.isConnected ? qsTr("Əlaqəni kəs") : qsTr("Əlaqəni qur")
+                                danger: delegateItem.isConnected
+                                positive: !delegateItem.isConnected
 
-                                            if (delegateItem.isConnected) {
-                                                //console.log("Bağlantı kesiliyor...")
+                                onClicked: {
+                                    if (autoConnectBlocker.running) {
+                                        return
+                                    }
 
-                                                _handleDisconnectWithAutoConnect(object)
+                                    if (delegateItem.isConnected) {
+                                        _handleDisconnectWithAutoConnect(object)
 
-                                                if (object.link) {
-                                                    object.link.disconnect()
-                                                }
-
-                                                delegateItem.isConnected = false
-                                                //console.log("Əlaqə kəsildi:", object.name)
-                                            } else {
-                                                //console.log("Bağlantı kuruluyor...")
-
-                                                _handleConnectWithAutoConnect(object)
-                                                _linkManager.createConnectedLink(object)
-
-                                                delegateItem.isConnected = true
-                                                //console.log("Əlaqə quruldu:", object.name)
-
-                                                connectionListPopup.close()
-                                            }
+                                        if (object.link) {
+                                            object.link.disconnect()
                                         }
+
+                                        delegateItem.isConnected = false
+                                    } else {
+                                        _handleConnectWithAutoConnect(object)
+                                        _linkManager.createConnectedLink(object)
+
+                                        delegateItem.isConnected = true
+
+                                        connectionListPopup.close()
                                     }
                                 }
                             }
                         }
                     }
+                }
 
-                    ScrollBar.vertical: ScrollBar {
-                        policy: ScrollBar.AsNeeded
-                    }
+                ScrollBar.vertical: ScrollBar {
+                    policy: ScrollBar.AsNeeded
                 }
             }
 
             RowLayout {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 40
-                spacing: 10
-                Layout.alignment: Qt.AlignHCenter
+                spacing: AzTheme.px(10)
 
-                Rectangle {
+                // Opens Tənzimləmələr on "Rabitə Kanalları" to add or edit a link
+                AzButton {
                     id: configButton
-                    Layout.preferredWidth: 120
-                    Layout.preferredHeight: 35
-                    radius: 6
-                    color: "#666666"
-                    border.color: "#FFFFFF"
-                    border.width: 1
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: AzTheme.px(38)
+                    text: qsTr("Konfiqurasiya")
+                    iconSource: "qrc:/res/AZSHIELD_ICON/v2/popup_settings.svg"
+                    onClicked: {
+                        connectionListPopup.close()
 
-                    QGCLabel {
-                        anchors.centerIn: parent
-                        text: qsTr("Konfiqurasiya")
-                        color: "white"
-                        font.pixelSize: 12
-                        font.bold: true
-                    }
-
-                    QGCMouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            connectionListPopup.close()
-
-                            if (leftPanel) {
-                                leftPanel.visible = false
-                            }
-
-                            // Tənzimləmələr overlay-ini aç və "Rabitə Kanalları"na keç. Səhifə adı
-                            // ilə açılır: sabit nömrə (7) siyahıya Gimbal əlavə olunanda Gimbal-ı açırdı.
-                            sideMenuLoader.setSource(Qt.resolvedUrl("Tenzimlemeler.qml"), { startPage: "Comm_links.qml" })
+                        if (leftPanel) {
+                            leftPanel.visible = false
                         }
+
+                        // Tənzimləmələr overlay-ini aç və "Rabitə Kanalları"na keç. Səhifə adı
+                        // ilə açılır: sabit nömrə (7) siyahıya Gimbal əlavə olunanda Gimbal-ı açırdı.
+                        sideMenuLoader.setSource(Qt.resolvedUrl("Tenzimlemeler.qml"), { startPage: "Comm_links.qml" })
                     }
                 }
 
-                Rectangle {
+                AzButton {
                     id: closeButton2
-                    Layout.preferredWidth: 80
-                    Layout.preferredHeight: 35
-                    radius: 6
-                    color: "#F44336"
-                    border.color: "#FFFFFF"
-                    border.width: 1
-
-                    QGCLabel {
-                        anchors.centerIn: parent
-                        text: qsTr("Bağla")
-                        color: "white"
-                        font.pixelSize: 12
-                        font.bold: true
-                    }
-
-                    QGCMouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            connectionListPopup.close()
-                        }
-                    }
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: AzTheme.px(38)
+                    text: qsTr("Bağla")
+                    onClicked: connectionListPopup.close()
                 }
             }
         }
