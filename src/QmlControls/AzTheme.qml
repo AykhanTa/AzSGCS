@@ -72,7 +72,7 @@ QtObject {
     readonly property color topBarMenuTop:      "#0F1215"
     readonly property color topBarMenuBottom:   "#0B0D0F"
     readonly property color topBarMenuIcon:     "#C8CACD"
-    // The kebab button's hover in the CSS; also marks the card whose panel is open.
+    // The kebab button's hover in the CSS.
     readonly property color activeTintStart:    Qt.rgba(29 / 255, 78 / 255, 216 / 255, 0.04)
     readonly property color activeTintEnd:      Qt.rgba(37 / 255, 99 / 255, 235 / 255, 0.09)
     readonly property color activeBorder:       Qt.rgba(37 / 255, 99 / 255, 235 / 255, 0.6)

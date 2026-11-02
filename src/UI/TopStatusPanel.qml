@@ -973,16 +973,16 @@ Item {
                                                                                                   : AzTheme.cardBorder
             }
 
-            // Open panel: the blue tint of the kebab button's hover.
+            // Open panel: the side menu's selected box, linear-gradient(180deg, #30353A, #202428),
+            // inside the #5D646B outline.
             Rectangle {
                 anchors.fill:    parent
                 anchors.margins: 1
                 radius:          cardBackground.radius - 1
                 visible:         block.isActive
                 gradient: Gradient {
-                    orientation: Gradient.Horizontal
-                    GradientStop { position: 0;      color: AzTheme.activeTintStart }
-                    GradientStop { position: 0.5982; color: AzTheme.activeTintEnd }
+                    GradientStop { position: 0; color: AzTheme.menuSelectedTop }
+                    GradientStop { position: 1; color: AzTheme.menuSelectedBottom }
                 }
             }
 
