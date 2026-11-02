@@ -88,20 +88,32 @@ QGCPopupDialog {
     }
 
     ColumnLayout {
-        width:      Math.min(mainWindow.width * .75, Math.max(ScreenTools.defaultFontPixelWidth * 60, editRow.width))
-        spacing:    globals.defaultTextHeight
+        width:      Math.min(mainWindow.width * .75, Math.max(AzTheme.px(560), editRow.width))
+        spacing:    AzTheme.px(14)
 
-        QGCLabel {
-            id:                 validationError
+        // A red-tinted box with the validation error
+        Rectangle {
             Layout.fillWidth:   true
-            wrapMode:           Text.WordWrap
-            color:              qgcPal.warningText
-            visible:            text !== ""
+            implicitHeight:     validationError.implicitHeight + AzTheme.px(20)
+            visible:            validationError.text !== ""
+            radius:             AzTheme.px(AzTheme.groupRadius)
+            color:              Qt.rgba(1, 52 / 255, 67 / 255, 0.10)
+            border.width:       1
+            border.color:       Qt.rgba(1, 52 / 255, 67 / 255, 0.55)
+
+            QGCLabel {
+                id:                 validationError
+                anchors.fill:       parent
+                anchors.margins:    AzTheme.px(10)
+                wrapMode:           Text.WordWrap
+                verticalAlignment:  Text.AlignVCenter
+                color:              AzTheme.statusRed
+            }
         }
 
         RowLayout {
             id:         editRow
-            spacing:    ScreenTools.defaultFontPixelWidth
+            spacing:    AzTheme.px(10)
 
             QGCTextField {
                 id:                 valueField
@@ -152,7 +164,7 @@ QGCPopupDialog {
 
         Column {
             id:         bitmaskColumn
-            spacing:    ScreenTools.defaultFontPixelHeight / 2
+            spacing:    AzTheme.px(8)
             visible:    fact.bitmaskStrings.length > 0
 
             Repeater {
@@ -174,53 +186,122 @@ QGCPopupDialog {
             Layout.fillWidth:   true
             wrapMode:           Text.WordWrap
             visible:            !longDescriptionLabel.visible
+            color:              AzTheme.textSecondary
             text:               fact.shortDescription
         }
 
         QGCLabel {
             id:                 longDescriptionLabel
             Layout.fillWidth:   true
+            color:              AzTheme.textSecondary
             wrapMode:           Text.WordWrap
             visible:            fact.longDescription != ""
             text:               fact.longDescription
         }
 
-        Row {
-            spacing: ScreenTools.defaultFontPixelWidth
+        // The limits as small pills: the name in grey, the value in white
+        Flow {
+            Layout.fillWidth:   true
+            spacing:            AzTheme.px(8)
+            visible:            !fact.minIsDefaultForType || !fact.maxIsDefaultForType || _allowDefaultReset
 
-            QGCLabel {
-                id:         minValueDisplay
-                text:       qsTr("Min: ") + fact.minString
+            component LimitPill: Rectangle {
+                property string name
+                property string value
+
+                width:          pillRow.implicitWidth + AzTheme.px(20)
+                height:         AzTheme.px(AzTheme.pillHeight)
+                radius:         height / 2
+                border.width:   1
+                border.color:   AzTheme.groupBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.pillTop }
+                    GradientStop { position: 1; color: AzTheme.pillBottom }
+                }
+
+                Row {
+                    id:                 pillRow
+                    anchors.centerIn:   parent
+                    spacing:            AzTheme.px(6)
+
+                    QGCLabel { text: name;  color: AzTheme.textSecondary }
+                    QGCLabel { text: value; font.weight: Font.Medium }
+                }
+            }
+
+            LimitPill {
+                id:         minPill
+                name:       qsTr("Min")
+                value:      fact.minString
                 visible:    !fact.minIsDefaultForType
             }
 
-            QGCLabel {
-                text:       qsTr("Max: ") + fact.maxString
+            LimitPill {
+                id:         maxPill
+                name:       qsTr("Max")
+                value:      fact.maxString
                 visible:    !fact.maxIsDefaultForType
             }
 
-            QGCLabel {
-                text:       qsTr("Default: ") + fact.defaultValueString
+            LimitPill {
+                id:         defaultPill
+                name:       qsTr("Defolt")
+                value:      fact.defaultValueString
                 visible:    _allowDefaultReset
             }
         }
 
         QGCLabel {
+            Layout.fillWidth:   true
+            wrapMode:   Text.WordWrap
+            color:      AzTheme.statusOrange
             visible:    fact.vehicleRebootRequired
             text:       qsTr("Dəyişiklikdən sonra təyyarənin yenidən işə salınması tələb olunur")
         }
 
         QGCLabel {
+            Layout.fillWidth:   true
+            wrapMode:   Text.WordWrap
+            color:      AzTheme.statusOrange
             visible:    fact.qgcRebootRequired
             text:       qsTr("Dəyişiklikdən sonra tətbiqin yenidən başlaması tələb olunur")
         }
 
-        QGCLabel {
+        // An orange-tinted box with the in-flight warning
+        Rectangle {
             Layout.fillWidth:   true
-            wrapMode:   Text.WordWrap
-            text:       qsTr("Xəbərdarlıq: Təyyarənin uçuşda olduğu zaman dəyərlərin dəyişdirilməsi təyyarənin qeyri-sabitliyinə və mümkün təyyarə itkisinə səbəb ola bilər. ") +
-                        qsTr("Nə etdiyinizi bildiyinizə əmin olun və Saxlamadan əvvəl dəyərlərinizi iki dəfə yoxlayın!")
-            visible:    fact.componentId != -1
+            implicitHeight:     warningRow.implicitHeight + AzTheme.px(20)
+            visible:            fact.componentId != -1
+            radius:             AzTheme.px(AzTheme.groupRadius)
+            color:              Qt.rgba(1, 159 / 255, 26 / 255, 0.10)
+            border.width:       1
+            border.color:       Qt.rgba(1, 159 / 255, 26 / 255, 0.55)
+
+            RowLayout {
+                id:                 warningRow
+                anchors.left:       parent.left
+                anchors.right:      parent.right
+                anchors.top:        parent.top
+                anchors.margins:    AzTheme.px(10)
+                spacing:            AzTheme.px(10)
+
+                QGCColoredImage {
+                    Layout.alignment:       Qt.AlignTop
+                    Layout.preferredWidth:  AzTheme.px(20)
+                    Layout.preferredHeight: AzTheme.px(20)
+                    source:                 "qrc:/res/AZSHIELD_ICON/bx_error.svg"
+                    sourceSize.height:      AzTheme.px(20)
+                    fillMode:               Image.PreserveAspectFit
+                    color:                  AzTheme.statusOrange
+                }
+
+                QGCLabel {
+                    Layout.fillWidth:   true
+                    wrapMode:   Text.WordWrap
+                    text:       qsTr("Xəbərdarlıq: Təyyarənin uçuşda olduğu zaman dəyərlərin dəyişdirilməsi təyyarənin qeyri-sabitliyinə və mümkün təyyarə itkisinə səbəb ola bilər. ") +
+                                qsTr("Nə etdiyinizi bildiyinizə əmin olun və Saxlamadan əvvəl dəyərlərinizi iki dəfə yoxlayın!")
+                }
+            }
         }
 
         QGCCheckBox {

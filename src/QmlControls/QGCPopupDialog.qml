@@ -9,6 +9,7 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Effects
 import QtQuick.Layouts
 import QtQuick.Dialogs
 
@@ -55,7 +56,11 @@ Popup {
     property var    dialogProperties
     property bool   destroyOnClose:         true
     property bool   preventClose:           false
-    
+
+    // The dialog content's labels, fields, combo boxes, check boxes and buttons take the
+    // new design's look (see QGCLabel._az). A dialog can set it to false to opt out.
+    property bool   azInputStyle:           true
+
     readonly property real headerMinWidth: titleLable.implicitWidth + rejectButton.width + acceptButton.width + titleRowLayout.spacing * 2
 
     signal accepted
@@ -67,16 +72,10 @@ Popup {
     // dialoq lazımsız böyüyür və məzmunun sağında boş zolaq qalır.
     readonly property bool _compact:    ScreenTools.isShortScreen
 
-    property real   _frameSize:         ScreenTools.defaultFontPixelWidth
-    property real   _contentMargin:     ScreenTools.defaultFontPixelHeight * (_compact ? 0.35 : 0.5)
+    property real   _contentMargin:     AzTheme.px(_compact ? 10 : AzTheme.popupGap)
     property bool   _acceptAllowed:     acceptButton.visible
     property bool   _rejectAllowed:     rejectButton.visible
     property int    _previousValidationErrorCount: 0
-
-    // Dialoq dizaynı
-    property color dialogColor:     "#2A2A2A"
-    property color dialogBorder:    "#6E6E6E"
-    property color dialogContentBg: "#1E1E1E"
 
     background: Item {
         width:  mainWindow.width
@@ -214,15 +213,35 @@ Popup {
         acceptButton.enabled = false
     }
 
-    Rectangle {
-        x:              mainLayout.x - _contentMargin * 1.5
-        y:              mainLayout.y - _contentMargin * 1.5
-        width:          mainLayout.width + _contentMargin * 3
-        height:         mainLayout.height + _contentMargin * 3
-        color:          root.dialogColor
-        radius:         14
-        border.width:   1
-        border.color:   root.dialogBorder
+    // The panel card of the new design: linear-gradient(155deg), 1 px #353A3F,
+    // radius 14 and a soft drop shadow.
+    Item {
+        id:     dialogFrame
+        x:      mainLayout.x - _contentMargin * 1.5
+        y:      mainLayout.y - _contentMargin * 1.5
+        width:  mainLayout.width + _contentMargin * 3
+        height: mainLayout.height + _contentMargin * 3
+
+        RectangularShadow {
+            anchors.fill:   dialogCard
+            offset.y:       AzTheme.px(12)
+            blur:           AzTheme.px(32)
+            radius:         dialogCard.radius
+            color:          AzTheme.popupShadow
+        }
+
+        AzGradientRect {
+            id:             dialogCard
+            anchors.fill:   parent
+            angle:          AzTheme.panelGradientAngle
+            startColor:     AzTheme.panelGradientStart
+            startPosition:  AzTheme.panelGradientStartPos
+            endColor:       AzTheme.panelGradientEnd
+            endPosition:    AzTheme.panelGradientEndPos
+            radius:         AzTheme.px(14)
+            borderColor:    AzTheme.panelBorder
+            borderWidth:    1
+        }
     }
 
     ColumnLayout {
@@ -237,28 +256,27 @@ Popup {
             Layout.fillWidth:       true
             spacing:                _contentMargin
 
-            QGCLabel {
+            Text {
                 id: titleLable
                 Layout.fillWidth:   true
                 text:               root.title
-                font.pointSize:     root._compact ? ScreenTools.defaultFontPointSize : ScreenTools.mediumFontPointSize
-                font.bold:          true
-                color:              "#FFFFFF"
-                verticalAlignment:	Text.AlignVCenter
+                font.family:        AzTheme.fontFamily
+                font.weight:        Font.Medium
+                font.pixelSize:     AzTheme.fontPx(root._compact ? 15 : AzTheme.popupTitleSize)
+                color:              AzTheme.textCard
+                verticalAlignment:  Text.AlignVCenter
                 elide:              Text.ElideRight
             }
 
-            QGCButton {
+            AzButton {
                 id:                     rejectButton
                 onClicked:              _reject()
-                Layout.minimumWidth:    height * 1.8
             }
 
-            QGCButton {
+            AzButton {
                 id:                     acceptButton
-                primary:                true
+                positive:               true
                 onClicked:              _accept()
-                Layout.minimumWidth:    height * 1.8
             }
         }
 
@@ -266,15 +284,18 @@ Popup {
         Rectangle {
             Layout.fillWidth:       true
             Layout.preferredHeight: 1
-            color:                  "#4A4A4A"
+            color:                  AzTheme.panelBorder
         }
 
         Rectangle {
             Layout.fillWidth:       true
             Layout.preferredWidth:  Math.min(maxAvailableWidth, totalContentWidth)
             Layout.preferredHeight: Math.min(maxAvailableHeight, totalContentHeight)
-            color:                  root.dialogContentBg
-            radius:                 10
+            // A group box: #191D20, 1 px #353A3F, radius 8
+            color:                  AzTheme.groupFill
+            radius:                 AzTheme.px(AzTheme.groupRadius)
+            border.width:           1
+            border.color:           AzTheme.groupBorder
 
             property real maxAvailableWidth:    mainWindow.width - _contentMargin * 4
             property real maxAvailableHeight:   mainWindow.height - titleRowLayout.height - _contentMargin * 6
