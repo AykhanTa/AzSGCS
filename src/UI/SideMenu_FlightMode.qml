@@ -5,36 +5,40 @@ import QtQuick.Layouts 1.15
 import QGroundControl 1.0
 import QGroundControl.FactControls 1.0
 import QGroundControl.Controls 1.0
-//import QGroundControl.ScreenTools 1.0
 
+// Flight modes, in the new design: the vehicle setup page header, two status cards
+// with group box rows, the active mode or switch tinted green.
 Rectangle {
     id: root
     anchors.fill: parent
-    color: "black"
+    color: "transparent"
     clip: true
+
+    // The combo boxes and labels take the new design's look (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // -------------------- Responsive --------------------
     readonly property bool phone: ScreenTools.isMobile || width < 700
 
-    readonly property real _m:        Math.max(12, ScreenTools.defaultFontPixelHeight * 0.75)
-    readonly property real _side:     Math.max(12, _m * 0.9)
-    readonly property real _itemH:    Math.max(56, ScreenTools.defaultFontPixelHeight * 2.8)
+    readonly property real _m:        AzTheme.px(phone ? 10 : 16)
+    readonly property real _side:     AzTheme.px(phone ? 12 : 20)
+    readonly property real _itemH:    AzTheme.px(AzTheme.groupRowHeight + 4)
 
     // Row içi padding/gap
-    readonly property real _rowPadH:  Math.max(12, ScreenTools.defaultFontPixelHeight * 0.90)
-    readonly property real _rowPadV:  Math.max(10, ScreenTools.defaultFontPixelHeight * 0.55)
-    readonly property real _rowGap:   Math.max(10, ScreenTools.defaultFontPixelHeight * 0.75)
+    readonly property real _rowPadH:  AzTheme.px(AzTheme.groupPadding)
+    readonly property real _rowPadV:  AzTheme.px(8)
+    readonly property real _rowGap:   AzTheme.px(12)
 
     // Combo ölçüləri (Layout üçün!)
-    readonly property real _comboH:   Math.max(36, ScreenTools.defaultFontPixelHeight * 1.9)
+    readonly property real _comboH:   AzTheme.px(36)
 
     // ✅ KİÇİK EKRANDA combo eni daha kiçik olsun ki, label tam görünsün
     readonly property real _comboW:   phone
                                      ? Math.max(110, Math.min(200, width * 0.42))
                                      : Math.max(130, Math.min(240, width * 0.20))
 
-    readonly property real _labelPx:  Math.max(14, ScreenTools.defaultFontPixelHeight * 0.95)
-    readonly property real _smallPx:  Math.max(12, ScreenTools.defaultFontPixelHeight * 0.85)
+    readonly property real _labelPx:  AzTheme.fontPx(AzTheme.popupTextSize)
+    readonly property real _smallPx:  AzTheme.fontPx(13)
 
     // ✅ ComboBox popup ölçüləri (böyük olmasın)
     readonly property real _comboPopupMaxH:   Math.min(320, Math.max(180, height * 0.45))
@@ -46,16 +50,6 @@ Rectangle {
     readonly property real _cardMinW: 560
     readonly property bool _twoCols:  width >= (2 * _cardMinW + _m)
     readonly property int  _columns:  _twoCols ? 2 : 1
-
-    // -------------------- LOCAL Combo Style (yalnız bu QML) --------------------
-    QtObject {
-        id: comboStyle
-        readonly property color text:    "white"
-        readonly property color bg:      "#2B2B2B"
-        readonly property color bgHi:    "#3A3A3A"
-        readonly property color border:  "#585858"
-        readonly property color popupBg: "#232323"
-    }
 
     PX4SimpleFlightModesController {
         id: controller
@@ -112,7 +106,7 @@ Rectangle {
             anchors.right: parent.right
             anchors.top: parent.top
 
-            anchors.topMargin: 0
+            anchors.topMargin: AzTheme.px(20)
             anchors.leftMargin: root._side
             anchors.rightMargin: root._side
             anchors.bottomMargin: root._side
@@ -124,17 +118,19 @@ Rectangle {
 
                 Text {
                     text: qsTr("Uçuş rejimlərinin konfiqurasiyası")
-                    color: "white"
-                    font.pixelSize: Math.max(22, ScreenTools.defaultFontPixelHeight * 1.35)
-                    font.bold: true
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
+                    font.pixelSize: AzTheme.fontPx(root.phone ? 18 : 20)
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
 
                 Text {
                     text: qsTr("Uçuş rejimlərini konfiqurasiya edin və RC ötürücü girişləri üçün seçimləri dəyişdirin")
-                    color: "#E8E8E8"
-                    font.pixelSize: 16
+                    color: AzTheme.textSecondary
+                    font.family: AzTheme.fontFamily
+                    font.pixelSize: AzTheme.fontPx(13)
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
@@ -152,10 +148,13 @@ Rectangle {
                     id: flightCard
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignTop
-                    radius: 16
-                    color: "#3D3B3B"
-                    border.width: 0.5
-                    border.color: "#9D9D9D"
+                    radius: AzTheme.px(AzTheme.cardRadius)
+                    border.width: 1
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
                     implicitHeight: flightContent.implicitHeight + (root._m * 2)
 
                     ColumnLayout {
@@ -166,9 +165,10 @@ Rectangle {
 
                         Text {
                             text: qsTr("Uçuş Rejimi Parametrləri")
-                            color: "white"
-                            font.pixelSize: Math.max(16, ScreenTools.defaultFontPixelHeight * 1.05)
-                            font.bold: true
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(16)
                             Layout.fillWidth: true
                         }
 
@@ -179,8 +179,10 @@ Rectangle {
                             // --- Flight mode channel ---
                             Rectangle {
                                 Layout.fillWidth: true
-                                radius: 10
-                                color: "#232323"
+                                radius: AzTheme.px(AzTheme.groupRadius)
+                                color: AzTheme.groupFill
+                                border.width: 1
+                                border.color: AzTheme.groupBorder
                                 clip: true
 
                                 // ✅ wrap ola bilsin deyə hündürlüyü implicitHeight ilə idarə edirik
@@ -197,7 +199,8 @@ Rectangle {
 
                                     Text {
                                         text: qsTr("Uçuş rejimi kanalı")
-                                        color: "#E8E8E8"
+                                        color: AzTheme.textCard
+                                        font.family: AzTheme.fontFamily
                                         font.pixelSize: root._labelPx
 
                                         // ✅ KİÇİK EKRANDA tam görünsün
@@ -231,8 +234,12 @@ Rectangle {
 
                                 delegate: Rectangle {
                                     Layout.fillWidth: true
-                                    radius: 10
-                                    color: (controller.activeFlightMode - 1) === index ? "#3A2E2E" : "#232323"
+                                    readonly property bool _isActive: (controller.activeFlightMode - 1) === index
+
+                                    radius: AzTheme.px(AzTheme.groupRadius)
+                                    color: _isActive ? Qt.rgba(0, 181 / 255, 70 / 255, 0.10) : AzTheme.groupFill
+                                    border.width: 1
+                                    border.color: _isActive ? Qt.rgba(0, 181 / 255, 70 / 255, 0.55) : AzTheme.groupBorder
                                     clip: true
 
                                     // ✅ PWM yazısı silindi -> ComboBox ən sağda olur, label üçün yer artır
@@ -249,7 +256,8 @@ Rectangle {
 
                                         Text {
                                             text: qsTr("Uçuş rejimi ") + (index + 1)
-                                            color: (controller.activeFlightMode - 1) === index ? "yellow" : "#E8E8E8"
+                                            color: _isActive ? AzTheme.statusGreen : AzTheme.textCard
+                                            font.family: AzTheme.fontFamily
                                             font.pixelSize: root._labelPx
 
                                             // ✅ KİÇİK EKRANDA %1 yazıları tam görünsün
@@ -288,10 +296,13 @@ Rectangle {
                     id: switchCard
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignTop
-                    radius: 16
-                    color: "#3D3B3B"
-                    border.width: 0.5
-                    border.color: "#9D9D9D"
+                    radius: AzTheme.px(AzTheme.cardRadius)
+                    border.width: 1
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
                     implicitHeight: switchContent.implicitHeight + (root._m * 2)
 
                     ColumnLayout {
@@ -302,23 +313,26 @@ Rectangle {
 
                         Text {
                             text: qsTr("Seçimləri dəyişdirin")
-                            color: "white"
-                            font.pixelSize: Math.max(16, ScreenTools.defaultFontPixelHeight * 1.05)
-                            font.bold: true
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(16)
                             Layout.fillWidth: true
                         }
 
                         ColumnLayout {
                             Layout.fillWidth: true
-                            spacing: 16
+                            spacing: root._m
 
                             Repeater {
                                 model: _switchNameList
 
                                 delegate: Rectangle {
                                     Layout.fillWidth: true
-                                    radius: 10
-                                    color: swActive ? "#3A2E2E" : "#232323"
+                                    radius: AzTheme.px(AzTheme.groupRadius)
+                                    color: swActive ? Qt.rgba(0, 181 / 255, 70 / 255, 0.10) : AzTheme.groupFill
+                                    border.width: 1
+                                    border.color: swActive ? Qt.rgba(0, 181 / 255, 70 / 255, 0.55) : AzTheme.groupBorder
                                     clip: true
 
                                     implicitHeight: Math.max(root._itemH, swRow.implicitHeight + (root._rowPadV * 2))
@@ -350,7 +364,8 @@ Rectangle {
 
                                         Text {
                                             text: getSwitchName(modelData)
-                                            color: swActive ? "yellow" : "#E8E8E8"
+                                            color: swActive ? AzTheme.statusGreen : AzTheme.textCard
+                                            font.family: AzTheme.fontFamily
                                             font.pixelSize: root._labelPx
 
                                             wrapMode: root.phone ? Text.WordWrap : Text.NoWrap
@@ -382,20 +397,23 @@ Rectangle {
                             Rectangle {
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: Math.max(240, Math.min(360, root.height * 0.35))
-                                radius: 10
-                                color: "#232323"
+                                radius: AzTheme.px(AzTheme.groupRadius)
+                                color: AzTheme.groupFill
+                                border.width: 1
+                                border.color: AzTheme.groupBorder
                                 clip: true
 
                                 ColumnLayout {
                                     anchors.fill: parent
-                                    anchors.margins: 15
-                                    spacing: 10
+                                    anchors.margins: AzTheme.px(AzTheme.groupPadding)
+                                    spacing: AzTheme.px(10)
 
                                     Text {
                                         text: qsTr("RC Kanal Monitoru")
-                                        color: "white"
+                                        color: AzTheme.textCard
+                                        font.family: AzTheme.fontFamily
+                                        font.weight: Font.Medium
                                         font.pixelSize: root._labelPx
-                                        font.bold: true
                                         Layout.fillWidth: true
                                     }
 
@@ -422,7 +440,7 @@ Rectangle {
                                 // kart Rectangle-ın uşağıdır (layout item-də anchors olmasın deyə).
                                 Rectangle {
                                     anchors.fill: parent
-                                    anchors.margins: 15
+                                    anchors.margins: AzTheme.px(AzTheme.groupPadding)
                                     color: "transparent"
                                     visible: root.showNoRcHint
 
@@ -434,7 +452,7 @@ Rectangle {
                                         QGCLabel {
                                             width: parent.width
                                             text: qsTr("RC siqnalı aşkar edilmədi")
-                                            color: "#E8E8E8"
+                                            color: AzTheme.textCard
                                             font.pixelSize: root._labelPx
                                             horizontalAlignment: Text.AlignHCenter
                                             wrapMode: Text.WordWrap
@@ -443,7 +461,7 @@ Rectangle {
                                         QGCLabel {
                                             width: parent.width
                                             text: qsTr("Radio qoşulduqdan sonra kanallar burada görünəcək.")
-                                            color: "#9D9D9D"
+                                            color: AzTheme.textSecondary
                                             font.pixelSize: root._smallPx
                                             horizontalAlignment: Text.AlignHCenter
                                             wrapMode: Text.WordWrap

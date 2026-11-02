@@ -6,10 +6,17 @@ import QGroundControl 1.0
 import QGroundControl.Controls 1.0
 import QGroundControl.FactControls 1.0
 
+// Joystick setup, in the new design: the vehicle setup page header, a pill tab bar
+// with the side menu's selected box, status cards with group box rows, and the
+// panel's switches and buttons.
 Rectangle {
     id: root
     anchors.fill: parent
-    color: "black"
+    color: "transparent"
+
+    // The combo boxes, check boxes, radio buttons and fields take the new design's
+    // look (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // Palette (qgcPal istifadə edirsən deyə təhlükəsiz olsun)
     QGCPalette {
@@ -23,13 +30,14 @@ Rectangle {
     readonly property bool _compact: (width < 1200) || (height < 820) || ScreenTools.isShortScreen
     readonly property bool _stacked: (width < 1000) || ScreenTools.isShortScreen
 
-    readonly property real _m:    Math.max(8, ScreenTools.defaultFontPixelHeight * (_compact ? 0.70 : 1.0))
-    readonly property real _side: Math.max(12, _m * 0.9)
+    readonly property real _m:    AzTheme.px(_compact ? 12 : 16)
+    readonly property real _side: AzTheme.px(_stacked ? 12 : 20)
+    readonly property real _top:  AzTheme.px(20)
     readonly property real _maxContentW: 1700
 
     readonly property int  _tabCols: _stacked ? ((width < 520) ? 1 : 2) : 4
-    readonly property real _tabSpacing: Math.max(8, _m * 0.6)
-    readonly property int  _tabH: Math.max(36, Math.round(ScreenTools.defaultFontPixelHeight * (_compact ? 2.0 : 2.4)))
+    readonly property real _tabSpacing: AzTheme.px(6)
+    readonly property int  _tabH: AzTheme.px(_compact ? 36 : 40)
 
     readonly property real axisMonitorWidth: ScreenTools.defaultFontPixelWidth * 32
 
@@ -88,8 +96,9 @@ Rectangle {
 
         // Scroll yalnız həqiqətən lazım olanda işləsin (fit olanda yox)
         readonly property real _scrollTol: 2   // 1-2px overflow üçün tolerans
-        contentHeight: (contentCol.implicitHeight <= height + _scrollTol) ? height : contentCol.implicitHeight
-        interactive:  contentCol.implicitHeight > height + _scrollTol
+        readonly property real _contentH: contentCol.implicitHeight + root._top
+        contentHeight: (_contentH <= height + _scrollTol) ? height : _contentH
+        interactive:  _contentH > height + _scrollTol
 
         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
         ScrollBar.horizontal: ScrollBar { policy: ScrollBar.AlwaysOff }
@@ -98,6 +107,7 @@ Rectangle {
             id: contentCol
             width: Math.min(pageFlick.width - (root._side * 2), root._maxContentW)
             x: (pageFlick.width - width) / 2
+            y: root._top
             spacing: root._m
 
             // ======================
@@ -105,21 +115,23 @@ Rectangle {
             // ======================
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: root._compact ? 2 : 6
+                spacing: AzTheme.px(6)
 
                 Text {
                     text: qsTr("Joystick Konfiqurasiyası")
-                    color: "white"
-                    font.bold: true
-                    font.pixelSize: root._compact ? 22 : 26
+                    color: AzTheme.textCard
+                    font.weight: Font.Medium
+                    font.family: AzTheme.fontFamily
+                    font.pixelSize: AzTheme.fontPx(root._compact ? 18 : 20)
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
 
                 Text {
                     text: qsTr("Optimal uçuş nəzarəti üçün nəzarətçi parametrlərinizi konfiqurasiya edin")
-                    color: "#E8E8E8"
-                    font.pixelSize: root._compact ? 13 : 16
+                    color: AzTheme.textSecondary
+                    font.family: AzTheme.fontFamily
+                    font.pixelSize: AzTheme.fontPx(13)
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
@@ -128,13 +140,19 @@ Rectangle {
             // ======================
             // Tabs
             // ======================
+            // A pill container; the selected tab takes the side menu's selected box
             Rectangle {
                 id: tabBar
                 Layout.fillWidth: true
-                color: "#2A2A2A"
-                radius: 16
+                radius: AzTheme.px(10)
+                border.width: 1
+                border.color: AzTheme.groupBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.pillTop }
+                    GradientStop { position: 1; color: AzTheme.pillBottom }
+                }
 
-                readonly property real pad: Math.max(8, root._m * 0.8)
+                readonly property real pad: AzTheme.px(4)
                 implicitHeight: tabFlow.implicitHeight + pad * 2
 
                 Flow {
@@ -151,7 +169,7 @@ Rectangle {
                         Rectangle {
                             id: tabBtn
                             height: root._tabH
-                            radius: height / 2
+                            radius: AzTheme.px(AzTheme.menuSelectedRadius)
 
                             readonly property int tabIndex: modelData.idx
                             readonly property bool isSelected: root.selectedButton === tabIndex
@@ -161,24 +179,33 @@ Rectangle {
                                        Math.floor((tabFlow.width - tabFlow.spacing * (root._tabCols - 1)) / root._tabCols)
                                    )
 
-                            color: isSelected ? "#232222" : "#2A2A2A"
-                            border.width: isSelected ? 2 : 1
-                            border.color: "white"
+                            color: (tabMouse.containsMouse && !isSelected) ? Qt.rgba(1, 1, 1, 0.04) : "transparent"
+                            gradient: isSelected ? selectedGradient : null
+                            border.width: isSelected ? 1 : 0
+                            border.color: AzTheme.menuSelectedBorder
+
+                            Gradient {
+                                id: selectedGradient
+                                GradientStop { position: 0; color: AzTheme.menuSelectedTop }
+                                GradientStop { position: 1; color: AzTheme.menuSelectedBottom }
+                            }
 
                             Text {
                                 anchors.centerIn: parent
+                                width: Math.min(implicitWidth, parent.width - AzTheme.px(16))
                                 text: modelData.label
-                                color: "#E8E8E8"
-                                font.pixelSize: root._compact ? 14 : 16
+                                color: tabBtn.isSelected ? AzTheme.textPrimary : AzTheme.textSecondary
+                                font.family: AzTheme.fontFamily
+                                font.weight: tabBtn.isSelected ? Font.Medium : Font.Normal
+                                font.pixelSize: AzTheme.fontPx(root._compact ? 13 : 14)
                                 elide: Text.ElideRight
                             }
 
                             MouseArea {
+                                id: tabMouse
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onEntered: { if (!tabBtn.isSelected) tabBtn.color = "#232222" }
-                                onExited:  { if (!tabBtn.isSelected) tabBtn.color = "#2A2A2A" }
                                 onClicked: root.selectButton(tabBtn.tabIndex)
                             }
                         }
@@ -241,10 +268,19 @@ Rectangle {
                         Layout.fillHeight: topCardsGrid.columns === 2
                         Layout.preferredHeight: (topCardsGrid.columns === 2) ? topCardsGrid.rowH : implicitHeight
 
-                        color: "#3D3B3B"
-                        radius: 16
+                        radius: AzTheme.px(AzTheme.cardRadius)
+
                         border.width: 1
-                        border.color: "#9D9D9D"
+
+                        border.color: AzTheme.cardBorder
+
+                        gradient: Gradient {
+
+                            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+
+                            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+
+                        }
 
                         readonly property real pad: root._m
                         implicitHeight: controlCol.implicitHeight + pad * 2
@@ -257,19 +293,20 @@ Rectangle {
 
                             Text {
                                 text: qsTr("Nəzarət Quraşdırması")
-                                color: "white"
+                                color: AzTheme.textCard
+                                font.family: AzTheme.fontFamily
                                 font.pixelSize: root._compact ? 15 : 16
-                                font.bold: true
+                                font.weight: Font.Medium
                                 Layout.fillWidth: true
                             }
 
                             // Enable joystick
                             Rectangle {
                                 Layout.fillWidth: true
-                                color: "#3D3B3B"
-                                radius: 14
+                                color: AzTheme.groupFill
+                                radius: AzTheme.px(AzTheme.groupRadius)
                                 border.width: 1
-                                border.color: "#9D9D9D"
+                                border.color: AzTheme.groupBorder
                                 implicitHeight: Math.max(48, ScreenTools.defaultFontPixelHeight * (root._compact ? 2.6 : 3.0))
 
                                 RowLayout {
@@ -282,65 +319,25 @@ Rectangle {
                                         text: root._requiresCalibration
                                               ? qsTr("Aktivləşdirməyə icazə verilmir (Əvvəlcə Kalibrlə)")
                                               : qsTr("Joystik daxiletməsini aktiv edin")
-                                        color: root._requiresCalibration ? "#FF6B6B" : "white"
+                                        color: root._requiresCalibration ? AzTheme.statusRed : AzTheme.textCard
+                                        font.family: AzTheme.fontFamily
                                         font.pixelSize: root._compact ? 13 : 16
-                                        font.bold: true
+                                        font.weight: Font.Medium
                                         wrapMode: Text.WordWrap
                                         elide: Text.ElideRight
                                     }
 
                                     // ON/OFF toggle
-                                    Rectangle {
+                                    AzSwitch {
                                         id: toggleSwitch
-                                        Layout.preferredWidth: 60
-                                        Layout.preferredHeight: 25
-                                        radius: 17
-                                        color: enabledSwitch.checked ? "#4CAF50" : "#F44336"
-                                        border.color: enabledSwitch.checked ? "#45a049" : "#d32f2f"
-                                        border.width: 2
+                                        checked: enabledSwitch.checked
                                         enabled: !root._requiresCalibration
-                                        opacity: enabled ? 1.0 : 0.5
 
-                                        Rectangle {
-                                            width: 13
-                                            height: 13
-                                            radius: 13
-                                            color: "white"
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            x: enabledSwitch.checked ? parent.width - width - 4 : 4
-                                            Behavior on x { NumberAnimation { duration: 200 } }
-                                        }
-
-                                        Text {
-                                            text: "ON"
-                                            color: "white"
-                                            font.pixelSize: 12
-                                            font.bold: true
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            x: 12
-                                            visible: enabledSwitch.checked
-                                        }
-
-                                        Text {
-                                            text: "OFF"
-                                            color: "white"
-                                            font.pixelSize: 12
-                                            font.bold: true
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            x: parent.width - width - 12
-                                            visible: !enabledSwitch.checked
-                                        }
-
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            enabled: parent.enabled
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                if (!root._requiresCalibration) {
-                                                    enabledSwitch.checked = !enabledSwitch.checked
-                                                    globals.activeVehicle.joystickEnabled = enabledSwitch.checked
-                                                    globals.activeVehicle.saveJoystickSettings()
-                                                }
+                                        onClicked: {
+                                            if (!root._requiresCalibration) {
+                                                enabledSwitch.checked = !enabledSwitch.checked
+                                                globals.activeVehicle.joystickEnabled = enabledSwitch.checked
+                                                globals.activeVehicle.saveJoystickSettings()
                                             }
                                         }
                                     }
@@ -374,8 +371,10 @@ Rectangle {
                             // Active joystick selection
                             Rectangle {
                                 Layout.fillWidth: true
-                                color: "#2A2A2A"
-                                radius: 14
+                                color: AzTheme.groupFill
+                                radius: AzTheme.px(AzTheme.groupRadius)
+                                border.width: 1
+                                border.color: AzTheme.groupBorder
                                 implicitHeight: Math.max(50, ScreenTools.defaultFontPixelHeight * 3.0)
 
                                 RowLayout {
@@ -385,9 +384,10 @@ Rectangle {
 
                                     Text {
                                         text: qsTr("Aktiv joystik:")
-                                        color: "white"
+                                        color: AzTheme.textCard
+                                        font.family: AzTheme.fontFamily
                                         font.pixelSize: root._compact ? 14 : 16
-                                        font.bold: true
+                                        font.weight: Font.Medium
                                         Layout.preferredWidth: ScreenTools.defaultFontPixelWidth * 16
                                         elide: Text.ElideRight
                                     }
@@ -420,9 +420,10 @@ Rectangle {
 
                             Text {
                                 text: qsTr("RC rejimi seçimi:")
-                                color: "white"
+                                color: AzTheme.textCard
+                                font.family: AzTheme.fontFamily
                                 font.pixelSize: root._compact ? 16 : 18
-                                font.bold: true
+                                font.weight: Font.Medium
                                 Layout.fillWidth: true
                             }
 
@@ -473,10 +474,19 @@ Rectangle {
 
                         visible: !root._buttonsOnly
 
-                        color: "#3D3B3B"
-                        radius: 16
+                        radius: AzTheme.px(AzTheme.cardRadius)
+
                         border.width: 1
-                        border.color: "#9D9D9D"
+
+                        border.color: AzTheme.cardBorder
+
+                        gradient: Gradient {
+
+                            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+
+                            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+
+                        }
 
                         readonly property real pad: root._m
                         implicitHeight: axisCol.implicitHeight + pad * 2
@@ -489,9 +499,10 @@ Rectangle {
 
                             Text {
                                 text: qsTr("Ox Konfiqurasiyası")
-                                color: "white"
+                                color: AzTheme.textCard
+                                font.family: AzTheme.fontFamily
                                 font.pixelSize: root._compact ? 15 : 16
-                                font.bold: true
+                                font.weight: Font.Medium
                                 Layout.fillWidth: true
                             }
 
@@ -500,7 +511,7 @@ Rectangle {
                                 Layout.fillWidth: true
                                 spacing: 6
 
-                                Text { text: qsTr("Roll"); color: "white"; font.pixelSize: 16 }
+                                Text { text: qsTr("Roll"); color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.pixelSize: 16 }
 
                                 Slider {
                                     id: rollSlider
@@ -516,11 +527,11 @@ Rectangle {
                                         width: rollSlider.availableWidth
                                         height: 12
                                         radius: height/2
-                                        color: "#707070"
+                                        color: AzTheme.slotEmpty
                                     }
                                     handle: Rectangle {
                                         width: 14; height: 14; radius: 7
-                                        color: "white"; border.color: "#9D9D9D"; border.width: 1
+                                        color: AzTheme.textPrimary; border.color: AzTheme.statusGreen; border.width: 2
                                         y: rollSlider.height/2 - height/2
                                         x: rollSlider.leftPadding + rollSlider.visualPosition * (rollSlider.availableWidth - width)
                                     }
@@ -528,7 +539,8 @@ Rectangle {
 
                                 Text {
                                     text: rollSlider.value
-                                    color: "white"
+                                    color: AzTheme.textCard
+                                    font.family: AzTheme.fontFamily
                                     font.pixelSize: 16
                                     horizontalAlignment: Text.AlignHCenter
                                     Layout.fillWidth: true
@@ -540,7 +552,7 @@ Rectangle {
                                 Layout.fillWidth: true
                                 spacing: 6
 
-                                Text { text: qsTr("Pitch"); color: "white"; font.pixelSize: 16 }
+                                Text { text: qsTr("Pitch"); color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.pixelSize: 16 }
 
                                 Slider {
                                     id: pitchSlider
@@ -556,11 +568,11 @@ Rectangle {
                                         width: pitchSlider.availableWidth
                                         height: 12
                                         radius: height/2
-                                        color: "#707070"
+                                        color: AzTheme.slotEmpty
                                     }
                                     handle: Rectangle {
                                         width: 14; height: 14; radius: 7
-                                        color: "white"; border.color: "#9D9D9D"; border.width: 1
+                                        color: AzTheme.textPrimary; border.color: AzTheme.statusGreen; border.width: 2
                                         y: pitchSlider.height/2 - height/2
                                         x: pitchSlider.leftPadding + pitchSlider.visualPosition * (pitchSlider.availableWidth - width)
                                     }
@@ -568,7 +580,8 @@ Rectangle {
 
                                 Text {
                                     text: pitchSlider.value
-                                    color: "white"
+                                    color: AzTheme.textCard
+                                    font.family: AzTheme.fontFamily
                                     font.pixelSize: 16
                                     horizontalAlignment: Text.AlignHCenter
                                     Layout.fillWidth: true
@@ -580,7 +593,7 @@ Rectangle {
                                 Layout.fillWidth: true
                                 spacing: 6
 
-                                Text { text: qsTr("Yaw"); color: "white"; font.pixelSize: 16 }
+                                Text { text: qsTr("Yaw"); color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.pixelSize: 16 }
 
                                 Slider {
                                     id: yawSlider
@@ -596,11 +609,11 @@ Rectangle {
                                         width: yawSlider.availableWidth
                                         height: 12
                                         radius: height/2
-                                        color: "#707070"
+                                        color: AzTheme.slotEmpty
                                     }
                                     handle: Rectangle {
                                         width: 14; height: 14; radius: 7
-                                        color: "white"; border.color: "#9D9D9D"; border.width: 1
+                                        color: AzTheme.textPrimary; border.color: AzTheme.statusGreen; border.width: 2
                                         y: yawSlider.height/2 - height/2
                                         x: yawSlider.leftPadding + yawSlider.visualPosition * (yawSlider.availableWidth - width)
                                     }
@@ -608,7 +621,8 @@ Rectangle {
 
                                 Text {
                                     text: yawSlider.value
-                                    color: "white"
+                                    color: AzTheme.textCard
+                                    font.family: AzTheme.fontFamily
                                     font.pixelSize: 16
                                     horizontalAlignment: Text.AlignHCenter
                                     Layout.fillWidth: true
@@ -620,7 +634,7 @@ Rectangle {
                                 Layout.fillWidth: true
                                 spacing: 6
 
-                                Text { text: qsTr("Throttle"); color: "white"; font.pixelSize: 16 }
+                                Text { text: qsTr("Throttle"); color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.pixelSize: 16 }
 
                                 Slider {
                                     id: throttleSlider
@@ -636,11 +650,11 @@ Rectangle {
                                         width: throttleSlider.availableWidth
                                         height: 12
                                         radius: height/2
-                                        color: "#707070"
+                                        color: AzTheme.slotEmpty
                                     }
                                     handle: Rectangle {
                                         width: 14; height: 14; radius: 7
-                                        color: "white"; border.color: "#9D9D9D"; border.width: 1
+                                        color: AzTheme.textPrimary; border.color: AzTheme.statusGreen; border.width: 2
                                         y: throttleSlider.height/2 - height/2
                                         x: throttleSlider.leftPadding + throttleSlider.visualPosition * (throttleSlider.availableWidth - width)
                                     }
@@ -648,7 +662,8 @@ Rectangle {
 
                                 Text {
                                     text: throttleSlider.value
-                                    color: "white"
+                                    color: AzTheme.textCard
+                                    font.family: AzTheme.fontFamily
                                     font.pixelSize: 16
                                     horizontalAlignment: Text.AlignHCenter
                                     Layout.fillWidth: true
@@ -711,10 +726,13 @@ Rectangle {
                 // --------------------------
                 Rectangle {
                     Layout.fillWidth: true
-                    color: "#3D3B3B"
-                    radius: 16
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
 
                     readonly property real pad: root._m
                     implicitHeight: mapCol.implicitHeight + pad * 2
@@ -727,9 +745,10 @@ Rectangle {
 
                         Text {
                             text: qsTr("Düymə Xəritəçəkmə")
-                            color: "white"
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
                             font.pixelSize: root._compact ? 15 : 16
-                            font.bold: true
+                            font.weight: Font.Medium
                             Layout.fillWidth: true
                         }
 
@@ -765,22 +784,23 @@ Rectangle {
                                     Rectangle {
                                         width: mapGridArea.cellW
                                         height: mapGridArea.cellH
-                                        radius: 10
+                                        radius: AzTheme.px(AzTheme.groupRadius)
 
                                         property bool pressed: false
 
                                         border.width: 1
-                                        border.color: pressed ? qgcPal.buttonHighlight : "#9D9D9D"
-                                        color: pressed ? qgcPal.buttonHighlight : "#888585"
+                                        border.color: pressed ? AzTheme.positiveBorder : AzTheme.groupBorder
+                                        color: pressed ? AzTheme.positiveBottom : AzTheme.groupFill
 
                                         QGCLabel {
                                             anchors.fill: parent
-                                            color: pressed ? qgcPal.buttonHighlightText : "#FFFFFF"
+                                            color: pressed ? AzTheme.textPrimary : AzTheme.textCard
                                             horizontalAlignment: Text.AlignHCenter
                                             verticalAlignment: Text.AlignVCenter
                                             text: index
+                                            font.family: AzTheme.fontFamily
                                             font.pixelSize: root._compact ? 15 : 18
-                                            font.bold: true
+                                            font.weight: Font.Medium
                                         }
                                     }
                                 }
@@ -814,10 +834,13 @@ Rectangle {
             Rectangle {
                 id: assignCard
                 width: parent.width
-                color: "#3D3B3B"
-                radius: 16
+                radius: AzTheme.px(AzTheme.cardRadius)
                 border.width: 1
-                border.color: "#9D9D9D"
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
 
                 readonly property real pad: root._m
                 implicitHeight: assignCol.implicitHeight + pad * 2
@@ -830,9 +853,10 @@ Rectangle {
 
                     Text {
                         text: qsTr("Fəaliyyəti çağırmaq üçün eyni hərəkətə malik bir neçə düymə eyni vaxtda basılmalıdır")
-                        color: "#E8E8E8"
+                        color: AzTheme.textSecondary
+                        font.family: AzTheme.fontFamily
                         font.pixelSize: root._compact ? 13 : 16
-                        font.bold: true
+                        font.weight: Font.Medium
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                     }
@@ -851,13 +875,13 @@ Rectangle {
                             Rectangle {
                                 id: rowRect
                                 Layout.fillWidth: true
-                                radius: 8
+                                radius: AzTheme.px(AzTheme.groupRadius)
                                 border.width: 1
-                                border.color: "#9D9D9D"
+                                border.color: pressed ? Qt.rgba(0, 181 / 255, 70 / 255, 0.55) : AzTheme.groupBorder
 
                                 property int  buttonIndex: index
                                 property bool pressed: false
-                                color: pressed ? "#3D3B3B" : "#2A2A2A"
+                                color: pressed ? Qt.rgba(0, 181 / 255, 70 / 255, 0.10) : AzTheme.groupFill
 
                                 property bool _compactRow: root._stacked || (width < 560)
 
@@ -936,9 +960,10 @@ Rectangle {
 
                                             Text {
                                                 text: qsTr("Düymə %1").arg(rowRect.buttonIndex)
-                                                color: "white"
+                                                color: AzTheme.textCard
+                                                font.family: AzTheme.fontFamily
                                                 font.pixelSize: 13
-                                                font.bold: true
+                                                font.weight: Font.Medium
                                                 Layout.preferredWidth: Math.max(ScreenTools.defaultFontPixelWidth * 10, implicitWidth)
                                                 elide: Text.ElideRight
                                             }
@@ -974,23 +999,6 @@ Rectangle {
                                                         root._activeJoystick.setButtonAction(rowRect.buttonIndex, selectedAction)
                                                     }
                                                 }
-
-                                                background: Rectangle {
-                                                    color: "#3D3B3B"
-                                                    border.color: "#9D9D9D"
-                                                    border.width: 1
-                                                    radius: 4
-                                                }
-
-                                                contentItem: Text {
-                                                    text: actionCombo.displayText
-                                                    color: "white"
-                                                    font.pixelSize: 12
-                                                    verticalAlignment: Text.AlignVCenter
-                                                    elide: Text.ElideRight
-                                                    leftPadding: 10
-                                                    rightPadding: 22
-                                                }
                                             }
 
                                             RowLayout {
@@ -999,37 +1007,19 @@ Rectangle {
 
                                                 Text {
                                                     text: qsTr("Repeat")
-                                                    color: "white"
+                                                    color: AzTheme.textCard
+                                                    font.family: AzTheme.fontFamily
                                                     font.pixelSize: 12
                                                     elide: Text.ElideRight
                                                 }
 
-                                                Rectangle {
-                                                    width: 40
-                                                    height: 16
-                                                    radius: 8
-                                                    color: rowRect.repeatEnabled ? "#4CAF50" : "#F44336"
-
-                                                    Rectangle {
-                                                        width: 12
-                                                        height: 12
-                                                        radius: 6
-                                                        color: "white"
-                                                        anchors.verticalCenter: parent.verticalCenter
-                                                        x: rowRect.repeatEnabled ? parent.width - width - 2 : 2
-                                                        Behavior on x { NumberAnimation { duration: 200 } }
-                                                    }
-
-                                                    MouseArea {
-                                                        anchors.fill: parent
-                                                        hoverEnabled: true
-                                                        cursorShape: Qt.PointingHandCursor
-                                                        onClicked: {
-                                                            if (root._activeJoystick && root._activeJoystick.calibrated) {
-                                                                var newState = !rowRect.repeatEnabled
-                                                                root._activeJoystick.setButtonRepeat(rowRect.buttonIndex, newState)
-                                                                rowRect.repeatEnabled = newState
-                                                            }
+                                                AzSwitch {
+                                                    checked: rowRect.repeatEnabled
+                                                    onClicked: {
+                                                        if (root._activeJoystick && root._activeJoystick.calibrated) {
+                                                            var newState = !rowRect.repeatEnabled
+                                                            root._activeJoystick.setButtonRepeat(rowRect.buttonIndex, newState)
+                                                            rowRect.repeatEnabled = newState
                                                         }
                                                     }
                                                 }
@@ -1050,9 +1040,10 @@ Rectangle {
 
                                             Text {
                                                 text: qsTr("Button %1").arg(rowRect.buttonIndex)
-                                                color: "white"
+                                                color: AzTheme.textCard
+                                                font.family: AzTheme.fontFamily
                                                 font.pixelSize: 13
-                                                font.bold: true
+                                                font.weight: Font.Medium
                                                 Layout.fillWidth: true
                                                 elide: Text.ElideRight
                                             }
@@ -1092,23 +1083,6 @@ Rectangle {
                                                             root._activeJoystick.setButtonAction(rowRect.buttonIndex, selectedAction)
                                                         }
                                                     }
-
-                                                    background: Rectangle {
-                                                        color: "#3D3B3B"
-                                                        border.color: "#9D9D9D"
-                                                        border.width: 1
-                                                        radius: 4
-                                                    }
-
-                                                    contentItem: Text {
-                                                        text: actionCombo.displayText
-                                                        color: "white"
-                                                        font.pixelSize: 12
-                                                        verticalAlignment: Text.AlignVCenter
-                                                        elide: Text.ElideRight
-                                                        leftPadding: 10
-                                                        rightPadding: 22
-                                                    }
                                                 }
 
                                                 RowLayout {
@@ -1117,37 +1091,19 @@ Rectangle {
 
                                                     Text {
                                                         text: qsTr("Təkrarla")
-                                                        color: "white"
+                                                        color: AzTheme.textCard
+                                                        font.family: AzTheme.fontFamily
                                                         font.pixelSize: 12
                                                         elide: Text.ElideRight
                                                     }
 
-                                                    Rectangle {
-                                                        width: 40
-                                                        height: 16
-                                                        radius: 8
-                                                        color: rowRect.repeatEnabled ? "#4CAF50" : "#F44336"
-
-                                                        Rectangle {
-                                                            width: 12
-                                                            height: 12
-                                                            radius: 6
-                                                            color: "white"
-                                                            anchors.verticalCenter: parent.verticalCenter
-                                                            x: rowRect.repeatEnabled ? parent.width - width - 2 : 2
-                                                            Behavior on x { NumberAnimation { duration: 200 } }
-                                                        }
-
-                                                        MouseArea {
-                                                            anchors.fill: parent
-                                                            hoverEnabled: true
-                                                            cursorShape: Qt.PointingHandCursor
-                                                            onClicked: {
-                                                                if (root._activeJoystick && root._activeJoystick.calibrated) {
-                                                                    var newState = !rowRect.repeatEnabled
-                                                                    root._activeJoystick.setButtonRepeat(rowRect.buttonIndex, newState)
-                                                                    rowRect.repeatEnabled = newState
-                                                                }
+                                                    AzSwitch {
+                                                        checked: rowRect.repeatEnabled
+                                                        onClicked: {
+                                                            if (root._activeJoystick && root._activeJoystick.calibrated) {
+                                                                var newState = !rowRect.repeatEnabled
+                                                                root._activeJoystick.setButtonRepeat(rowRect.buttonIndex, newState)
+                                                                rowRect.repeatEnabled = newState
                                                             }
                                                         }
                                                     }
@@ -1188,14 +1144,10 @@ Rectangle {
                 width: parent.width
                 spacing: root._m
 
-                Rectangle {
+                Item {
                     Layout.fillWidth: true
-                    color: "black"
-                    radius: 16
-                    border.width: 1
-                    border.color: "#9D9D9D"
 
-                    readonly property real pad: root._m
+                    readonly property real pad: 0
                     implicitHeight: calMainGrid.implicitHeight + pad * 2
 
                     GridLayout {
@@ -1209,10 +1161,13 @@ Rectangle {
                         // Joystick visualization
                         Rectangle {
                             Layout.fillWidth: true
-                            color: "#3D3B3B"     // ✅ karta kontrast verildi
-                            radius: 12
+                            radius: AzTheme.px(AzTheme.cardRadius)
                             border.width: 1
-                            border.color: "#9D9D9D"
+                            border.color: AzTheme.cardBorder
+                            gradient: Gradient {
+                                GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                                GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                            }
 
                             implicitHeight: joyVisCol.implicitHeight + root._m
 
@@ -1224,8 +1179,9 @@ Rectangle {
 
                                 Text {
                                     text: qsTr("Joystick")
-                                    color: "white"
-                                    font.bold: true
+                                    color: AzTheme.textCard
+                                    font.weight: Font.Medium
+                                    font.family: AzTheme.fontFamily
                                     font.pixelSize: root._compact ? 14 : 16
                                     Layout.fillWidth: true
                                 }
@@ -1249,8 +1205,8 @@ Rectangle {
                                         anchors.centerIn: parent
 
                                         radius: ScreenTools.defaultFontPixelWidth * 2
-                                        color: "#2A2A2A"
-                                        border.color: "#9D9D9D"
+                                        color: AzTheme.groupFill
+                                        border.color: AzTheme.groupBorder
                                         border.width: ScreenTools.defaultFontPixelWidth * 0.25
                                         antialiasing: true
 
@@ -1261,8 +1217,8 @@ Rectangle {
                                             width: parent.width * 0.25
                                             height: width
                                             radius: width * 0.5
-                                            color: "#2A2A2A"
-                                            border.color: "#9D9D9D"
+                                            color: AzTheme.groupFill
+                                            border.color: AzTheme.groupBorder
                                             border.width: ScreenTools.defaultFontPixelWidth * 0.125
                                             x: (parent.width * 0.25) - (width * 0.5)
                                             y: (parent.height * 0.5) - (height * 0.5)
@@ -1270,7 +1226,7 @@ Rectangle {
 
                                         // Left stick dot
                                         Rectangle {
-                                            color: "#4CAF50"
+                                            color: AzTheme.statusGreen
                                             width: parent.width * 0.035
                                             height: width
                                             radius: width * 0.5
@@ -1284,8 +1240,8 @@ Rectangle {
                                             width: parent.width * 0.25
                                             height: width
                                             radius: width * 0.5
-                                            color: "#2A2A2A"
-                                            border.color: "#9D9D9D"
+                                            color: AzTheme.groupFill
+                                            border.color: AzTheme.groupBorder
                                             border.width: ScreenTools.defaultFontPixelWidth * 0.125
                                             x: (parent.width * 0.75) - (width * 0.5)
                                             y: (parent.height * 0.5) - (height * 0.5)
@@ -1293,7 +1249,7 @@ Rectangle {
 
                                         // Right stick dot
                                         Rectangle {
-                                            color: "#4CAF50"
+                                            color: AzTheme.statusGreen
                                             width: parent.width * 0.035
                                             height: width
                                             radius: width * 0.5
@@ -1309,10 +1265,13 @@ Rectangle {
                         // Axis monitor
                         Rectangle {
                             Layout.fillWidth: true
-                            color: "#3D3B3B"
-                            radius: 12
+                            radius: AzTheme.px(AzTheme.cardRadius)
                             border.width: 1
-                            border.color: "#9D9D9D"
+                            border.color: AzTheme.cardBorder
+                            gradient: Gradient {
+                                GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                                GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                            }
                             implicitHeight: axisMonCol.implicitHeight + root._m
 
                             ColumnLayout {
@@ -1323,8 +1282,9 @@ Rectangle {
 
                                 Text {
                                     text: qsTr("Axis Monitor")
-                                    color: "white"
-                                    font.bold: true
+                                    color: AzTheme.textCard
+                                    font.weight: Font.Medium
+                                    font.family: AzTheme.fontFamily
                                     font.pixelSize: root._compact ? 14 : 16
                                     Layout.fillWidth: true
                                 }
@@ -1352,7 +1312,8 @@ Rectangle {
 
                                         Text {
                                             text: qsTr("Axis %1").arg(modelData)
-                                            color: "white"
+                                            color: AzTheme.textCard
+                                            font.family: AzTheme.fontFamily
                                             font.pixelSize: 14
                                             Layout.preferredWidth: 70
                                             elide: Text.ElideRight
@@ -1362,18 +1323,18 @@ Rectangle {
                                             id: theAxis
                                             Layout.fillWidth: true
                                             height: 25
-                                            color: "#2A2A2A"
-                                            border.color: "#9D9D9D"
+                                            color: AzTheme.groupFill
+                                            border.color: AzTheme.groupBorder
                                             border.width: 1
 
                                             property real axisValue: 0
                                             property real deadbandValue: 0
-                                            property color deadbandColor: "#8c161a"
+                                            property color deadbandColor: AzTheme.statusRed
 
                                             Rectangle {
                                                 width: 8
                                                 height: parent.height
-                                                color: "#4CAF50"
+                                                color: AzTheme.statusGreen
                                                 x: parent.width / 2 + (parent.axisValue / 32768.0) * (parent.width / 2) - width / 2
                                             }
 
@@ -1394,7 +1355,7 @@ Rectangle {
                                                 onPressed: function(mouse) {
                                                     startX = mouseX
                                                     direction = startX > width/2 ? 1 : -1
-                                                    theAxis.deadbandColor = "#3C6315"
+                                                    theAxis.deadbandColor = AzTheme.statusGreen
                                                 }
 
                                                 onPositionChanged: {
@@ -1408,7 +1369,7 @@ Rectangle {
 
                                                 onReleased: {
                                                     controller.setDeadbandValue(modelData, theAxis.deadbandValue)
-                                                    theAxis.deadbandColor = "#8c161a"
+                                                    theAxis.deadbandColor = AzTheme.statusRed
                                                 }
                                             }
                                         }
@@ -1422,62 +1383,36 @@ Rectangle {
                 // Buttons
                 Flow {
                     Layout.fillWidth: true
-                    spacing: root._m
+                    spacing: AzTheme.px(10)
 
-                    Rectangle {
-                        width: 120; height: 40; radius: 8
-                        color: (controller.calibrating && controller.skipEnabled) ? "#6C6C6C" : "#3D3D3D"
-                        opacity: (controller.calibrating && controller.skipEnabled) ? 1.0 : 0.7
-
-                        Text { text: qsTr("Keç"); color: "white"; anchors.centerIn: parent; font.pixelSize: 14 }
-                        MouseArea {
-                            anchors.fill: parent
-                            enabled: controller.calibrating && controller.skipEnabled
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: controller.skipButtonClicked()
-                        }
+                    AzButton {
+                        width: AzTheme.px(130)
+                        text: qsTr("Keç")
+                        enabled: controller.calibrating && controller.skipEnabled
+                        onClicked: controller.skipButtonClicked()
                     }
 
-                    Rectangle {
-                        width: 120; height: 40; radius: 8
-                        color: controller.calibrating ? "#6C6C6C" : "#3D3D3D"
-                        opacity: controller.calibrating ? 1.0 : 0.7
-
-                        Text { text: qsTr("Ləğv et"); color: "white"; anchors.centerIn: parent; font.pixelSize: 14 }
-                        MouseArea {
-                            anchors.fill: parent
-                            enabled: controller.calibrating
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: controller.cancelButtonClicked()
-                        }
+                    AzButton {
+                        width: AzTheme.px(130)
+                        text: qsTr("Ləğv et")
+                        enabled: controller.calibrating
+                        onClicked: controller.cancelButtonClicked()
                     }
 
-                    Rectangle {
-                        width: 120; height: 40; radius: 8
-                        color: "#4CAF50"
-                        opacity: (controller.calibrating ? controller.nextEnabled : true) ? 1.0 : 0.6
-
-                        Text {
-                            text: controller.calibrating ? qsTr("Sonrakı") : qsTr("Başla")
-                            color: "white"
-                            anchors.centerIn: parent
-                            font.pixelSize: 14
-                            font.bold: true
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            enabled: controller.calibrating ? controller.nextEnabled : true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: controller.nextButtonClicked()
-                        }
+                    AzButton {
+                        width: AzTheme.px(130)
+                        text: controller.calibrating ? qsTr("Sonrakı") : qsTr("Başla")
+                        positive: true
+                        enabled: controller.calibrating ? controller.nextEnabled : true
+                        onClicked: controller.nextButtonClicked()
                     }
                 }
 
                 Text {
                     text: controller.statusText
-                    color: "white"
+                    color: AzTheme.textCard
                     wrapMode: Text.WordWrap
+                    font.family: AzTheme.fontFamily
                     font.pixelSize: 14
                     Layout.fillWidth: true
                 }
@@ -1503,10 +1438,13 @@ Rectangle {
                 // ===== Throttle Configuration =====
                 Rectangle {
                     Layout.fillWidth: true
-                    color: "#3D3B3B"
-                    radius: 16
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
 
                     readonly property real pad: root._m
                     implicitHeight: throttleCol.implicitHeight + pad * 2
@@ -1519,9 +1457,10 @@ Rectangle {
 
                         Text {
                             text: qsTr("Throttle Configuration")
-                            color: "white"
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
                             font.pixelSize: root._compact ? 16 : 18
-                            font.bold: true
+                            font.weight: Font.Medium
                             Layout.fillWidth: true
                         }
 
@@ -1535,10 +1474,10 @@ Rectangle {
                             Rectangle {
                                 Layout.fillWidth: true
                                 height: Math.max(58, ScreenTools.defaultFontPixelHeight * 3.0)
-                                radius: 10
-                                color: "#2A2A2A"
+                                radius: AzTheme.px(AzTheme.groupRadius)
+                                color: selected ? Qt.rgba(0, 181 / 255, 70 / 255, 0.10) : AzTheme.groupFill
                                 border.width: 1
-                                border.color: "#9D9D9D"
+                                border.color: selected ? Qt.rgba(0, 181 / 255, 70 / 255, 0.55) : AzTheme.groupBorder
 
                                 readonly property bool selected: root._activeJoystick ? (root._activeJoystick.throttleMode === 1) : false
 
@@ -1550,19 +1489,20 @@ Rectangle {
                                     Rectangle {
                                         width: 20; height: 20; radius: 10
                                         color: "transparent"
-                                        border.color: "#757575"
+                                        border.color: parent.parent.parent.selected ? AzTheme.statusGreen : AzTheme.cardHoverBorder
                                         border.width: 2
                                         Rectangle {
                                             width: 8; height: 8; radius: 4
                                             anchors.centerIn: parent
-                                            color: parent.parent.parent.selected ? "#8F8F8F" : "transparent"
+                                            color: parent.parent.parent.selected ? AzTheme.statusGreen : "transparent"
                                         }
                                     }
 
                                     Text {
                                         Layout.fillWidth: true
                                         text: qsTr("Full down stick is zero throttle")
-                                        color: "white"
+                                        color: AzTheme.textCard
+                                        font.family: AzTheme.fontFamily
                                         font.pixelSize: root._compact ? 14 : 16
                                         elide: Text.ElideRight
                                     }
@@ -1582,10 +1522,10 @@ Rectangle {
                             Rectangle {
                                 Layout.fillWidth: true
                                 height: Math.max(58, ScreenTools.defaultFontPixelHeight * 3.0)
-                                radius: 10
-                                color: "#2A2A2A"
+                                radius: AzTheme.px(AzTheme.groupRadius)
+                                color: selected ? Qt.rgba(0, 181 / 255, 70 / 255, 0.10) : AzTheme.groupFill
                                 border.width: 1
-                                border.color: "#9D9D9D"
+                                border.color: selected ? Qt.rgba(0, 181 / 255, 70 / 255, 0.55) : AzTheme.groupBorder
 
                                 readonly property bool selected: root._activeJoystick ? (root._activeJoystick.throttleMode === 0) : false
 
@@ -1597,19 +1537,20 @@ Rectangle {
                                     Rectangle {
                                         width: 20; height: 20; radius: 10
                                         color: "transparent"
-                                        border.color: "#757575"
+                                        border.color: parent.parent.parent.selected ? AzTheme.statusGreen : AzTheme.cardHoverBorder
                                         border.width: 2
                                         Rectangle {
                                             width: 8; height: 8; radius: 4
                                             anchors.centerIn: parent
-                                            color: parent.parent.parent.selected ? "#8F8F8F" : "transparent"
+                                            color: parent.parent.parent.selected ? AzTheme.statusGreen : "transparent"
                                         }
                                     }
 
                                     Text {
                                         Layout.fillWidth: true
                                         text: qsTr("Center stick is zero throttle")
-                                        color: "white"
+                                        color: AzTheme.textCard
+                                        font.family: AzTheme.fontFamily
                                         font.pixelSize: root._compact ? 14 : 16
                                         elide: Text.ElideRight
                                     }
@@ -1632,10 +1573,13 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     visible: root._activeJoystick ? (root._activeJoystick.throttleMode === 0) : false
-                    color: "#3D3B3B"
-                    radius: 16
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
                     height: Math.max(78, ScreenTools.defaultFontPixelHeight * 4.0)
 
                     RowLayout {
@@ -1646,9 +1590,10 @@ Rectangle {
                         Text {
                             Layout.fillWidth: true
                             text: qsTr("Spring loaded throttle smoothing")
-                            color: "white"
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
                             font.pixelSize: root._compact ? 16 : 18
-                            font.bold: true
+                            font.weight: Font.Medium
                             elide: Text.ElideRight
                         }
 
@@ -1666,10 +1611,13 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     visible: globals.activeVehicle && globals.activeVehicle.supportsNegativeThrust
-                    color: "#3D3B3B"
-                    radius: 16
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
                     height: Math.max(78, ScreenTools.defaultFontPixelHeight * 4.0)
 
                     RowLayout {
@@ -1680,9 +1628,10 @@ Rectangle {
                         Text {
                             Layout.fillWidth: true
                             text: qsTr("Allow negative Thrust")
-                            color: "white"
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
                             font.pixelSize: root._compact ? 16 : 18
-                            font.bold: true
+                            font.weight: Font.Medium
                             elide: Text.ElideRight
                         }
 
@@ -1700,10 +1649,13 @@ Rectangle {
                 // ===== Exponential =====
                 Rectangle {
                     Layout.fillWidth: true
-                    color: "#3D3B3B"
-                    radius: 16
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
 
                     readonly property real pad: root._m
                     implicitHeight: expoCol.implicitHeight + pad * 2
@@ -1716,9 +1668,10 @@ Rectangle {
 
                         Text {
                             text: qsTr("Exponential:")
-                            color: "white"
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
                             font.pixelSize: root._compact ? 16 : 18
-                            font.bold: true
+                            font.weight: Font.Medium
                             Layout.fillWidth: true
                         }
 
@@ -1766,7 +1719,8 @@ Rectangle {
 
                             Text {
                                 text: expoSlider.value.toFixed(2)
-                                color: "white"
+                                color: AzTheme.textCard
+                                font.family: AzTheme.fontFamily
                                 font.pixelSize: 16
                                 Layout.alignment: Qt.AlignVCenter
                                 width: 60
@@ -1780,10 +1734,13 @@ Rectangle {
                 Rectangle {
                     id: advSettingsCard
                     Layout.fillWidth: true
-                    color: "#3D3B3B"
-                    radius: 16
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
 
                     readonly property real pad: root._m
 
@@ -1804,9 +1761,10 @@ Rectangle {
                             Text {
                                 Layout.fillWidth: true
                                 text: qsTr("Enable further advanced settings (careful!)")
-                                color: "white"
+                                color: AzTheme.textCard
+                                font.family: AzTheme.fontFamily
                                 font.pixelSize: root._compact ? 16 : 18
-                                font.bold: true
+                                font.weight: Font.Medium
                                 wrapMode: Text.WordWrap
                             }
 
@@ -1836,10 +1794,10 @@ Rectangle {
                             // Axis frequency
                             Rectangle {
                                 Layout.fillWidth: true
-                                color: "#2A2A2A"
-                                radius: 10
+                                color: AzTheme.groupFill
+                                radius: AzTheme.px(AzTheme.groupRadius)
                                 border.width: 1
-                                border.color: "#9D9D9D"
+                                border.color: AzTheme.groupBorder
                                 implicitHeight: row1.implicitHeight + 20
 
                                 RowLayout {
@@ -1851,7 +1809,8 @@ Rectangle {
                                     Text {
                                         Layout.fillWidth: true
                                         text: qsTr("Axis frequency (Hz):")
-                                        color: "white"
+                                        color: AzTheme.textCard
+                                        font.family: AzTheme.fontFamily
                                         font.pixelSize: 14
                                         elide: Text.ElideRight
                                     }
@@ -1875,10 +1834,10 @@ Rectangle {
                             // Button repeat frequency
                             Rectangle {
                                 Layout.fillWidth: true
-                                color: "#2A2A2A"
-                                radius: 10
+                                color: AzTheme.groupFill
+                                radius: AzTheme.px(AzTheme.groupRadius)
                                 border.width: 1
-                                border.color: "#9D9D9D"
+                                border.color: AzTheme.groupBorder
                                 implicitHeight: row2.implicitHeight + 20
 
                                 RowLayout {
@@ -1890,7 +1849,8 @@ Rectangle {
                                     Text {
                                         Layout.fillWidth: true
                                         text: qsTr("Button repeat frequency (Hz):")
-                                        color: "white"
+                                        color: AzTheme.textCard
+                                        font.family: AzTheme.fontFamily
                                         font.pixelSize: 14
                                         elide: Text.ElideRight
                                     }
@@ -1914,10 +1874,10 @@ Rectangle {
                             // Circle correction
                             Rectangle {
                                 Layout.fillWidth: true
-                                color: "#2A2A2A"
-                                radius: 10
+                                color: AzTheme.groupFill
+                                radius: AzTheme.px(AzTheme.groupRadius)
                                 border.width: 1
-                                border.color: "#9D9D9D"
+                                border.color: AzTheme.groupBorder
                                 implicitHeight: row3.implicitHeight + 20
 
                                 RowLayout {
@@ -1929,7 +1889,8 @@ Rectangle {
                                     Text {
                                         Layout.fillWidth: true
                                         text: qsTr("Enable circle correction")
-                                        color: "white"
+                                        color: AzTheme.textCard
+                                        font.family: AzTheme.fontFamily
                                         font.pixelSize: 14
                                         elide: Text.ElideRight
                                     }
@@ -1947,10 +1908,10 @@ Rectangle {
                             // Deadbands
                             Rectangle {
                                 Layout.fillWidth: true
-                                color: "#2A2A2A"
-                                radius: 10
+                                color: AzTheme.groupFill
+                                radius: AzTheme.px(AzTheme.groupRadius)
                                 border.width: 1
-                                border.color: "#9D9D9D"
+                                border.color: AzTheme.groupBorder
                                 implicitHeight: row4.implicitHeight + 20
 
                                 RowLayout {
@@ -1962,7 +1923,8 @@ Rectangle {
                                     Text {
                                         Layout.fillWidth: true
                                         text: qsTr("Deadbands")
-                                        color: "white"
+                                        color: AzTheme.textCard
+                                        font.family: AzTheme.fontFamily
                                         font.pixelSize: 14
                                         elide: Text.ElideRight
                                     }
@@ -1977,7 +1939,8 @@ Rectangle {
 
                             Text {
                                 Layout.fillWidth: true
-                                color: "#E8E8E8"
+                                color: AzTheme.textSecondary
+                                font.family: AzTheme.fontFamily
                                 font.pixelSize: ScreenTools.defaultFontPixelHeight * 0.9
                                 wrapMode: Text.WordWrap
                                 text: qsTr("Deadband can be set during the first ") +
