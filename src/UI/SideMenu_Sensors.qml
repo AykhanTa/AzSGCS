@@ -1,5 +1,6 @@
-
-// SideMenu_Sensors.qml  (WIDE ekranda 2x3 orientasiya blokları daha böyük + paneli maksimum doldurur)
+// Sensor calibration, in the new design: the vehicle setup page header, the
+// calibration buttons with a red dot until done, the status log and the orientation
+// steps on group boxes, and a green progress bar.
 
 import QtQuick
 import QtQuick.Controls
@@ -13,12 +14,15 @@ import QGroundControl.Controls
 Item {
     id: _root
 
+    // The buttons, labels, combo boxes and the orientation steps take the new
+    // design's look (see QGCLabel._az).
+    readonly property bool azInputStyle: true
+
     // ======================
-    // Background + click blocker
+    // Click blocker
     // ======================
-    Rectangle {
+    Item {
         anchors.fill: parent
-        color: "#000000"
         z: 0
 
         MouseArea {
@@ -50,8 +54,9 @@ Item {
         return ap.findKnownVehicleComponent(AutoPilotPlugin.KnownSensorsVehicleComponent)
     }
 
-    readonly property real _m:            Math.max(8, ScreenTools.defaultFontPixelHeight * (_compact ? 0.70 : 1.0))
-    readonly property real _side:         Math.max(12, _m * 0.9)
+    readonly property real _m:            AzTheme.px(_compact ? 12 : 16)
+    readonly property real _side:         AzTheme.px(_stacked ? 12 : 20)
+    readonly property real _top:          AzTheme.px(20)
     readonly property real _maxContentW:  1700
 
     // Right button panel width (wide-da)
@@ -206,7 +211,7 @@ Item {
                       + (mainCol.spacing * 2)
 
         // 2px ehtiyat (yuvarlaqlaşdırma səbəbilə scroll çıxmasın)
-        var target = pageFlick.height - headerH - bottomGap - (outerSp * 2) - fixedMain - 2
+        var target = pageFlick.height - _root._top - headerH - bottomGap - (outerSp * 2) - fixedMain - 2
 
         if (target < minH) target = minH
         return target
@@ -300,7 +305,6 @@ Item {
                     Layout.preferredWidth:  innerColumn.width
                     wrapMode:               Text.WordWrap
                     text:                   preCalibrationDialogHelp
-                    color: "white"
                 }
 
                 Column {
@@ -312,12 +316,11 @@ Item {
                         wrapMode:   Text.WordWrap
                         visible:    !_sensorsHaveFixedOrientation && (preCalibrationDialogType == "accel" || preCalibrationDialogType == "compass")
                         text:       qsTr("Kalibrləmədən əvvəl avtopilot oriyentasiyasını təyin edin.")
-                        color: "white"
                     }
 
                     Column {
                         visible:    boardRotationHelp.visible
-                        QGCLabel { text: qsTr("Avtopilot Orientasiyası"); color: "white" }
+                        QGCLabel { text: qsTr("Avtopilot Orientasiyası") }
 
                         FactComboBox {
                             sizeToContents: true
@@ -327,19 +330,15 @@ Item {
                         QGCLabel {
                             wrapMode:   Text.WordWrap
                             text:       qsTr("ROTATION_NONE uçuş istiqamətində komponent nöqtələrini göstərir.")
-                            color: "white"
                         }
                     }
 
                     QGCLabel {
                         wrapMode:   Text.WordWrap
                         text:       qsTr("Kalibrləməyə başlamaq üçün Ok klikləyin..")
-                        color: "white"
                     }
                 }
             }
-
-            background: Rectangle { color: "#1a1a1a" }
         }
     }
 
@@ -358,7 +357,6 @@ Item {
                 QGCLabel {
                     text:       qsTr("Uçuşdan əvvəl təyyarəni yenidən işə salın..")
                     visible:    showRebootVehicleButton
-                    color: "white"
                 }
 
                 QGCButton {
@@ -370,12 +368,11 @@ Item {
                 QGCLabel {
                     text:       qsTr("Orientasiyaları lazım olduqda tənzimləyin.\n\nROTATION_NONE uçuş istiqamətində komponent nöqtələrini göstərir.")
                     visible:    _boardOrientationChangeAllowed || (_compassOrientationChangeAllowed && currentExternalMagCount() !== 0)
-                    color: "white"
                 }
 
                 Column {
                     visible: _boardOrientationChangeAllowed
-                    QGCLabel { text: qsTr("Avtopilot Orientasiyası"); color: "white" }
+                    QGCLabel { text: qsTr("Avtopilot Orientasiyası") }
                     FactComboBox { sizeToContents: true; fact: sens_board_rot }
                 }
 
@@ -388,13 +385,11 @@ Item {
                         property Fact calMagIdFact:  controller.getParameterFact(-1, _calMagIdParamFormat.replace("#", index))
                         property Fact calMagRotFact: controller.getParameterFact(-1, _calMagRotParamFormat.replace("#", index))
 
-                        QGCLabel { text: qsTr("Mag %1 Orientation").arg(index); color: "white" }
+                        QGCLabel { text: qsTr("Mag %1 Orientation").arg(index) }
                         FactComboBox { sizeToContents: true; fact: parent.calMagRotFact }
                     }
                 }
             }
-
-            background: Rectangle { color: "gray" }
         }
     }
 
@@ -412,8 +407,9 @@ Item {
         contentWidth: width
 
         readonly property real _scrollTol: 2
-        contentHeight: (contentCol.implicitHeight <= height + _scrollTol) ? height : contentCol.implicitHeight
-        interactive:  contentCol.implicitHeight > height + _scrollTol
+        readonly property real _contentH: contentCol.implicitHeight + _root._top
+        contentHeight: (_contentH <= height + _scrollTol) ? height : _contentH
+        interactive:  _contentH > height + _scrollTol
 
         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
         ScrollBar.horizontal: ScrollBar { policy: ScrollBar.AlwaysOff }
@@ -422,27 +418,30 @@ Item {
             id: contentCol
             width: Math.min(pageFlick.width - (_root._side * 2), _root._maxContentW)
             x: (pageFlick.width - width) / 2
+            y: _root._top
             spacing: _root._m
 
             // -------- Header
             ColumnLayout {
                 id: headerCol
                 Layout.fillWidth: true
-                spacing: _root._compact ? 2 : 6
+                spacing: AzTheme.px(6)
 
                 Text {
                     text: qsTr("Sensor Kalibrləməsi")
-                    color: "white"
-                    font.bold: true
-                    font.pixelSize: _root._compact ? 22 : 26
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
+                    font.pixelSize: AzTheme.fontPx(_root._compact ? 18 : 20)
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
 
                 Text {
                     text: qsTr("Kompas, giroskop, akselerometr və digər sensorları kalibrləyin və oriyentasiyanı tənzimləyin.")
-                    color: "#E8E8E8"
-                    font.pixelSize: _root._compact ? 13 : 16
+                    color: AzTheme.textSecondary
+                    font.family: AzTheme.fontFamily
+                    font.pixelSize: AzTheme.fontPx(13)
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
@@ -483,8 +482,6 @@ Item {
                             width:          buttonsFlow.btnW
                             text:           qsTr("Kompas")
                             indicatorGreen: cal_mag0_id.value !== 0
-                            forceTextColor: true
-                                forcedTextColor: "white"
                             visible:        !_allMagsDisabled && QGroundControl.corePlugin.options.showSensorCalibrationCompass && showSensorCalibrationCompass
 
                             onClicked: {
@@ -499,8 +496,6 @@ Item {
                             width:          buttonsFlow.btnW
                             text:           qsTr("Giroskop")
                             indicatorGreen: cal_gyro0_id.value !== 0
-                            forceTextColor: true
-                                forcedTextColor: "white"
                             visible:        QGroundControl.corePlugin.options.showSensorCalibrationGyro && showSensorCalibrationGyro
 
                             onClicked: {
@@ -515,8 +510,6 @@ Item {
                             width:          buttonsFlow.btnW
                             text:           qsTr("Akselerometr")
                             indicatorGreen: cal_acc0_id.value !== 0
-                            forceTextColor: true
-                                forcedTextColor: "white"
                             visible:        QGroundControl.corePlugin.options.showSensorCalibrationAccel && showSensorCalibrationAccel
 
                             onClicked: {
@@ -531,8 +524,6 @@ Item {
                             width:          buttonsFlow.btnW
                             text:           qsTr("Üfüq Səviyyəsi")
                             indicatorGreen: true
-                            forceTextColor: true
-                                forcedTextColor: "white"
                             enabled:        cal_acc0_id.value !== 0 && cal_gyro0_id.value !== 0
                             visible:        QGroundControl.corePlugin.options.showSensorCalibrationLevel && showSensorCalibrationLevel
 
@@ -550,8 +541,6 @@ Item {
                             visible:        (_root._sensorsVehicleComponent && _root._sensorsVehicleComponent.airspeedCalSupported) &&
                                                 QGroundControl.corePlugin.options.showSensorCalibrationAirspeed &&
                                                 showSensorCalibrationAirspeed
-                            forceTextColor: true
-                                forcedTextColor: "white"
                             indicatorGreen: sens_dpres_off.value !== 0
 
                             onClicked: {
@@ -609,6 +598,23 @@ Item {
                         ProgressBar {
                             id: progressBar
                             Layout.fillWidth: true
+
+                            background: Rectangle {
+                                implicitHeight: AzTheme.px(8)
+                                radius:         height / 2
+                                color:          AzTheme.slotEmpty
+                            }
+
+                            contentItem: Item {
+                                implicitHeight: AzTheme.px(8)
+
+                                Rectangle {
+                                    width:  progressBar.visualPosition * parent.width
+                                    height: parent.height
+                                    radius: height / 2
+                                    color:  AzTheme.statusGreen
+                                }
+                            }
                         }
 
                         Item {
@@ -623,11 +629,17 @@ Item {
                                 anchors.fill:   parent
                                 readOnly:       true
                                 text:           statusTextAreaDefaultText
-                                color:          "white"
+                                color:          AzTheme.textCard
+                                font.family:    AzTheme.fontFamily
+                                font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
+                                wrapMode:       TextEdit.WordWrap
+                                padding:        AzTheme.px(AzTheme.groupPadding)
 
                                 background: Rectangle {
-                                    color: "#1a1a1a"
-                                    border.color: "#333333"
+                                    color:        AzTheme.groupFill
+                                    radius:       AzTheme.px(AzTheme.groupRadius)
+                                    border.width: 1
+                                    border.color: AzTheme.groupBorder
                                 }
                             }
 
@@ -635,8 +647,10 @@ Item {
                                 id:         orientationCalArea
                                 anchors.fill: parent
                                 visible:    controller.showOrientationCalArea
-                                color:      "#1a1a1a"
-                                border.color: "#333333"
+                                color:      AzTheme.groupFill
+                                radius:     AzTheme.px(AzTheme.groupRadius)
+                                border.width: 1
+                                border.color: AzTheme.groupBorder
 
                                 QGCLabel {
                                     id:                 orientationCalAreaHelpText
@@ -645,8 +659,7 @@ Item {
                                     anchors.right:      parent.right
                                     anchors.margins:    _root._m
                                     wrapMode:           Text.WordWrap
-                                    font.pointSize:     ScreenTools.mediumFontPointSize
-                                    color:              "white"
+                                    font.pixelSize:     AzTheme.fontPx(15)
                                 }
 
                                 // ✅ ORIENTATION GRID: Böyük ekranda 3 sütun, kiçik ekranda 2 sütun
@@ -809,33 +822,12 @@ Item {
                             Layout.fillWidth: true
                             Item { Layout.fillWidth: true }
 
-                            Rectangle {
+                            AzButton {
                                 id: factoryResetRect
-                                height: 34
-                                radius: 4
-                                border.color: "#9D9D9D"
-                                border.width: 0.5
-
-                                property bool resetEnabled: !controller.waitingForCancel
-                                color: resetEnabled ? "#3D3B3B" : "#5D5B5B"
-
-                                width: Math.max(ScreenTools.defaultFontPixelWidth * 22, resetText.implicitWidth + 40)
-
-                                Text {
-                                    id: resetText
-                                    text: qsTr("Zavod parametrlərinə sıfırlama")
-                                    color: factoryResetRect.resetEnabled ? "#FFFFFF" : "#888888"
-                                    font.pixelSize: 16
-                                    anchors.centerIn: parent
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    enabled: factoryResetRect.resetEnabled
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: controller.resetFactoryParameters()
-                                }
+                                text: qsTr("Zavod parametrlərinə sıfırlama")
+                                danger: true
+                                enabled: !controller.waitingForCancel
+                                onClicked: controller.resetFactoryParameters()
                             }
                         }
                     }

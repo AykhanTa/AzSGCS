@@ -30,16 +30,23 @@ Rectangle {
 
     property var __qgcPal: QGCPalette { colorGroupEnabled: enabled }
 
-    color:  calInProgress ? "yellow" : (calValid ? "green" : "red")
+    // Screens in the new design declare azInputStyle: a status card outlined in the
+    // step's colour (orange in progress, green done, red to do) with a status label.
+    readonly property bool _az: typeof azInputStyle !== "undefined" && azInputStyle === true
+    readonly property color _azStateColor: calInProgress ? AzTheme.statusOrange : (calValid ? AzTheme.statusGreen : AzTheme.statusRed)
+
+    color:  _az ? _azStateColor : (calInProgress ? "yellow" : (calValid ? "green" : "red"))
+    radius: _az ? AzTheme.px(12) : 0
 
     Rectangle {
-        readonly property int inset: 5
+        readonly property int inset: _az ? 2 : 5
 
         x:      inset
         y:      inset
         width:  parent.width - (inset * 2)
         height: parent.height - (inset * 2)
-        color: qgcPal.windowShade
+        radius: _az ? AzTheme.px(10) : 0
+        color:  _az ? AzTheme.cardGradientEnd : qgcPal.windowShade
 
         Image {
             width:      parent.width
@@ -54,7 +61,9 @@ Rectangle {
             height:                 parent.height
             horizontalAlignment:    Text.AlignHCenter
             verticalAlignment:      Text.AlignBottom
+            bottomPadding:          _az ? AzTheme.px(8) : 0
             font.pointSize:         ScreenTools.mediumFontPointSize
+            color:                  _az ? _azStateColor : qgcPal.text
             text:                   calInProgress ? calInProgressText : (calValid ? qsTr("Tamamlandı") : qsTr("Tamamlanmayıb"))
         }
     }

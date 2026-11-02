@@ -19,16 +19,18 @@ import QGroundControl.Controls
 QGCButton {
 
     property bool indicatorGreen: false ///< true: no indicator shown, false: red indicator shown
-    backgroundColor: "black"
+    // In the new design (azInputStyle) the button keeps its panel look and the
+    // indicator is the design's red status dot.
+    backgroundColor: _az ? AzTheme.buttonBottom : "black"
 
     Rectangle {
-        anchors.rightMargin:    ScreenTools.defaultFontPixelWidth / 3
+        anchors.rightMargin:    _az ? AzTheme.px(10) : ScreenTools.defaultFontPixelWidth / 3
         anchors.right:          parent.right
         anchors.verticalCenter: parent.verticalCenter
         width:                  radius * 2
         height:                 width
-        radius:                 (ScreenTools.defaultFontPixelHeight * .75) / 2
-        color:                  "red"
+        radius:                 _az ? AzTheme.px(4) : (ScreenTools.defaultFontPixelHeight * .75) / 2
+        color:                  _az ? AzTheme.statusRed : "red"
         visible:                enabled && !indicatorGreen
     }
 }

@@ -7,16 +7,23 @@ import QGroundControl 1.0
 import QGroundControl.FactControls 1.0
 import QGroundControl.Controls 1.0
 import QGroundControl.AutoPilotPlugins.PX4 1.0
-//import QGroundControl.ScreenTools 1.0
 
+// Power setup, in the new design: the vehicle setup page header, one status card with
+// group box rows, the battery summary, the new text fields and combo boxes, and the
+// panel's buttons.
 Rectangle {
     id: root
     anchors.fill: parent
-    color: "black"
+    color: "transparent"
+
+    // The fields, combo boxes, check boxes and labels take the new design's look
+    // (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // ---- Responsive ölçülər ----
-    readonly property real _m:            Math.max(12, ScreenTools.defaultFontPixelHeight * 0.75)
-    readonly property real _side:         Math.max(12, _m * 0.9)
+    readonly property real _m:            AzTheme.px(_compact ? 12 : 16)
+    readonly property real _side:         AzTheme.px(_compact ? 12 : 20)
+    readonly property real _editorH:      AzTheme.px(36)
 
     // Çərçivə səhifəsi ilə eyni eşik — kiçik ekranlarda başlıq yığcamlaşır.
     readonly property bool _compact:      (width < 1200) || (height < 820) || ScreenTools.isShortScreen
@@ -58,32 +65,38 @@ Rectangle {
     }
 
     // ---- Inline component: label + editor sətri (genişdə yan-yana, darda alt-alta) ----
+    // A group box row: #191D20, 1 px #353A3F, radius 8
     component FormRow: Rectangle {
         id: row
         Layout.fillWidth: true
-        radius: 6
-        color: "#2A2A2A"
+        radius: AzTheme.px(AzTheme.groupRadius)
+        color: AzTheme.groupFill
+        border.width: 1
+        border.color: AzTheme.groupBorder
 
         property alias title: titleText.text
         property bool  wide: root._wideForm
         property real  editorPreferredWidth: root._fieldW
         default property alias editor: editorSlot.data
 
-        implicitHeight: grid.implicitHeight + 28
+        implicitHeight: grid.implicitHeight + AzTheme.px(20)
 
         GridLayout {
             id: grid
             anchors.fill: parent
-            anchors.margins: 14
+            anchors.leftMargin: AzTheme.px(AzTheme.groupPadding)
+            anchors.rightMargin: AzTheme.px(10)
+            anchors.topMargin: AzTheme.px(10)
+            anchors.bottomMargin: AzTheme.px(10)
             columns: row.wide ? 2 : 1
-            columnSpacing: 16
-            rowSpacing: 10
+            columnSpacing: AzTheme.px(16)
+            rowSpacing: AzTheme.px(8)
 
             Text {
                 id: titleText
-                color: "#FFFFFF"
-                font.pixelSize: 16
-                font.bold: true
+                color: AzTheme.textCard
+                font.family: AzTheme.fontFamily
+                font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignVCenter
@@ -99,6 +112,54 @@ Rectangle {
         }
     }
 
+    // A section title inside the card
+    component SectionTitle: Text {
+        Layout.fillWidth: true
+        Layout.topMargin: AzTheme.px(6)
+        color: AzTheme.textCard
+        font.family: AzTheme.fontFamily
+        font.weight: Font.Medium
+        font.pixelSize: AzTheme.fontPx(15)
+        wrapMode: Text.WordWrap
+    }
+
+    // Help text under a row
+    component HelpText: Text {
+        Layout.fillWidth: true
+        wrapMode: Text.WordWrap
+        color: AzTheme.textSecondary
+        font.family: AzTheme.fontFamily
+        font.pixelSize: AzTheme.fontPx(13)
+    }
+
+    // A red-tinted warning line with the error icon
+    component WarningLine: RowLayout {
+        property alias text: warningText.text
+
+        Layout.fillWidth: true
+        spacing: AzTheme.px(8)
+
+        QGCColoredImage {
+            Layout.alignment: Qt.AlignTop
+            Layout.preferredWidth: AzTheme.px(18)
+            Layout.preferredHeight: AzTheme.px(18)
+            source: "qrc:/res/AZSHIELD_ICON/bx_error.svg"
+            sourceSize.height: AzTheme.px(18)
+            fillMode: Image.PreserveAspectFit
+            color: AzTheme.statusRed
+        }
+
+        Text {
+            id: warningText
+            Layout.fillWidth: true
+            color: AzTheme.statusRed
+            font.family: AzTheme.fontFamily
+            font.weight: Font.Medium
+            font.pixelSize: AzTheme.fontPx(13)
+            wrapMode: Text.WordWrap
+        }
+    }
+
     // ---- Scrollable page ----
     QGCFlickable {
         id: flick
@@ -106,7 +167,7 @@ Rectangle {
         anchors.fill: parent
         clip: true
         contentWidth: width
-        contentHeight: contentCol.implicitHeight + root._side
+        contentHeight: contentCol.implicitHeight + AzTheme.px(20) + root._side
         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
         ColumnLayout {
@@ -119,52 +180,81 @@ Rectangle {
             anchors.top: parent.top
             anchors.leftMargin: root._side
             anchors.rightMargin: root._side
-            anchors.topMargin: 0
+            anchors.topMargin: AzTheme.px(20)
             anchors.bottomMargin: root._side
 
-            // --- Header (yuxarı boşluqsuz) ---
+            // --- Header ---
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: root._compact ? 3 : 6
+                spacing: AzTheme.px(6)
 
                 Text {
                     text: qsTr("Güc Parametrləri")
-                    color: "white"
-                    font.pixelSize: root._compact ? 21 : 26
-                    font.bold: true
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
+                    font.pixelSize: AzTheme.fontPx(root._compact ? 18 : 20)
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
 
                 Text {
                     text: qsTr("Batareya və enerji idarəetməsini konfiqurasiya edin")
-                    color: "#E8E8E8"
-                    font.pixelSize: root._compact ? 13 : 16
-                    font.bold: false
+                    color: AzTheme.textSecondary
+                    font.family: AzTheme.fontFamily
+                    font.pixelSize: AzTheme.fontPx(13)
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
             }
 
-            // --- Loading card ---
+            // --- Loading card: the vehicle state and what to expect ---
             Rectangle {
                 Layout.fillWidth: true
-                radius: 16
-                color: "#3D3B3B"
+                Layout.preferredHeight: AzTheme.px(200)
+                radius: AzTheme.px(AzTheme.cardRadius)
                 border.width: 1
-                border.color: "#9D9D9D"
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
                 visible: !parametersReady
-                implicitHeight: 220
 
-                Text {
+                Column {
                     anchors.centerIn: parent
                     width: parent.width - 2 * root._side
-                    text: qsTr("Parametrlər yüklənir...\nAvtopilot bağlantısını gözləyin")
-                    color: "#FFFFFF"
-                    font.pixelSize: 18
-                    font.bold: true
-                    horizontalAlignment: Text.AlignHCenter
-                    wrapMode: Text.WordWrap
+                    spacing: AzTheme.px(10)
+
+                    Rectangle {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: AzTheme.px(12)
+                        height: width
+                        radius: width / 2
+                        color: globals.activeVehicle ? AzTheme.statusOrange : AzTheme.mutedText
+                    }
+
+                    Text {
+                        width: parent.width
+                        text: globals.activeVehicle ? qsTr("Parametrlər yüklənir...") : qsTr("Aktiv aparat yoxdur")
+                        color: AzTheme.textCard
+                        font.family: AzTheme.fontFamily
+                        font.weight: Font.Medium
+                        font.pixelSize: AzTheme.fontPx(17)
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.WordWrap
+                    }
+
+                    Text {
+                        width: parent.width
+                        text: globals.activeVehicle ? qsTr("Avtopilot bağlantısını gözləyin")
+                                                    : qsTr("Qoşulduqdan sonra batareya parametrləri görünəcək.")
+                        color: AzTheme.textSecondary
+                        font.family: AzTheme.fontFamily
+                        font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.WordWrap
+                    }
                 }
             }
 
@@ -173,10 +263,13 @@ Rectangle {
                 id: mainCard
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
-                radius: 16
-                color: "#3D3B3B"
+                radius: AzTheme.px(AzTheme.cardRadius)
                 border.width: 1
-                border.color: "#9D9D9D"
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
                 visible: parametersReady
 
                 implicitHeight: cardContent.implicitHeight + (root._m * 2)
@@ -189,11 +282,11 @@ Rectangle {
 
                     // Title
                     Text {
-                        text: "Batareya"
-                        color: "#FFFFFF"
-                        font.pixelSize: 18
-                        font.bold: true
-                        horizontalAlignment: Text.AlignHCenter
+                        text: qsTr("Batareya")
+                        color: AzTheme.textCard
+                        font.family: AzTheme.fontFamily
+                        font.weight: Font.Medium
+                        font.pixelSize: AzTheme.fontPx(16)
                         Layout.fillWidth: true
                     }
 
@@ -205,17 +298,19 @@ Rectangle {
                         columnSpacing: root._m
                         rowSpacing: root._m
 
-                        // Battery summary box
+                        // Battery summary: a group box with the pack drawing and its limits
                         Rectangle {
                             id: batterySummary
                             Layout.row: 0
                             Layout.column: root._wideTop ? 1 : 0
                             Layout.fillWidth: !root._wideTop
-                            Layout.preferredWidth: root._wideTop ? 360 : -1
+                            Layout.preferredWidth: root._wideTop ? AzTheme.px(340) : -1
                             Layout.alignment: Qt.AlignTop
 
-                            radius: 10
-                            color: "#232323"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             visible: parametersReady && batParams.battSource.rawValue != -1
 
                             implicitHeight: summaryCol.implicitHeight + 2 * root._m
@@ -224,17 +319,17 @@ Rectangle {
                                 id: summaryCol
                                 anchors.fill: parent
                                 anchors.margins: root._m
-                                spacing: 10
+                                spacing: AzTheme.px(10)
 
                                 QGCColoredImage {
                                     id: batteryImage
                                     Layout.alignment: Qt.AlignHCenter
-                                    Layout.preferredWidth: 110
-                                    Layout.preferredHeight: 160
+                                    Layout.preferredWidth: AzTheme.px(110)
+                                    Layout.preferredHeight: AzTheme.px(150)
                                     sourceSize.height: height
                                     fillMode: Image.PreserveAspectFit
                                     smooth: true
-                                    color: qgcPal.text
+                                    color: AzTheme.textSecondary
                                     cache: false
                                     source: {
                                         if (!parametersReady) return "/qmlimages/PowerComponentBattery_01cell.svg"
@@ -250,25 +345,31 @@ Rectangle {
                                     }
                                 }
 
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 1
+                                    color: AzTheme.groupBorder
+                                }
+
                                 RowLayout {
                                     Layout.fillWidth: true
-                                    spacing: 8
-                                    Text { text: "Max Batareya:"; color: "#FFFFFF"; font.pixelSize: 14; font.bold: true }
+                                    spacing: AzTheme.px(8)
+                                    Text { text: qsTr("Max Batareya"); color: AzTheme.textSecondary; font.family: AzTheme.fontFamily; font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize) }
                                     Item { Layout.fillWidth: true }
                                     Text {
                                         text: parametersReady ? (batParams.battNumCells.value * batParams.battHighVolt.value).toFixed(1) + " V" : "0.0 V"
-                                        color: "#FFFFFF"; font.pixelSize: 14
+                                        color: AzTheme.statusGreen; font.family: AzTheme.fontFamily; font.weight: Font.Medium; font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
                                     }
                                 }
 
                                 RowLayout {
                                     Layout.fillWidth: true
-                                    spacing: 8
-                                    Text { text: "Min Batareya:"; color: "#FFFFFF"; font.pixelSize: 14; font.bold: true }
+                                    spacing: AzTheme.px(8)
+                                    Text { text: qsTr("Min Batareya"); color: AzTheme.textSecondary; font.family: AzTheme.fontFamily; font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize) }
                                     Item { Layout.fillWidth: true }
                                     Text {
                                         text: parametersReady ? (batParams.battNumCells.value * batParams.battLowVolt.value).toFixed(1) + " V" : "0.0 V"
-                                        color: "#FFFFFF"; font.pixelSize: 14
+                                        color: AzTheme.statusRed; font.family: AzTheme.fontFamily; font.weight: Font.Medium; font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
                                     }
                                 }
                             }
@@ -281,123 +382,53 @@ Rectangle {
                             Layout.column: 0
                             Layout.fillWidth: true
                             Layout.alignment: Qt.AlignTop
-                            spacing: 10
+                            spacing: AzTheme.px(8)
 
                             // Source
                             FormRow {
                                 title: qsTr("Mənbə")
                                 FactComboBox {
                                     width: parent.width
-                                    height: 34
+                                    height: root._editorH
                                     fact: batParams.battSource
                                     indexModel: false
                                     enabled: parametersReady
-
-                                    background: Rectangle {
-                                        color: "#3D3B3B"
-                                        radius: 4
-                                        border.color: "#9D9D9D"
-                                        border.width: 0.5
-                                    }
-
-                                    contentItem: Text {
-                                        text: parametersReady ? parent.currentText : qsTr("Yüklənir...")
-                                        color: parametersReady ? "#FFFFFF" : "#888888"
-                                        font.pixelSize: 16
-                                        verticalAlignment: Text.AlignVCenter
-                                        horizontalAlignment: Text.AlignHCenter
-                                        anchors.fill: parent
-                                    }
                                 }
                             }
 
                             // Battery settings when source enabled
                             ColumnLayout {
                                 Layout.fillWidth: true
-                                spacing: 10
+                                spacing: AzTheme.px(8)
                                 visible: parametersReady && batParams.battSource.rawValue != -1
 
                                 FormRow {
                                     title: qsTr("Elementlərin sayı (ardıcıl)")
                                     FactTextField {
                                         width: parent.width
-                                        height: 34
+                                        height: root._editorH
                                         fact: batParams.battNumCells
-                                        showUnits: true
                                         enabled: parametersReady
-
-                                        background: Rectangle {
-                                            color: parametersReady ? "white" : "#E0E0E0"
-                                            radius: 4
-                                            border.color: "#9D9D9D"
-                                            border.width: 0.5
-                                        }
                                     }
                                 }
 
                                 FormRow {
                                     title: qsTr("Boş gərginlik (hər element üçün)")
-                                    Rectangle {
+                                    FactTextField {
                                         width: parent.width
-                                        height: 34
-                                        color: parametersReady ? "white" : "#E0E0E0"
-                                        radius: 4
-
-                                        RowLayout {
-                                            anchors.fill: parent
-                                            anchors.margins: 6
-                                            spacing: 6
-
-                                            FactTextField {
-                                                Layout.fillWidth: true
-                                                height: 34
-                                                fact: batParams.battLowVolt
-                                                showUnits: false
-                                                enabled: parametersReady
-
-                                                background: Rectangle { color: "transparent"; border.width: 0 }
-                                            }
-
-                                            Text {
-                                                text: "V"
-                                                color: parametersReady ? "#000000" : "#888888"
-                                                font.pixelSize: 16
-                                                Layout.alignment: Qt.AlignVCenter
-                                            }
-                                        }
+                                        height: root._editorH
+                                        fact: batParams.battLowVolt
+                                        enabled: parametersReady
                                     }
                                 }
 
                                 FormRow {
                                     title: qsTr("Tam dolu gərginlik (hər element üçün)")
-                                    Rectangle {
+                                    FactTextField {
                                         width: parent.width
-                                        height: 34
-                                        color: parametersReady ? "white" : "#E0E0E0"
-                                        radius: 4
-
-                                        RowLayout {
-                                            anchors.fill: parent
-                                            anchors.margins: 6
-                                            spacing: 6
-
-                                            FactTextField {
-                                                Layout.fillWidth: true
-                                                height: 34
-                                                fact: batParams.battHighVolt
-                                                showUnits: false
-                                                enabled: parametersReady
-
-                                                background: Rectangle { color: "transparent"; border.width: 0 }
-                                            }
-
-                                            Text {
-                                                text: "V"
-                                                color: parametersReady ? "#000000" : "#888888"
-                                                font.pixelSize: 16
-                                                Layout.alignment: Qt.AlignVCenter
-                                            }
-                                        }
+                                        height: root._editorH
+                                        fact: batParams.battHighVolt
+                                        enabled: parametersReady
                                     }
                                 }
 
@@ -411,55 +442,30 @@ Rectangle {
                                     Flow {
                                         id: vdFlow
                                         width: parent.width
-                                        spacing: 12
+                                        spacing: AzTheme.px(10)
 
                                         FactTextField {
                                             id: vdField
                                             width: root._wideForm
                                                    ? Math.max(170, vdFlow.width - (vdCalc.width + vdFlow.spacing))
                                                    : vdFlow.width
-                                            height: 34
+                                            height: root._editorH
                                             fact: batParams.battVoltageDivider
                                             enabled: parametersReady
-
-                                            background: Rectangle {
-                                                color: parametersReady ? "white" : "#E0E0E0"
-                                                radius: 4
-                                                border.color: "#9D9D9D"
-                                                border.width: 0.5
-                                            }
                                         }
 
-                                        Rectangle {
+                                        AzButton {
                                             id: vdCalc
-                                            width: root._wideForm ? 197 : vdFlow.width
-                                            height: 34
-                                            color: parametersReady ? "#3D3B3B" : "#5D5B5B"
-                                            radius: 4
-                                            border.color: "#9D9D9D"
-                                            border.width: 0.5
-
-                                            Text {
-                                                text: "Hesabla"
-                                                color: parametersReady ? "#FFFFFF" : "#888888"
-                                                font.pixelSize: 16
-                                                anchors.centerIn: parent
-                                            }
-
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                enabled: parametersReady
-                                                onClicked: calcVoltageDividerDlgComponent.createObject(mainWindow).open()
-                                            }
+                                            width: root._wideForm ? AzTheme.px(150) : vdFlow.width
+                                            height: root._editorH
+                                            text: qsTr("Hesabla")
+                                            enabled: parametersReady
+                                            onClicked: calcVoltageDividerDlgComponent.createObject(mainWindow).open()
                                         }
                                     }
                                 }
 
-                                Text {
-                                    Layout.fillWidth: true
-                                    wrapMode: Text.WordWrap
-                                    font.pixelSize: 13
-                                    color: "#FFFFFF"
+                                HelpText {
                                     visible: parametersReady && batParams.battVoltageDividerAvailable
                                     text: {
                                         if (!parametersReady) return qsTr("Parametrlər yüklənir...")
@@ -487,55 +493,30 @@ Rectangle {
                                     Flow {
                                         id: apvFlow
                                         width: parent.width
-                                        spacing: 12
+                                        spacing: AzTheme.px(10)
 
                                         FactTextField {
                                             id: apvField
                                             width: root._wideForm
                                                    ? Math.max(170, apvFlow.width - (apvCalc.width + apvFlow.spacing))
                                                    : apvFlow.width
-                                            height: 34
+                                            height: root._editorH
                                             fact: batParams.battAmpsPerVolt
                                             enabled: parametersReady
-
-                                            background: Rectangle {
-                                                color: parametersReady ? "white" : "#E0E0E0"
-                                                radius: 4
-                                                border.color: "#9D9D9D"
-                                                border.width: 0.5
-                                            }
                                         }
 
-                                        Rectangle {
+                                        AzButton {
                                             id: apvCalc
-                                            width: root._wideForm ? 197 : apvFlow.width
-                                            height: 34
-                                            color: parametersReady ? "#3D3B3B" : "#5D5B5B"
-                                            radius: 4
-                                            border.color: "#9D9D9D"
-                                            border.width: 0.5
-
-                                            Text {
-                                                text: "Calculate"
-                                                color: parametersReady ? "#FFFFFF" : "#888888"
-                                                font.pixelSize: 16
-                                                anchors.centerIn: parent
-                                            }
-
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                enabled: parametersReady
-                                                onClicked: calcAmpsPerVoltDlgComponent.createObject(mainWindow).open()
-                                            }
+                                            width: root._wideForm ? AzTheme.px(150) : apvFlow.width
+                                            height: root._editorH
+                                            text: qsTr("Hesabla")
+                                            enabled: parametersReady
+                                            onClicked: calcAmpsPerVoltDlgComponent.createObject(mainWindow).open()
                                         }
                                     }
                                 }
 
-                                Text {
-                                    Layout.fillWidth: true
-                                    wrapMode: Text.WordWrap
-                                    font.pixelSize: 13
-                                    color: "#FFFFFF"
+                                HelpText {
                                     visible: parametersReady && batParams.battAmpsPerVoltAvailable
                                     text: {
                                         if (!parametersReady) return qsTr("Parametrlər yüklənir...")
@@ -555,291 +536,137 @@ Rectangle {
                             }
 
                             // Message when battery source disabled
-                            Text {
-                                Layout.fillWidth: true
-                                wrapMode: Text.WordWrap
-                                font.pixelSize: 16
-                                color: "#FFFFFF"
+                            HelpText {
                                 visible: parametersReady && batParams.battSource.rawValue == -1
                                 text: "Battery monitoring is disabled. No battery parameters will be available."
                             }
 
                             // ----- ESC Calibration section -----
-                            Text {
-                                Layout.fillWidth: true
+                            SectionTitle {
                                 text: "ESC PWM Minimum and Maximum Calibration"
-                                color: "#FFFFFF"
-                                font.pixelSize: 14
-                                font.bold: true
-                                wrapMode: Text.WordWrap
                                 visible: parametersReady
                             }
 
                             Rectangle {
                                 Layout.fillWidth: true
-                                radius: 6
-                                color: "#2A2A2A"
+                                radius: AzTheme.px(AzTheme.groupRadius)
+                                color: AzTheme.groupFill
+                                border.width: 1
+                                border.color: AzTheme.groupBorder
                                 visible: parametersReady
-                                implicitHeight: escGrid.implicitHeight + 28
+                                implicitHeight: escGrid.implicitHeight + AzTheme.px(28)
 
                                 GridLayout {
                                     id: escGrid
                                     anchors.fill: parent
-                                    anchors.margins: 14
+                                    anchors.margins: AzTheme.px(14)
                                     columns: root._wideForm ? 2 : 1
-                                    columnSpacing: 16
-                                    rowSpacing: 12
+                                    columnSpacing: AzTheme.px(16)
+                                    rowSpacing: AzTheme.px(12)
 
                                     ColumnLayout {
                                         Layout.fillWidth: true
-                                        spacing: 8
+                                        spacing: AzTheme.px(8)
 
-                                        Text {
+                                        WarningLine {
                                             text: qsTr("XƏBƏRDARLIQ: ESC kalibrləməsini aparmazdan əvvəl pervanelər mütləq aparatdan çıxarılmalıdır.")
-                                            color: "#FF6B6B"
-                                            font.pixelSize: 14
-                                            font.bold: true
-                                            wrapMode: Text.WordWrap
-                                            Layout.fillWidth: true
                                         }
 
-                                        Text {
+                                        HelpText {
                                             text: qsTr("Bu əməliyyat üçün USB bağlantısından istifadə etməlisiniz.")
-                                            color: "#FFFFFF"
-                                            font.pixelSize: 14
-                                            wrapMode: Text.WordWrap
-                                            Layout.fillWidth: true
                                         }
                                     }
 
-                                    Rectangle {
+                                    AzButton {
                                         Layout.alignment: root._wideForm ? Qt.AlignRight : Qt.AlignLeft
                                         Layout.fillWidth: !root._wideForm
-                                        Layout.preferredWidth: root._wideForm ? 197 : -1
-                                        height: 37
-                                        color: parametersReady ? "#3D3B3B" : "#5D5B5B"
-                                        radius: 4
-                                        border.color: "#9D9D9D"
-                                        border.width: 0.5
-
-                                        Text {
-                                            text: qsTr("Kalibrlə")
-                                            color: parametersReady ? "#FFFFFF" : "#888888"
-                                            font.pixelSize: 16
-                                            anchors.centerIn: parent
-                                        }
-
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            enabled: parametersReady
-                                            onClicked: controller.calibrateEsc()
-                                        }
+                                        Layout.preferredWidth: root._wideForm ? AzTheme.px(150) : -1
+                                        text: qsTr("Kalibrlə")
+                                        positive: true
+                                        enabled: parametersReady
+                                        onClicked: controller.calibrateEsc()
                                     }
                                 }
                             }
 
                             // ----- UAVCAN toggle -----
-                            RowLayout {
-                                Layout.fillWidth: true
-                                spacing: 10
+                            QGCCheckBox {
+                                Layout.topMargin: AzTheme.px(6)
+                                text: qsTr("UAVCAN parametrlərini göstər")
+                                checked: root.showUAVCAN
                                 visible: parametersReady
-
-                                Rectangle {
-                                    width: 22
-                                    height: 22
-                                    color: "#3D3B3B"
-                                    radius: 3
-                                    border.color: "#9D9D9D"
-                                    border.width: 1
-
-                                    Rectangle {
-                                        width: 12
-                                        height: 12
-                                        color: "#FFFFFF"
-                                        radius: 2
-                                        anchors.centerIn: parent
-                                        visible: root.showUAVCAN
-                                    }
-
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        onClicked: root.showUAVCAN = !root.showUAVCAN
-                                    }
-                                }
-
-                                Text {
-                                    text: qsTr("UAVCAN parametrlərini göstər")
-                                    color: "#FFFFFF"
-                                    font.pixelSize: 14
-                                    font.bold: true
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
+                                onClicked: root.showUAVCAN = checked
                             }
 
                             // ----- UAV Bus Configuration -----
-                            Text {
-                                Layout.fillWidth: true
+                            SectionTitle {
                                 text: qsTr("UAV şin konfiqurasiyası")
-                                color: "#FFFFFF"
-                                font.pixelSize: 14
-                                font.bold: true
                                 visible: parametersReady && root.showUAVCAN
                             }
 
-                            Rectangle {
-                                Layout.fillWidth: true
-                                radius: 6
-                                color: "#2A2A2A"
+                            FormRow {
+                                title: qsTr("Dəyişiklik üçün yenidən başladılması tələb olunur")
                                 visible: parametersReady && root.showUAVCAN
-                                implicitHeight: uavGrid.implicitHeight + 28
 
-                                GridLayout {
-                                    id: uavGrid
-                                    anchors.fill: parent
-                                    anchors.margins: 14
-                                    columns: root._wideForm ? 3 : 1
-                                    columnSpacing: 16
-                                    rowSpacing: 10
-
-                                    Text {
-                                        text: qsTr("UAV şin konfiqurasiyası")
-                                        color: "#FFFFFF"
-                                        font.pixelSize: 16
-                                        font.bold: true
-                                        wrapMode: Text.WordWrap
-                                        Layout.fillWidth: true
-                                    }
-
-                                    Text {
-                                        text: qsTr("Dəyişiklik üçün yenidən başladılması tələb olunur")
-                                        color: "#FFFFFF"
-                                        font.pixelSize: 14
-                                        wrapMode: Text.WordWrap
-                                        Layout.fillWidth: true
-                                    }
-
-                                    FactComboBox {
-                                        Layout.fillWidth: !root._wideForm
-                                        Layout.preferredWidth: root._wideForm ? 197 : -1
-                                        height: 34
-                                        fact: controller.getParameterFact(-1, "UAVCAN_ENABLE", false)
-                                        indexModel: false
-                                        enabled: parametersReady
-
-                                        background: Rectangle {
-                                            color: "#3D3B3B"
-                                            radius: 4
-                                            border.color: "#9D9D9D"
-                                            border.width: 0.5
-                                        }
-
-                                        contentItem: Text {
-                                            text: parametersReady ? parent.currentText : qsTr("Yüklənir...")
-                                            color: parametersReady ? "#FFFFFF" : "#888888"
-                                            font.pixelSize: 16
-                                            verticalAlignment: Text.AlignVCenter
-                                            horizontalAlignment: Text.AlignHCenter
-                                            anchors.fill: parent
-                                        }
-                                    }
+                                FactComboBox {
+                                    width: parent.width
+                                    height: root._editorH
+                                    fact: controller.getParameterFact(-1, "UAVCAN_ENABLE", false)
+                                    indexModel: false
+                                    enabled: parametersReady
                                 }
                             }
 
                             // ----- UAVCAN Motor Assignment -----
-                            Text {
-                                Layout.fillWidth: true
+                            SectionTitle {
                                 text: qsTr("UAVCAN mühərrik indeksinin və fırlanma istiqamətinin təyini")
-                                color: "#FFFFFF"
-                                font.pixelSize: 13
-                                font.bold: true
                                 visible: parametersReady && root.showUAVCAN
                             }
 
                             Rectangle {
                                 Layout.fillWidth: true
-                                radius: 6
-                                color: "#2A2A2A"
+                                radius: AzTheme.px(AzTheme.groupRadius)
+                                color: AzTheme.groupFill
+                                border.width: 1
+                                border.color: AzTheme.groupBorder
                                 visible: parametersReady && root.showUAVCAN
-                                implicitHeight: assignCol.implicitHeight + 28
+                                implicitHeight: assignCol.implicitHeight + AzTheme.px(28)
 
                                 ColumnLayout {
                                     id: assignCol
                                     anchors.fill: parent
-                                    anchors.margins: 14
-                                    spacing: 8
+                                    anchors.margins: AzTheme.px(14)
+                                    spacing: AzTheme.px(8)
 
-                                    Text {
+                                    WarningLine {
                                         text: qsTr("XƏBƏRDARLIQ: ESC kalibrləməsini aparmazdan əvvəl pervanelər mütləq aparatdan çıxarılmalıdır.")
-                                        color: "#FF6B6B"
-                                        font.pixelSize: 12
-                                        font.bold: true
-                                        wrapMode: Text.WordWrap
-                                        Layout.fillWidth: true
                                     }
 
-                                    Text {
+                                    HelpText {
                                         text: qsTr("ESC parametrlərinə yalnız təyinat (assignment) tamamlandıqdan sonra redaktorda çıxış mümkün olacaq.")
-                                        color: "#FFFFFF"
-                                        font.pixelSize: 12
-                                        wrapMode: Text.WordWrap
-                                        Layout.fillWidth: true
                                     }
 
-                                    Text {
+                                    HelpText {
                                         text: qsTr("Prosesi başladın, sonra mühərrik indekslərinin sırasına uyğun olaraq hər mühərriki öz fırlanma istiqamətində hərəkətə gətirin.")
-                                        color: "#FFFFFF"
-                                        font.pixelSize: 12
-                                        wrapMode: Text.WordWrap
-                                        Layout.fillWidth: true
                                     }
 
                                     Flow {
                                         Layout.fillWidth: true
-                                        spacing: 12
+                                        spacing: AzTheme.px(10)
 
-                                        Rectangle {
-                                            width: root._wideForm ? 180 : parent.width
-                                            height: 32
-                                            color: parametersReady ? "#3D3B3B" : "#5D5B5B"
-                                            radius: 4
-                                            border.color: "#9D9D9D"
-                                            border.width: 0.5
-
-                                            Text {
-                                                text: qsTr("Təyinata başla")
-                                                color: parametersReady ? "#FFFFFF" : "#888888"
-                                                font.pixelSize: 14
-                                                anchors.centerIn: parent
-                                            }
-
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                enabled: parametersReady
-                                                onClicked: controller.startBusConfigureActuators()
-                                            }
+                                        AzButton {
+                                            width: root._wideForm ? AzTheme.px(180) : parent.width
+                                            text: qsTr("Təyinata başla")
+                                            positive: true
+                                            enabled: parametersReady
+                                            onClicked: controller.startBusConfigureActuators()
                                         }
 
-                                        Rectangle {
-                                            width: root._wideForm ? 180 : parent.width
-                                            height: 32
-                                            color: parametersReady ? "#3D3B3B" : "#5D5B5B"
-                                            radius: 4
-                                            border.color: "#9D9D9D"
-                                            border.width: 0.5
-
-                                            Text {
-                                                text: qsTr("Təyinatı dayandır")
-                                                color: parametersReady ? "#FFFFFF" : "#888888"
-                                                font.pixelSize: 14
-                                                anchors.centerIn: parent
-                                            }
-
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                enabled: parametersReady
-                                                onClicked: controller.stopBusConfigureActuators()
-                                            }
+                                        AzButton {
+                                            width: root._wideForm ? AzTheme.px(180) : parent.width
+                                            text: qsTr("Təyinatı dayandır")
+                                            enabled: parametersReady
+                                            onClicked: controller.stopBusConfigureActuators()
                                         }
                                     }
                                 }
