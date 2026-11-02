@@ -322,10 +322,6 @@ Item {
             cursorShape:  enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
             onClicked:    action.clicked()
         }
-
-        ToolTip.visible: action.collapsed && actionMouse.containsMouse
-        ToolTip.text:    action.label
-        ToolTip.delay:   400
     }
 
     // =========================
@@ -500,10 +496,6 @@ Item {
                         cursorShape:  Qt.PointingHandCursor
                         onClicked:    leftPanel._activate(model.pageId)
                     }
-
-                    ToolTip.visible: isCollapsed && itemMouse.containsMouse
-                    ToolTip.text:    model.text
-                    ToolTip.delay:   400
                 }
             }
         }
