@@ -9,12 +9,18 @@ import QGroundControl.Controls
 
 
 
+// Vehicle setup summary, in the new design: one status card per component with its
+// setup state, on the vehicle setup page's dark background.
 Rectangle {
     id: _summaryRoot
     anchors.fill: parent
-    color: "black"
+    color: "transparent"
 
     property var aparatController: null
+
+    // The component summaries' labels and rows take the new design's look
+    // (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // Aparat / parametr vəziyyəti — digər səhifələrdəki "Parametrlər yüklənir" bloku üçün
     readonly property var  _activeVehicle:   QGroundControl.multiVehicleManager.activeVehicle
@@ -55,8 +61,8 @@ Rectangle {
     readonly property bool tablet: width < 1100
     readonly property bool smallScreen: tablet  // köhnə ad istifadə edən yerlər üçün
 
-    readonly property real sidePadding: Math.max(8,  ScreenTools.defaultFontPixelWidth  * (phone ? 0.9 : tablet ? 1.2 : 1.6))
-    readonly property real gridGap:     Math.max(8,  ScreenTools.defaultFontPixelWidth  * (phone ? 0.9 : tablet ? 1.2 : 1.6))
+    readonly property real sidePadding: AzTheme.px(phone ? 12 : 20)
+    readonly property real gridGap:     AzTheme.px(phone ? 10 : 16)
 
     // Kart minimum eni (telefon üçün daha kiçik)
     readonly property real minCardW: phone ? 280 : tablet ? 360 : 520
@@ -219,26 +225,31 @@ Rectangle {
                 // Çərçivə səhifəsindəki kimi yuxarı çıxır və yer tutmur.
                 x: sidePadding
                 width: Math.max(0, contentColumn.width - sidePadding * 2)
-                bottomPadding: Math.max(8, ScreenTools.defaultFontPixelHeight * 0.8)
-                spacing: Math.max(6, ScreenTools.defaultFontPixelHeight * (_summaryRoot._compact ? 0.4 : 0.6))
+                topPadding: AzTheme.px(20)
+                bottomPadding: AzTheme.px(16)
+                spacing: AzTheme.px(6)
 
                 Text {
+                    width: parent.width
                     text: qsTr("Təyyarənin Konfiqurasiyası Xülasəsi")
-                    color: "white"
-                    font.pixelSize: _summaryRoot._compact ? 21 : 26
-                    font.bold: true
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
+                    font.pixelSize: AzTheme.fontPx(_summaryRoot._compact ? 18 : 20)
                     wrapMode: Text.WordWrap
                 }
 
                 // Subtitle — səhifənin məqsədini izah edir (digər səhifələrlə eyni üslub)
                 Text {
                     text: qsTr("Təyyarənizin bütün komponentlərinin quraşdırma vəziyyətinə buradan nəzər salın; hər blok müvafiq konfiqurasiya səhifəsinə keçid edir.")
-                    color: "#E8E8E8"
-                    font.pixelSize: _summaryRoot._compact ? 13 : 16
-                    font.bold: false
+                    color: AzTheme.textSecondary
+                    font.family: AzTheme.fontFamily
+                    font.pixelSize: AzTheme.fontPx(13)
                     wrapMode: Text.WordWrap
                     width: parent.width
                 }
+
+                Item { width: 1; height: AzTheme.px(4) }
 
                 // subtitle YOX (sənin istədiyin kimi)
 
@@ -246,14 +257,15 @@ Rectangle {
                     id: warningBar
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    radius: 10
-                    color: "#B3947272"
+                    // A red-tinted group box
+                    radius: AzTheme.px(AzTheme.groupRadius)
+                    color: Qt.rgba(1, 52 / 255, 67 / 255, 0.10)
                     border.width: 1
-                    border.color: "#B3FF0000"
+                    border.color: Qt.rgba(1, 52 / 255, 67 / 255, 0.55)
 
-                    readonly property real padX: Math.max(10, ScreenTools.defaultFontPixelWidth * 1.2)
-                    readonly property real padY: Math.max(8,  ScreenTools.defaultFontPixelHeight * 0.6)
-                    readonly property real minH: Math.max(46, ScreenTools.defaultFontPixelHeight * 2.6)
+                    readonly property real padX: AzTheme.px(16)
+                    readonly property real padY: AzTheme.px(12)
+                    readonly property real minH: AzTheme.px(52)
 
                     // ✅ hündürlük mətinə görə böyüsün, min hündürlük də olsun
                     height: Math.max(minH, warnText.implicitHeight + padY * 2)
@@ -274,12 +286,14 @@ Rectangle {
                         anchors.bottomMargin: warningBar.padY
                         spacing: Math.max(10, ScreenTools.defaultFontPixelWidth)
 
-                        Image {
+                        QGCColoredImage {
                             source: "qrc:/res/AZSHIELD_ICON/bx_error.svg"
-                            Layout.preferredWidth: 22
-                            Layout.preferredHeight: 22
+                            Layout.preferredWidth: AzTheme.px(22)
+                            Layout.preferredHeight: AzTheme.px(22)
                             Layout.alignment: Qt.AlignVCenter
+                            sourceSize.height: AzTheme.px(22)
                             fillMode: Image.PreserveAspectFit
+                            color: AzTheme.statusRed
                         }
 
                         QGCLabel {
@@ -294,9 +308,8 @@ Rectangle {
                             horizontalAlignment: Text.AlignLeft
                             verticalAlignment: Text.AlignVCenter
 
-                            color: warningBar.setupComplete ? qgcPal.text : qgcPal.warningText
-                            font.bold: true
-                            font.pixelSize: Math.max(12, ScreenTools.defaultFontPixelHeight * 0.85)
+                            color: AzTheme.textCard
+                            font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
 
                             text: warningBar.setupComplete ?
                                 qsTr("Aşağıda təyyarəniz üçün parametrlərin xülasəsini tapa bilərsiniz. Solda hər bir komponent üçün quraşdırma menyuları var.") :
@@ -313,28 +326,57 @@ Rectangle {
             Item {
                 width: parent.width
                 visible: !_summaryRoot._parametersReady
-                height: visible ? (220 + sidePadding) : 0
+                height: visible ? (emptyCard.height + sidePadding) : 0
 
+                // A status card with the vehicle state and what to expect
                 Rectangle {
+                    id: emptyCard
                     x: sidePadding
                     width: parent.width - 2 * sidePadding
-                    height: 220
-                    radius: 16
-                    color: "#3D3B3B"
+                    height: AzTheme.px(200)
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
 
-                    Text {
+                    Column {
                         anchors.centerIn: parent
                         width: parent.width - 2 * sidePadding
-                        text: _summaryRoot._activeVehicle
-                              ? qsTr("Parametrlər yüklənir...\nAvtopilot bağlantısını gözləyin")
-                              : qsTr("Aktiv aparat yoxdur.\nQoşulduqdan sonra xülasə görünəcək.")
-                        color: "#FFFFFF"
-                        font.pixelSize: Math.max(16, ScreenTools.defaultFontPixelHeight * 0.95)
-                        font.bold: true
-                        horizontalAlignment: Text.AlignHCenter
-                        wrapMode: Text.WordWrap
+                        spacing: AzTheme.px(10)
+
+                        Rectangle {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: AzTheme.px(12)
+                            height: width
+                            radius: width / 2
+                            color: _summaryRoot._activeVehicle ? AzTheme.statusOrange : AzTheme.mutedText
+                        }
+
+                        Text {
+                            width: parent.width
+                            text: _summaryRoot._activeVehicle ? qsTr("Parametrlər yüklənir...")
+                                                              : qsTr("Aktiv aparat yoxdur")
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(17)
+                            horizontalAlignment: Text.AlignHCenter
+                            wrapMode: Text.WordWrap
+                        }
+
+                        Text {
+                            width: parent.width
+                            text: _summaryRoot._activeVehicle ? qsTr("Avtopilot bağlantısını gözləyin")
+                                                              : qsTr("Qoşulduqdan sonra xülasə görünəcək.")
+                            color: AzTheme.textSecondary
+                            font.family: AzTheme.fontFamily
+                            font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
+                            horizontalAlignment: Text.AlignHCenter
+                            wrapMode: Text.WordWrap
+                        }
                     }
                 }
             }
@@ -361,46 +403,107 @@ Rectangle {
                         height: Math.max(230, Math.min(_summaryRoot.smallScreen ? 300 : 220,
                                                       _summaryRoot.height * (_summaryRoot.smallScreen ? 0.48 : 0.36)))
 
-                        color: "#3C3838"
-                        radius: 16
-                        border.width: 1
-                        border.color: "#9D9D9D"
+                        // The status card: linear-gradient(145deg, #25272A, #181B1E), 1 px #353A3F,
+                        // radius 14; its outline brightens while the header is hovered.
+                        id: componentCard
+                        color: "transparent"
                         visible: modelData && modelData.summaryQmlSource && modelData.summaryQmlSource.toString() !== ""
 
-                        readonly property real titleH: Math.max(46, ScreenTools.defaultFontPixelHeight * (_summaryRoot.smallScreen ? 2.7 : 2.4))
+                        readonly property real titleH: AzTheme.px(52)
+                        readonly property bool _needsSetup: modelData.requiresSetup && modelData.setupSource !== ""
 
-                        QGCButton {
+                        AzGradientRect {
+                            anchors.fill:  parent
+                            angle:         AzTheme.cardGradientAngle
+                            startColor:    AzTheme.cardGradientStart
+                            startPosition: AzTheme.cardGradientStartPos
+                            endColor:      AzTheme.cardGradientEnd
+                            endPosition:   AzTheme.cardGradientEndPos
+                            radius:        AzTheme.px(AzTheme.cardRadius)
+                            borderColor:   titleMouse.containsMouse ? AzTheme.cardHoverBorder : AzTheme.cardBorder
+                            borderWidth:   1
+                        }
+
+                        // Title, setup state and a chevron: opens the component's page
+                        Item {
                             id: titleBar
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.top: parent.top
                             height: titleH
-                            text:prettyTitle(modelData.name)
-                            font.bold: true
-                            // ✅ kiçik ekranda title da böyüsün
-                            font.pixelSize: Math.max(17, ScreenTools.defaultFontPixelHeight * (_summaryRoot.smallScreen ? 1.2 : 1.0))
 
-                            background: Rectangle {
-                                anchors.fill: parent
-                                color: "#333131"
-                                radius: 13
-                                border.width: 1
-                                border.color: "#888888"
+                            Text {
+                                anchors.left: parent.left
+                                anchors.leftMargin: AzTheme.px(18)
+                                anchors.right: stateRow.left
+                                anchors.rightMargin: AzTheme.px(10)
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: prettyTitle(modelData.name)
+                                color: AzTheme.textCard
+                                font.family: AzTheme.fontFamily
+                                font.weight: Font.Medium
+                                font.pixelSize: AzTheme.fontPx(16)
+                                elide: Text.ElideRight
+                            }
+
+                            Row {
+                                id: stateRow
+                                anchors.right: parent.right
+                                anchors.rightMargin: AzTheme.px(14)
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: AzTheme.px(10)
+
+                                Row {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: AzTheme.px(6)
+                                    visible: componentCard._needsSetup
+
+                                    Rectangle {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: Math.max(6, AzTheme.px(8))
+                                        height: width
+                                        radius: width / 2
+                                        color: modelData.setupComplete ? AzTheme.statusGreen : AzTheme.statusRed
+                                    }
+
+                                    Text {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: modelData.setupComplete ? qsTr("Hazırdır") : qsTr("Quraşdırılmayıb")
+                                        color: AzTheme.textSecondary
+                                        font.family: AzTheme.fontFamily
+                                        font.pixelSize: AzTheme.fontPx(12)
+                                    }
+                                }
+
+                                QGCColoredImage {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: AzTheme.px(16)
+                                    height: width
+                                    sourceSize.height: height
+                                    rotation: -90
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "qrc:/res/AZSHIELD_ICON/v2/popup_chevron.svg"
+                                    color: titleMouse.containsMouse ? AzTheme.textCard : AzTheme.textSecondary
+                                }
                             }
 
                             Rectangle {
+                                anchors.left: parent.left
                                 anchors.right: parent.right
-                                anchors.rightMargin: Math.max(10, ScreenTools.defaultFontPixelWidth)
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: Math.max(12, ScreenTools.defaultFontPixelWidth * 1.6)
-                                height: width
-                                radius: width / 2
-                                color: modelData.setupComplete ? "#00d932" : "red"
-                                visible: modelData.requiresSetup && modelData.setupSource !== ""
+                                anchors.leftMargin: 1
+                                anchors.rightMargin: 1
+                                anchors.bottom: parent.bottom
+                                height: 1
+                                color: AzTheme.groupBorder
                             }
 
-                            onClicked: _summaryRoot.goToComponent(modelData)
-
+                            MouseArea {
+                                id: titleMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: _summaryRoot.goToComponent(modelData)
+                            }
                         }
 
                         Rectangle {
@@ -412,7 +515,7 @@ Rectangle {
                             color: "transparent"
                             clip: true
 
-                            readonly property real innerPad: Math.max(8, Math.min(18, parent.width * 0.04))
+                            readonly property real innerPad: AzTheme.px(16)
 
                             // ✅ scale üçün kompensasiya: content area ölçüsünü scale-ə bölürük
                             Item {
