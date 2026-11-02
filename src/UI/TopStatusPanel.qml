@@ -968,8 +968,9 @@ Item {
                 endPosition:   AzTheme.cardGradientEndPos
                 radius:        AzTheme.px(AzTheme.cardRadius)
                 borderWidth:   1
-                borderColor:   block.isActive ? AzTheme.activeBorder
-                                              : ((mouseArea.containsMouse && block.isClickable) ? AzTheme.cardHoverBorder : AzTheme.cardBorder)
+                // #5D646B while its panel is open (and on hover), #353A3F otherwise
+                borderColor:   (block.isActive || (mouseArea.containsMouse && block.isClickable)) ? AzTheme.cardHoverBorder
+                                                                                                  : AzTheme.cardBorder
             }
 
             // Open panel: the blue tint of the kebab button's hover.
