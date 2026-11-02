@@ -26,6 +26,10 @@ Item {
 
     property bool twoColumn: false
 
+    // Screens in the new design declare azInputStyle: a dark rounded track, a grey
+    // centre mark and a white thumb, as on the Radio page's stick rows.
+    readonly property bool _az: typeof azInputStyle !== "undefined" && azInputStyle === true
+
     readonly property int _pwmMin:      800
     readonly property int _pwmMax:      2200
     readonly property int _pwmRange:    _pwmMax - _pwmMin
@@ -45,7 +49,7 @@ Item {
 
             property int            __lastRcValue:      1500
             readonly property int   __rcValueMaxJitter: 2
-            property color          __barColor:         qgcPal.windowShade
+            property color          __barColor:         _root._az ? AzTheme.slotEmpty : qgcPal.windowShade
 
             // Bar
             Rectangle {
@@ -53,15 +57,16 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 width:                  parent.width
                 height:                 parent.height / 2
+                radius:                 _root._az ? height / 2 : 0
                 color:                  __barColor
             }
 
             // Center point
             Rectangle {
                 anchors.horizontalCenter:   parent.horizontalCenter
-                width:                      ScreenTools.defaultFontPixelWidth / 2
+                width:                      _root._az ? 2 : ScreenTools.defaultFontPixelWidth / 2
                 height:                     parent.height
-                color:                      qgcPal.window
+                color:                      _root._az ? AzTheme.cardHoverBorder : qgcPal.window
             }
 
             // Indicator
@@ -71,7 +76,7 @@ Item {
                 height:                 width
                 x:                      (((reversed ? _pwmMax - rcValue : rcValue - _pwmMin) / _pwmRange) * parent.width) - (width / 2)
                 radius:                 width / 2
-                color:                  qgcPal.text
+                color:                  _root._az ? AzTheme.textPrimary : qgcPal.text
                 visible:                mapped
             }
 
@@ -87,7 +92,7 @@ Item {
                 id:         barAnimation
                 target:     bar
                 property:   "color"
-                from:       "yellow"
+                from:       _root._az ? AzTheme.statusYellow : "yellow"
                 to:         __barColor
                 duration:   1500
             }

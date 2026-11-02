@@ -6,13 +6,19 @@ import QtQuick.Layouts
 import QGroundControl
 import QGroundControl.FactControls
 import QGroundControl.Controls
-// import QGroundControl.ScreenTools
 
+// Radio calibration, in the new design: the vehicle setup page header, status cards
+// for the sticks, transmitter mode, channel monitor and extra setup, with group box
+// rows inside them.
 Rectangle {
     id: root
     anchors.fill: parent
-    color: "black"
+    color: "transparent"
     clip: true
+
+    // The labels, radio buttons, combo boxes and buttons take the new design's look
+    // (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // ✅ Outer scroll-un əsas səbəbi sabit implicitHeight idi.
     // Loader/Flickable parent implicitHeight-ə görə contentHeight hesablayanda scroll çıxırdı.
@@ -35,14 +41,15 @@ Rectangle {
     readonly property bool phone:  ScreenTools.isMobile || width < 700
     readonly property bool tablet: !phone && width < 1100
 
-    readonly property real sidePadding: Math.max(10, ScreenTools.defaultFontPixelWidth  * (phone ? 0.9 : tablet ? 1.2 : 1.6))
-    readonly property real gap:         Math.max(10, ScreenTools.defaultFontPixelWidth  * (phone ? 0.9 : tablet ? 1.2 : 1.6))
-    readonly property real innerPad:    Math.max(12, ScreenTools.defaultFontPixelWidth  * (phone ? 1.0 : 1.3))
+    readonly property real sidePadding: AzTheme.px(phone ? 12 : 20)
+    readonly property real gap:         AzTheme.px(phone ? 10 : 16)
+    readonly property real innerPad:    AzTheme.px(phone ? 12 : 16)
+    readonly property real topPad:      AzTheme.px(20)
 
-    readonly property real h1Px:    Math.max(18, ScreenTools.defaultFontPixelHeight * (phone ? 1.20 : tablet ? 1.30 : 1.35))
-    readonly property real subPx:   Math.max(12, ScreenTools.defaultFontPixelHeight * (phone ? 0.95 : 1.00))
-    readonly property real titlePx: Math.max(14, ScreenTools.defaultFontPixelHeight * (phone ? 1.00 : 1.05))
-    readonly property real textPx:  Math.max(12, ScreenTools.defaultFontPixelHeight * (phone ? 0.95 : 1.00))
+    readonly property real h1Px:    AzTheme.fontPx(compact ? 18 : 20)
+    readonly property real subPx:   AzTheme.fontPx(13)
+    readonly property real titlePx: AzTheme.fontPx(16)
+    readonly property real textPx:  AzTheme.fontPx(AzTheme.popupTextSize)
 
     // ✅ Dropdown (ComboBox popup) çox böyük olmasın deyə ölçülər
     // - popup max height məhdud olur (scroll avtomatik işləyir)
@@ -51,8 +58,8 @@ Rectangle {
     readonly property int  _comboPopupFontPx: Math.max(11, Math.round(textPx - 2))
     readonly property real _comboPopupItemH:  Math.max(28, _comboPopupFontPx * 2.0)
 
-    readonly property real rowMinH:     Math.max(44, ScreenTools.defaultFontPixelHeight * 2.3)
-    readonly property real channelRowH: Math.max(28, ScreenTools.defaultFontPixelHeight * 1.9)
+    readonly property real rowMinH:     AzTheme.px(AzTheme.groupRowHeight)
+    readonly property real channelRowH: AzTheme.px(28)
     readonly property real labelW:      phone ? 90 : 120
 
     // sağ sütun en limiti (Rejim seçimi çox enli olmasın)
@@ -231,7 +238,7 @@ Rectangle {
 
             property int __lastRcValue: 1500
             readonly property int __rcValueMaxJitter: 2
-            property color __barColor: "#707070"
+            property color __barColor: AzTheme.slotEmpty
 
             readonly property int _pwmMin: 800
             readonly property int _pwmMax: 2200
@@ -241,26 +248,27 @@ Rectangle {
                 id: bar
                 anchors.verticalCenter: parent.verticalCenter
                 width: parent.width
-                height: 12
-                radius: 6
+                height: AzTheme.px(8)
+                radius: height / 2
                 color: __barColor
             }
 
             Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: 2
-                height: parent.height
-                color: "#5A5A5A"
+                height: parent.height * 0.7
+                anchors.verticalCenter: parent.verticalCenter
+                color: AzTheme.cardHoverBorder
             }
 
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
-                width: 14
+                width: AzTheme.px(14)
                 height: width
                 radius: width/2
-                color: mapped ? "white" : "transparent"
-                border.color: "#9D9D9D"
-                border.width: 1
+                color: mapped ? AzTheme.textPrimary : "transparent"
+                border.color: mapped ? AzTheme.statusGreen : AzTheme.cardHoverBorder
+                border.width: mapped ? 2 : 1
                 x: {
                     if (!mapped) return parent.width/2 - width/2
                     var normalized = (reversed ? _pwmMax - rcValue : rcValue - _pwmMin) / _pwmRange
@@ -272,7 +280,7 @@ Rectangle {
                 id: barAnim
                 target: bar
                 property: "color"
-                from: "yellow"
+                from: AzTheme.statusYellow
                 to: __barColor
                 duration: 1500
             }
@@ -321,28 +329,22 @@ Rectangle {
             Text {
                 id: title
                 x: root.sidePadding
-                y: 0
+                y: root.topPad
                 text: qsTr("Radio Konfiqurasiyası")
-                color: "white"
+                color: AzTheme.textCard
+                font.family: AzTheme.fontFamily
+                font.weight: Font.Medium
                 font.pixelSize: root.h1Px
-                font.bold: true
             }
 
             Text {
                 id: subtitle
                 x: root.sidePadding
-                y: title.y + title.implicitHeight + 4
+                y: title.y + title.implicitHeight + AzTheme.px(6)
                 text: qsTr("RC ötürücü kanallarınızı və parametrlərinizi konfiqurasiya edin")
-                color: "#E8E8E8"
+                color: AzTheme.textSecondary
+                font.family: AzTheme.fontFamily
                 font.pixelSize: root.subPx
-            }
-
-            Rectangle {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                height: 1
-                color: "#FFFFFF"
-                opacity: 0.25
             }
 
             readonly property real topY: subtitle.y + subtitle.implicitHeight + root.gap
@@ -357,10 +359,13 @@ Rectangle {
                 x: desktop.m
                 y: desktop.topY
                 width: desktop.leftW
-                color: "#3D3B3B"
-                radius: 16
-                border.width: 0.5
-                border.color: "white"
+                radius: AzTheme.px(AzTheme.cardRadius)
+                border.width: 1
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
                 implicitHeight: attCol.implicitHeight + root.innerPad * 2
 
                 ColumnLayout {
@@ -371,22 +376,26 @@ Rectangle {
 
                     Text {
                         text: qsTr("Münasibətə Nəzarətlər")
-                        color: "white"
+                        color: AzTheme.textCard
+                        font.family: AzTheme.fontFamily
+                        font.weight: Font.Medium
                         font.pixelSize: root.titlePx
-                        font.bold: true
                     }
 
                     // Roll
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         implicitHeight: Math.max(root.rowMinH, root.channelRowH + 2*8)
                         RowLayout {
                             anchors.fill: parent
-                            anchors.margins: 10
+                            anchors.leftMargin: AzTheme.px(AzTheme.groupPadding)
+                            anchors.rightMargin: AzTheme.px(AzTheme.groupPadding)
                             spacing: root.gap
-                            Text { text: qsTr("Roll"); color: "white"; font.pixelSize: root.textPx; Layout.preferredWidth: root.labelW; Layout.minimumWidth: root.labelW }
+                            Text { text: qsTr("Roll"); color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.pixelSize: root.textPx; Layout.preferredWidth: root.labelW; Layout.minimumWidth: root.labelW }
                             Loader {
                                 id: rollLoader
                                 Layout.fillWidth: true
@@ -400,14 +409,17 @@ Rectangle {
                     // Pitch
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         implicitHeight: Math.max(root.rowMinH, root.channelRowH + 2*8)
                         RowLayout {
                             anchors.fill: parent
-                            anchors.margins: 10
+                            anchors.leftMargin: AzTheme.px(AzTheme.groupPadding)
+                            anchors.rightMargin: AzTheme.px(AzTheme.groupPadding)
                             spacing: root.gap
-                            Text { text: qsTr("Pitch"); color: "white"; font.pixelSize: root.textPx; Layout.preferredWidth: root.labelW; Layout.minimumWidth: root.labelW }
+                            Text { text: qsTr("Pitch"); color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.pixelSize: root.textPx; Layout.preferredWidth: root.labelW; Layout.minimumWidth: root.labelW }
                             Loader {
                                 id: pitchLoader
                                 Layout.fillWidth: true
@@ -421,14 +433,17 @@ Rectangle {
                     // Yaw
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         implicitHeight: Math.max(root.rowMinH, root.channelRowH + 2*8)
                         RowLayout {
                             anchors.fill: parent
-                            anchors.margins: 10
+                            anchors.leftMargin: AzTheme.px(AzTheme.groupPadding)
+                            anchors.rightMargin: AzTheme.px(AzTheme.groupPadding)
                             spacing: root.gap
-                            Text { text: qsTr("Yaw"); color: "white"; font.pixelSize: root.textPx; Layout.preferredWidth: root.labelW; Layout.minimumWidth: root.labelW }
+                            Text { text: qsTr("Yaw"); color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.pixelSize: root.textPx; Layout.preferredWidth: root.labelW; Layout.minimumWidth: root.labelW }
                             Loader {
                                 id: yawLoader
                                 Layout.fillWidth: true
@@ -442,14 +457,17 @@ Rectangle {
                     // Throttle
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         implicitHeight: Math.max(root.rowMinH, root.channelRowH + 2*8)
                         RowLayout {
                             anchors.fill: parent
-                            anchors.margins: 10
+                            anchors.leftMargin: AzTheme.px(AzTheme.groupPadding)
+                            anchors.rightMargin: AzTheme.px(AzTheme.groupPadding)
                             spacing: root.gap
-                            Text { text: qsTr("Throttle"); color: "white"; font.pixelSize: root.textPx; Layout.preferredWidth: root.labelW; Layout.minimumWidth: root.labelW }
+                            Text { text: qsTr("Throttle"); color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.pixelSize: root.textPx; Layout.preferredWidth: root.labelW; Layout.minimumWidth: root.labelW }
                             Loader {
                                 id: throttleLoader
                                 Layout.fillWidth: true
@@ -469,9 +487,9 @@ Rectangle {
                 y: attitudePanel.y + attitudePanel.height + root.gap
                 spacing: root.gap
 
-                QGCButton { id: skipButton;   width: 196; height: 45; text: qsTr("Keç");     onClicked: controller.skipButtonClicked() }
-                QGCButton { id: cancelButton; width: 196; height: 45; text: qsTr("Ləğv et"); onClicked: controller.cancelButtonClicked() }
-                QGCButton { id: nextButton;   width: 196; height: 45; primary: true; text: controller.calibrateText; onClicked: controller.nextButtonClicked() }
+                QGCButton { id: skipButton;   width: AzTheme.px(196); height: AzTheme.px(40); text: qsTr("Keç");     onClicked: controller.skipButtonClicked() }
+                QGCButton { id: cancelButton; width: AzTheme.px(196); height: AzTheme.px(40); text: qsTr("Ləğv et"); onClicked: controller.cancelButtonClicked() }
+                QGCButton { id: nextButton;   width: AzTheme.px(196); height: AzTheme.px(40); primary: true; text: controller.calibrateText; onClicked: controller.nextButtonClicked() }
             }
 
             // Status (boşdursa yer tutmasın)
@@ -481,7 +499,7 @@ Rectangle {
                 y: buttonRow.y + buttonRow.height + ((text && text.length > 0) ? 8 : 0)
                 width: attitudePanel.width
                 wrapMode: Text.WordWrap
-                color: "white"
+                color: AzTheme.textCard
                 font.pixelSize: root.textPx
                 verticalAlignment: Text.AlignVCenter
                 height: (text && text.length > 0) ? implicitHeight : 0
@@ -494,10 +512,13 @@ Rectangle {
                 x: attitudePanel.x + attitudePanel.width + root.gap
                 y: attitudePanel.y
                 width: desktop.rightW
-                color: "#3D3B3B"
-                radius: 16
-                border.width: 0.5
-                border.color: "#9D9D9D"
+                radius: AzTheme.px(AzTheme.cardRadius)
+                border.width: 1
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
                 implicitHeight: modeCol.implicitHeight + root.innerPad * 2
 
                 ColumnLayout {
@@ -506,7 +527,7 @@ Rectangle {
                     anchors.margins: root.innerPad
                     spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.6)
 
-                    Text { text: qsTr("Transmitter rejimi"); color: "white"; font.pixelSize: root.titlePx; font.bold: true }
+                    Text { text: qsTr("Transmitter rejimi"); color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.weight: Font.Medium; font.pixelSize: root.titlePx }
 
                     ButtonGroup { id: modeGroup }
 
@@ -525,10 +546,13 @@ Rectangle {
                 x: modePanel.x
                 y: modePanel.y + modePanel.height + root.gap
                 width: modePanel.width
-                color: "#3D3B3B"
-                radius: 16
-                border.width: 0.5
-                border.color: "#9D9D9D"
+                radius: AzTheme.px(AzTheme.cardRadius)
+                border.width: 1
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
                 implicitHeight: monCol.implicitHeight + root.innerPad * 2
 
                 ColumnLayout {
@@ -564,10 +588,12 @@ Rectangle {
                             anchors.centerIn: parent
                             width: 100
                             height: 30
-                            color: "#3D3B3B"
-                            radius: 5
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
+                            radius: AzTheme.px(AzTheme.groupRadius)
                             visible: helpImage.status === Image.Loading
-                            Text { anchors.centerIn: parent; text: qsTr("Yüklənir..."); color: "white"; font.pixelSize: 12 }
+                            Text { anchors.centerIn: parent; text: qsTr("Yüklənir..."); color: AzTheme.textSecondary; font.family: AzTheme.fontFamily; font.pixelSize: AzTheme.fontPx(12) }
                         }
                     }
 
@@ -607,7 +633,7 @@ Rectangle {
                                 QGCLabel {
                                     width: parent.width
                                     text: qsTr("RC siqnalı aşkar edilmədi")
-                                    color: "#E8E8E8"
+                                    color: AzTheme.textCard
                                     font.pixelSize: root.textPx
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.WordWrap
@@ -616,7 +642,7 @@ Rectangle {
                                 QGCLabel {
                                     width: parent.width
                                     text: qsTr("Radio qəbuledicisini qoşun və çubuqları hərəkət etdirin. Siqnal gəldikdə kanallar burada görünəcək.")
-                                    color: "#9D9D9D"
+                                    color: AzTheme.textSecondary
                                     font.pixelSize: root.textPx
                                     horizontalAlignment: Text.AlignHCenter
                                     wrapMode: Text.WordWrap
@@ -637,10 +663,13 @@ Rectangle {
                 readonly property real bottomLimit: (root.height - desktop.m)
                 readonly property real maxPanelH: Math.max(220, Math.floor(bottomLimit - y) - 1)
 
-                color: "#3D3B3B"
-                radius: 16
-                border.width: 0.5
-                border.color: "#9D9D9D"
+                radius: AzTheme.px(AzTheme.cardRadius)
+                border.width: 1
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
 
                 implicitHeight: extraCol.implicitHeight + root.innerPad * 2
                 height: Math.min(implicitHeight, maxPanelH)
@@ -654,9 +683,10 @@ Rectangle {
                     Text {
                         id: extraTitle
                         text: qsTr("Əlavə Radio quraşdırma:")
-                        color: "white"
+                        color: AzTheme.textCard
+                        font.family: AzTheme.fontFamily
+                        font.weight: Font.Medium
                         font.pixelSize: root.titlePx
-                        font.bold: true
                     }
 
                     // kontent azdırsa panel kiçilir, çoxdursa içi scroll olur
@@ -695,9 +725,11 @@ Rectangle {
 
                                 delegate: Rectangle {
                                     Layout.fillWidth: true
-                                    radius: 10
-                                    color: "#2A2A2A"
-                                    implicitHeight: 46
+                                    radius: AzTheme.px(AzTheme.groupRadius)
+                                    color: AzTheme.groupFill
+                                    border.width: 1
+                                    border.color: AzTheme.groupBorder
+                                    implicitHeight: AzTheme.px(AzTheme.groupRowHeight)
 
                                     RowLayout {
                                         anchors.fill: parent
@@ -706,7 +738,7 @@ Rectangle {
 
                                         QGCLabel {
                                             text: controller.getParameterFact(-1, modelData).shortDescription
-                                            color: "white"
+                                            color: AzTheme.textCard
                                             font.pixelSize: root.textPx
                                             Layout.fillWidth: true
                                         }
@@ -735,13 +767,13 @@ Rectangle {
                         spacing: root.gap
 
                         QGCButton {
-                            width: 190; height: 40
+                            width: AzTheme.px(190); height: AzTheme.px(40)
                             primary: true
                             text: qsTr("Spektrum bağlama")
                             onClicked: spektrumBindDialogComponent.createObject(mainWindow).open()
                         }
                         QGCButton {
-                            width: 190; height: 40
+                            width: AzTheme.px(190); height: AzTheme.px(40)
                             primary: true
                             text: qsTr("CRSF Bağlaması")
                             onClicked: mainWindow.showMessageDialog(
@@ -752,7 +784,7 @@ Rectangle {
                                        )
                         }
                         QGCButton {
-                            width: 220; height: 40
+                            width: AzTheme.px(220); height: AzTheme.px(40)
                             primary: true
                             text: qsTr("Kəsmələri kopyalayın")
                             onClicked: mainWindow.showMessageDialog(
@@ -806,21 +838,24 @@ Rectangle {
                         Layout.fillWidth: true
                         Layout.leftMargin: root.sidePadding
                         Layout.rightMargin: root.sidePadding
-                        Layout.topMargin: 0
-                        spacing: 6
+                        Layout.topMargin: root.topPad
+                        spacing: AzTheme.px(6)
 
-                        Text { text: qsTr("Radio Konfiqurasiyası"); color: "white"; font.pixelSize: root.h1Px; font.bold: true }
-                        Text { text: qsTr("RC ötürücü kanallarınızı və parametrlərinizi konfiqurasiya edin"); color: "#E8E8E8"; font.pixelSize: root.subPx; wrapMode: Text.WordWrap }
+                        Text { text: qsTr("Radio Konfiqurasiyası"); color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.weight: Font.Medium; font.pixelSize: root.h1Px }
+                        Text { Layout.fillWidth: true; text: qsTr("RC ötürücü kanallarınızı və parametrlərinizi konfiqurasiya edin"); color: AzTheme.textSecondary; font.family: AzTheme.fontFamily; font.pixelSize: root.subPx; wrapMode: Text.WordWrap }
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.leftMargin: root.sidePadding
                         Layout.rightMargin: root.sidePadding
-                        color: "#3D3B3B"
-                        radius: 16
-                        border.width: 0.5
-                        border.color: "white"
+                        radius: AzTheme.px(AzTheme.cardRadius)
+                        border.width: 1
+                        border.color: AzTheme.cardBorder
+                        gradient: Gradient {
+                            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                        }
                         implicitHeight: aCol.implicitHeight + root.innerPad*2
 
                         ColumnLayout {
@@ -829,60 +864,72 @@ Rectangle {
                             anchors.margins: root.innerPad
                             spacing: 12
 
-                            Text { text: qsTr("Münasibətə Nəzarətlər"); color: "white"; font.pixelSize: root.titlePx; font.bold: true }
+                            Text { text: qsTr("Münasibətə Nəzarətlər"); color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.weight: Font.Medium; font.pixelSize: root.titlePx }
 
                             Rectangle {
                                 Layout.fillWidth: true
-                                radius: 10
-                                color: "#2A2A2A"
+                                radius: AzTheme.px(AzTheme.groupRadius)
+                                color: AzTheme.groupFill
+                                border.width: 1
+                                border.color: AzTheme.groupBorder
                                 implicitHeight: root.rowMinH
                                 RowLayout {
                                     anchors.fill: parent
-                                    anchors.margins: 10
+                                    anchors.leftMargin: AzTheme.px(AzTheme.groupPadding)
+                                    anchors.rightMargin: AzTheme.px(AzTheme.groupPadding)
                                     spacing: root.gap
-                                    Text { text: qsTr("Roll"); color: "white"; font.pixelSize: root.textPx; Layout.preferredWidth: root.labelW }
+                                    Text { text: qsTr("Roll"); color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.pixelSize: root.textPx; Layout.preferredWidth: root.labelW }
                                     Loader { id: rollLoader; Layout.fillWidth: true; Layout.preferredHeight: root.channelRowH; sourceComponent: channelMonitorDisplayComponent }
                                 }
                             }
 
                             Rectangle {
                                 Layout.fillWidth: true
-                                radius: 10
-                                color: "#2A2A2A"
+                                radius: AzTheme.px(AzTheme.groupRadius)
+                                color: AzTheme.groupFill
+                                border.width: 1
+                                border.color: AzTheme.groupBorder
                                 implicitHeight: root.rowMinH
                                 RowLayout {
                                     anchors.fill: parent
-                                    anchors.margins: 10
+                                    anchors.leftMargin: AzTheme.px(AzTheme.groupPadding)
+                                    anchors.rightMargin: AzTheme.px(AzTheme.groupPadding)
                                     spacing: root.gap
-                                    Text { text: qsTr("Pitch"); color: "white"; font.pixelSize: root.textPx; Layout.preferredWidth: root.labelW }
+                                    Text { text: qsTr("Pitch"); color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.pixelSize: root.textPx; Layout.preferredWidth: root.labelW }
                                     Loader { id: pitchLoader; Layout.fillWidth: true; Layout.preferredHeight: root.channelRowH; sourceComponent: channelMonitorDisplayComponent }
                                 }
                             }
 
                             Rectangle {
                                 Layout.fillWidth: true
-                                radius: 10
-                                color: "#2A2A2A"
+                                radius: AzTheme.px(AzTheme.groupRadius)
+                                color: AzTheme.groupFill
+                                border.width: 1
+                                border.color: AzTheme.groupBorder
                                 implicitHeight: root.rowMinH
                                 RowLayout {
                                     anchors.fill: parent
-                                    anchors.margins: 10
+                                    anchors.leftMargin: AzTheme.px(AzTheme.groupPadding)
+                                    anchors.rightMargin: AzTheme.px(AzTheme.groupPadding)
                                     spacing: root.gap
-                                    Text { text: qsTr("Yaw"); color: "white"; font.pixelSize: root.textPx; Layout.preferredWidth: root.labelW }
+                                    Text { text: qsTr("Yaw"); color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.pixelSize: root.textPx; Layout.preferredWidth: root.labelW }
                                     Loader { id: yawLoader; Layout.fillWidth: true; Layout.preferredHeight: root.channelRowH; sourceComponent: channelMonitorDisplayComponent }
                                 }
                             }
 
                             Rectangle {
                                 Layout.fillWidth: true
-                                radius: 10
-                                color: "#2A2A2A"
+                                radius: AzTheme.px(AzTheme.groupRadius)
+                                color: AzTheme.groupFill
+                                border.width: 1
+                                border.color: AzTheme.groupBorder
                                 implicitHeight: root.rowMinH
                                 RowLayout {
                                     anchors.fill: parent
-                                    anchors.margins: 10
+                                    anchors.leftMargin: AzTheme.px(AzTheme.groupPadding)
+                                    anchors.rightMargin: AzTheme.px(AzTheme.groupPadding)
                                     spacing: root.gap
-                                    Text { text: qsTr("Throttle"); color: "white"; font.pixelSize: root.textPx; Layout.preferredWidth: root.labelW }
+                                    Text { text: qsTr("Throttle"); color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.pixelSize: root.textPx; Layout.preferredWidth: root.labelW }
                                     Loader { id: throttleLoader; Layout.fillWidth: true; Layout.preferredHeight: root.channelRowH; sourceComponent: channelMonitorDisplayComponent }
                                 }
                             }
@@ -893,10 +940,13 @@ Rectangle {
                         Layout.fillWidth: true
                         Layout.leftMargin: root.sidePadding
                         Layout.rightMargin: root.sidePadding
-                        color: "#3D3B3B"
-                        radius: 16
-                        border.width: 0.5
-                        border.color: "#9D9D9D"
+                        radius: AzTheme.px(AzTheme.cardRadius)
+                        border.width: 1
+                        border.color: AzTheme.cardBorder
+                        gradient: Gradient {
+                            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                        }
                         implicitHeight: mCol.implicitHeight + root.innerPad*2
 
                         ColumnLayout {
@@ -905,7 +955,7 @@ Rectangle {
                             anchors.margins: root.innerPad
                             spacing: 10
 
-                            Text { text: qsTr("Transmitter rejimi"); color: "white"; font.pixelSize: root.titlePx; font.bold: true }
+                            Text { text: qsTr("Transmitter rejimi"); color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.weight: Font.Medium; font.pixelSize: root.titlePx }
                             ButtonGroup { id: mGroup }
 
                             RowLayout {
@@ -921,10 +971,13 @@ Rectangle {
                         Layout.fillWidth: true
                         Layout.leftMargin: root.sidePadding
                         Layout.rightMargin: root.sidePadding
-                        color: "#3D3B3B"
-                        radius: 16
-                        border.width: 0.5
-                        border.color: "#9D9D9D"
+                        radius: AzTheme.px(AzTheme.cardRadius)
+                        border.width: 1
+                        border.color: AzTheme.cardBorder
+                        gradient: Gradient {
+                            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                        }
                         implicitHeight: mmCol.implicitHeight + root.innerPad*2
 
                         ColumnLayout {
@@ -991,7 +1044,7 @@ Rectangle {
                                         QGCLabel {
                                             width: parent.width
                                             text: qsTr("RC siqnalı aşkar edilmədi")
-                                            color: "#E8E8E8"
+                                            color: AzTheme.textCard
                                             font.pixelSize: root.textPx
                                             horizontalAlignment: Text.AlignHCenter
                                             wrapMode: Text.WordWrap
@@ -1000,7 +1053,7 @@ Rectangle {
                                         QGCLabel {
                                             width: parent.width
                                             text: qsTr("Radio qoşulduqdan sonra kanallar burada görünəcək.")
-                                            color: "#9D9D9D"
+                                            color: AzTheme.textSecondary
                                             font.pixelSize: root.textPx
                                             horizontalAlignment: Text.AlignHCenter
                                             wrapMode: Text.WordWrap
@@ -1017,9 +1070,9 @@ Rectangle {
                         Layout.rightMargin: root.sidePadding
                         spacing: root.gap
 
-                        QGCButton { id: skipButton;   width: parent.width; height: 45; text: qsTr("Keç");     onClicked: controller.skipButtonClicked() }
-                        QGCButton { id: cancelButton; width: parent.width; height: 45; text: qsTr("Ləğv et"); onClicked: controller.cancelButtonClicked() }
-                        QGCButton { id: nextButton;   width: parent.width; height: 45; primary: true; text: controller.calibrateText; onClicked: controller.nextButtonClicked() }
+                        QGCButton { id: skipButton;   width: parent.width; height: AzTheme.px(40); text: qsTr("Keç");     onClicked: controller.skipButtonClicked() }
+                        QGCButton { id: cancelButton; width: parent.width; height: AzTheme.px(40); text: qsTr("Ləğv et"); onClicked: controller.cancelButtonClicked() }
+                        QGCButton { id: nextButton;   width: parent.width; height: AzTheme.px(40); primary: true; text: controller.calibrateText; onClicked: controller.nextButtonClicked() }
                     }
 
                     QGCLabel {
@@ -1028,7 +1081,7 @@ Rectangle {
                         Layout.leftMargin: root.sidePadding
                         Layout.rightMargin: root.sidePadding
                         wrapMode: Text.WordWrap
-                        color: "white"
+                        color: AzTheme.textCard
                         font.pixelSize: root.textPx
                     }
 
@@ -1036,10 +1089,13 @@ Rectangle {
                         Layout.fillWidth: true
                         Layout.leftMargin: root.sidePadding
                         Layout.rightMargin: root.sidePadding
-                        color: "#3D3B3B"
-                        radius: 16
-                        border.width: 0.5
-                        border.color: "#9D9D9D"
+                        radius: AzTheme.px(AzTheme.cardRadius)
+                        border.width: 1
+                        border.color: AzTheme.cardBorder
+                        gradient: Gradient {
+                            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                        }
                         implicitHeight: exCol.implicitHeight + root.innerPad*2
 
                         ColumnLayout {
@@ -1048,7 +1104,7 @@ Rectangle {
                             anchors.margins: root.innerPad
                             spacing: root.gap
 
-                            Text { text: qsTr("Əlavə Radio quraşdırma:"); color: "white"; font.pixelSize: root.titlePx; font.bold: true }
+                            Text { text: qsTr("Əlavə Radio quraşdırma:"); color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.weight: Font.Medium; font.pixelSize: root.titlePx }
 
                             GridLayout {
                                 Layout.fillWidth: true
@@ -1064,16 +1120,18 @@ Rectangle {
 
                                     delegate: Rectangle {
                                         Layout.fillWidth: true
-                                        radius: 10
-                                        color: "#2A2A2A"
-                                        implicitHeight: 46
+                                        radius: AzTheme.px(AzTheme.groupRadius)
+                                        color: AzTheme.groupFill
+                                        border.width: 1
+                                        border.color: AzTheme.groupBorder
+                                        implicitHeight: AzTheme.px(AzTheme.groupRowHeight)
 
                                         RowLayout {
                                             anchors.fill: parent
                                             anchors.margins: 10
                                             spacing: root.gap
 
-                                            QGCLabel { text: controller.getParameterFact(-1, modelData).shortDescription; color: "white"; Layout.fillWidth: true }
+                                            QGCLabel { text: controller.getParameterFact(-1, modelData).shortDescription; color: AzTheme.textCard; Layout.fillWidth: true }
 
                                             FactComboBox {
                                                 id: extraParamComboC
@@ -1095,9 +1153,9 @@ Rectangle {
                                 Layout.fillWidth: true
                                 spacing: root.gap
 
-                                QGCButton { width: parent.width; height: 40; primary: true; text: qsTr("Spektrum bağlama"); onClicked: spektrumBindDialogComponent.createObject(mainWindow).open() }
-                                QGCButton { width: parent.width; height: 40; primary: true; text: qsTr("CRSF Bağlaması"); onClicked: mainWindow.showMessageDialog(qsTr("CRSF Bağlaması"), qsTr("CRSF qəbuledicinizi bağlama rejimində yerləşdirmək üçün Ok düyməsini klikləyin."), Dialog.Ok|Dialog.Cancel, function(a){ if(a) controller.crsfBindMode() }) }
-                                QGCButton { width: parent.width; height: 40; primary: true; text: qsTr("Kəsmələri kopyalayın"); onClicked: mainWindow.showMessageDialog(qsTr("Kəsmələri kopyalayın"), qsTr("Çubuqlarınızı mərkəzləşdirin və tənzimləyicini tam aşağı hərəkət etdirin, sonra trimləri kopyalamaq üçün Ok düyməsini basın. Ok düyməsini basdıqdan sonra radionuzdakı trimləri sıfıra qaytarın."), Dialog.Ok|Dialog.Cancel, function(a){ if(a) controller.copyTrims() }) }
+                                QGCButton { width: parent.width; height: AzTheme.px(40); primary: true; text: qsTr("Spektrum bağlama"); onClicked: spektrumBindDialogComponent.createObject(mainWindow).open() }
+                                QGCButton { width: parent.width; height: AzTheme.px(40); primary: true; text: qsTr("CRSF Bağlaması"); onClicked: mainWindow.showMessageDialog(qsTr("CRSF Bağlaması"), qsTr("CRSF qəbuledicinizi bağlama rejimində yerləşdirmək üçün Ok düyməsini klikləyin."), Dialog.Ok|Dialog.Cancel, function(a){ if(a) controller.crsfBindMode() }) }
+                                QGCButton { width: parent.width; height: AzTheme.px(40); primary: true; text: qsTr("Kəsmələri kopyalayın"); onClicked: mainWindow.showMessageDialog(qsTr("Kəsmələri kopyalayın"), qsTr("Çubuqlarınızı mərkəzləşdirin və tənzimləyicini tam aşağı hərəkət etdirin, sonra trimləri kopyalamaq üçün Ok düyməsini basın. Ok düyməsini basdıqdan sonra radionuzdakı trimləri sıfıra qaytarın."), Dialog.Ok|Dialog.Cancel, function(a){ if(a) controller.copyTrims() }) }
                             }
                         }
                     }

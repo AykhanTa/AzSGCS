@@ -15,11 +15,15 @@ RadioButton {
     property var    _qgcPal:    QGCPalette { colorGroupEnabled: enabled }
     property bool   _noText:    text === ""
 
+    // Screens in the new design declare azInputStyle: a dark ring with a green dot
+    readonly property bool _az: typeof azInputStyle !== "undefined" && azInputStyle === true
+
     indicator: Rectangle {
-        implicitWidth:          ScreenTools.radioButtonIndicatorSize
+        implicitWidth:          control._az ? AzTheme.px(20) : ScreenTools.radioButtonIndicatorSize
         implicitHeight:         width
-        color:                  "white"
-        border.color:           "black"
+        color:                  control._az ? AzTheme.pillBottom : "white"
+        border.color:           control._az ? (control.checked ? AzTheme.statusGreen : AzTheme.cardHoverBorder) : "black"
+        border.width:           control._az ? (control.checked ? 2 : 1) : 1
         radius:                 height / 2
         opacity:                control.enabled ? 1 : 0.5
         x:                      control.leftPadding
@@ -31,17 +35,17 @@ RadioButton {
             height:             width
             antialiasing:       true
             radius:             height * 0.5
-            color:              "black"
+            color:              control._az ? AzTheme.statusGreen : "black"
             visible:            control.checked
         }
     }
 
     contentItem: Text {
         text:               control.text
-        font.family:        control.font.pointSize
+        font.family:        control._az ? AzTheme.fontFamily : control.font.pointSize
         font.pointSize:     control.font.pointSize
         font.bold:          control.font.bold
-        color:              control.textColor
+        color:              control._az ? AzTheme.textCard : control.textColor
         opacity:            enabled ? 1.0 : 0.3
         verticalAlignment:  Text.AlignVCenter
         leftPadding:        control.indicator.width + (_noText ? 0 : ScreenTools.defaultFontPixelWidth * 0.25)
