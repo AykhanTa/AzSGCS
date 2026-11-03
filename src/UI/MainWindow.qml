@@ -20,10 +20,14 @@ ApplicationWindow {
     visible: false
 
     // ❗Responsivlik üçün Screen.width/height binding-i SİLİNDİ (SavedState/resize pozulmasın)
-    width:  ScreenTools.defaultFontPixelWidth  * 140
-    height: ScreenTools.defaultFontPixelHeight * 80
-    minimumWidth:  ScreenTools.defaultFontPixelWidth  * 90
-    minimumHeight: ScreenTools.defaultFontPixelHeight * 55
+    // On a phone or remote the window is the screen. The desktop size and minimum are far
+    // larger than a G20's logical screen (753x471 at dpr 2.55): Qt kept the window at the
+    // minimum, the remote showed only its top left corner, and anything centred in the
+    // window (the startup logo, every dialog) was drawn off screen.
+    width:  ScreenTools.isMobile ? Screen.width  : ScreenTools.defaultFontPixelWidth  * 140
+    height: ScreenTools.isMobile ? Screen.height : ScreenTools.defaultFontPixelHeight * 80
+    minimumWidth:  ScreenTools.isMobile ? 0 : ScreenTools.defaultFontPixelWidth  * 90
+    minimumHeight: ScreenTools.isMobile ? 0 : ScreenTools.defaultFontPixelHeight * 55
 
 //     // --- SPLASH SCREEN KODU BAŞLANĞICI ---
     Rectangle {

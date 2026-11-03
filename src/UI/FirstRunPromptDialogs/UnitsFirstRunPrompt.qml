@@ -74,7 +74,11 @@ FirstRunPrompt {
         Rectangle {
             Layout.preferredHeight: unitsGrid.height + (_margins * 2)
             Layout.preferredWidth:  unitsGrid.width + (_margins * 2)
-            color:                  qgcPal.windowShade
+            // A group box, as in the other dialogs of the new design
+            color:                  AzTheme.groupFill
+            radius:                 AzTheme.px(AzTheme.groupRadius)
+            border.width:           1
+            border.color:           AzTheme.groupBorder
             Layout.fillWidth:       true
 
             GridLayout {
