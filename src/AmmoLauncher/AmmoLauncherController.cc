@@ -25,7 +25,14 @@ namespace AmmoLauncherProtocol {
 
 uint8_t crc(uint8_t type, uint8_t id)
 {
-    return static_cast<uint8_t>(type ^ id);
+    uint8_t result = 0x00;
+    for (const uint8_t byte : { type, id }) {
+        result ^= byte;
+        for (int bit = 0; bit < 8; bit++) {
+            result = (result & 0x01) ? static_cast<uint8_t>((result >> 1) ^ 0x8C) : static_cast<uint8_t>(result >> 1);
+        }
+    }
+    return result;
 }
 
 QByteArray build(uint8_t type, uint8_t id)

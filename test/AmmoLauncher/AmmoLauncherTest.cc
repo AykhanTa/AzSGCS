@@ -49,9 +49,14 @@ void AmmoLauncherTest::_arm(AmmoLauncherController &controller)
 
 void AmmoLauncherTest::_packetTest()
 {
-    QCOMPARE(build(kTypeArm, kIdArm), QByteArray::fromHex("a5f1a051b6"));
-    QCOMPARE(build(kTypeServo, 0x03), QByteArray::fromHex("a51f031cb6"));
-    QCOMPARE(build(kTypeServo, kIdSalvo), QByteArray::fromHex("a51fffe0b6"));
+    // The worked example of the launcher's protocol sheet
+    QCOMPARE(crc(0x44, 0x20), uint8_t(0x83));
+
+    QCOMPARE(build(kTypeArm, kIdArm), QByteArray::fromHex("a5f1a0f2b6"));
+    QCOMPARE(build(kTypeArm, kIdDisarm), QByteArray::fromHex("a5f1d00ab6"));
+    QCOMPARE(build(kTypeServo, 0x03), QByteArray::fromHex("a51f0316b6"));
+    QCOMPARE(build(kTypeServo, kIdSalvo), QByteArray::fromHex("a51fffc1b6"));
+    QCOMPARE(build(kTypeHeartbeat, 0x10), QByteArray::fromHex("a51110b5b6"));
 
     QCOMPARE(slotCountForHeartbeat(0x08), 8);
     QCOMPARE(slotCountForHeartbeat(0x10), 10);
@@ -68,7 +73,7 @@ void AmmoLauncherTest::_parserTest()
     // good packets.
     QList<Packet> packets = parser.feed(QByteArray::fromHex("0012a5f1"));
     QVERIFY(packets.isEmpty());
-    packets = parser.feed(QByteArray::fromHex("a051b6"));
+    packets = parser.feed(QByteArray::fromHex("a0f2b6"));
     QCOMPARE(packets.size(), 1);
     QCOMPARE(packets[0].type, kTypeArm);
     QCOMPARE(packets[0].id, kIdArm);
@@ -84,7 +89,7 @@ void AmmoLauncherTest::_parserTest()
     QCOMPARE(packets[1].id, uint8_t(0x10));
 
     // A start byte inside a broken frame still begins the next packet.
-    packets = parser.feed(QByteArray::fromHex("a5a5f1d021b6"));
+    packets = parser.feed(QByteArray::fromHex("a5a5f1d00ab6"));
     QCOMPARE(packets.size(), 1);
     QCOMPARE(packets[0].id, kIdDisarm);
 }

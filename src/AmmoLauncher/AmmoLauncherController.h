@@ -58,8 +58,8 @@ struct Packet {
     uint8_t id   = 0;
 };
 
-/// The CRC byte. The launcher's algorithm is not specified yet; this is the XOR of the
-/// data type and the id, and the only place to change once it is.
+/// The CRC byte: CRC-8/MAXIM (Dallas) over the data type and the id -- init 0x00,
+/// reflected polynomial 0x8C (0x31), no final XOR. CRC(0x44, 0x20) is 0x83.
 uint8_t crc(uint8_t type, uint8_t id);
 
 QByteArray build(uint8_t type, uint8_t id);
