@@ -38,6 +38,7 @@ Rectangle {
     property Fact _showLogReplayStatusBar: _flyViewSettings.showLogReplayStatusBar
     property Fact _showSimpleCameraControl: _flyViewSettings.showSimpleCameraControl
     property Fact _updateHomePosition: _flyViewSettings.updateHomePosition
+    property Fact _ammoArmOnGround: _flyViewSettings.ammoArmOnGround
 
     function mavlinkActionList() {
         var fileModel = QGCFileDialogController.getFiles(_settingsManager.appSettings.mavlinkActionsSavePath, "*.json")
@@ -454,6 +455,37 @@ Rectangle {
                             Layout.fillWidth: true
                         }
                         FactCheckBoxSlider { fact: _updateHomePosition }
+                    }
+                }
+
+                // Mərmi: yerdə ARM (stend testi). Land detector olmayan aparatda
+                // "uçur" vəziyyəti heç vaxt gəlmir və ARM tamamilə bloklanır.
+                Rectangle {
+                    Layout.fillWidth: true
+                    radius: panelStyle.rowRadius
+                    color: panelStyle.rowBg
+                    visible: _ammoArmOnGround.visible
+                    implicitHeight: Math.max(root.rowMinH, ammoGroundRow.implicitHeight + root.rowPadY * 2)
+                    height: implicitHeight
+
+                    RowLayout {
+                        id: ammoGroundRow
+                        anchors.fill: parent
+                        anchors.leftMargin: root.rowPadX
+                        anchors.rightMargin: root.rowPadX
+                        anchors.topMargin: root.rowPadY
+                        anchors.bottomMargin: root.rowPadY
+                        spacing: root.gap
+
+                        QGCLabel {
+                            text: qsTr("Mərmi: Aparat Yerdə Olarkən ARM-a İcazə Ver (stend testi)")
+                            color: "white"
+                            font.pixelSize: root.labelFontPx
+                            elide: Text.ElideRight
+                            wrapMode: Text.NoWrap
+                            Layout.fillWidth: true
+                        }
+                        FactCheckBoxSlider { fact: _ammoArmOnGround }
                     }
                 }
             }

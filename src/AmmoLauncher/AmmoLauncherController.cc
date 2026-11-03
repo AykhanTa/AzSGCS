@@ -11,80 +11,41 @@
 
 #include <QtCore/QTimer>
 
+#include <cmath>
 #include <cstring>
 
-#include "LinkInterface.h"
-#include "MAVLinkProtocol.h"
+#include "Fact.h"
+#include "FlyViewSettings.h"
 #include "QGCLoggingCategory.h"
+#include "SettingsManager.h"
 #include "Vehicle.h"
-#include "VehicleLinkManager.h"
 
 QGC_LOGGING_CATEGORY(AmmoLauncherLog, "qgc.ammolauncher")
 
 namespace AmmoLauncherProtocol {
 
-uint8_t crc(uint8_t type, uint8_t id)
+MavCommand commandFor(uint8_t type, uint8_t id)
 {
-    uint8_t result = 0x00;
-    for (const uint8_t byte : { type, id }) {
-        result ^= byte;
-        for (int bit = 0; bit < 8; bit++) {
-            result = (result & 0x01) ? static_cast<uint8_t>((result >> 1) ^ 0x8C) : static_cast<uint8_t>(result >> 1);
+    if (type == kTypeArm) {
+        if (id == kIdArm) {
+            return { kCmdGripper, 0, GRIPPER_ACTION_GRAB };
         }
+        return { kCmdRawFrame, static_cast<float>(type), static_cast<float>(id) };
     }
-    return result;
-}
-
-QByteArray build(uint8_t type, uint8_t id)
-{
-    QByteArray packet(kPacketSize, '\0');
-    packet[0] = static_cast<char>(kStart);
-    packet[1] = static_cast<char>(type);
-    packet[2] = static_cast<char>(id);
-    packet[3] = static_cast<char>(crc(type, id));
-    packet[4] = static_cast<char>(kEnd);
-    return packet;
-}
-
-int slotCountForHeartbeat(uint8_t id)
-{
-    switch (id) {
-    case 0x08: return 8;
-    case 0x10: return 10;
-    case 0x12: return 12;
-    default:   return 0;
+    if (type == kTypeServo) {
+        // The salvo is servo "0" released; servo n is n released.
+        return { kCmdGripper, (id == kIdSalvo) ? 0.0f : static_cast<float>(id), GRIPPER_ACTION_RELEASE };
     }
+    return { kCmdRawFrame, static_cast<float>(type), static_cast<float>(id) };
 }
 
-QList<Packet> Parser::feed(const QByteArray &bytes)
+int slotCountForValue(float value)
 {
-    _buffer.append(bytes);
-
-    QList<Packet> packets;
-    qsizetype pos = 0;
-    while (true) {
-        const qsizetype start = _buffer.indexOf(static_cast<char>(kStart), pos);
-        if (start < 0) {
-            _buffer.clear();
-            return packets;
-        }
-        if (_buffer.size() - start < kPacketSize) {
-            _buffer.remove(0, start);
-            return packets;
-        }
-
-        const uint8_t type = static_cast<uint8_t>(_buffer.at(start + 1));
-        const uint8_t id   = static_cast<uint8_t>(_buffer.at(start + 2));
-        const uint8_t sum  = static_cast<uint8_t>(_buffer.at(start + 3));
-        const uint8_t end  = static_cast<uint8_t>(_buffer.at(start + 4));
-
-        if ((end == kEnd) && (sum == crc(type, id))) {
-            packets.append({ type, id });
-            pos = start + kPacketSize;
-        } else {
-            qCDebug(AmmoLauncherLog) << "Dropping bad frame at" << start << _buffer.mid(start, kPacketSize).toHex(' ');
-            pos = start + 1;
-        }
+    switch (static_cast<int>(std::lround(value))) {
+    case 8:  return 8;
+    case 10: return 10;
+    case 12: return 12;
+    default: return 0;
     }
 }
 
@@ -95,15 +56,16 @@ using namespace AmmoLauncherProtocol;
 AmmoLauncherController::AmmoLauncherController(QObject *parent)
     : QObject(parent)
     , _heartbeatTimer(new QTimer(this))
-    , _ackTimer(new QTimer(this))
 {
     _heartbeatTimer->setInterval(500);
     (void) connect(_heartbeatTimer, &QTimer::timeout, this, &AmmoLauncherController::_checkHeartbeat);
     _heartbeatTimer->start();
 
-    _ackTimer->setSingleShot(true);
-    _ackTimer->setInterval(kAckTimeoutMs);
-    (void) connect(_ackTimer, &QTimer::timeout, this, &AmmoLauncherController::_ackTimeout);
+    Fact *armOnGround = SettingsManager::instance()->flyViewSettings()->ammoArmOnGround();
+    _groundArmAllowed = armOnGround->rawValue().toBool();
+    (void) connect(armOnGround, &Fact::rawValueChanged, this, [this](const QVariant &value) {
+        _setGroundArmAllowed(value.toBool());
+    });
 
     _lastStatusText = statusText();
 }
@@ -119,7 +81,7 @@ void AmmoLauncherController::setVehicle(Vehicle *vehicle)
     if (_vehicle) {
         // Best effort: the launcher must not stay armed under a vehicle we stop watching.
         if (_armed) {
-            (void) _send(build(kTypeArm, kIdDisarm));
+            (void) _send({ kTypeArm, kIdDisarm });
         }
         (void) disconnect(_vehicle, nullptr, this, nullptr);
     }
@@ -127,8 +89,7 @@ void AmmoLauncherController::setVehicle(Vehicle *vehicle)
     _vehicle = vehicle;
 
     _queue.clear();
-    _ackTimer->stop();
-    _parser.reset();
+    _headSent = false;
     _setArmed(false);
     _setConnected(false);
     _setSlotCount(0);
@@ -148,7 +109,7 @@ void AmmoLauncherController::setVehicle(Vehicle *vehicle)
 
 bool AmmoLauncherController::canArm() const
 {
-    return _connected && _flying && !_armed && !busy();
+    return _connected && (_flying || _groundArmAllowed) && !_armed && !busy();
 }
 
 bool AmmoLauncherController::canFire() const
@@ -171,7 +132,10 @@ QString AmmoLauncherController::statusText() const
     if (_armed) {
         return tr("ARM");
     }
-    return _flying ? tr("DISARM") : tr("Aparat yerdədir");
+    if (_flying) {
+        return tr("DISARM");
+    }
+    return _groundArmAllowed ? tr("DISARM (stend)") : tr("Aparat yerdədir");
 }
 
 void AmmoLauncherController::arm()
@@ -180,7 +144,7 @@ void AmmoLauncherController::arm()
         _fail(tr("Buraxıcı qoşulmayıb."));
         return;
     }
-    if (!_flying) {
+    if (!_flying && !_groundArmAllowed) {
         _fail(tr("Aparat yerdə olarkən buraxıcı ARM edilə bilməz."));
         return;
     }
@@ -208,9 +172,9 @@ void AmmoLauncherController::disarm()
         }
     }
 
-    // Behind the command already on the wire, ahead of everything else.
+    // Behind the command already sent, ahead of everything else.
     const bool wasBusy = busy();
-    const Command disarmCommand { kTypeArm, kIdDisarm, 0 };
+    const Command disarmCommand { kTypeArm, kIdDisarm };
     if (_queue.isEmpty()) {
         _queue.append(disarmCommand);
         _sendHead();
@@ -294,50 +258,34 @@ void AmmoLauncherController::fire()
 
 void AmmoLauncherController::_mavlinkMessageReceived(const mavlink_message_t &message)
 {
-    if (message.msgid != MAVLINK_MSG_ID_TUNNEL) {
+    if (message.msgid != MAVLINK_MSG_ID_NAMED_VALUE_FLOAT) {
         return;
     }
 
-    mavlink_tunnel_t tunnel{};
-    mavlink_msg_tunnel_decode(&message, &tunnel);
-    if (tunnel.payload_type != kTunnelPayloadType) {
+    mavlink_named_value_float_t namedValue{};
+    mavlink_msg_named_value_float_decode(&message, &namedValue);
+
+    // The name is not null terminated when it fills the field.
+    char name[sizeof(namedValue.name) + 1] = {};
+    std::memcpy(name, namedValue.name, sizeof(namedValue.name));
+    if (std::strcmp(name, kSlotValueName) != 0) {
         return;
     }
 
-    const int length = qMin<int>(tunnel.payload_length, sizeof(tunnel.payload));
-    _handleBytes(QByteArray(reinterpret_cast<const char *>(tunnel.payload), length));
+    _handleSlotValue(namedValue.value);
 }
 
-void AmmoLauncherController::_handleBytes(const QByteArray &bytes)
+void AmmoLauncherController::_handleSlotValue(float value)
 {
-    for (const Packet &packet : _parser.feed(bytes)) {
-        _handlePacket(packet);
-    }
-}
-
-void AmmoLauncherController::_handlePacket(const Packet &packet)
-{
-    switch (packet.type) {
-    case kTypeHeartbeat:
-        _handleHeartbeat(packet.id);
-        break;
-    case kTypeAck:
-        _handleReply(true, packet.id);
-        break;
-    case kTypeNack:
-        _handleReply(false, packet.id);
-        break;
-    default:
-        qCDebug(AmmoLauncherLog) << "Ignoring packet" << Qt::hex << int(packet.type) << int(packet.id);
-        break;
-    }
-}
-
-void AmmoLauncherController::_handleHeartbeat(uint8_t id)
-{
-    const int count = slotCountForHeartbeat(id);
+    const int count = slotCountForValue(value);
     if (count == 0) {
-        qCWarning(AmmoLauncherLog) << "Unknown launcher heartbeat id" << Qt::hex << int(id);
+        if (value != 0.0f) {
+            qCWarning(AmmoLauncherLog) << "Unknown launcher slot count" << value;
+        }
+        // The flight controller has lost the launcher's heartbeat.
+        if (_connected) {
+            _linkLost();
+        }
         return;
     }
 
@@ -359,29 +307,23 @@ void AmmoLauncherController::_handleHeartbeat(uint8_t id)
     _emitDerived();
 }
 
-void AmmoLauncherController::_handleReply(bool ack, uint8_t id)
+void AmmoLauncherController::_handleResult(int command, Result result)
 {
-    if (_queue.isEmpty() || (_queue.first().id != id)) {
-        qCDebug(AmmoLauncherLog) << "Unexpected" << (ack ? "ACK" : "NACK") << Qt::hex << int(id);
+    if (!_headSent || _queue.isEmpty() || (commandFor(_queue.first().type, _queue.first().id).command != command)) {
+        qCDebug(AmmoLauncherLog) << "Unexpected result for command" << command;
         return;
     }
 
     const Command head = _queue.first();
-    _ackTimer->stop();
+    const bool accepted = (result == Result::Accepted);
 
     if (head.type == kTypeArm) {
-        if (head.id == kIdArm) {
-            if (ack) {
-                _setArmed(true);
-            } else {
-                _fail(tr("Buraxıcı ARM komandasını rədd etdi."));
-            }
-        } else if (ack) {
-            _setArmed(false);
+        if (accepted) {
+            _setArmed(head.id == kIdArm);
         } else {
-            _fail(tr("Buraxıcı DISARM komandasını rədd etdi."));
+            _fail(_failureText(head, result));
         }
-    } else if (ack) {
+    } else if (accepted) {
         QList<int> states = _slotStates;
         if (head.id == kIdSalvo) {
             states.fill(SlotEmpty);
@@ -390,38 +332,19 @@ void AmmoLauncherController::_handleReply(bool ack, uint8_t id)
         }
         _setSlotStates(states);
     } else {
-        _fail(tr("Buraxıcı %1 komandasını rədd etdi.").arg(_commandName(head.type, head.id)));
+        // A refused or unanswered servo is not retried and cancels the rest of the
+        // firing: the operator decides.
+        _fail(_failureText(head, result));
         _dropFiring(false);
     }
 
-    _finishHead();
-}
-
-void AmmoLauncherController::_ackTimeout()
-{
-    if (_queue.isEmpty()) {
-        return;
-    }
-
-    Command &head = _queue.first();
-    if (head.retries < kMaxRetries) {
-        head.retries++;
-        qCDebug(AmmoLauncherLog) << "No reply, retry" << head.retries << _commandName(head.type, head.id);
-        _sendHead();
-        return;
-    }
-
-    _fail(tr("Buraxıcı %1 komandasına cavab vermədi.").arg(_commandName(head.type, head.id)));
-    if (head.type == kTypeServo) {
-        _dropFiring(false);
-    }
     _finishHead();
 }
 
 void AmmoLauncherController::_enqueue(uint8_t type, uint8_t id)
 {
     const bool wasBusy = busy();
-    _queue.append({ type, id, 0 });
+    _queue.append({ type, id });
     if (!wasBusy) {
         _sendHead();
         emit busyChanged();
@@ -435,17 +358,18 @@ void AmmoLauncherController::_sendHead()
         return;
     }
 
-    const Command &head = _queue.first();
+    const Command head = _queue.first();
     qCDebug(AmmoLauncherLog) << "Sending" << _commandName(head.type, head.id);
-    if (!_send(build(head.type, head.id))) {
-        qCWarning(AmmoLauncherLog) << "No link to send" << _commandName(head.type, head.id);
+    _headSent = true;
+    if (!_send(head)) {
+        qCWarning(AmmoLauncherLog) << "No vehicle to send" << _commandName(head.type, head.id);
+        _handleResult(commandFor(head.type, head.id).command, Result::NoResponse);
     }
-    // A failed send is retried by the timeout like a lost packet.
-    _ackTimer->start();
 }
 
 void AmmoLauncherController::_finishHead()
 {
+    _headSent = false;
     if (!_queue.isEmpty()) {
         _queue.removeFirst();
     }
@@ -460,7 +384,7 @@ void AmmoLauncherController::_finishHead()
 
 void AmmoLauncherController::_dropFiring(bool headInFlight)
 {
-    // The head stays queued: it is on the wire, or it is about to be finished.
+    // The head stays queued: it is sent, or it is about to be finished.
     for (qsizetype i = _queue.size() - 1; i >= 1; i--) {
         if (_queue.at(i).type == kTypeServo) {
             _queue.removeAt(i);
@@ -481,36 +405,48 @@ void AmmoLauncherController::_dropFiring(bool headInFlight)
     _setSlotStates(states);
 }
 
-bool AmmoLauncherController::_send(const QByteArray &packet)
+bool AmmoLauncherController::_send(const Command &command)
 {
+    const MavCommand mavCommand = commandFor(command.type, command.id);
+
     if (_sendHook) {
-        return _sendHook(packet);
+        return _sendHook(mavCommand);
     }
 
     if (!_vehicle) {
         return false;
     }
 
-    SharedLinkInterfacePtr sharedLink = _vehicle->vehicleLinkManager()->primaryLink().lock();
-    if (!sharedLink) {
-        return false;
-    }
+    // The controller lives as long as the application, so it outlives any command the
+    // vehicle still has in flight. A late result for a command that is no longer the
+    // head (after a vehicle change or a lost link) is ignored by _handleResult.
+    static const Vehicle::MavCmdResultHandler resultHandler =
+        [](void *resultHandlerData, int /*compId*/, const mavlink_command_ack_t &ack, Vehicle::MavCmdResultFailureCode_t failureCode) {
+            auto *controller = static_cast<AmmoLauncherController *>(resultHandlerData);
+            Result result = Result::Failed;
+            if (failureCode == Vehicle::MavCmdResultFailureNoResponseToCommand) {
+                result = Result::NoResponse;
+            } else if (failureCode == Vehicle::MavCmdResultFailureDuplicateCommand) {
+                result = Result::TemporarilyRejected;
+            } else {
+                switch (ack.result) {
+                case MAV_RESULT_ACCEPTED:             result = Result::Accepted;            break;
+                case MAV_RESULT_DENIED:               result = Result::Denied;              break;
+                case MAV_RESULT_TEMPORARILY_REJECTED: result = Result::TemporarilyRejected; break;
+                case MAV_RESULT_UNSUPPORTED:          result = Result::Unsupported;         break;
+                default:                              result = Result::Failed;              break;
+                }
+            }
+            controller->_handleResult(ack.command, result);
+        };
 
-    uint8_t payload[sizeof(mavlink_tunnel_t::payload)] = {};
-    const int length = qMin<int>(packet.size(), sizeof(payload));
-    std::memcpy(payload, packet.constData(), length);
-
-    mavlink_message_t message;
-    (void) mavlink_msg_tunnel_pack_chan(MAVLinkProtocol::instance()->getSystemId(),
-                                        MAVLinkProtocol::getComponentId(),
-                                        sharedLink->mavlinkChannel(),
-                                        &message,
-                                        static_cast<uint8_t>(_vehicle->id()),
-                                        MAV_COMP_ID_ALL,
-                                        kTunnelPayloadType,
-                                        static_cast<uint8_t>(length),
-                                        payload);
-    return _vehicle->sendMessageOnLinkThreadSafe(sharedLink.get(), message);
+    const Vehicle::MavCmdAckHandlerInfo_t handlerInfo { resultHandler, this, nullptr, nullptr };
+    _vehicle->sendMavCommandWithHandler(&handlerInfo,
+                                        MAV_COMP_ID_AUTOPILOT1,
+                                        static_cast<MAV_CMD>(mavCommand.command),
+                                        mavCommand.param1,
+                                        mavCommand.param2);
+    return true;
 }
 
 void AmmoLauncherController::_checkHeartbeat()
@@ -519,12 +455,18 @@ void AmmoLauncherController::_checkHeartbeat()
         return;
     }
 
-    qCWarning(AmmoLauncherLog) << "Launcher heartbeat lost";
+    _linkLost();
+}
 
-    // Nothing can be sent now; the launcher has to disarm itself on the lost link.
+void AmmoLauncherController::_linkLost()
+{
+    qCWarning(AmmoLauncherLog) << "Launcher link lost";
+
+    // Nothing reaches the launcher now; it has to disarm itself on the lost link.
+    // Locally the launcher is disarmed and nothing is waited on any more.
     const bool wasBusy = busy();
     _queue.clear();
-    _ackTimer->stop();
+    _headSent = false;
     _setArmed(false);
     _setConnected(false);
     _dropFiring(false);
@@ -538,7 +480,7 @@ void AmmoLauncherController::_checkHeartbeat()
 void AmmoLauncherController::_vehicleFlyingChanged(bool flying)
 {
     _setFlying(flying);
-    if (!flying && _armed) {
+    if (!flying && _armed && !_groundArmAllowed) {
         qCDebug(AmmoLauncherLog) << "Vehicle landed: disarming the launcher";
         disarm();
     }
@@ -575,6 +517,21 @@ void AmmoLauncherController::_setFlying(bool flying)
         _flying = flying;
         emit flyingChanged();
     }
+}
+
+void AmmoLauncherController::_setGroundArmAllowed(bool allowed)
+{
+    if (allowed == _groundArmAllowed) {
+        return;
+    }
+
+    _groundArmAllowed = allowed;
+    emit groundArmAllowedChanged();
+    // Turning the bench test off on the ground disarms like a landing.
+    if (!allowed && !_flying && _armed) {
+        disarm();
+    }
+    _emitDerived();
 }
 
 void AmmoLauncherController::_setSlotStates(const QList<int> &states)
@@ -618,4 +575,24 @@ QString AmmoLauncherController::_commandName(uint8_t type, uint8_t id)
         return tr("toplu atış");
     }
     return tr("servo %1").arg(id);
+}
+
+QString AmmoLauncherController::_failureText(const Command &command, Result result)
+{
+    const QString name = _commandName(command.type, command.id);
+    switch (result) {
+    case Result::Denied:
+        return tr("Buraxıcı %1 komandasını rədd etdi.").arg(name);
+    case Result::Failed:
+        return tr("Buraxıcı %1 komandasına cavab vermədi.").arg(name);
+    case Result::TemporarilyRejected:
+        return tr("%1: FC hazırda komandanı qəbul edə bilmir (mexanizm portu bağlıdır və ya növbə doludur).").arg(name);
+    case Result::Unsupported:
+        return tr("%1: FC bu komandanı dəstəkləmir.").arg(name);
+    case Result::NoResponse:
+        return tr("%1: FC cavab vermədi.").arg(name);
+    case Result::Accepted:
+        break;
+    }
+    return QString();
 }

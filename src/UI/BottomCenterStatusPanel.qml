@@ -62,11 +62,12 @@ Item {
         return AzTheme.slotReady
     }
 
-    // Red armed, green ready to arm, orange on the ground, grey without the launcher.
+    // Red armed, green ready to arm, orange on the ground (unless the bench test
+    // setting allows arming there), grey without the launcher.
     function _statusColor() {
         if (!connected) return AzTheme.mutedText
         if (armed)      return AzTheme.statusRed
-        if (!launcher.flying) return AzTheme.statusOrange
+        if (!launcher.flying && !launcher.groundArmAllowed) return AzTheme.statusOrange
         return AzTheme.statusGreen
     }
 

@@ -102,6 +102,12 @@
     "min":          3,
     "max":          60,
     "default":      10
+},
+{
+    "name":         "ammoArmOnGround",
+    "shortDesc":    "Allow arming the ammunition launcher while the vehicle is on the ground (bench test)",
+    "type":         "bool",
+    "default":      false
 }
 ]
 }

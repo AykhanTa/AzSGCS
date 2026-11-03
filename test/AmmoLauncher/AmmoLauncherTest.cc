@@ -12,6 +12,11 @@ using States = QList<int>;
 constexpr int R = AmmoLauncherController::SlotReady;
 constexpr int S = AmmoLauncherController::SlotSelected;
 constexpr int E = AmmoLauncherController::SlotEmpty;
+
+QString format(const MavCommand &command)
+{
+    return QStringLiteral("%1 %2 %3").arg(command.command).arg(command.param1).arg(command.param2);
+}
 }
 
 void AmmoLauncherTest::init()
@@ -24,74 +29,77 @@ void AmmoLauncherTest::init()
 
 void AmmoLauncherTest::_setUp(AmmoLauncherController &controller, int slotCount, bool flying)
 {
-    controller._sendHook = [this](const QByteArray &packet) {
-        _sent.append(packet);
+    controller._sendHook = [this](const MavCommand &command) {
+        _sent.append(format(command));
         return true;
     };
+    controller._setGroundArmAllowed(false);
     controller._setFlying(flying);
-    const uint8_t heartbeat = (slotCount == 8) ? 0x08 : (slotCount == 10) ? 0x10 : 0x12;
-    _receive(controller, kTypeHeartbeat, heartbeat);
+    controller._handleSlotValue(static_cast<float>(slotCount));
 }
 
-void AmmoLauncherTest::_receive(AmmoLauncherController &controller, uint8_t type, uint8_t id)
+void AmmoLauncherTest::_accept(AmmoLauncherController &controller, uint8_t type, uint8_t id)
 {
-    controller._handleBytes(build(type, id));
+    controller._handleResult(commandFor(type, id).command, AmmoLauncherController::Result::Accepted);
+}
+
+void AmmoLauncherTest::_deny(AmmoLauncherController &controller, uint8_t type, uint8_t id)
+{
+    controller._handleResult(commandFor(type, id).command, AmmoLauncherController::Result::Denied);
 }
 
 void AmmoLauncherTest::_arm(AmmoLauncherController &controller)
 {
     controller.arm();
-    QCOMPARE(_sent.last(), build(kTypeArm, kIdArm));
-    _receive(controller, kTypeAck, kIdArm);
+    QCOMPARE(_sent.last(), _cmd(kTypeArm, kIdArm));
+    _accept(controller, kTypeArm, kIdArm);
     QVERIFY(controller.armed());
     _sent.clear();
 }
 
-void AmmoLauncherTest::_packetTest()
+QString AmmoLauncherTest::_cmd(uint8_t type, uint8_t id)
 {
-    // The worked example of the launcher's protocol sheet
-    QCOMPARE(crc(0x44, 0x20), uint8_t(0x83));
-
-    QCOMPARE(build(kTypeArm, kIdArm), QByteArray::fromHex("a5f1a0f2b6"));
-    QCOMPARE(build(kTypeArm, kIdDisarm), QByteArray::fromHex("a5f1d00ab6"));
-    QCOMPARE(build(kTypeServo, 0x03), QByteArray::fromHex("a51f0316b6"));
-    QCOMPARE(build(kTypeServo, kIdSalvo), QByteArray::fromHex("a51fffc1b6"));
-    QCOMPARE(build(kTypeHeartbeat, 0x10), QByteArray::fromHex("a51110b5b6"));
-
-    QCOMPARE(slotCountForHeartbeat(0x08), 8);
-    QCOMPARE(slotCountForHeartbeat(0x10), 10);
-    QCOMPARE(slotCountForHeartbeat(0x12), 12);
-    QCOMPARE(slotCountForHeartbeat(0x0A), 0);
-    QCOMPARE(slotCountForHeartbeat(0x0C), 0);
+    return format(commandFor(type, id));
 }
 
-void AmmoLauncherTest::_parserTest()
+void AmmoLauncherTest::_commandMappingTest()
 {
-    Parser parser;
+    // The flight controller's table: DO_GRIPPER for ARM, servos and the salvo, the raw
+    // frame (USER_1 data type / id) for DISARM.
+    QCOMPARE(_cmd(kTypeArm, kIdArm), QStringLiteral("211 0 1"));
+    QCOMPARE(_cmd(kTypeArm, kIdDisarm), QStringLiteral("31010 241 208"));
+    QCOMPARE(_cmd(kTypeServo, 0x01), QStringLiteral("211 1 0"));
+    QCOMPARE(_cmd(kTypeServo, 0x0C), QStringLiteral("211 12 0"));
+    QCOMPARE(_cmd(kTypeServo, kIdSalvo), QStringLiteral("211 0 0"));
 
-    // Noise before a packet, a packet split over two reads, and a bad CRC between two
-    // good packets.
-    QList<Packet> packets = parser.feed(QByteArray::fromHex("0012a5f1"));
-    QVERIFY(packets.isEmpty());
-    packets = parser.feed(QByteArray::fromHex("a0f2b6"));
-    QCOMPARE(packets.size(), 1);
-    QCOMPARE(packets[0].type, kTypeArm);
-    QCOMPARE(packets[0].id, kIdArm);
+    QCOMPARE(slotCountForValue(8), 8);
+    QCOMPARE(slotCountForValue(10), 10);
+    QCOMPARE(slotCountForValue(12), 12);
+    QCOMPARE(slotCountForValue(0), 0);
+    QCOMPARE(slotCountForValue(9), 0);
+}
 
-    QByteArray stream = build(kTypeAck, 0x02);
-    stream += QByteArray::fromHex("a51f0300b6");
-    stream += build(kTypeHeartbeat, 0x10);
-    packets = parser.feed(stream);
-    QCOMPARE(packets.size(), 2);
-    QCOMPARE(packets[0].type, kTypeAck);
-    QCOMPARE(packets[0].id, uint8_t(0x02));
-    QCOMPARE(packets[1].type, kTypeHeartbeat);
-    QCOMPARE(packets[1].id, uint8_t(0x10));
+void AmmoLauncherTest::_slotValueTest()
+{
+    AmmoLauncherController controller;
 
-    // A start byte inside a broken frame still begins the next packet.
-    packets = parser.feed(QByteArray::fromHex("a5a5f1d00ab6"));
-    QCOMPARE(packets.size(), 1);
-    QCOMPARE(packets[0].id, kIdDisarm);
+    // MECH_SLOT arrives as NAMED_VALUE_FLOAT; other names are not the launcher.
+    auto send = [&controller](const char *name, float value) {
+        mavlink_message_t message;
+        (void) mavlink_msg_named_value_float_pack(1, MAV_COMP_ID_AUTOPILOT1, &message, 0, name, value);
+        controller._mavlinkMessageReceived(message);
+    };
+
+    send("OTHER", 10);
+    QVERIFY(!controller.connected());
+
+    send(kSlotValueName, 10);
+    QVERIFY(controller.connected());
+    QCOMPARE(controller.slotCount(), 10);
+
+    // A name that fills the whole 10 character field is not null terminated.
+    send("MECH_SLOTS", 12);
+    QCOMPARE(controller.slotCount(), 10);
 }
 
 void AmmoLauncherTest::_heartbeatTest()
@@ -105,13 +113,9 @@ void AmmoLauncherTest::_heartbeatTest()
     QCOMPARE(controller.slotCount(), 10);
     QCOMPARE(controller.slotStates(), States(10, R));
 
-    // An unknown id is not a launcher.
-    _receive(controller, kTypeHeartbeat, 0x0A);
-    QCOMPARE(controller.slotCount(), 10);
-
     // Another launcher resets the slots.
     controller.toggleSlot(0);
-    _receive(controller, kTypeHeartbeat, 0x12);
+    controller._handleSlotValue(12);
     QCOMPARE(controller.slotCount(), 12);
     QCOMPARE(controller.slotStates(), States(12, R));
 }
@@ -130,12 +134,12 @@ void AmmoLauncherTest::_armOnlyWhileFlyingTest()
     controller._vehicleFlyingChanged(true);
     QVERIFY(controller.canArm());
     controller.arm();
-    QCOMPARE(_sent, QList<QByteArray>{ build(kTypeArm, kIdArm) });
+    QCOMPARE(_sent, QList<QString>{ _cmd(kTypeArm, kIdArm) });
     QVERIFY(controller.busy());
     QVERIFY(!controller.armed());
 
     // Selecting is allowed while disarmed, firing is not.
-    controller._handleBytes(build(kTypeNack, kIdArm));
+    _deny(controller, kTypeArm, kIdArm);
     QVERIFY(!controller.armed());
     QVERIFY(!controller.busy());
     QCOMPARE(failed.count(), 2);
@@ -143,9 +147,29 @@ void AmmoLauncherTest::_armOnlyWhileFlyingTest()
     QVERIFY(!controller.canFire());
 
     controller.arm();
-    _receive(controller, kTypeAck, kIdArm);
+    _accept(controller, kTypeArm, kIdArm);
     QVERIFY(controller.armed());
     QVERIFY(controller.canFire());
+}
+
+void AmmoLauncherTest::_groundArmSettingTest()
+{
+    AmmoLauncherController controller;
+    _setUp(controller, 10, false);
+    QVERIFY(!controller.canArm());
+
+    // The bench test setting arms on the ground.
+    controller._setGroundArmAllowed(true);
+    QVERIFY(controller.canArm());
+    _arm(controller);
+
+    // Turning it off on the ground disarms like a landing.
+    controller._setGroundArmAllowed(false);
+    QVERIFY(!controller.armed());
+    QCOMPARE(_sent, QList<QString>{ _cmd(kTypeArm, kIdDisarm) });
+    _accept(controller, kTypeArm, kIdDisarm);
+    QVERIFY(!controller.busy());
+    QVERIFY(!controller.canArm());
 }
 
 void AmmoLauncherTest::_fireSelectedTest()
@@ -160,14 +184,14 @@ void AmmoLauncherTest::_fireSelectedTest()
     controller.toggleSlot(7);
     controller.fire();
 
-    // One command at a time, each waiting for its ACK.
-    QCOMPARE(_sent, QList<QByteArray>{ build(kTypeServo, 0x02) });
+    // One command at a time, each waiting for its COMMAND_ACK.
+    QCOMPARE(_sent, QList<QString>{ _cmd(kTypeServo, 0x02) });
     QVERIFY(controller.busy());
     QVERIFY(!controller.canFire());
 
-    _receive(controller, kTypeAck, 0x02);
-    QCOMPARE(_sent.last(), build(kTypeServo, 0x05));
-    _receive(controller, kTypeAck, 0x05);
+    _accept(controller, kTypeServo, 0x02);
+    QCOMPARE(_sent.last(), _cmd(kTypeServo, 0x05));
+    _accept(controller, kTypeServo, 0x05);
     QCOMPARE(_sent.size(), 2);
     QVERIFY(!controller.busy());
 
@@ -189,8 +213,8 @@ void AmmoLauncherTest::_salvoTest()
 
     controller.selectAll();
     controller.fire();
-    QCOMPARE(_sent, QList<QByteArray>{ build(kTypeServo, kIdSalvo) });
-    _receive(controller, kTypeAck, kIdSalvo);
+    QCOMPARE(_sent, QList<QString>{ _cmd(kTypeServo, kIdSalvo) });
+    _accept(controller, kTypeServo, kIdSalvo);
     QCOMPARE(controller.slotStates(), States(12, E));
 
     // With a slot already fired, "all" goes out servo by servo.
@@ -200,14 +224,14 @@ void AmmoLauncherTest::_salvoTest()
     _arm(partial);
     partial.toggleSlot(0);
     partial.fire();
-    _receive(partial, kTypeAck, 0x01);
+    _accept(partial, kTypeServo, 0x01);
     _sent.clear();
     partial.selectAll();
     partial.fire();
-    QCOMPARE(_sent, QList<QByteArray>{ build(kTypeServo, 0x02) });
+    QCOMPARE(_sent, QList<QString>{ _cmd(kTypeServo, 0x02) });
 }
 
-void AmmoLauncherTest::_nackDropsFiringTest()
+void AmmoLauncherTest::_deniedDropsFiringTest()
 {
     AmmoLauncherController controller;
     _setUp(controller, 8, true);
@@ -217,7 +241,7 @@ void AmmoLauncherTest::_nackDropsFiringTest()
     controller.toggleSlot(0);
     controller.toggleSlot(1);
     controller.fire();
-    _receive(controller, kTypeNack, 0x01);
+    _deny(controller, kTypeServo, 0x01);
 
     QCOMPARE(failed.count(), 1);
     QCOMPARE(_sent.size(), 1);
@@ -226,23 +250,34 @@ void AmmoLauncherTest::_nackDropsFiringTest()
     QVERIFY(controller.armed());
 }
 
-void AmmoLauncherTest::_retryTest()
+void AmmoLauncherTest::_failedNotRetriedTest()
 {
     AmmoLauncherController controller;
     _setUp(controller, 8, true);
-    controller._ackTimer->setInterval(20);
+    _arm(controller);
 
+    // No answer from the launcher (FAILED) or from the flight controller: the operator
+    // decides, nothing is sent again.
     QSignalSpy failed(&controller, &AmmoLauncherController::commandFailed);
-    controller.arm();
-    QTRY_COMPARE_WITH_TIMEOUT(failed.count(), 1, 2000);
+    controller.toggleSlot(2);
+    controller.toggleSlot(3);
+    controller.fire();
+    controller._handleResult(commandFor(kTypeServo, 0x03).command, AmmoLauncherController::Result::Failed);
+    QCOMPARE(failed.count(), 1);
+    QCOMPARE(_sent, QList<QString>{ _cmd(kTypeServo, 0x03) });
+    QCOMPARE(controller.slotStates(), States(8, R));
 
-    // The first try and every retry.
-    QCOMPARE(_sent.size(), 1 + AmmoLauncherController::kMaxRetries);
-    for (const QByteArray &packet : _sent) {
-        QCOMPARE(packet, build(kTypeArm, kIdArm));
-    }
+    _sent.clear();
+    controller.toggleSlot(5);
+    controller.fire();
+    controller._handleResult(commandFor(kTypeServo, 0x06).command, AmmoLauncherController::Result::NoResponse);
+    QCOMPARE(failed.count(), 2);
+    QCOMPARE(_sent.size(), 1);
     QVERIFY(!controller.busy());
-    QVERIFY(!controller.armed());
+
+    // A result for a command that is not waiting is ignored.
+    _accept(controller, kTypeServo, 0x06);
+    QCOMPARE(controller.slotStates(), States(8, R));
 }
 
 void AmmoLauncherTest::_landingDisarmsTest()
@@ -253,8 +288,8 @@ void AmmoLauncherTest::_landingDisarmsTest()
 
     controller._vehicleFlyingChanged(false);
     QVERIFY(!controller.armed());
-    QCOMPARE(_sent, QList<QByteArray>{ build(kTypeArm, kIdDisarm) });
-    _receive(controller, kTypeAck, kIdDisarm);
+    QCOMPARE(_sent, QList<QString>{ _cmd(kTypeArm, kIdDisarm) });
+    _accept(controller, kTypeArm, kIdDisarm);
     QVERIFY(!controller.busy());
     QVERIFY(!controller.canArm());
 }
@@ -272,10 +307,10 @@ void AmmoLauncherTest::_disarmDropsFiringTest()
     controller.disarm();
     QVERIFY(!controller.armed());
 
-    // Servo 1 is already on the wire; DISARM goes next and servos 2 and 3 never go.
-    _receive(controller, kTypeAck, 0x01);
-    QCOMPARE(_sent, (QList<QByteArray>{ build(kTypeServo, 0x01), build(kTypeArm, kIdDisarm) }));
-    _receive(controller, kTypeAck, kIdDisarm);
+    // Servo 1 is already sent; DISARM goes next and servos 2 and 3 never go.
+    _accept(controller, kTypeServo, 0x01);
+    QCOMPARE(_sent, (QList<QString>{ _cmd(kTypeServo, 0x01), _cmd(kTypeArm, kIdDisarm) }));
+    _accept(controller, kTypeArm, kIdDisarm);
     QVERIFY(!controller.busy());
 
     States expected(8, R);
@@ -300,7 +335,27 @@ void AmmoLauncherTest::_heartbeatLossTest()
     QCOMPARE(controller.slotCount(), 8);
     QCOMPARE(controller.slotStates(), States(8, R));
 
-    _receive(controller, kTypeHeartbeat, 0x08);
+    controller._handleSlotValue(8);
     QVERIFY(controller.connected());
     QVERIFY(controller.canArm());
+}
+
+void AmmoLauncherTest::_slotValueZeroTest()
+{
+    AmmoLauncherController controller;
+    _setUp(controller, 10, true);
+    _arm(controller);
+
+    controller.toggleSlot(0);
+    controller.fire();
+    QVERIFY(controller.busy());
+
+    // MECH_SLOT 0: the flight controller has lost the launcher's heartbeat.
+    QSignalSpy failed(&controller, &AmmoLauncherController::commandFailed);
+    controller._handleSlotValue(0);
+    QVERIFY(!controller.connected());
+    QVERIFY(!controller.armed());
+    QVERIFY(!controller.busy());
+    QCOMPARE(failed.count(), 1);
+    QCOMPARE(controller.slotStates(), States(10, R));
 }
