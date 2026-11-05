@@ -1260,79 +1260,110 @@ ApplicationWindow {
         }
     }
 
+    // A panel card under the status bar outlined in the warning yellow: the message on the
+    // left, then a divider and the "Vehicle Error" tag with its dot. A tap dismisses it.
     Popup {
         id: criticalVehicleMessagePopup
-        y: ScreenTools.toolbarHeight + ScreenTools.defaultFontPixelHeight
+        y: (mainWindow._topInset > 0 ? mainWindow._topInset : ScreenTools.toolbarHeight) + AzTheme.px(10)
         x: Math.round((mainWindow.width - width) * 0.5)
-        width: mainWindow.width * 0.55
-        height: criticalVehicleMessageText.contentHeight + ScreenTools.defaultFontPixelHeight * 2
+        width: Math.min(mainWindow.width - 2 * AzTheme.px(16), Math.max(AzTheme.px(420), mainWindow.width * 0.42))
+        height: messageRow.implicitHeight + 2 * _padY
+        padding: 0
         modal: false
         focus: true
+
+        readonly property real  _padX:        AzTheme.px(18)
+        readonly property real  _padY:        AzTheme.px(12)
+        readonly property color _accent:      AzTheme.statusYellow
 
         property alias criticalVehicleMessage: criticalVehicleMessageText.text
         property bool additionalCriticalMessagesReceived: false
 
-        background: Rectangle {
-            anchors.fill: parent
-            color: qgcPal.alertBackground
-            radius: ScreenTools.defaultFontPixelHeight * 0.5
-            border.color: qgcPal.alertBorder
-            border.width: 2
-
-            Rectangle {
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top
-                anchors.topMargin: -(height / 2)
-                color: qgcPal.alertBackground
-                radius: ScreenTools.defaultFontPixelHeight * 0.25
-                border.color: qgcPal.alertBorder
-                border.width: 1
-                width: vehicleWarningLabel.contentWidth + _margins
-                height: vehicleWarningLabel.contentHeight + _margins
-
-                property real _margins: ScreenTools.defaultFontPixelHeight * 0.25
-
-                QGCLabel {
-                    id: vehicleWarningLabel
-                    anchors.centerIn: parent
-                    text: qsTr("Vehicle Error")
-                    font.pointSize: ScreenTools.smallFontPointSize
-                    color: qgcPal.alertText
-                }
+        background: Item {
+            RectangularShadow {
+                anchors.fill: messageCard
+                offset.y:     AzTheme.px(8)
+                blur:         AzTheme.px(20)
+                radius:       messageCard.radius
+                color:        AzTheme.popupShadow
             }
 
-            Rectangle {
-                id: additionalErrorsIndicator
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: -(height / 2)
-                color: qgcPal.alertBackground
-                radius: ScreenTools.defaultFontPixelHeight * 0.25
-                border.color: qgcPal.alertBorder
-                border.width: 1
-                width: additionalErrorsLabel.contentWidth + _margins
-                height: additionalErrorsLabel.contentHeight + _margins
-                visible: criticalVehicleMessagePopup.additionalCriticalMessagesReceived
-
-                property real _margins: ScreenTools.defaultFontPixelHeight * 0.25
-
-                QGCLabel {
-                    id: additionalErrorsLabel
-                    anchors.centerIn: parent
-                    text: qsTr("Additional errors received")
-                    font.pointSize: ScreenTools.smallFontPointSize
-                    color: qgcPal.alertText
-                }
+            AzGradientRect {
+                id:            messageCard
+                anchors.fill:  parent
+                angle:         AzTheme.panelGradientAngle
+                startColor:    AzTheme.panelGradientStart
+                startPosition: AzTheme.panelGradientStartPos
+                endColor:      AzTheme.panelGradientEnd
+                endPosition:   AzTheme.panelGradientEndPos
+                radius:        AzTheme.px(10)
+                borderColor:   Qt.rgba(1, 212 / 255, 59 / 255, 0.75)
+                borderWidth:   1
             }
         }
 
-        QGCLabel {
-            id: criticalVehicleMessageText
-            width: criticalVehicleMessagePopup.width - ScreenTools.defaultFontPixelHeight
-            anchors.centerIn: parent
-            wrapMode: Text.WordWrap
-            color: qgcPal.alertText
-            textFormat: TextEdit.RichText
+        RowLayout {
+            id: messageRow
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.leftMargin: criticalVehicleMessagePopup._padX
+            anchors.rightMargin: criticalVehicleMessagePopup._padX
+            spacing: AzTheme.px(14)
+
+            Column {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignVCenter
+                spacing: AzTheme.px(4)
+
+                Text {
+                    id: criticalVehicleMessageText
+                    width: parent.width
+                    wrapMode: Text.WordWrap
+                    textFormat: TextEdit.RichText
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
+                }
+
+                Text {
+                    width: parent.width
+                    visible: criticalVehicleMessagePopup.additionalCriticalMessagesReceived
+                    text: qsTr("Əlavə xətalar var: toxunun və siyahıya baxın")
+                    color: criticalVehicleMessagePopup._accent
+                    font.family: AzTheme.fontFamily
+                    font.pixelSize: AzTheme.fontPx(12)
+                    elide: Text.ElideRight
+                }
+            }
+
+            Rectangle {
+                Layout.preferredWidth: 1
+                Layout.fillHeight: true
+                Layout.minimumHeight: AzTheme.px(22)
+                color: AzTheme.panelBorder
+            }
+
+            Row {
+                Layout.alignment: Qt.AlignVCenter
+                spacing: AzTheme.px(8)
+
+                Rectangle {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: AzTheme.px(7)
+                    height: width
+                    radius: width / 2
+                    color: criticalVehicleMessagePopup._accent
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: qsTr("Vehicle Error")
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.pixelSize: AzTheme.fontPx(12)
+                }
+            }
         }
 
         MouseArea {
@@ -1342,7 +1373,7 @@ ApplicationWindow {
                 if (criticalVehicleMessagePopup.additionalCriticalMessagesReceived) {
                     criticalVehicleMessagePopup.additionalCriticalMessagesReceived = false
                     flyView.dropMainStatusIndicatorTool()
-                } else {
+                } else if (QGroundControl.multiVehicleManager.activeVehicle) {
                     QGroundControl.multiVehicleManager.activeVehicle.resetErrorLevelMessages()
                 }
             }
