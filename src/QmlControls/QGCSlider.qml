@@ -31,7 +31,11 @@ Slider {
     property bool indicatorBarVisible:  true
 
     property real _implicitBarLength:   Math.round(ScreenTools.defaultFontPixelWidth * 20)
-    property real _barHeight:           Math.round(ScreenTools.defaultFontPixelHeight / 3)
+    property real _barHeight:           _az ? AzTheme.px(6) : Math.round(ScreenTools.defaultFontPixelHeight / 3)
+
+    // Screens in the new design declare azInputStyle: a dark rounded track and a light
+    // handle with a green outline.
+    readonly property bool _az: typeof azInputStyle !== "undefined" && azInputStyle === true
 
     background: Rectangle {
         x:              control.horizontal ? 
@@ -45,8 +49,8 @@ Slider {
         width:          control.horizontal ? control.availableWidth : implicitWidth
         height:         control.horizontal ? implicitHeight : control.availableHeight
         radius:         control._barHeight / 2
-        color:          qgcPal.button
-        border.width:   1
+        color:          control._az ? AzTheme.slotEmpty : qgcPal.button
+        border.width:   control._az ? 0 : 1
         border.color:   qgcPal.buttonText
     }
 
@@ -83,9 +87,9 @@ Slider {
                             control.topPadding + control.visualPosition * (control.availableHeight - height)
         implicitWidth:  _radius * 2
         implicitHeight: _radius * 2
-        color:          qgcPal.button
-        border.color:   qgcPal.buttonText
-        border.width:   1
+        color:          control._az ? AzTheme.textCard : qgcPal.button
+        border.color:   control._az ? AzTheme.statusGreen : qgcPal.buttonText
+        border.width:   control._az ? 2 : 1
         radius:         _radius
 
         property real _radius: ScreenTools.isMobile ? ScreenTools.minTouchPixels / 2 : ScreenTools.defaultFontPixelHeight / 2
@@ -94,9 +98,9 @@ Slider {
             text:               control.value.toFixed( control.to <= 1 ? 1 : 0)
             visible:            control.displayValue
             anchors.centerIn:   parent
-            font.family:        ScreenTools.normalFontFamily
+            font.family:        control._az ? AzTheme.fontFamily : ScreenTools.normalFontFamily
             font.pointSize:     ScreenTools.smallFontPointSize
-            color:              qgcPal.buttonText
+            color:              control._az ? AzTheme.panelGradientEnd : qgcPal.buttonText
         }
     }
 }

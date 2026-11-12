@@ -7,10 +7,17 @@ import QGroundControl.Controls 1.0
 import QGroundControl.FactControls 1.0
 import QGroundControl.AutoPilotPlugins.PX4 1.0
 
+// Actuators, in the new design: the vehicle setup page header, status cards for the
+// mixer, the geometry, the test and the outputs, a pill tab bar for the outputs, and the
+// new fields, sliders and switches.
 Rectangle {
     id: actuatorPage
     anchors.fill: parent
-    color: "black"
+    color: "transparent"
+
+    // The fields, combo boxes, sliders, tabs and buttons take the new design's look
+    // (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     property bool parametersReady: globals.activeVehicle
                                    && globals.activeVehicle.parameterManager
@@ -19,9 +26,10 @@ Rectangle {
     property var  actuators: (globals.activeVehicle && globals.activeVehicle.actuators) ? globals.activeVehicle.actuators : null
     property bool _showAdvanced: true
 
-    readonly property real _m:       Math.max(12, ScreenTools.defaultFontPixelHeight * 0.75)
-    readonly property real _side:    Math.max(12, _m * 0.9)
-    readonly property real _margins: ScreenTools.defaultFontPixelHeight
+    readonly property real _m:       AzTheme.px(_compact ? 12 : 16)
+    readonly property real _side:    AzTheme.px(_compact ? 12 : 20)
+    readonly property real _margins: AzTheme.px(14)
+    readonly property real _cardPad: AzTheme.px(_compact ? 14 : 18)
 
     // Breakpoint: kiçik ekranda alt-alta, böyükdə yan-yana
     readonly property bool _twoCols: width >= 1200
@@ -96,59 +104,80 @@ Rectangle {
         pressDelay: 150
 
         contentWidth: width
-        contentHeight: pageCol.implicitHeight + _side
+        contentHeight: pageCol.implicitHeight + AzTheme.px(20) + _side
 
         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
         ScrollBar.horizontal: ScrollBar { policy: ScrollBar.AlwaysOff }
 
         ColumnLayout {
             id: pageCol
+            y: AzTheme.px(20)
             width: vFlick.width
             spacing: _m
 
             // Header (başlıq + açıqlama bir-birinə yaxın)
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: actuatorPage._compact ? 3 : 6
+                spacing: AzTheme.px(6)
 
                 Text {
                     text: qsTr("Aktuator Konfiqurasiyası")
-                    color: "#FFFFFF"
-                    font.pixelSize: actuatorPage._compact ? 21 : 26
-                    font.bold: true
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
+                    font.pixelSize: AzTheme.fontPx(actuatorPage._compact ? 18 : 20)
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
 
                 Text {
                     text: qsTr("Ötürücü çıxışlarını və motor konfiqurasiyasını idarə edin. Mikserin həndəsəsini tənzimləyin və aktuator testini həyata keçirin.")
-                    color: "#E8E8E8"
-                    font.pixelSize: actuatorPage._compact ? 13 : 16
-                    font.bold: false
+                    color: AzTheme.textSecondary
+                    font.family: AzTheme.fontFamily
+                    font.pixelSize: AzTheme.fontPx(13)
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
             }
 
-            // Avtopilot bağlantısı gözləyən kart
+            // Avtopilot bağlantısı gözləyən kart: the vehicle state and what to expect
             Rectangle {
                 Layout.fillWidth: true
-                radius: 16
-                color: "#3D3B3B"
+                radius: AzTheme.px(AzTheme.cardRadius)
                 border.width: 1
-                border.color: "#9D9D9D"
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
                 visible: !actuatorPage.parametersReady
-                implicitHeight: 220
+                implicitHeight: AzTheme.px(200)
 
-                Text {
+                Column {
                     anchors.centerIn: parent
                     width: parent.width - 2 * _m
-                    text: qsTr("Parametrlər yüklənir...\nAvtopilot bağlantısını gözləyin")
-                    color: "#FFFFFF"
-                    font.pixelSize: 18
-                    font.bold: true
-                    horizontalAlignment: Text.AlignHCenter
-                    wrapMode: Text.WordWrap
+                    spacing: AzTheme.px(10)
+
+                    Rectangle {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: AzTheme.px(12); height: width; radius: width / 2
+                        color: globals.activeVehicle ? AzTheme.statusOrange : AzTheme.mutedText
+                    }
+                    Text {
+                        width: parent.width
+                        text: globals.activeVehicle ? qsTr("Parametrlər yüklənir...") : qsTr("Aktiv aparat yoxdur")
+                        color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.weight: Font.Medium
+                        font.pixelSize: AzTheme.fontPx(17)
+                        horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap
+                    }
+                    Text {
+                        width: parent.width
+                        text: globals.activeVehicle ? qsTr("Avtopilot bağlantısını gözləyin")
+                                                    : qsTr("Qoşulduqdan sonra aktuatorlar görünəcək.")
+                        color: AzTheme.textSecondary; font.family: AzTheme.fontFamily
+                        font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
+                        horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap
+                    }
                 }
             }
 
@@ -179,37 +208,16 @@ Rectangle {
             spacing: 10
             visible: actuatorPage.parametersReady
 
-            Switch {
-                id: advancedSwitch
+            AzSwitch {
                 checked: actuatorPage._showAdvanced
-
-                // ✅ implicitWidth/Height əvəzinə width/height
-                indicator: Rectangle {
-                    width: 48
-                    height: 26
-                    x: advancedSwitch.leftPadding
-                    y: parent.height / 2 - height / 2
-                    radius: 13
-                    color: advancedSwitch.checked ? "#4CAF50" : "#cccccc"
-                    border.color: advancedSwitch.checked ? "#4CAF50" : "#999999"
-
-                    Rectangle {
-                        x: advancedSwitch.checked ? parent.width - width : 0
-                        width: 26
-                        height: 26
-                        radius: 13
-                        color: advancedSwitch.down ? "#cccccc" : "#ffffff"
-                        border.color: advancedSwitch.checked ? "#4CAF50" : "#999999"
-                    }
-                }
-
-                onCheckedChanged: actuatorPage._showAdvanced = checked
+                onClicked: actuatorPage._showAdvanced = !actuatorPage._showAdvanced
             }
 
             Text {
                 text: qsTr("Qabaqcıl Parametrləri göstərin")
-                color: "white"
-                font.pixelSize: 14
+                color: AzTheme.textCard
+                font.family: AzTheme.fontFamily
+                font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
                 Layout.alignment: Qt.AlignVCenter
             }
 
@@ -227,8 +235,8 @@ Rectangle {
                 id: contentGrid
                 width: parent.width
                 columns: actuatorPage._twoCols ? 2 : 1
-                columnSpacing: 30
-                rowSpacing: 30
+                columnSpacing: _m
+                rowSpacing: _m
 
                 // ---------- SOL BLOK ----------
                 Item {
@@ -242,27 +250,30 @@ Rectangle {
                     Column {
                         id: leftColumn
                         width: parent.width
-                        spacing: 20
+                        spacing: _m
 
                         // Mixer card
                         Rectangle {
                             width: parent.width
-                            implicitHeight: mixerUi.height + 30
-                            color: "#3D3B3B"
+                            implicitHeight: mixerUi.height + 2 * _cardPad
                             visible: actuators.mixer.groups.count > 0
-                            radius: 12
-                            border.color: "#9D9D9D"
-                            border.width: 2
+                            radius: AzTheme.px(AzTheme.cardRadius)
+                            border.width: 1
+                            border.color: AzTheme.cardBorder
+                            gradient: Gradient {
+                                GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                                GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                            }
 
                             Column {
                                 id: mixerUi
                                 spacing: _margins
                                 anchors {
                                     top: parent.top
-                                    topMargin: 20
+                                    topMargin: _cardPad
                                     left: parent.left
                                     right: parent.right
-                                    margins: 20
+                                    margins: _cardPad
                                 }
                                 enabled: !safetySwitch.checked && !actuators.motorAssignmentActive
 
@@ -275,9 +286,8 @@ Rectangle {
                                         RowLayout {
                                             QGCLabel {
                                                 text: mixerGroup.label
-                                                font.bold: true
+                                                font.weight: Font.Medium
                                                 rightPadding: ScreenTools.defaultFontPixelWidth * 3
-                                                color: "#FFFFFF"
                                             }
                                             ActuatorFact {
                                                 property var countParam: mixerGroup.countParam
@@ -323,7 +333,7 @@ Rectangle {
                                                         visible: object.visible && (_showAdvanced || !object.advanced)
                                                         Layout.row: 0
                                                         Layout.column: 1 + index
-                                                        color: "#B8D4E8"
+                                                        color: AzTheme.textSecondary
                                                     }
                                                 }
 
@@ -333,7 +343,6 @@ Rectangle {
                                                         text: object.label + ":"
                                                         Layout.row: 1 + index
                                                         Layout.column: 0
-                                                        color: "#E8F4FF"
                                                     }
                                                 }
 
@@ -360,7 +369,7 @@ Rectangle {
                                             RowLayout {
                                                 spacing: ScreenTools.defaultFontPixelWidth
                                                 visible: _showAdvanced || !object.advanced
-                                                QGCLabel { text: object.label + ":"; color: "#B8D4E8" }
+                                                QGCLabel { text: object.label + ":"; color: AzTheme.textSecondary }
                                                 ActuatorFact { fact: object.fact }
                                             }
                                         }
@@ -372,12 +381,12 @@ Rectangle {
                         // Aktuator görüntüsü
                         Rectangle {
                             width: parent.width
-                            height: 200
-                            color: "#1a1f2c"
+                            height: AzTheme.px(200)
+                            color: AzTheme.groupFill
                             visible: actuators.isMultirotor
-                            radius: 12
-                            border.color: "#2a3a5c"
-                            border.width: 2
+                            radius: AzTheme.px(AzTheme.cardRadius)
+                            border.color: AzTheme.groupBorder
+                            border.width: 1
 
                             Image {
                                 id: actuatorImage
@@ -404,27 +413,29 @@ Rectangle {
                         // Aktuator testi
                         Rectangle {
                             width: parent.width
-                            implicitHeight: actuatorTesting.height + 50
-                            color: "#3D3B3B"
-                            radius: 12
-                            border.color: "#9D9D9D"
-                            border.width: 2
+                            implicitHeight: actuatorTesting.height + 2 * _cardPad
+                            radius: AzTheme.px(AzTheme.cardRadius)
+                            border.width: 1
+                            border.color: AzTheme.cardBorder
+                            gradient: Gradient {
+                                GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                                GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                            }
 
                             Column {
                                 id: actuatorTesting
                                 spacing: _margins
                                 anchors {
                                     top: parent.top
-                                    topMargin: 20
+                                    topMargin: _cardPad
                                     left: parent.left
                                     right: parent.right
-                                    margins: 20
+                                    margins: _cardPad
                                 }
 
                                 QGCLabel {
                                     text: qsTr("Test etmək üçün bəzi çıxışları konfiqurasiya edin.")
                                     visible: actuators.actuatorTest.actuators.count == 0
-                                    color: "#FFFFFF"
                                 }
 
                                 Row {
@@ -436,22 +447,26 @@ Rectangle {
                                         enabled: !actuators.motorAssignmentActive && !actuators.actuatorTest.hadFailure
 
                                         // ✅ implicitWidth/Height əvəzinə width/height
+                                        // AzSwitch's look; the Switch itself stays, its state drives the test
                                         indicator: Rectangle {
-                                            width: 48
-                                            height: 26
+                                            width: AzTheme.px(44)
+                                            height: AzTheme.px(24)
                                             x: safetySwitch.leftPadding
                                             y: parent.height / 2 - height / 2
-                                            radius: 13
-                                            color: safetySwitch.checked ? "#4CAF50" : "#cccccc"
-                                            border.color: safetySwitch.checked ? "#4CAF50" : "#999999"
+                                            radius: height / 2
+                                            color: safetySwitch.checked ? AzTheme.statusGreen : AzTheme.pillBottom
+                                            border.width: 1
+                                            border.color: safetySwitch.checked ? AzTheme.statusGreen : AzTheme.groupBorder
+                                            opacity: safetySwitch.enabled ? 1 : 0.45
 
                                             Rectangle {
-                                                x: safetySwitch.checked ? parent.width - width : 0
-                                                width: 26
-                                                height: 26
-                                                radius: 13
-                                                color: safetySwitch.down ? "#cccccc" : "#ffffff"
-                                                border.color: safetySwitch.checked ? "#4CAF50" : "#999999"
+                                                x: safetySwitch.checked ? parent.width - width - AzTheme.px(3) : AzTheme.px(3)
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                width: parent.height - AzTheme.px(6)
+                                                height: width
+                                                radius: width / 2
+                                                color: AzTheme.textCard
+                                                Behavior on x { NumberAnimation { duration: 150 } }
                                             }
                                         }
 
@@ -480,7 +495,8 @@ Rectangle {
                                     }
 
                                     QGCLabel {
-                                        color: "#FFA500"
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        color: safetySwitch.checked ? AzTheme.statusRed : AzTheme.statusOrange
                                         text: safetySwitch.checked
                                               ? qsTr("Diqqət: Aktuator parametrləri aktivləşdirilib")
                                               : qsTr("Pərvanələr çıxarıldı - Parametrləri aktivləşdirin.")
@@ -577,58 +593,70 @@ Rectangle {
                     Column {
                         id: rightColumn
                         width: parent.width
-                        spacing: 20
+                        spacing: _m
 
-                        Rectangle {
+                        Text {
                             width: parent.width
-                            height: 50
-                            color: "#3D3B3B"
-                            radius: 12
-                            border.color: "#9D9D9D"
-                            border.width: 2
-
-                            Text {
-                                text: qsTr("AKTUATOR ÇIXIŞLARI")
-                                color: "#FFFFFF"
-                                font.pixelSize: 16
-                                font.bold: true
-                                anchors.centerIn: parent
-                            }
+                            text: qsTr("Aktuator çıxışları")
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(16)
                         }
 
                         Rectangle {
                             width: parent.width
-                            height: 40
-                            radius: 8
-                            color: "#3D3B3B"
-                            border.color: "#9D9D9D"
+                            height: unsetRow.implicitHeight + AzTheme.px(20)
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: Qt.rgba(1, 52 / 255, 67 / 255, 0.10)
+                            border.color: Qt.rgba(1, 52 / 255, 67 / 255, 0.55)
                             border.width: 1
                             visible: actuators.hasUnsetRequiredFunctions
 
-                            Text {
-                                text: qsTr("⚠️ Bir və ya bir neçə aktuator hələ də çıxışa təyin edilməyib.")
-                                color: "#D21404"
-                                font.pixelSize: 12
-                                anchors.centerIn: parent
+                            RowLayout {
+                                id: unsetRow
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.margins: AzTheme.px(12)
+                                spacing: AzTheme.px(10)
+
+                                QGCColoredImage {
+                                    Layout.preferredWidth: AzTheme.px(18)
+                                    Layout.preferredHeight: AzTheme.px(18)
+                                    source: "qrc:/res/AZSHIELD_ICON/bx_error.svg"
+                                    sourceSize.height: AzTheme.px(18)
+                                    fillMode: Image.PreserveAspectFit
+                                    color: AzTheme.statusRed
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: qsTr("Bir və ya bir neçə aktuator hələ də çıxışa təyin edilməyib.")
+                                    color: AzTheme.textCard
+                                    font.family: AzTheme.fontFamily
+                                    font.pixelSize: AzTheme.fontPx(13)
+                                    wrapMode: Text.WordWrap
+                                }
                             }
                         }
 
-                        Rectangle {
+                        Flickable {
                             width: parent.width
-                            height: 50
-                            color: "#3D3B3B"
-                            radius: 12
-                            border.color: "#9D9D9D"
-                            border.width: 2
+                            height: tabBar.implicitHeight
+                            contentWidth: tabBar.implicitWidth
+                            clip: true
+                            flickableDirection: Flickable.HorizontalFlick
+                            boundsBehavior: Flickable.StopAtBounds
+                            interactive: contentWidth > width
 
                             QGCTabBar {
                                 id: tabBar
-                                anchors.centerIn: parent
                                 Repeater {
                                     model: actuators.actuatorOutputs
                                     QGCTabButton {
-                                        text: "   " + object.label + "   "
-                                        width: implicitWidth
+                                        text: object.label
+                                        width: implicitWidth + AzTheme.px(24)
                                     }
                                 }
                                 onCurrentIndexChanged: actuators.selectActuatorOutput(currentIndex)
@@ -642,11 +670,14 @@ Rectangle {
                             id: actuatorGroupPanel
 
                             width: parent.width
-                            implicitHeight: actuatorGroupColumn.height + 30
-                            color: "#3D3B3B"
-                            radius: 12
-                            border.color: "#9D9D9D"
-                            border.width: 2
+                            implicitHeight: actuatorGroupColumn.height + 2 * _cardPad
+                            radius: AzTheme.px(AzTheme.cardRadius)
+                            border.width: 1
+                            border.color: AzTheme.cardBorder
+                            gradient: Gradient {
+                                GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                                GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                            }
 
                             property var actuatorOutput: actuators.selectedActuatorOutput
 
@@ -657,8 +688,8 @@ Rectangle {
                                     top: parent.top
                                     left: parent.left
                                     right: parent.right
-                                    margins: 20
-                                    topMargin: 20
+                                    margins: _cardPad
+                                    topMargin: _cardPad
                                 }
 
                                 // ✅ Buttonlar dar ekranda sətirə düşsün
@@ -703,7 +734,7 @@ Rectangle {
                                         QGCLabel {
                                             visible: parent.enableParam != null
                                             text: parent.enableParam ? parent.enableParam.label + ":" : ""
-                                            color: "#C8E8C8"
+                                            color: AzTheme.textSecondary
                                         }
                                         ActuatorFact {
                                             visible: parent.enableParam != null
@@ -723,9 +754,8 @@ Rectangle {
                                                 width: parent.width
                                                 QGCLabel {
                                                     text: subgroup.label
-                                                    font.bold: true
+                                                    font.weight: Font.Medium
                                                     rightPadding: ScreenTools.defaultFontPixelWidth * 3
-                                                    color: "#90C890"
                                                 }
                                                 ActuatorFact {
                                                     property var primaryParam: subgroup.primaryParam
@@ -773,7 +803,7 @@ Rectangle {
                                                             visible: object.visible && (_showAdvanced || !object.advanced)
                                                             Layout.row: 0
                                                             Layout.column: 1 + index
-                                                            color: "#E8F4E8"
+                                                            color: AzTheme.textSecondary
                                                         }
                                                     }
 
@@ -783,7 +813,6 @@ Rectangle {
                                                             text: object.label + ":"
                                                             Layout.row: 1 + index
                                                             Layout.column: 0
-                                                            color: "#F4F8F4"
                                                         }
                                                     }
 
@@ -809,7 +838,7 @@ Rectangle {
                                                 RowLayout {
                                                     width: parent.width
                                                     visible: _showAdvanced || !object.advanced
-                                                    QGCLabel { text: object.label + ":"; color: "#E8F4E8" }
+                                                    QGCLabel { text: object.label + ":"; color: AzTheme.textSecondary }
                                                     ActuatorFact { fact: object.fact }
                                                 }
                                             }
@@ -821,7 +850,7 @@ Rectangle {
                                         RowLayout {
                                             width: parent.width
                                             visible: _showAdvanced || !object.advanced
-                                            QGCLabel { text: object.label + ":"; color: "#E8F4E8" }
+                                            QGCLabel { text: object.label + ":"; color: AzTheme.textSecondary }
                                             ActuatorFact { fact: object.fact }
                                         }
                                     }
@@ -833,7 +862,7 @@ Rectangle {
                                             width: parent.width
                                             QGCLabel {
                                                 text: modelData
-                                                color: "#FFA500"
+                                                color: AzTheme.statusOrange
                                                 width: parent.width
                                                 wrapMode: Text.WordWrap
                                             }

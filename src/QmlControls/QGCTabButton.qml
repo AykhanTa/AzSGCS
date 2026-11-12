@@ -80,14 +80,25 @@ TabButton {
 
     QGCPalette { id: qgcPal; colorGroupEnabled: enabled }
 
+    // Screens in the new design declare azInputStyle (see QGCLabel._az).
+    readonly property bool _az: typeof azInputStyle !== "undefined" && azInputStyle === true
+
     background: Rectangle {
         id:             backRect
         implicitWidth:  ScreenTools.implicitButtonWidth
-        implicitHeight: ScreenTools.implicitButtonHeight
-        //radius:         backRadius
-        border.width:   showBorder ? 1 : 0
-        border.color:   qgcPal.buttonBorder
-        color:          "#3D3B3B"//_showHighlight ? qgcPal.buttonHighlight : qgcPal.button
+        implicitHeight: control._az ? AzTheme.px(36) : ScreenTools.implicitButtonHeight
+        radius:         control._az ? AzTheme.px(AzTheme.menuSelectedRadius) : 0
+        border.width:   control._az ? (control.checked ? 1 : 0) : (showBorder ? 1 : 0)
+        border.color:   control._az ? AzTheme.menuSelectedBorder : qgcPal.buttonBorder
+        color:          control._az ? (control.hovered && !control.checked ? Qt.rgba(1, 1, 1, 0.04) : "transparent")
+                                    : "#3D3B3B"//_showHighlight ? qgcPal.buttonHighlight : qgcPal.button
+        gradient:       (control._az && control.checked) ? selectedGradient : null
+
+        Gradient {
+            id: selectedGradient
+            GradientStop { position: 0; color: AzTheme.menuSelectedTop }
+            GradientStop { position: 1; color: AzTheme.menuSelectedBottom }
+        }
     }
 
     contentItem: Item {
@@ -101,7 +112,8 @@ TabButton {
             source:                 control.icon.source
             height:                 source === "" ? 0 : ScreenTools.defaultFontPixelHeight
             width:                  height
-            color:                  _showHighlight ? qgcPal.buttonHighlightText : qgcPal.buttonText
+            color:                  control._az ? (control.checked ? AzTheme.textPrimary : AzTheme.textSecondary)
+                                                : (_showHighlight ? qgcPal.buttonHighlightText : qgcPal.buttonText)
             fillMode:               Image.PreserveAspectFit
             sourceSize.height:      height
             visible:                _showIcon
@@ -112,9 +124,12 @@ TabButton {
             anchors.centerIn:       parent
             antialiasing:           true
             text:                   control.text
-            font.pointSize:         14//control.pointSize
-            font.family:            ScreenTools.normalFontFamily
-            color:                  _showHighlight ? "#7DFF03" : qgcPal.buttonText
+            font.pointSize:         control._az ? -1 : 14//control.pointSize
+            font.pixelSize:         control._az ? AzTheme.fontPx(14) : -1
+            font.family:            control._az ? AzTheme.fontFamily : ScreenTools.normalFontFamily
+            font.weight:            (control._az && control.checked) ? Font.Medium : Font.Normal
+            color:                  control._az ? (control.checked ? AzTheme.textPrimary : AzTheme.textSecondary)
+                                                : (_showHighlight ? "#7DFF03" : qgcPal.buttonText)
             visible:                !_showIcon
         }
     }

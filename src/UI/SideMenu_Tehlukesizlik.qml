@@ -3,7 +3,11 @@
 // UI isə digər Aparat Qurğusu səhifələri (Enerji/Aktuatorlar) ilə eyni blok-kart dizaynında.
 //
 // Nizam: blok daxilində label/field alt-alta (2 sütun: label | field, field kartı doldurur).
-// Bloklar iki müstəqil sütunda (masonry) — hündürlüyə görə balanslanıb.
+// Bloklar iki müstəqil sütunda (masonry) — hündürlüyə görə balanslanıb; dar ekranda bir
+// sütunda alt-alta.
+//
+// New design: the vehicle setup page header, one status card per block with its icon in
+// a group box, and the new fields, combo boxes, check boxes and radio buttons.
 
 import QtQuick
 import QtQuick.Controls
@@ -16,20 +20,24 @@ import QGroundControl.FactControls
 Rectangle {
     id: root
     anchors.fill: parent
-    color: "black"
+    color: "transparent"
+
+    // The fields, combo boxes, check boxes, radio buttons and labels take the new
+    // design's look (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // -------- Responsive metrics --------
     readonly property bool _compact: (width < 1200) || (height < 820) || ScreenTools.isShortScreen
     readonly property bool _stacked: (width < 900)  || ScreenTools.isShortScreen
 
-    readonly property real _m:          Math.max(8, ScreenTools.defaultFontPixelHeight * (_compact ? 0.75 : 1.0))
-    readonly property real _side:       Math.max(12, _m * 0.9)
+    readonly property real _m:          AzTheme.px(_compact ? 12 : 16)
+    readonly property real _side:       AzTheme.px(_stacked ? 12 : 20)
 
     readonly property real _labelWidth: ScreenTools.defaultFontPixelWidth * 20
     readonly property real _fieldMin:   ScreenTools.defaultFontPixelWidth * 12
     readonly property real _fieldMax:   ScreenTools.defaultFontPixelWidth * 30
-    readonly property real _iconW:      ScreenTools.defaultFontPixelHeight * 3.6
-    readonly property real _iconH:      ScreenTools.defaultFontPixelHeight * 2.8
+    readonly property real _iconW:      AzTheme.px(64)
+    readonly property real _iconH:      AzTheme.px(40)
 
     // -------- Vehicle / parametr vəziyyəti --------
     readonly property var  _activeVehicle:   QGroundControl.multiVehicleManager.activeVehicle
@@ -59,7 +67,7 @@ Rectangle {
 
     // -------- Təkrar komponentlər --------
     component SLabel: QGCLabel {
-        color: "white"; elide: Text.ElideRight
+        elide: Text.ElideRight
         Layout.preferredWidth: _labelWidth
         Layout.alignment: Qt.AlignVCenter
     }
@@ -77,35 +85,58 @@ Rectangle {
         spacing: 6
         visible: sectionVisible
 
-        RowLayout {
+        Text {
             Layout.fillWidth: true
-            QGCLabel { text: sec.title; color: "white"; font.bold: true; font.pixelSize: 18 }
+            text: sec.title
+            color: AzTheme.textCard
+            font.family: AzTheme.fontFamily
+            font.weight: Font.Medium
+            font.pixelSize: AzTheme.fontPx(16)
+            elide: Text.ElideRight
         }
+
+        // The status card: linear-gradient(145deg, #25272A, #181B1E), 1 px #353A3F, radius 14
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: secRow.implicitHeight + _m * 2
-            radius: 16; color: "#3D3B3B"; border.width: 1; border.color: "#9D9D9D"
+            radius: AzTheme.px(AzTheme.cardRadius)
+            border.width: 1
+            border.color: AzTheme.cardBorder
+            gradient: Gradient {
+                GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+            }
+
             RowLayout {
                 id: secRow
                 anchors.fill: parent; anchors.margins: _m; spacing: _m
-                Item {
-                    Layout.preferredWidth: _iconW; Layout.preferredHeight: _iconH
-                    Layout.alignment: Qt.AlignTop; Layout.topMargin: _m * 0.4
+
+                // The block's icon in a group box
+                Rectangle {
+                    Layout.preferredWidth: _iconW; Layout.preferredHeight: _iconW
+                    Layout.alignment: Qt.AlignTop
                     visible: sec.iconSource !== "" && !_stacked
+                    radius: AzTheme.px(AzTheme.groupRadius)
+                    color: AzTheme.groupFill
+                    border.width: 1
+                    border.color: AzTheme.groupBorder
+
                     QGCColoredImage {
                         visible: sec.iconColored; anchors.centerIn: parent
-                        source: sec.iconSource; color: qgcPal.text
-                        height: _iconH; width: _iconH * 1.3; fillMode: Image.PreserveAspectFit
+                        source: sec.iconSource; color: AzTheme.textCard
+                        height: _iconH; width: _iconH; sourceSize.height: _iconH
+                        fillMode: Image.PreserveAspectFit
                     }
                     Image {
                         visible: !sec.iconColored; anchors.centerIn: parent
-                        source: sec.iconSource; height: _iconH
+                        source: sec.iconSource; height: _iconH; width: _iconH
+                        sourceSize.height: _iconH
                         fillMode: Image.PreserveAspectFit; mipmap: true
                     }
                 }
                 GridLayout {
                     id: secGrid
-                    columns: 2; columnSpacing: _m; rowSpacing: Math.max(6, _m * 0.6)
+                    columns: 2; columnSpacing: _m; rowSpacing: AzTheme.px(10)
                     Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter
                 }
             }
@@ -127,11 +158,12 @@ Rectangle {
         clip: true
         flickableDirection: Flickable.VerticalFlick
         contentWidth: width
-        contentHeight: outerCol.implicitHeight + _side
+        contentHeight: outerCol.implicitHeight + AzTheme.px(20) + _side
         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
         ColumnLayout {
             id: outerCol
+            y: AzTheme.px(20)
             width: pageFlick.width
             spacing: _m
 
@@ -140,40 +172,70 @@ Rectangle {
             // səhifəsindəki kimi yuxarı çıxır və yer tutmur.
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: root._compact ? 3 : 6
+                spacing: AzTheme.px(6)
 
                 Text {
                     text: qsTr("Təhlükəsizlik Konfiqurasiyası")
-                    color: "white"; font.pixelSize: root._compact ? 21 : 26; font.bold: true
+                    color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.weight: Font.Medium
+                    font.pixelSize: AzTheme.fontPx(root._compact ? 18 : 20)
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                 }
                 Text {
                     text: qsTr("Batareya, RC/data-link itkisi, geofence və enmə üçün failsafe davranışlarını konfiqurasiya edin.")
-                    color: "#E8E8E8"; font.pixelSize: root._compact ? 13 : 16
+                    color: AzTheme.textSecondary; font.family: AzTheme.fontFamily; font.pixelSize: AzTheme.fontPx(13)
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                 }
             }
 
             // ---------- Yükləmə / aparat yoxdur ----------
+            // A status card with the vehicle state and what to expect
             Rectangle {
-                Layout.fillWidth: true; Layout.preferredHeight: 220
-                radius: 16; color: "#3D3B3B"; border.width: 1; border.color: "#9D9D9D"
+                Layout.fillWidth: true; Layout.preferredHeight: AzTheme.px(200)
+                radius: AzTheme.px(AzTheme.cardRadius)
+                border.width: 1; border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
                 visible: !root._parametersReady
-                Text {
-                    anchors.centerIn: parent; width: parent.width - (_side * 2)
-                    text: root._activeVehicle
-                          ? qsTr("Parametrlər yüklənir...\nAvtopilot bağlantısını gözləyin")
-                          : qsTr("Aktiv aparat yoxdur.\nQoşulduqdan sonra parametrlər görünəcək.")
-                    color: "#FFFFFF"; font.pixelSize: 18; font.bold: true
-                    horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap
+
+                Column {
+                    anchors.centerIn: parent
+                    width: parent.width - (_side * 2)
+                    spacing: AzTheme.px(10)
+
+                    Rectangle {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: AzTheme.px(12); height: width; radius: width / 2
+                        color: root._activeVehicle ? AzTheme.statusOrange : AzTheme.mutedText
+                    }
+                    Text {
+                        width: parent.width
+                        text: root._activeVehicle ? qsTr("Parametrlər yüklənir...") : qsTr("Aktiv aparat yoxdur")
+                        color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.weight: Font.Medium
+                        font.pixelSize: AzTheme.fontPx(17)
+                        horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap
+                    }
+                    Text {
+                        width: parent.width
+                        text: root._activeVehicle ? qsTr("Avtopilot bağlantısını gözləyin")
+                                                  : qsTr("Qoşulduqdan sonra parametrlər görünəcək.")
+                        color: AzTheme.textSecondary; font.family: AzTheme.fontFamily
+                        font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
+                        horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap
+                    }
                 }
             }
 
             // ---------- Bloklar: 2 sütun (masonry), hündürlüyə görə balanslı ----------
-            RowLayout {
+            // Dar ekranda sağ sütun solun altına keçir (əvvəl gizlənirdi və bloklarına
+            // G20/G30-da çatmaq olmurdu).
+            GridLayout {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
-                spacing: _m
+                columns: _stacked ? 1 : 2
+                columnSpacing: _m
+                rowSpacing: _m
                 visible: root._parametersReady
 
                 // ===================== SOL SÜTUN =====================
@@ -203,7 +265,7 @@ Rectangle {
                         iconColored: true
                         SLabel { text: qsTr("Qalxılacaq hündürlük:") }
                         FactTextField { fact: controller.getParameterFact(-1, "RTL_RETURN_ALT", false); Layout.fillWidth: true; Layout.minimumWidth: _fieldMin; Layout.maximumWidth: _fieldMax }
-                        QGCLabel { text: qsTr("Evə qayıtdıqdan sonra:"); color: "white"; Layout.columnSpan: 2 }
+                        QGCLabel { text: qsTr("Evə qayıtdıqdan sonra:"); color: AzTheme.textSecondary; Layout.columnSpan: 2 }
                         QGCRadioButton {
                             id: rtlLandNow; text: qsTr("Dərhal en"); Layout.columnSpan: 2
                             checked: root._rtlLandDelay ? root._rtlLandDelay.value === 0 : false
@@ -251,7 +313,6 @@ Rectangle {
                     Layout.preferredWidth: 1
                     Layout.alignment: Qt.AlignTop
                     spacing: _m
-                    visible: !_stacked
 
                     // ---- Obyekt Aşkarlama ----
                     Section {
