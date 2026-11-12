@@ -7,10 +7,16 @@ import QGroundControl
 import QGroundControl.FactControls
 import QGroundControl.Controls
 
+// General settings, in the new design: the page header of the setup pages, status cards
+// with group box rows, and the new combo boxes, switches and buttons.
 Rectangle {
     id: root
     anchors.fill: parent
-    color: "#000000"
+    color: "transparent"
+
+    // The combo boxes, switches, labels and buttons take the new design's look
+    // (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     property var    _settingsManager:           QGroundControl.settingsManager
     property var    _appSettings:               _settingsManager.appSettings
@@ -24,8 +30,8 @@ Rectangle {
     readonly property bool phone:  ScreenTools.isMobile || width < 700
     readonly property bool tablet: width < 1100
 
-    readonly property real sidePadding: Math.max(10, ScreenTools.defaultFontPixelWidth  * (phone ? 0.9 : tablet ? 1.2 : 1.6))
-    readonly property real gap:         Math.max(10, ScreenTools.defaultFontPixelWidth  * (phone ? 0.9 : tablet ? 1.2 : 1.6))
+    readonly property real sidePadding: AzTheme.px(phone ? 12 : 20)
+    readonly property real gap:         AzTheme.px(phone ? 10 : 16)
 
     // Yumşaq font scale: desktop=1.00, tablet ~0.95, phone ~0.90
     readonly property real fontScale: {
@@ -35,9 +41,9 @@ Rectangle {
         return Math.max(0.90, Math.min(1.0, s))
     }
 
-    readonly property real titleFontPx: Math.max(18, ScreenTools.defaultFontPixelHeight * (phone ? 1.15 : tablet ? 1.25 : 1.25) * fontScale)
-    readonly property real descFontPx:  Math.max(12, ScreenTools.defaultFontPixelHeight * (phone ? 0.92 : 0.98) * fontScale)
-    readonly property real labelFontPx: Math.max(11, ScreenTools.defaultFontPixelHeight * (phone ? 0.90 : 0.88) * fontScale)
+    readonly property real titleFontPx: AzTheme.fontPx(phone ? 18 : 20)
+    readonly property real descFontPx:  AzTheme.fontPx(13)
+    readonly property real labelFontPx: AzTheme.fontPx(AzTheme.popupTextSize)
 
     readonly property real smallPoint: ScreenTools.smallFontPointSize * fontScale
 
@@ -56,9 +62,9 @@ Rectangle {
                                                    Math.floor((availableW - gap * (columns - 1)) / columns))
 
     // Row ölçüləri
-    readonly property real rowPadX: Math.max(12, ScreenTools.defaultFontPixelWidth * 1.2)
-    readonly property real rowPadY: Math.max(8,  ScreenTools.defaultFontPixelHeight * 0.6)
-    readonly property real rowMinH: Math.max(48, ScreenTools.defaultFontPixelHeight * 2.6)
+    readonly property real rowPadX: AzTheme.px(AzTheme.groupPadding)
+    readonly property real rowPadY: AzTheme.px(8)
+    readonly property real rowMinH: AzTheme.px(AzTheme.groupRowHeight + 4)
 
     readonly property real ctrlW: Math.max(140, Math.min(260, panelW * (phone ? 0.55 : 0.42)))
 
@@ -117,31 +123,26 @@ Rectangle {
         anchors.top: parent.top
         anchors.leftMargin: sidePadding
         anchors.rightMargin: sidePadding
-        anchors.topMargin: 0
-        spacing: Math.max(6, ScreenTools.defaultFontPixelHeight * 0.6)
+        anchors.topMargin: AzTheme.px(20)
+        spacing: AzTheme.px(6)
 
         Text {
+            width: parent.width
             text: qsTr("Ümumi Tənzimləmələr")
-            color: "white"
-            font.pixelSize: 26
-            font.bold: true
+            color: AzTheme.textCard
+            font.family: AzTheme.fontFamily
+            font.weight: Font.Medium
+            font.pixelSize: root.titleFontPx
             wrapMode: Text.WordWrap
         }
 
         Text {
             text: qsTr("Proqramda ümumi parametrləri, ölçü vahidlərini və marka şəkillərini tənzimləmək üçün istifadə olunan tənzimləmələr")
-            color: "#E8E8E8"
-            font.pixelSize: 16
+            color: AzTheme.textSecondary
+            font.family: AzTheme.fontFamily
+            font.pixelSize: root.descFontPx
             wrapMode: Text.WordWrap
             width: Math.min(parent.width, 1100)
-        }
-
-        Rectangle {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: 1
-            color: "#FFFFFF"
-            opacity: 0.25
         }
     }
 
@@ -152,7 +153,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.topMargin: Math.max(8, ScreenTools.defaultFontPixelHeight * 0.8)
+        anchors.topMargin: AzTheme.px(16)
 
         clip: true
         flickableDirection: Flickable.VerticalFlick
@@ -181,13 +182,16 @@ Rectangle {
                 Rectangle {
                     id: generalPanel
                     width: Math.min(root.panelW, panelFlow.width)
-                    color: "#3D3B3B"
-                    radius: 16
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
 
 
-                    readonly property real pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+                    readonly property real pad: AzTheme.px(16)
                     readonly property real desiredH: generalLayout.implicitHeight + pad * 2
 
                     //height: generalLayout.implicitHeight + pad * 2
@@ -199,13 +203,14 @@ Rectangle {
                         x: generalPanel.pad
                         y: generalPanel.pad
                         width: generalPanel.width - 2 * generalPanel.pad
-                        spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                        spacing: AzTheme.px(8)
 
                         Text {
                             text: qsTr("Ümumi")
-                            color: "white"
-                            font.pixelSize: Math.max(15, ScreenTools.defaultFontPixelHeight * 1.02 * root.fontScale)
-                            font.bold: true
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(16)
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
                         }
@@ -213,8 +218,10 @@ Rectangle {
                         // Dil
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, langRow.implicitHeight + root.rowPadY * 2)
 
                             RowLayout {
@@ -228,7 +235,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Dil")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     elide: Text.ElideRight
                                     wrapMode: Text.NoWrap
@@ -248,8 +254,10 @@ Rectangle {
                         // Rəng Sxemi
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, palRow.implicitHeight + root.rowPadY * 2)
 
                             RowLayout {
@@ -263,7 +271,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Rəng Sxemi")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     elide: Text.ElideRight
                                     wrapMode: Text.NoWrap
@@ -283,8 +290,10 @@ Rectangle {
                         // Yayım GSC Mövqeyi
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, gcsRow.implicitHeight + root.rowPadY * 2)
 
                             RowLayout {
@@ -298,7 +307,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Yayım GSC Mövqeyi")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     elide: Text.ElideRight
                                     wrapMode: Text.NoWrap
@@ -318,8 +326,10 @@ Rectangle {
                         // Audio muted
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, audioRow.implicitHeight + root.rowPadY * 2)
 
                             RowLayout {
@@ -333,7 +343,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Bütün audio çıxışı səssizləşdirin")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     elide: Text.ElideRight
                                     wrapMode: Text.NoWrap
@@ -350,8 +359,10 @@ Rectangle {
                         // Clear settings next boot
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, clearRow.implicitHeight + root.rowPadY * 2)
 
                             RowLayout {
@@ -365,7 +376,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Növbəti başlanğıcda bütün parametrləri silin")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     elide: Text.ElideRight
                                     wrapMode: Text.NoWrap
@@ -388,8 +398,10 @@ Rectangle {
                         // UI Scaling
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             visible: _appFontPointSize.visible
                             implicitHeight: Math.max(root.rowMinH, scaleRow.implicitHeight + root.rowPadY * 2)
 
@@ -404,7 +416,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("UI Miqyaslanması")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     elide: Text.ElideRight
                                     wrapMode: Text.NoWrap
@@ -428,7 +439,6 @@ Rectangle {
                                     QGCLabel {
                                         Layout.preferredWidth: 60
                                         text: (QGroundControl.settingsManager.appSettings.appFontPointSize.value / ScreenTools.platformFontPointSize * 100).toFixed(0) + "%"
-                                        color: "white"
                                         horizontalAlignment: Text.AlignHCenter
                                     }
 
@@ -449,8 +459,10 @@ Rectangle {
                         // Save Path (desktop only)
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             visible: _appSavePath.visible && !ScreenTools.isMobile
                             implicitHeight: Math.max(root.rowMinH, saveRow.implicitHeight + root.rowPadY * 2)
 
@@ -465,7 +477,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Proqram Yüklə/Yolu saxla")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     elide: Text.ElideRight
                                     wrapMode: Text.NoWrap
@@ -475,7 +486,6 @@ Rectangle {
                                 QGCLabel {
                                     Layout.fillWidth: true
                                     text: _appSavePath.rawValue === "" ? qsTr("<default location>") : _appSavePath.value
-                                    color: "white"
                                     elide: Text.ElideMiddle
                                     font.pointSize: root.smallPoint
                                 }
@@ -502,13 +512,16 @@ Rectangle {
                 Rectangle {
                     id: unitsPanel
                     width: Math.min(root.panelW, panelFlow.width)
-                    color: "#3D3B3B"
-                    radius: 16
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
                     visible: QGroundControl.settingsManager.unitsSettings.visible
 
-                    readonly property real pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+                    readonly property real pad: AzTheme.px(16)
                     readonly property real desiredH: unitsLayout.implicitHeight + pad * 2
 
                     // height: unitsLayout.implicitHeight + pad * 2
@@ -520,13 +533,14 @@ Rectangle {
                         x: unitsPanel.pad
                         y: unitsPanel.pad
                         width: unitsPanel.width - 2 * unitsPanel.pad
-                        spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                        spacing: AzTheme.px(8)
 
                         Text {
                             text: qsTr("Vahidlər")
-                            color: "white"
-                            font.pixelSize: Math.max(15, ScreenTools.defaultFontPixelHeight * 1.02 * root.fontScale)
-                            font.bold: true
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(16)
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
                         }
@@ -542,8 +556,10 @@ Rectangle {
 
                             delegate: Rectangle {
                                 Layout.fillWidth: true
-                                radius: 10
-                                color: "#2A2A2A"
+                                radius: AzTheme.px(AzTheme.groupRadius)
+                                color: AzTheme.groupFill
+                                border.width: 1
+                                border.color: AzTheme.groupBorder
                                 implicitHeight: Math.max(root.rowMinH, uRow.implicitHeight + root.rowPadY * 2)
 
                                 RowLayout {
@@ -557,7 +573,6 @@ Rectangle {
 
                                     QGCLabel {
                                         text: modelData.shortDescription
-                                        color: "white"
                                         font.pixelSize: root.labelFontPx
                                         elide: Text.ElideRight
                                         wrapMode: Text.NoWrap

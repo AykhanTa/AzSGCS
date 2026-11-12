@@ -24,8 +24,12 @@ Item {
     // auto/manual state
     property bool   useAutoTuning:      true
 
+    // Screens in the new design declare azInputStyle: the chart and the cards take its
+    // colours, the labels and controls theirs (see QGCLabel._az).
+    readonly property bool _az: typeof azInputStyle !== "undefined" && azInputStyle === true
+
     // Internals
-    property real   _margins:           ScreenTools.defaultFontPixelHeight / 2
+    property real   _margins:           _az ? AzTheme.px(12) : ScreenTools.defaultFontPixelHeight / 2
     property int    _currentAxis:       0
     property var    _xAxis:             xAxis
     property var    _yAxis:             yAxis
@@ -135,11 +139,11 @@ Item {
         titleText:              ScreenTools.isShortScreen ? "" : qsTr("sec")
         tickCount:              Math.min(Math.max(Math.floor(chart.width / (ScreenTools.defaultFontPixelWidth * 7)), 4), 11)
         labelsFont.pointSize:   ScreenTools.defaultFontPointSize
-        labelsFont.family:      ScreenTools.normalFontFamily
+        labelsFont.family:      root._az ? AzTheme.fontFamily : ScreenTools.normalFontFamily
         titleFont.pointSize:    ScreenTools.defaultFontPointSize
-        titleFont.family:       ScreenTools.normalFontFamily
-        color:                  "#9D9D9D"
-        labelsColor:            "#CCCCCC"
+        titleFont.family:       root._az ? AzTheme.fontFamily : ScreenTools.normalFontFamily
+        color:                  root._az ? AzTheme.panelBorder : "#9D9D9D"
+        labelsColor:            root._az ? AzTheme.textSecondary : "#CCCCCC"
         gridLineColor:          Qt.rgba(1, 1, 1, 0.12)
         minorGridLineColor:     Qt.rgba(1, 1, 1, 0.06)
     }
@@ -151,11 +155,11 @@ Item {
         titleText:              unit
         tickCount:              Math.min(((max - min) / _tickSeparation), _maxTickSections) + 1
         labelsFont.pointSize:   ScreenTools.defaultFontPointSize
-        labelsFont.family:      ScreenTools.normalFontFamily
+        labelsFont.family:      root._az ? AzTheme.fontFamily : ScreenTools.normalFontFamily
         titleFont.pointSize:    ScreenTools.defaultFontPointSize
-        titleFont.family:       ScreenTools.normalFontFamily
-        color:                  "#9D9D9D"
-        labelsColor:            "#CCCCCC"
+        titleFont.family:       root._az ? AzTheme.fontFamily : ScreenTools.normalFontFamily
+        color:                  root._az ? AzTheme.panelBorder : "#9D9D9D"
+        labelsColor:            root._az ? AzTheme.textSecondary : "#CCCCCC"
         gridLineColor:          Qt.rgba(1, 1, 1, 0.12)
         minorGridLineColor:     Qt.rgba(1, 1, 1, 0.06)
     }
@@ -273,18 +277,18 @@ Item {
                     // Match the dark cards the rest of this screen is built from; the
                     // QtCharts default theme is light and stood out badly against them.
                     theme:                  ChartView.ChartThemeDark
-                    backgroundColor:        "#2A2A2A"
-                    plotAreaColor:          "#232323"
-                    backgroundRoundness:    ScreenTools.defaultFontPixelHeight / 2
-                    titleColor:             "#FFFFFF"
+                    backgroundColor:        root._az ? AzTheme.cardGradientEnd : "#2A2A2A"
+                    plotAreaColor:          root._az ? AzTheme.groupFill : "#232323"
+                    backgroundRoundness:    root._az ? AzTheme.px(AzTheme.cardRadius) : ScreenTools.defaultFontPixelHeight / 2
+                    titleColor:             root._az ? AzTheme.textCard : "#FFFFFF"
 
                     legend.alignment:       Qt.AlignBottom
                     legend.backgroundVisible: false
-                    legend.labelColor:      "#CCCCCC"
+                    legend.labelColor:      root._az ? AzTheme.textSecondary : "#CCCCCC"
                     legend.font.pointSize:  ScreenTools.defaultFontPointSize
-                    legend.font.family:     ScreenTools.normalFontFamily
+                    legend.font.family:     root._az ? AzTheme.fontFamily : ScreenTools.normalFontFamily
                     titleFont.pointSize:    ScreenTools.defaultFontPointSize
-                    titleFont.family:       ScreenTools.normalFontFamily
+                    titleFont.family:       root._az ? AzTheme.fontFamily : ScreenTools.normalFontFamily
 
                     // wheel/drag yalnız 2 sütunda işləsin (stacked-də wheel scroll üçün boş qalır)
                     MouseArea {
@@ -448,7 +452,7 @@ Item {
 
                                 QGCLabel {
                                     text: qsTr("Select Tuning:")
-                                    color: "white"
+                                    color: root._az ? AzTheme.textCard : "white"
                                     font.pointSize: root._stacked ? ScreenTools.smallFontPointSize : ScreenTools.defaultFontPointSize
                                     Layout.fillWidth: true
                                 }
@@ -475,8 +479,9 @@ Item {
 
                                             contentItem: Text {
                                                 text: parent.text
-                                                font: parent.font
-                                                color: "white"
+                                                font.family: root._az ? AzTheme.fontFamily : parent.font.family
+                                                font.pointSize: parent.font.pointSize
+                                                color: root._az ? AzTheme.textCard : "white"
                                                 verticalAlignment: Text.AlignVCenter
                                                 leftPadding: parent.indicator.width + parent.spacing
                                                 elide: Text.ElideRight
@@ -499,9 +504,9 @@ Item {
 
                                         Rectangle {
                                             Layout.fillWidth: true
-                                            color: "#3C3838"
-                                            radius: 8
-                                            border.color: "#9D9D9D"
+                                            color: root._az ? AzTheme.groupFill : "#3C3838"
+                                            radius: root._az ? AzTheme.px(AzTheme.groupRadius) : 8
+                                            border.color: root._az ? AzTheme.groupBorder : "#9D9D9D"
                                             border.width: 1
                                             Layout.topMargin: root._margins * 0.4
 
@@ -515,15 +520,16 @@ Item {
 
                                                 QGCLabel {
                                                     text: title
-                                                    font.bold: true
-                                                    color: "white"
+                                                    font.bold: !root._az
+                                                    font.weight: root._az ? Font.Medium : Font.Bold
+                                                    color: root._az ? AzTheme.textCard : "white"
                                                     Layout.fillWidth: true
                                                 }
 
                                                 QGCLabel {
                                                     text: description
                                                     wrapMode: Text.WordWrap
-                                                    color: "#CCCCCC"
+                                                    color: root._az ? AzTheme.textSecondary : "#CCCCCC"
                                                     Layout.fillWidth: true
                                                     font.pointSize: ScreenTools.smallFontPointSize
                                                 }
@@ -566,9 +572,9 @@ Item {
 
                                                 RowLayout {
                                                     Layout.fillWidth: true
-                                                    QGCLabel { text: min.toFixed(3); color: "#AAAAAA"; font.pointSize: ScreenTools.smallFontPointSize }
+                                                    QGCLabel { text: min.toFixed(3); color: root._az ? AzTheme.mutedText : "#AAAAAA"; font.pointSize: ScreenTools.smallFontPointSize }
                                                     Item { Layout.fillWidth: true }
-                                                    QGCLabel { text: max.toFixed(3); color: "#AAAAAA"; font.pointSize: ScreenTools.smallFontPointSize }
+                                                    QGCLabel { text: max.toFixed(3); color: root._az ? AzTheme.mutedText : "#AAAAAA"; font.pointSize: ScreenTools.smallFontPointSize }
                                                 }
                                             }
                                         }
@@ -579,10 +585,10 @@ Item {
                             // Clipboard
                             Rectangle {
                                 Layout.fillWidth: true
-                                color: "#2A2A2A"
-                                border.color: "#9D9D9D"
+                                color: root._az ? AzTheme.groupFill : "#2A2A2A"
+                                border.color: root._az ? AzTheme.groupBorder : "#9D9D9D"
                                 border.width: 1
-                                radius: 4
+                                radius: root._az ? AzTheme.px(AzTheme.groupRadius) : 4
                                 clip: true
 
                                 implicitHeight: Math.min(Math.max(clipboardCol.implicitHeight + root._margins * 2, 140), 360)
@@ -595,7 +601,7 @@ Item {
 
                                     QGCLabel {
                                         text: qsTr("Clipboard Values:")
-                                        color: "white"
+                                        color: root._az ? AzTheme.textCard : "white"
                                         Layout.fillWidth: true
                                     }
 
@@ -608,14 +614,14 @@ Item {
 
                                             QGCLabel {
                                                 text: param
-                                                color: "white"
+                                                color: root._az ? AzTheme.textCard : "white"
                                                 elide: Text.ElideRight
                                                 Layout.fillWidth: true
                                             }
 
                                             Rectangle {
-                                                color: "#1E1E1E"
-                                                radius: 3
+                                                color: root._az ? AzTheme.pillBottom : "#1E1E1E"
+                                                radius: root._az ? AzTheme.px(6) : 3
                                                 Layout.preferredWidth: Math.min(ScreenTools.defaultFontPixelWidth * 14, rightHost.width * 0.35)
                                                 implicitHeight: valueLbl.implicitHeight + 6
 
@@ -625,7 +631,7 @@ Item {
                                                     text: (root._savedTuningParamValues && root._savedTuningParamValues.length > index)
                                                           ? root._savedTuningParamValues[index]
                                                           : ""
-                                                    color: "white"
+                                                    color: root._az ? AzTheme.textCard : "white"
                                                     elide: Text.ElideRight
                                                 }
                                             }

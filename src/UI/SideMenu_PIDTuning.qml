@@ -6,14 +6,21 @@ import QGroundControl 1.0
 import QGroundControl.Controls 1.0
 import QGroundControl.FactControls 1.0
 
+// PID tuning, in the new design: the vehicle setup page header, a pill tab bar for the
+// Rate and Attitude controllers, and the tuning chart and cards in the design's colours
+// (PIDTuning follows azInputStyle).
 Rectangle {
     id: root
     anchors.fill: parent
-    color: "black"
+    color: "transparent"
 
-    readonly property real _m: Math.max(12, ScreenTools.defaultFontPixelHeight * 0.75)
+    // The chart, cards, sliders, fields and buttons take the new design's look
+    // (see QGCLabel._az).
+    readonly property bool azInputStyle: true
+
     readonly property bool _compact: width < 1200 || height < 820
-    readonly property real _side: Math.max(12, _m * 0.9)
+    readonly property real _m: AzTheme.px(_compact ? 12 : 16)
+    readonly property real _side: AzTheme.px(_compact ? 12 : 20)
     readonly property real _maxContentW: 1600
 
     property bool parametersReady: globals.activeVehicle
@@ -46,13 +53,13 @@ Rectangle {
         z: 2
         anchors.fill: parent
 
-        anchors.topMargin: 0
+        anchors.topMargin: AzTheme.px(20)
         anchors.leftMargin: root._side
         anchors.rightMargin: root._side
         anchors.bottomMargin: root._side
 
         // kompakt olanda aralıqlar azalsın
-        spacing: root._compact ? (root._m * 0.65) : root._m
+        spacing: root._m
 
         // Header (başlıq + açıqlama bir-birinə yaxın)
         // Hündürlüyü _headerFactor idarə edir; yığılanda ColumnLayout-un
@@ -71,46 +78,66 @@ Rectangle {
                 width: headerArea.width
                 // Yığılan hissə aşağı sıxılmasın, yuxarı sürüşsün.
                 y: headerArea.height - headerArea._fullH
-                spacing: root._compact ? 3 : 6
+                spacing: AzTheme.px(6)
 
                 Text {
                     text: qsTr("PID tənzimləmə")
-                    color: "white"
-                    font.pixelSize: root._compact ? 21 : 26
-                    font.bold: true
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
+                    font.pixelSize: AzTheme.fontPx(root._compact ? 18 : 20)
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
 
                 Text {
                     text: qsTr("Uçuşun stabilliyini və reaksiya sürətini yaxşılaşdırmaq üçün Rate və Attitude nəzarətçilərinin PID parametrlərini tənzimləyin. Qrafikdə Response/Setpoint davranışını izləyin.")
-                    color: "#E8E8E8"
-                    font.pixelSize: root._compact ? 13 : 16
+                    color: AzTheme.textSecondary
+                    font.family: AzTheme.fontFamily
+                    font.pixelSize: AzTheme.fontPx(13)
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
             }
         }
 
-        // Avtopilot bağlantısı gözləyən kart
+        // A status card with the vehicle state and what to expect
         Rectangle {
             Layout.fillWidth: true
-            radius: 16
-            color: "#3D3B3B"
+            radius: AzTheme.px(AzTheme.cardRadius)
             border.width: 1
-            border.color: "#9D9D9D"
+            border.color: AzTheme.cardBorder
+            gradient: Gradient {
+                GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+            }
             visible: !root.parametersReady
-            implicitHeight: 220
+            implicitHeight: AzTheme.px(200)
 
-            Text {
+            Column {
                 anchors.centerIn: parent
                 width: parent.width - 2 * root._m
-                text: qsTr("Parametrlər yüklənir...\nAvtopilot bağlantısını gözləyin")
-                color: "#FFFFFF"
-                font.pixelSize: 18
-                font.bold: true
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.WordWrap
+                spacing: AzTheme.px(10)
+
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: AzTheme.px(12); height: width; radius: width / 2
+                    color: globals.activeVehicle ? AzTheme.statusOrange : AzTheme.mutedText
+                }
+                Text {
+                    width: parent.width
+                    text: globals.activeVehicle ? qsTr("Parametrlər yüklənir...") : qsTr("Aktiv aparat yoxdur")
+                    color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.weight: Font.Medium
+                    font.pixelSize: AzTheme.fontPx(17)
+                    horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap
+                }
+                Text {
+                    width: parent.width
+                    text: globals.activeVehicle ? qsTr("Avtopilot bağlantısını gözləyin") : qsTr("Qoşulduqdan sonra PID parametrləri görünəcək.")
+                    color: AzTheme.textSecondary; font.family: AzTheme.fontFamily
+                    font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
+                    horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap
+                }
             }
         }
 
@@ -142,53 +169,16 @@ Rectangle {
 
         ColumnLayout {
             id: bodyCol
-            spacing: root._compact ? (root._m * 0.65) : root._m
+            spacing: root._m
 
-            GridLayout {
+            QGCTabBar {
+                id: controllerTabs
                 Layout.fillWidth: true
-                columns: root._compact ? 1 : 2
-                columnSpacing: root._m
-                rowSpacing: root._m
+                currentIndex: st.tab
+                onCurrentIndexChanged: st.tab = currentIndex
 
-                QGCButton {
-                    text: qsTr("Rate Controller")
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: root._compact
-                                           ? ScreenTools.defaultFontPixelHeight * 1.9
-                                           : ScreenTools.defaultFontPixelHeight * 2.7
-                    primary: st.tab === 0
-                    backgroundColor: st.tab === 0 ? "#4E4E4E" : "#2A2A2A"
-                    onClicked: st.tab = 0
-
-                    contentItem: Text {
-                        text: parent.text
-                        color: st.tab === 0 ? "#00FF00" : "white"
-                        font.pixelSize: root._compact ? 13 : 16
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        elide: Text.ElideRight
-                    }
-                }
-
-                QGCButton {
-                    text: qsTr("Attitude Controller")
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: root._compact
-                                           ? ScreenTools.defaultFontPixelHeight * 1.9
-                                           : ScreenTools.defaultFontPixelHeight * 2.7
-                    primary: st.tab === 1
-                    backgroundColor: st.tab === 1 ? "#4E4E4E" : "#2A2A2A"
-                    onClicked: st.tab = 1
-
-                    contentItem: Text {
-                        text: parent.text
-                        color: st.tab === 1 ? "#00FF00" : "white"
-                        font.pixelSize: root._compact ? 13 : 16
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        elide: Text.ElideRight
-                    }
-                }
+                QGCTabButton { text: qsTr("Rate Controller") }
+                QGCTabButton { text: qsTr("Attitude Controller") }
             }
 
             Item {

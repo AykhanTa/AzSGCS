@@ -1,15 +1,18 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Effects
 import QtQuick.Layouts 1.15
 
 import QGroundControl
 import QGroundControl.Controls
-//import QGroundControl.ScreenTools
 
+// Application settings, in the new design: the vehicle setup frame's 80 px header on the
+// top bar's panel gradient with a back card, the page list on the side menu's panel
+// (its selected box and hover outline), and the page on the dark app background.
 Rectangle {
     id: root
     anchors.fill: parent
-    color: "#000000"
+    color: AzTheme.panelGradientEnd
 
     // =========================
     // ✅ INPUT BLOCKER (çox vacib)
@@ -72,7 +75,7 @@ Rectangle {
 
         // (optional) seçilən item görünəcək yerə scroll
         Qt.callLater(function() {
-            var itemH = 48 + menuColumn.spacing
+            var itemH = root._itemH + menuColumn.spacing
             var y = i * itemH
             menuFlick.contentY = Math.max(0, Math.min(y, menuFlick.contentHeight - menuFlick.height))
         })
@@ -90,8 +93,9 @@ Rectangle {
 
     // -------- responsive metrics --------
     readonly property bool smallScreen: width < 1100
-    readonly property real _m: Math.max(12, ScreenTools.defaultFontPixelWidth * (smallScreen ? 1.0 : 1.4))
-    readonly property real topH: Math.max(78, ScreenTools.defaultFontPixelHeight * 4.2)
+    readonly property real _m: AzTheme.px(12)
+    readonly property real topH: AzTheme.px(80)
+    readonly property real _itemH: AzTheme.px(52)
 
     // Menu width limitləri (sabit deyil, auto + limit)
     readonly property real _minMenuW: Math.max(170, ScreenTools.defaultFontPixelWidth * 18)
@@ -127,65 +131,104 @@ Rectangle {
     // --------- Top header ---------
     Item {
         id: topHeader
-        z: 1
+        z: 2
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
         height: topH
 
-        // Back
+        // linear-gradient(155deg), box-shadow 0 8px 16px rgba(0, 0, 0, 0.28)
+        RectangularShadow {
+            anchors.fill: headerBackground
+            offset.y:     AzTheme.px(8)
+            blur:         AzTheme.px(16)
+            color:        AzTheme.topBarShadow
+        }
+
+        AzGradientRect {
+            id:            headerBackground
+            anchors.fill:  parent
+            angle:         AzTheme.panelGradientAngle
+            startColor:    AzTheme.panelGradientStart
+            startPosition: AzTheme.panelGradientStartPos
+            endColor:      AzTheme.panelGradientEnd
+            endPosition:   AzTheme.panelGradientEndPos
+        }
+
         Rectangle {
-            width: 34
-            height: 34
-            radius: 6
-            color: "#2a2a2a"
+            anchors.left:   parent.left
+            anchors.right:  parent.right
+            anchors.bottom: parent.bottom
+            height:         1
+            color:          AzTheme.panelBorder
+        }
+
+        // Back, on the status card style
+        Item {
+            id: backButton
+            width: AzTheme.px(44)
+            height: width
             anchors.left: parent.left
-            anchors.leftMargin: _m
+            anchors.leftMargin: AzTheme.px(18)
             anchors.verticalCenter: parent.verticalCenter
 
-            Image {
+            AzGradientRect {
+                anchors.fill:  parent
+                angle:         AzTheme.cardGradientAngle
+                startColor:    backMouse.pressed ? AzTheme.menuSelectedTop : AzTheme.cardGradientStart
+                startPosition: AzTheme.cardGradientStartPos
+                endColor:      backMouse.pressed ? AzTheme.menuSelectedBottom : AzTheme.cardGradientEnd
+                endPosition:   AzTheme.cardGradientEndPos
+                radius:        AzTheme.px(10)
+                borderColor:   backMouse.containsMouse ? AzTheme.cardHoverBorder : AzTheme.cardBorder
+                borderWidth:   1
+            }
+
+            QGCColoredImage {
                 anchors.centerIn: parent
                 source: "qrc:/res/AZSHIELD_ICON/Back.svg"
-                width: 18
-                height: 18
+                width: AzTheme.px(20)
+                height: width
+                sourceSize.height: height
                 fillMode: Image.PreserveAspectFit
+                color: AzTheme.textCard
             }
+
             MouseArea {
+                id: backMouse
                 anchors.fill: parent
+                hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: closeThis()
             }
         }
 
         Column {
-            anchors.left: parent.left
-            anchors.leftMargin: _m + 46
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 4
-
-            Text {
-                text: qsTr("Tətbiq Tənzimləmələri")
-                color: "white"
-                font.pixelSize: Math.max(20, ScreenTools.defaultFontPixelHeight * 1.35)
-                font.bold: true
-                wrapMode: Text.WordWrap
-            }
-
-            Text {
-                text: qsTr("Dronunuzu uçuş üçün tənzimləyin")
-                color: "#E8E8E8"
-                font.pixelSize: Math.max(12, ScreenTools.defaultFontPixelHeight * 0.9)
-                wrapMode: Text.WordWrap
-            }
-        }
-
-        Rectangle {
-            anchors.left: parent.left
+            anchors.left: backButton.right
+            anchors.leftMargin: AzTheme.px(16)
             anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            height: 1
-            color: "#FFFFFF"
-            opacity: 0.25
+            anchors.rightMargin: _m
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: AzTheme.px(2)
+
+            Text {
+                width: parent.width
+                text: qsTr("Tətbiq Tənzimləmələri")
+                color: AzTheme.textCard
+                font.family: AzTheme.fontFamily
+                font.weight: Font.Medium
+                font.pixelSize: AzTheme.fontPx(22)
+                elide: Text.ElideRight
+            }
+
+            Text {
+                width: parent.width
+                text: qsTr("Dronunuzu uçuş üçün tənzimləyin")
+                color: AzTheme.textSecondary
+                font.family: AzTheme.fontFamily
+                font.pixelSize: AzTheme.fontPx(13)
+                elide: Text.ElideRight
+            }
         }
     }
 
@@ -205,6 +248,15 @@ Rectangle {
             Layout.maximumWidth: Layout.preferredWidth
             Layout.fillHeight: true
             color: "transparent"
+
+            AzGradientRect {
+                anchors.fill:  parent
+                angle:         AzTheme.panelGradientAngle
+                startColor:    AzTheme.panelGradientStart
+                startPosition: AzTheme.panelGradientStartPos
+                endColor:      AzTheme.panelGradientEnd
+                endPosition:   AzTheme.panelGradientEndPos
+            }
 
             ColumnLayout {
                 anchors.fill: parent
@@ -229,7 +281,7 @@ Rectangle {
                     Column {
                         id: menuColumn
                         width: menuFlick.width
-                        spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.7)
+                        spacing: AzTheme.px(6)
 
                         // ✅ ən uzun item eni
                         property real maxItemW: 0
@@ -252,14 +304,17 @@ Rectangle {
                         Repeater {
                             model: menuModel
 
+                            // The side menu's item: linear-gradient(180deg, #30353A, #202428),
+                            // 1 px #5D646B, radius 8 when selected; a faint outline on hover.
                             delegate: Rectangle {
                                 id: menuItem
-                                height: 48
-                                radius: 10
+                                height: root._itemH
+                                radius: AzTheme.px(AzTheme.menuSelectedRadius)
 
-                                readonly property real _pad: 10
-                                readonly property real _gap: 10
-                                readonly property real _icon: 18
+                                readonly property real _pad: AzTheme.px(12)
+                                readonly property real _gap: AzTheme.px(12)
+                                readonly property real _icon: AzTheme.px(20)
+                                readonly property bool _selected: root.selectedIndex === index
 
                                 // ✅ ideal en: icon + gap + text + padding
                                 readonly property real _idealW: (_pad * 2) + _icon + _gap + labelText.implicitWidth
@@ -270,31 +325,42 @@ Rectangle {
 
                                 property bool hovered: false
 
-                                color: root.selectedIndex === index ? "#434343"
-                                       : (hovered ? "#2c2c2c" : "transparent")
-                                border.width: root.selectedIndex === index ? 1 : 0
-                                border.color: "#5e5e5e"
+                                color: (hovered && !_selected) ? Qt.rgba(1, 1, 1, 0.04) : "transparent"
+                                gradient: _selected ? selectedGradient : null
+                                border.width: (_selected || hovered) ? 1 : 0
+                                border.color: _selected ? AzTheme.menuSelectedBorder : AzTheme.panelBorder
+
+                                Gradient {
+                                    id: selectedGradient
+                                    GradientStop { position: 0; color: AzTheme.menuSelectedTop }
+                                    GradientStop { position: 1; color: AzTheme.menuSelectedBottom }
+                                }
 
                                 Row {
                                     anchors.left: parent.left
-                                    anchors.leftMargin: _pad
+                                    anchors.leftMargin: menuItem._pad
                                     anchors.verticalCenter: parent.verticalCenter
-                                    spacing: _gap
+                                    spacing: menuItem._gap
 
-                                    Image {
+                                    QGCColoredImage {
+                                        anchors.verticalCenter: parent.verticalCenter
                                         source: iconPath
-                                        width: _icon
-                                        height: _icon
+                                        width: menuItem._icon
+                                        height: menuItem._icon
+                                        sourceSize.height: height
                                         fillMode: Image.PreserveAspectFit
+                                        color: menuItem._selected ? AzTheme.textPrimary : AzTheme.textCard
                                     }
 
                                     Text {
                                         id: labelText
+                                        anchors.verticalCenter: parent.verticalCenter
                                         text: textLabel
-                                        color: "white"
-                                        font.pixelSize: 18
+                                        color: menuItem._selected ? AzTheme.textPrimary : AzTheme.textCard
+                                        font.family: AzTheme.fontFamily
+                                        font.pixelSize: AzTheme.fontPx(16)
                                         elide: Text.ElideRight
-                                        width: Math.min(implicitWidth, menuColumn.width - (_pad*2 + _icon + _gap))
+                                        width: Math.min(implicitWidth, menuColumn.width - (menuItem._pad * 2 + menuItem._icon + menuItem._gap))
                                     }
                                 }
 
@@ -317,7 +383,7 @@ Rectangle {
         Rectangle {
             Layout.preferredWidth: 1
             Layout.fillHeight: true
-            color: "#3D3D3D"
+            color: AzTheme.panelBorder
         }
 
         // ------------------ Sağ panel ------------------

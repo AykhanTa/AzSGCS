@@ -22,6 +22,9 @@ AbstractButton   {
 
     property bool   _showBorder: qgcPal.globalTheme === QGCPalette.Light
 
+    // Screens in the new design declare azInputStyle: AzSwitch's look, green when on.
+    readonly property bool _az: typeof azInputStyle !== "undefined" && azInputStyle === true
+
     QGCPalette { id: qgcPal; colorGroupEnabled: control.enabled }
 
     contentItem: Item {
@@ -39,20 +42,26 @@ AbstractButton   {
             id:                     indicator
             anchors.right:          parent.right
             anchors.verticalCenter: parent.verticalCenter
-            height:                 ScreenTools.defaultFontPixelHeight
-            width:                  height * 2
+            height:                 control._az ? AzTheme.px(24) : ScreenTools.defaultFontPixelHeight
+            width:                  control._az ? AzTheme.px(44) : height * 2
             radius:                 height / 2
-            color:                  control.checked ? qgcPal.primaryButton : qgcPal.button
-            border.width:           _showBorder ? 1 : 0
-            border.color:           qgcPal.buttonBorder
+            color:                  control._az ? (control.checked ? AzTheme.statusGreen : AzTheme.pillBottom)
+                                                : (control.checked ? qgcPal.primaryButton : qgcPal.button)
+            border.width:           (control._az || _showBorder) ? 1 : 0
+            border.color:           control._az ? (control.checked ? AzTheme.statusGreen : AzTheme.groupBorder) : qgcPal.buttonBorder
+            opacity:                (control._az && !control.enabled) ? 0.45 : 1
 
             Rectangle {
+                readonly property real _inset: control._az ? AzTheme.px(3) : 1
+
                 anchors.verticalCenter: parent.verticalCenter
-                x:                      checked ? indicator.width - width - 1: 1
-                height:                 parent.height - 2
+                x:                      checked ? indicator.width - width - _inset : _inset
+                height:                 parent.height - 2 * _inset
                 width:                  height
                 radius:                 height / 2
-                color:                  qgcPal.buttonText
+                color:                  control._az ? AzTheme.textCard : qgcPal.buttonText
+
+                Behavior on x { enabled: control._az; NumberAnimation { duration: 150 } }
             }
         }
     }
