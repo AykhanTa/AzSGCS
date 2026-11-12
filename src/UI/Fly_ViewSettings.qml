@@ -7,10 +7,16 @@ import QGroundControl
 import QGroundControl.FactControls
 import QGroundControl.Controls
 
+// Fly view settings, in the new design: the page header of the setup pages, status
+// cards with group box rows, and the new switches, fields, combo boxes and buttons.
 Rectangle {
     id: root
     anchors.fill: parent
-    color: "#000000"
+    color: "transparent"
+
+    // The switches, fields, combo boxes, labels and buttons take the new design's look
+    // (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     property var    _settingsManager:                       QGroundControl.settingsManager
     property var    _flyViewSettings:                       _settingsManager.flyViewSettings
@@ -50,8 +56,8 @@ Rectangle {
     readonly property bool phone:  ScreenTools.isMobile || width < 720
     readonly property bool tablet: width < 1100
 
-    readonly property real sidePadding: Math.max(10, ScreenTools.defaultFontPixelWidth  * (phone ? 0.9 : tablet ? 1.2 : 1.6))
-    readonly property real gap:         Math.max(10, ScreenTools.defaultFontPixelWidth  * (phone ? 0.9 : tablet ? 1.2 : 1.6))
+    readonly property real sidePadding: AzTheme.px(phone ? 12 : 20)
+    readonly property real gap:         AzTheme.px(phone ? 10 : 16)
 
     readonly property real fontScale: {
         var w = Math.max(1, width)
@@ -60,14 +66,14 @@ Rectangle {
         return Math.max(0.90, Math.min(1.0, s))
     }
 
-    readonly property real titleFontPx: Math.max(18, ScreenTools.defaultFontPixelHeight * (phone ? 1.15 : 1.25) * fontScale)
-    readonly property real descFontPx:  Math.max(12, ScreenTools.defaultFontPixelHeight * (phone ? 0.92 : 0.98) * fontScale)
-    readonly property real labelFontPx: Math.max(11, ScreenTools.defaultFontPixelHeight * (phone ? 0.90 : 0.88) * fontScale)
+    readonly property real titleFontPx: AzTheme.fontPx(phone ? 18 : 20)
+    readonly property real descFontPx:  AzTheme.fontPx(13)
+    readonly property real labelFontPx: AzTheme.fontPx(AzTheme.popupTextSize)
     readonly property real smallPoint:  ScreenTools.smallFontPointSize * fontScale
 
-    readonly property real rowPadX: Math.max(12, ScreenTools.defaultFontPixelWidth * 1.2)
-    readonly property real rowPadY: Math.max(8,  ScreenTools.defaultFontPixelHeight * 0.6)
-    readonly property real rowMinH: Math.max(48, ScreenTools.defaultFontPixelHeight * 2.6)
+    readonly property real rowPadX: AzTheme.px(AzTheme.groupPadding)
+    readonly property real rowPadY: AzTheme.px(8)
+    readonly property real rowMinH: AzTheme.px(AzTheme.groupRowHeight + 4)
 
     // Layout width hesabı (real görünən en üçün)
     readonly property real contentW: Math.max(0, flick.width - 2 * sidePadding)
@@ -94,31 +100,26 @@ Rectangle {
         anchors.top: parent.top
         anchors.leftMargin: sidePadding
         anchors.rightMargin: sidePadding
-        anchors.topMargin: 0
-        spacing: Math.max(6, ScreenTools.defaultFontPixelHeight * 0.6)
+        anchors.topMargin: AzTheme.px(20)
+        spacing: AzTheme.px(6)
 
         Text {
+            width: parent.width
             text: qsTr("Uçuş Görünüşü Tənzimləmələri")
-            color: "white"
-            font.pixelSize: 26
-            font.bold: true
+            color: AzTheme.textCard
+            font.family: AzTheme.fontFamily
+            font.weight: Font.Medium
+            font.pixelSize: root.titleFontPx
             wrapMode: Text.WordWrap
         }
 
         Text {
             text: qsTr("Uçuş görünüşü tənzimləməsini göstərən və dəyişdirməyə imkan verən tənzimləmə paneli")
-            color: "#E8E8E8"
-            font.pixelSize: 16
+            color: AzTheme.textSecondary
+            font.family: AzTheme.fontFamily
+            font.pixelSize: root.descFontPx
             wrapMode: Text.WordWrap
             width: Math.min(parent.width, 1100)
-        }
-
-        Rectangle {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: 1
-            color: "#FFFFFF"
-            opacity: 0.25
         }
     }
 
@@ -129,7 +130,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.topMargin: Math.max(6, ScreenTools.defaultFontPixelHeight * 0.5)
+        anchors.topMargin: AzTheme.px(16)
 
         clip: true
         flickableDirection: Flickable.VerticalFlick
@@ -208,16 +209,20 @@ Rectangle {
     // ===================== COMMON PANEL STYLE HELPERS =====================
     QtObject {
         id: panelStyle
-        readonly property color panelBg: "#3D3B3B"
-        readonly property color rowBg:   "#2A2A2A"
-        readonly property color border:  "#9D9D9D"
-        readonly property real  radius:  16
-        readonly property real  rowRadius: 10
-        readonly property real  pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
-        readonly property real  titlePx: {
-            var v = Math.max(15, ScreenTools.defaultFontPixelHeight * 1.02 * (root.fontScale || 1))
-            return isFinite(v) ? v : 15
+        // The status card: linear-gradient(145deg, #25272A, #181B1E), 1 px #353A3F, radius 14
+        readonly property color panelBg: AzTheme.cardGradientEnd
+        readonly property Gradient cardGradient: Gradient {
+            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
         }
+        // A group box row: #191D20, 1 px #353A3F, radius 8
+        readonly property color rowBg:     AzTheme.groupFill
+        readonly property color rowBorder: AzTheme.groupBorder
+        readonly property color border:    AzTheme.cardBorder
+        readonly property real  radius:    AzTheme.px(AzTheme.cardRadius)
+        readonly property real  rowRadius: AzTheme.px(AzTheme.groupRadius)
+        readonly property real  pad:       AzTheme.px(16)
+        readonly property real  titlePx: AzTheme.fontPx(16)
     }
 
     // ===================== PANEL 1: ÜMUMİ =====================
@@ -226,7 +231,7 @@ Rectangle {
 
         Rectangle {
             width: root.colW
-            color: panelStyle.panelBg
+            gradient: panelStyle.cardGradient
             radius: panelStyle.radius
             border.width: 1
             border.color: panelStyle.border
@@ -241,9 +246,10 @@ Rectangle {
 
                 Text {
                     text: qsTr("Ümumi")
-                    color: "white"
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
                     font.pixelSize: panelStyle.titlePx
-                    font.bold: true
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
@@ -253,6 +259,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _useChecklist.visible && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length
                     implicitHeight: Math.max(root.rowMinH, useRow.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -268,7 +276,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Ön Uçuş Siyahısını İstifadə Edin")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -283,6 +291,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _enforceChecklist.visible && _useChecklist.visible && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length
                     implicitHeight: Math.max(root.rowMinH, enforceRow.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -298,7 +308,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Ön Uçuş Siyahısını Məcbur Edin")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -313,6 +323,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _enableMultiVehiclePanel.visible
                     implicitHeight: Math.max(root.rowMinH, mvRow.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -328,7 +340,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Çoxlu Vasitə Panelini Aktiv Edin")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -343,6 +355,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _keepMapCenteredOnVehicle.visible
                     implicitHeight: Math.max(root.rowMinH, kmRow.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -358,7 +372,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Xəritəni Vasitə Mərkəzində Saxlayın")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -373,6 +387,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _showLogReplayStatusBar.visible
                     implicitHeight: Math.max(root.rowMinH, logRow.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -388,7 +404,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Telemetri Log Replay Status Barını Göstər")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -403,6 +419,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _showSimpleCameraControl.visible
                     implicitHeight: Math.max(root.rowMinH, camRow.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -418,7 +436,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Sadə Kamera Nəzarətini Göstər (DIGICAM_CONTROL)")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -433,6 +451,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _updateHomePosition.visible
                     implicitHeight: Math.max(root.rowMinH, homeRow.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -448,7 +468,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Ev Mövqeyini Cihazın Yerləşməsinə Görə Yenilə")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -464,6 +484,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _ammoArmOnGround.visible
                     implicitHeight: Math.max(root.rowMinH, ammoGroundRow.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -479,7 +501,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Mərmi: Aparat Yerdə Olarkən ARM-a İcazə Ver (stend testi)")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -498,7 +520,7 @@ Rectangle {
 
         Rectangle {
             width: root.colW
-            color: panelStyle.panelBg
+            gradient: panelStyle.cardGradient
             radius: panelStyle.radius
             border.width: 1
             border.color: panelStyle.border
@@ -515,9 +537,10 @@ Rectangle {
 
                 Text {
                     text: qsTr("Guide Edilmiş Əmrlər")
-                    color: "white"
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
                     font.pixelSize: panelStyle.titlePx
-                    font.bold: true
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
@@ -526,6 +549,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _guidedMinimumAltitude.visible
                     implicitHeight: Math.max(root.rowMinH, gminRow.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -541,7 +566,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Minimum Hündürlük")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -561,6 +586,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _guidedMaximumAltitude.visible
                     implicitHeight: Math.max(root.rowMinH, gmaxRow.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -576,7 +603,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Maksimum Hündürlük")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -596,6 +623,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _maxGoToLocationDistance.visible
                     implicitHeight: Math.max(root.rowMinH, distRow.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -611,7 +640,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Go To Location Maksimum Məsafə")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -631,6 +660,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _forwardFlightGoToLocationLoiterRad.visible
                     implicitHeight: Math.max(root.rowMinH, loiterRow.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -646,7 +677,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("İrəli Uçuş Rəhbəri Modunda Loiter Radiusu")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -666,6 +697,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     // Go To həmişə paneldə "Təsdiq et" ilə göndərilir: bu açar artıq heç nəyi dəyişmir.
                     visible: false
                     implicitHeight: Math.max(root.rowMinH, confirmRow.implicitHeight + root.rowPadY * 2)
@@ -682,7 +715,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Guide Edilmiş Modda Go To Location Üçün Təsdiq Tələb Edin")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -702,7 +735,7 @@ Rectangle {
 
         Rectangle {
             width: root.colW
-            color: panelStyle.panelBg
+            gradient: panelStyle.cardGradient
             radius: panelStyle.radius
             border.width: 1
             border.color: panelStyle.border
@@ -717,16 +750,17 @@ Rectangle {
 
                 Text {
                     text: qsTr("MAVLink Aksiyonları")
-                    color: "white"
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
                     font.pixelSize: panelStyle.titlePx
-                    font.bold: true
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
 
                 Text {
                     text: qsTr("Fəaliyyət JSON faylları '%1' qovluğunda yaradılmalıdır.").arg(QGroundControl.settingsManager.appSettings.mavlinkActionsSavePath)
-                    color: "#CCCCCC"
+                    color: AzTheme.textSecondary
                     font.pointSize: root.smallPoint
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
@@ -736,6 +770,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     implicitHeight: Math.max(root.rowMinH, flyActRow.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
 
@@ -750,7 +786,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Fly View Aksiyonları")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -785,6 +821,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     implicitHeight: Math.max(root.rowMinH, joyActRow.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
 
@@ -799,7 +837,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Joystick Aksiyonları")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -839,7 +877,7 @@ Rectangle {
 
         Rectangle {
             width: root.colW
-            color: panelStyle.panelBg
+            gradient: panelStyle.cardGradient
             radius: panelStyle.radius
             border.width: 1
             border.color: panelStyle.border
@@ -855,9 +893,10 @@ Rectangle {
 
                 Text {
                     text: qsTr("Virtual Joystick")
-                    color: "white"
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
                     font.pixelSize: panelStyle.titlePx
-                    font.bold: true
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
@@ -866,6 +905,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _virtualJoystick.visible
                     implicitHeight: Math.max(root.rowMinH, vjRow1.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -881,7 +922,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Virtual Joystick Aktiv Edilmiş")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -895,6 +936,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _virtualJoystickAutoCenterThrottle.visible
                     implicitHeight: Math.max(root.rowMinH, vjRow2.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -910,7 +953,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Auto-Center Throttle")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -924,6 +967,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _virtualJoystickLeftHandedMode.visible
                     implicitHeight: Math.max(root.rowMinH, vjRow3.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -939,7 +984,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Sol Əl Modu (stickləri dəyişdirin)")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -958,7 +1003,7 @@ Rectangle {
 
         Rectangle {
             width: root.colW
-            color: panelStyle.panelBg
+            gradient: panelStyle.cardGradient
             radius: panelStyle.radius
             border.width: 1
             border.color: panelStyle.border
@@ -974,9 +1019,10 @@ Rectangle {
 
                 Text {
                     text: qsTr("3D Görünüş")
-                    color: "white"
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
                     font.pixelSize: panelStyle.titlePx
-                    font.bold: true
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
@@ -985,6 +1031,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _viewer3DEnabled.visible
                     implicitHeight: Math.max(root.rowMinH, v3dRow1.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -1000,7 +1048,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("3D Görünüş Aktiv Edilmiş")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -1014,6 +1062,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _viewer3DOsmFilePath.visible
                     implicitHeight: Math.max(root.rowMinH, osmCol.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -1033,7 +1083,7 @@ Rectangle {
 
                             QGCLabel {
                                 text: qsTr("3D Xəritə Faylı:")
-                                color: "white"
+                                color: AzTheme.textCard
                                 font.pixelSize: root.labelFontPx
                                 elide: Text.ElideRight
                                 wrapMode: Text.NoWrap
@@ -1044,8 +1094,6 @@ Rectangle {
                                 Layout.fillWidth: true
                                 readOnly: true
                                 text: _viewer3DOsmFilePath.rawValue
-                                color: "white"
-                                background: Rectangle { color: "#1A1A1A"; radius: 5 }
                             }
                         }
 
@@ -1080,6 +1128,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _viewer3DBuildingLevelHeight.visible
                     implicitHeight: Math.max(root.rowMinH, v3dRow2.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -1095,7 +1145,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Orta Bina Səviyyəsi Hündürlüyü")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -1114,6 +1164,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _viewer3DAltitudeBias.visible
                     implicitHeight: Math.max(root.rowMinH, v3dRow3.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -1129,7 +1181,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Vasitələr Hündürlük Biası")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -1153,7 +1205,7 @@ Rectangle {
 
         Rectangle {
             width: root.colW
-            color: panelStyle.panelBg
+            gradient: panelStyle.cardGradient
             radius: panelStyle.radius
             border.width: 1
             border.color: panelStyle.border
@@ -1169,9 +1221,10 @@ Rectangle {
 
                 Text {
                     text: qsTr("İnstrument Paneli")
-                    color: "white"
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
                     font.pixelSize: panelStyle.titlePx
-                    font.bold: true
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
@@ -1180,6 +1233,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _showAdditionalIndicatorsCompass.visible
                     implicitHeight: Math.max(root.rowMinH, compRow.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -1195,7 +1250,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Kompasda əlavə başlıq göstəricilərini göstərin")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap
@@ -1209,6 +1264,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: _lockNoseUpCompass.visible
                     implicitHeight: Math.max(root.rowMinH, lockRow.implicitHeight + root.rowPadY * 2)
                     height: implicitHeight
@@ -1224,7 +1281,7 @@ Rectangle {
 
                         QGCLabel {
                             text: qsTr("Kompası Burnu-Yuxarı Kilidləyin")
-                            color: "white"
+                            color: AzTheme.textCard
                             font.pixelSize: root.labelFontPx
                             elide: Text.ElideRight
                             wrapMode: Text.NoWrap

@@ -6,42 +6,35 @@ import QGroundControl
 import QGroundControl.Controls
 import QGroundControl.FactControls
 
+// Firmware upgrade, in the new design: the vehicle setup page header, then a status card
+// with the progress bar and the upgrade log. The page follows the frame's size (it used
+// to be a fixed 1548x862 under a header placed with negative offsets).
 SetupPage {
     id:             firmwarePage
-
-    // SetupPage-in daxili QGCFlickable-i səhifəni y=0-dan doldurur. Bu "y" ofseti
-    // bütün səhifəni aşağı sürüşdürərək yuxarıda başlıq üçün zolaq açır; aşağıdakı
-    // Text-lər mənfi y ilə həmin zolağa yerləşir. Zolağı digər səhifələrdəki kimi
-    // dar saxlayırıq ki, başlıq da, altındakı Loader paneli də yuxarı qalxsın.
-    y:              70
 
     pageComponent:  firmwarePageComponent
     pageName:       qsTr("Proqram təminatı")
     showAdvanced:   globals.activeVehicle && globals.activeVehicle.apmFirmware
 
-    Text {
-        id: name
-        text: qsTr("Proqram Təminatı Konfiqurasiyası")
-        x:10; y:-65; color: "white"; font.pointSize: 20; font.bold: true }
+    // The dialog, buttons, combo boxes and labels take the new design's look
+    // (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
-    Text {
-        id: name1
-        text: qsTr("Cihaz Proqram Təminatı Parametrləri")
-        x:10; y:-27; color: "white"; font.pointSize: 12;  }
-
+    readonly property bool _compact: (width < 1200) || (height < 820) || ScreenTools.isShortScreen
+    readonly property real _side:    AzTheme.px(_compact ? 12 : 20)
 
     Component {
         id: firmwarePageComponent
 
         ColumnLayout {
-            width:   1548//availableWidth
-            height:  862//availableHeigh
-           // spacing: 70//ScreenTools.defaultFontPixelHeight
+            x:       firmwarePage._side
+            width:   Math.max(0, firmwarePage.availableWidth - 2 * firmwarePage._side)
+            height:  Math.max(AzTheme.px(320), firmwarePage.availableHeight - firmwarePage._side)
+            spacing: AzTheme.px(16)
 
             // İstifadəçi görünüşlü mətnlər
             readonly property string title:             qsTr("Proqram təminatı Quraşdırma")
-           // readonly property string highlightPrefix:   "<font color=\"" + "qgcPal.warningText" + "\">"
-            readonly property string highlightPrefix:   "<font color=\"" + "#F5B331" + "\">"
+            readonly property string highlightPrefix:   "<font color=\"" + AzTheme.statusOrange + "\">"
 
             readonly property string highlightSuffix:   "</font>"
             readonly property string welcomeText:       qsTr("%1 Pixhawk cihazlarında və SiK Radiolarında proqram təminatını təkmilləşdirə bilərsiniz.").arg(QGroundControl.appName)
@@ -407,32 +400,116 @@ SetupPage {
                 } // QGCPopupDialog
             } // Component - firmwareSelectDialogComponent
 
-            ProgressBar {
-                id:                     progressBar
-                Layout.preferredWidth:  parent.width
-                visible:                !flashBootloaderButton.visible
+            // Header
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: AzTheme.px(firmwarePage._compact ? 4 : 12)
+                spacing: AzTheme.px(6)
+
+                Text {
+                    Layout.fillWidth: true
+                    text: qsTr("Proqram Təminatı Konfiqurasiyası")
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
+                    font.pixelSize: AzTheme.fontPx(firmwarePage._compact ? 18 : 20)
+                    wrapMode: Text.WordWrap
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    text: qsTr("Cihaz Proqram Təminatı Parametrləri")
+                    color: AzTheme.textSecondary
+                    font.family: AzTheme.fontFamily
+                    font.pixelSize: AzTheme.fontPx(13)
+                    wrapMode: Text.WordWrap
+                }
             }
 
-            QGCButton {
-                id:         flashBootloaderButton
-                text:       qsTr("ChibiOS Bootloader Quraşdır")
-                visible:    firmwarePage.advanced
-                onClicked:  globals.activeVehicle.flashBootloader()
-            }
+            // The status card: the progress bar and the upgrade log
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                radius: AzTheme.px(AzTheme.cardRadius)
+                border.width: 1
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
 
-            TextArea {
-                id:                 statusTextArea
-                Layout.preferredWidth:              parent.width
-                Layout.fillHeight:  true
-                readOnly:           true
-                font.pointSize:     11//ScreenTools.defaultFontPointSize
-                textFormat:         TextEdit.RichText
-                text:               _singleFirmwareMode ? welcomeTextSingle : welcomeText
-                color:              "white"//qgcPal.text
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: AzTheme.px(firmwarePage._compact ? 14 : 18)
+                    spacing: AzTheme.px(12)
 
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: AzTheme.px(12)
 
-                background: Rectangle {
-                    color: "#232323"//qgcPal.windowShade 181818
+                        Text {
+                            Layout.fillWidth: true
+                            text: title
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(16)
+                            elide: Text.ElideRight
+                        }
+
+                        QGCButton {
+                            id:         flashBootloaderButton
+                            text:       qsTr("ChibiOS Bootloader Quraşdır")
+                            visible:    firmwarePage.advanced
+                            onClicked:  if (globals.activeVehicle) globals.activeVehicle.flashBootloader()
+                        }
+                    }
+
+                    // A dark rounded track with a green fill
+                    ProgressBar {
+                        id:                     progressBar
+                        Layout.fillWidth:       true
+                        visible:                !flashBootloaderButton.visible
+
+                        background: Rectangle {
+                            implicitHeight: AzTheme.px(8)
+                            radius:         height / 2
+                            color:          AzTheme.slotEmpty
+                        }
+
+                        contentItem: Item {
+                            implicitHeight: AzTheme.px(8)
+
+                            Rectangle {
+                                width:  progressBar.visualPosition * parent.width
+                                height: parent.height
+                                radius: height / 2
+                                color:  AzTheme.statusGreen
+                            }
+                        }
+                    }
+
+                    // The upgrade log on a group box
+                    TextArea {
+                        id:                 statusTextArea
+                        Layout.fillWidth:   true
+                        Layout.fillHeight:  true
+                        readOnly:           true
+                        wrapMode:           TextEdit.WordWrap
+                        textFormat:         TextEdit.RichText
+                        text:               _singleFirmwareMode ? welcomeTextSingle : welcomeText
+                        color:              AzTheme.textCard
+                        font.family:        AzTheme.fontFamily
+                        font.pixelSize:     AzTheme.fontPx(AzTheme.popupTextSize)
+                        padding:            AzTheme.px(AzTheme.groupPadding)
+
+                        background: Rectangle {
+                            color:        AzTheme.groupFill
+                            radius:       AzTheme.px(AzTheme.groupRadius)
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
+                        }
+                    }
                 }
             }
         } // ColumnLayout
