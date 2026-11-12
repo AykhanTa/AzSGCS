@@ -6,29 +6,34 @@ import QGroundControl 1.0
 import QGroundControl.Controls 1.0
 import QGroundControl.FactControls 1.0
 
+// Parameter editor, in the new design: the vehicle setup page header, a status card with
+// the search, filter and tools, the categories as side-menu style chips, the groups as
+// side menu items on a card, and the parameter table on a card.
 Rectangle {
     id: root
     anchors.fill: parent
-    color: "black"
+    color: "transparent"
+
+    // The search field, check box, buttons and section headers take the new design's
+    // look (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // ===== Responsive =====
     readonly property bool _compact: (width < 1200) || (height < 820) || ScreenTools.isShortScreen
-    readonly property real _m:       Math.max(6, ScreenTools.defaultFontPixelHeight * (_compact ? 0.45 : 0.55))
-    readonly property real _side:    _compact ? Math.max(6, _m * 0.9) : _m * 2
+    readonly property real _m:       AzTheme.px(_compact ? 10 : 14)
+    readonly property real _side:    AzTheme.px(_compact ? 12 : 20)
+    readonly property real _top:     AzTheme.px(_compact ? 12 : 20)
 
-    // ✅ Kiçik ekranda Search/Clear/Tools hündürlüyü ARTIRILDI (text cut olmasın)
-    readonly property int  _ctrlH:     Math.round(ScreenTools.defaultFontPixelHeight * (_compact ? 1.55 : 2.0))
-    readonly property int  _catH:      Math.round(ScreenTools.defaultFontPixelHeight * (_compact ? 1.35 : 2.0))
-    readonly property real _ctrlFont:  ScreenTools.defaultFontPixelHeight * (_compact ? 0.82 : 1.0)
-    readonly property real _catFont:   ScreenTools.defaultFontPixelHeight * (_compact ? 0.90 : 1.0)
+    readonly property int  _ctrlH:   AzTheme.px(_compact ? 34 : 38)
+    readonly property int  _catH:    AzTheme.px(_compact ? 32 : 36)
+    readonly property real _cardPad: AzTheme.px(_compact ? 10 : 14)
 
     // Kiçik ekranda bloklar çox kiçilməsin
     readonly property real _compactGroupH: Math.max(ScreenTools.defaultFontPixelHeight * 10, Math.floor(root.height * 0.30))
     readonly property real _compactParamH: Math.max(ScreenTools.defaultFontPixelHeight * 16, Math.floor(root.height * 0.55))
 
-    readonly property color _textOnBlack: "white"
-    readonly property color _modifiedOnBlack: "#FF3B30"   // qırmızı (istəsən "#FF0000")
-
+    readonly property color _valueColor:    AzTheme.textCard
+    readonly property color _modifiedColor: AzTheme.statusRed
 
     // ===== State =====
     property Fact _editorDialogFact: Fact { }
@@ -39,6 +44,45 @@ Rectangle {
     readonly property bool _searchFilter: (searchText.text.trim() !== "") || controller.showModifiedOnly
 
     ParameterEditorController { id: controller }
+
+    // The status card: linear-gradient(145deg, #25272A, #181B1E), 1 px #353A3F, radius 14
+    component CardBackground: Rectangle {
+        radius: AzTheme.px(AzTheme.cardRadius)
+        border.width: 1
+        border.color: AzTheme.cardBorder
+        gradient: Gradient {
+            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+        }
+    }
+
+    // A row of the tools menu: the dark popup's row with a faint highlight
+    component ToolsMenuItem: MenuItem {
+        id: toolsItem
+        implicitHeight: visible ? AzTheme.px(40) : 0
+        height: implicitHeight
+
+        background: Rectangle {
+            color: toolsItem.highlighted ? Qt.rgba(1, 1, 1, 0.06) : "transparent"
+            radius: AzTheme.px(6)
+        }
+        contentItem: Text {
+            text: toolsItem.text
+            color: AzTheme.textCard
+            font.family: AzTheme.fontFamily
+            font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
+            verticalAlignment: Text.AlignVCenter
+            elide: Text.ElideRight
+            leftPadding: AzTheme.px(12)
+            rightPadding: AzTheme.px(12)
+        }
+    }
+
+    component ToolsMenuSeparator: MenuSeparator {
+        topPadding: AzTheme.px(4)
+        bottomPadding: AzTheme.px(4)
+        contentItem: Rectangle { implicitHeight: 1; color: AzTheme.panelBorder }
+    }
 
     // ✅ Tools menyusunu dəqiq Tools düyməsinin altına yerləşdir
     function positionToolsMenu() {
@@ -52,7 +96,7 @@ Rectangle {
         desiredX = Math.max(0, Math.min(desiredX, root.width - customToolsMenu.width))
 
         customToolsMenu.x = desiredX
-        customToolsMenu.y = p.y + Math.round(ScreenTools.defaultFontPixelHeight * 0.25)
+        customToolsMenu.y = p.y + AzTheme.px(6)
     }
 
     // İlk açılışda boş qalmasın: 1-ci category + 1-ci group seç
@@ -130,8 +174,8 @@ Rectangle {
     //    həmin bindingin asılılığı olduğu üçün sonsuz binding loop yaranırdı.
     TextMetrics {
         id: toolsMetrics
-        font.family:    ScreenTools.normalFontFamily
-        font.pixelSize: ScreenTools.defaultFontPixelHeight * 0.9
+        font.family:    AzTheme.fontFamily
+        font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
     }
 
     property real _toolsMenuWidth: 300
@@ -151,45 +195,35 @@ Rectangle {
             toolsMetrics.text = labels[i]
             w = Math.max(w, toolsMetrics.width)
         }
-        // mətn + sol/sağ doldurma (14+14) + nəfəslik
-        _toolsMenuWidth = w + 28 + ScreenTools.defaultFontPixelWidth * 1.5
+        // mətn + sol/sağ doldurma + menyunun öz kənarları + nəfəslik
+        _toolsMenuWidth = w + AzTheme.px(24) + AzTheme.px(16) + ScreenTools.defaultFontPixelWidth * 1.5
     }
 
     Component.onCompleted: _recalcToolsMenuWidth()
 
-    // ===== Tools menu (istədiyin stil) =====
+    // ===== Tools menu: the dark popup of the new combo boxes =====
     Menu {
         id: customToolsMenu
         // Əvvəlcədən ölçülmüş ölçüyə görə enlənir, amma ekran enini keçmir.
         width: Math.min(root.width - 20, Math.max(300, root._toolsMenuWidth))
+        padding: AzTheme.px(8)
 
         background: Rectangle {
-            color: "#3D3B3B"
-            border.color: "#9D9D9D"
+            color: AzTheme.menuSelectedBottom
+            border.color: AzTheme.panelBorder
             border.width: 1
-            radius: 6
+            radius: AzTheme.px(AzTheme.popupRadius)
         }
 
         // ✅ Açılmamışdan əvvəl koordinatı yenilə
         onAboutToShow: root.positionToolsMenu()
 
-        MenuItem {
+        ToolsMenuItem {
             text: qsTr("Yeniləyin")
             onTriggered: controller.refresh()
-            background: Rectangle { color: parent.highlighted ? "#504E4E" : "transparent"; radius: 4 }
-            contentItem: Text {
-                text: parent.text
-                color: "white"
-                font.family: ScreenTools.normalFontFamily
-                font.pixelSize: ScreenTools.defaultFontPixelHeight * 0.9
-                verticalAlignment: Text.AlignVCenter
-                elide: Text.ElideRight
-                leftPadding: 14
-                rightPadding: 14
-            }
         }
 
-        MenuItem {
+        ToolsMenuItem {
             text: qsTr("Hamısını proqram təminatının defoltlarına sıfırla")
             onTriggered: mainWindow.showMessageDialog(
                              qsTr("Hamısını Sıfırla"),
@@ -197,20 +231,9 @@ Rectangle {
                              Dialog.Cancel | Dialog.Reset,
                              function() { controller.resetAllToDefaults() }
                          )
-            background: Rectangle { color: parent.highlighted ? "#504E4E" : "transparent"; radius: 4 }
-            contentItem: Text {
-                text: parent.text
-                color: "white"
-                font.family: ScreenTools.normalFontFamily
-                font.pixelSize: ScreenTools.defaultFontPixelHeight * 0.9
-                verticalAlignment: Text.AlignVCenter
-                elide: Text.ElideRight
-                leftPadding: 14
-                rightPadding: 14
-            }
         }
 
-        MenuItem {
+        ToolsMenuItem {
             text: qsTr("Təyyarənin konfiqurasiya defoltlarına sıfırla")
             visible: _activeVehicle && !_activeVehicle.apmFirmware
             onTriggered: mainWindow.showMessageDialog(
@@ -219,100 +242,45 @@ Rectangle {
                              Dialog.Cancel | Dialog.Reset,
                              function() { controller.resetAllToVehicleConfiguration() }
                          )
-            background: Rectangle { color: parent.highlighted ? "#504E4E" : "transparent"; radius: 4 }
-            contentItem: Text {
-                text: parent.text
-                color: "white"
-                font.family: ScreenTools.normalFontFamily
-                font.pixelSize: ScreenTools.defaultFontPixelHeight * 0.9
-                verticalAlignment: Text.AlignVCenter
-                elide: Text.ElideRight
-                leftPadding: 14
-                rightPadding: 14
-            }
         }
 
-        MenuSeparator { contentItem: Rectangle { implicitHeight: 1; color: "#6F6F6F" } }
+        ToolsMenuSeparator { }
 
-        MenuItem {
+        ToolsMenuItem {
             text: qsTr("Nəzərdən keçirilməsi üçün fayldan yükləyin...")
             onTriggered: {
                 fileDialog.title = qsTr("Parametrləri yüklə")
                 fileDialog.openForLoad()
             }
-            background: Rectangle { color: parent.highlighted ? "#504E4E" : "transparent"; radius: 4 }
-            contentItem: Text {
-                text: parent.text
-                color: "white"
-                font.family: ScreenTools.normalFontFamily
-                font.pixelSize: ScreenTools.defaultFontPixelHeight * 0.9
-                verticalAlignment: Text.AlignVCenter
-                elide: Text.ElideRight
-                leftPadding: 14
-                rightPadding: 14
-            }
         }
 
-        MenuItem {
+        ToolsMenuItem {
             text: qsTr("Faylda saxla...")
             onTriggered: {
                 fileDialog.title = qsTr("Parametrləri saxla")
                 fileDialog.openForSave()
             }
-            background: Rectangle { color: parent.highlighted ? "#504E4E" : "transparent"; radius: 4 }
-            contentItem: Text {
-                text: parent.text
-                color: "white"
-                font.family: ScreenTools.normalFontFamily
-                font.pixelSize: ScreenTools.defaultFontPixelHeight * 0.9
-                verticalAlignment: Text.AlignVCenter
-                elide: Text.ElideRight
-                leftPadding: 14
-                rightPadding: 14
-            }
         }
 
-        MenuSeparator { visible: _showRCToParam; contentItem: Rectangle { implicitHeight: 1; color: "#6F6F6F" } }
+        ToolsMenuSeparator { visible: _showRCToParam }
 
-        MenuItem {
+        ToolsMenuItem {
             text: qsTr("Param üçün bütün RC-ni silin")
             visible: _showRCToParam && _activeVehicle
-            onTriggered: _activeVehicle.clearAllParamMapRC()
-            background: Rectangle { color: parent.highlighted ? "#504E4E" : "transparent"; radius: 4 }
-            contentItem: Text {
-                text: parent.text
-                color: "white"
-                font.family: ScreenTools.normalFontFamily
-                font.pixelSize: ScreenTools.defaultFontPixelHeight * 0.9
-                verticalAlignment: Text.AlignVCenter
-                elide: Text.ElideRight
-                leftPadding: 14
-                rightPadding: 14
-            }
+            onTriggered: if (_activeVehicle) _activeVehicle.clearAllParamMapRC()
         }
 
-        MenuSeparator { contentItem: Rectangle { implicitHeight: 1; color: "#6F6F6F" } }
+        ToolsMenuSeparator { }
 
-        MenuItem {
+        ToolsMenuItem {
             text: qsTr("Təyyarəni yenidən başladın")
             visible: _activeVehicle
             onTriggered: mainWindow.showMessageDialog(
                              qsTr("Təyyarəni yenidən başladın"),
                              qsTr("Təyyarəni yenidən işə salmaq üçün Ok seçin."),
                              Dialog.Cancel | Dialog.Ok,
-                             function() { _activeVehicle.rebootVehicle() }
+                             function() { if (_activeVehicle) _activeVehicle.rebootVehicle() }
                          )
-            background: Rectangle { color: parent.highlighted ? "#504E4E" : "transparent"; radius: 4 }
-            contentItem: Text {
-                text: parent.text
-                color: "white"
-                font.family: ScreenTools.normalFontFamily
-                font.pixelSize: ScreenTools.defaultFontPixelHeight * 0.9
-                verticalAlignment: Text.AlignVCenter
-                elide: Text.ElideRight
-                leftPadding: 14
-                rightPadding: 14
-            }
         }
 
         onClosed: toolsButton.checked = false
@@ -331,7 +299,7 @@ Rectangle {
         boundsBehavior: Flickable.StopAtBounds
 
         contentWidth: width
-        contentHeight: root._compact ? (contentCol.implicitHeight + root._side) : height
+        contentHeight: root._compact ? (contentCol.implicitHeight + root._top + root._side) : height
 
         ScrollBar.vertical: ScrollBar { policy: root._compact ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff }
         ScrollBar.horizontal: ScrollBar { policy: ScrollBar.AlwaysOff }
@@ -339,66 +307,55 @@ Rectangle {
         ColumnLayout {
             id: contentCol
             x: root._side
-            y: 0
+            y: root._top
             width: pageFlick.width - (root._side * 2)
 
             // BÖYÜK EKRAN FIX
-            height: root._compact ? implicitHeight : pageFlick.height
+            height: root._compact ? implicitHeight : (pageFlick.height - root._top - root._side)
 
-            spacing: root._compact ? (root._m * 0.55) : root._m
+            spacing: root._m
 
             // ===== Title + description =====
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: root._compact ? 2 : 4
+                spacing: AzTheme.px(6)
 
                 Text {
                     text: qsTr("Parametrlər")
-                    color: "white"
-                    font.bold: true
-                    font.pixelSize: root._compact ? 22 : 28
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
+                    font.pixelSize: AzTheme.fontPx(root._compact ? 18 : 20)
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                 }
 
                 Text {
-                    text: qsTr("Parametrləri axtarın, kateqoriya və qruplara görə seçin.")
-                    color: "#E8E8E8"
-                    font.pixelSize: root._compact ? 12 : 14
-                    Layout.fillWidth: true
-                    wrapMode: Text.WordWrap
-                }
-
-                Text {
-                    text: qsTr("Dəyəri klikləyərək redaktə edin. Dəyişiklikləri ehtiyatla edin.")
-                    color: "#CFCFCF"
-                    font.pixelSize: root._compact ? 11 : 13
+                    text: qsTr("Parametrləri axtarın, kateqoriya və qruplara görə seçin.") + " " +
+                          qsTr("Dəyəri klikləyərək redaktə edin. Dəyişiklikləri ehtiyatla edin.")
+                    color: AzTheme.textSecondary
+                    font.family: AzTheme.fontFamily
+                    font.pixelSize: AzTheme.fontPx(13)
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                 }
             }
 
-            // ===== Navbar =====
-            Rectangle {
+            // ===== Navbar: search, filter, categories and tools on a card =====
+            CardBackground {
                 id: navBg
                 Layout.fillWidth: true
-                color: "#3D3B3B"
-                radius: 8
-                border.color: "#9D9D9D"
-                border.width: 1
-
-                readonly property real pad: root._compact ? Math.max(6, root._m * 0.70) : root._m
-                implicitHeight: navGrid.implicitHeight + pad * 2
+                implicitHeight: navGrid.implicitHeight + root._cardPad * 2
 
                 GridLayout {
                     id: navGrid
-                    x: navBg.pad
-                    y: navBg.pad
-                    width: navBg.width - navBg.pad * 2
+                    x: root._cardPad
+                    y: root._cardPad
+                    width: navBg.width - root._cardPad * 2
 
                     columns: root._compact ? 2 : 5
-                    columnSpacing: root._compact ? Math.max(6, root._m * 0.65) : root._m
-                    rowSpacing:    root._compact ? Math.max(4, root._m * 0.50) : 0
+                    columnSpacing: root._m
+                    rowSpacing: root._compact ? AzTheme.px(8) : 0
 
                     QGCTextField {
                         id: searchText
@@ -410,17 +367,7 @@ Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: root._ctrlH
                         Layout.minimumHeight: root._ctrlH
-
-                        font.pixelSize: root._ctrlFont
-
-                        background: Rectangle {
-                            color: "#2A2A2A"
-                            radius: 5
-                            border.color: "#FFFFFF"
-                            border.width: 1
-                        }
-                        color: "#FFFFFF"
-                        placeholderTextColor: "#FFFFFF"
+                        Layout.minimumWidth: AzTheme.px(160)
                     }
 
                     QGCButton {
@@ -429,22 +376,6 @@ Rectangle {
                         Layout.column: 1
                         Layout.preferredHeight: root._ctrlH
                         Layout.minimumHeight: root._ctrlH
-
-                        background: Rectangle {
-                            color: "#2A2A2A"
-                            radius: 5
-                            border.color: parent.pressed ? "#00FF00" : "#FFFFFF"
-                            border.width: 1
-                        }
-                        contentItem: Text {
-                            text: parent.text
-                            color: "white"
-                            font.family: ScreenTools.normalFontFamily
-                            font.pixelSize: root._ctrlFont
-                            verticalAlignment: Text.AlignVCenter
-                            horizontalAlignment: Text.AlignHCenter
-                            elide: Text.ElideRight
-                        }
 
                         onClicked: {
                             if (ScreenTools.isMobile) Qt.inputMethod.hide()
@@ -464,65 +395,18 @@ Rectangle {
                         Layout.fillWidth: root._compact
                         Layout.preferredHeight: root._ctrlH
                         Layout.minimumHeight: root._ctrlH
-
-                        background: Rectangle { color: "#2A2A2A"; radius: 5 }
-
-                        indicator: Rectangle {
-                            width:  root._compact ? 18 : 24
-                            height: root._compact ? 18 : 24
-                            anchors.verticalCenter: parent.verticalCenter
-                            x: parent.leftPadding
-                            radius: 4
-                            border.color: parent.checked ? "#00FF00" : "#FFFFFF"
-                            border.width: 2
-                            color: parent.checked ? "#00FF00" : "transparent"
-
-                            Text {
-                                text: "✓"
-                                color: "#2A2A2A"
-                                font.pixelSize: height * 0.82
-                                font.bold: true
-                                anchors.centerIn: parent
-                                visible: parent.parent.checked
-                            }
-                        }
-
-                        contentItem: Text {
-                            text: parent.text
-                            color: "white"
-                            font.family: ScreenTools.normalFontFamily
-                            font.pixelSize: ScreenTools.defaultFontPixelHeight * (root._compact ? 0.78 : 1.0)
-                            verticalAlignment: Text.AlignVCenter
-                            leftPadding: parent.indicator.width + parent.spacing + 5
-                            elide: Text.ElideRight
-                        }
                     }
 
                     QGCButton {
                         id: toolsButton
                         text: qsTr("Alətlər")
                         checkable: true
+                        iconSource: "qrc:/res/AZSHIELD_ICON/v2/popup_settings.svg"
 
                         Layout.row: root._compact ? 1 : 0
                         Layout.column: root._compact ? 1 : 4
                         Layout.preferredHeight: root._ctrlH
                         Layout.minimumHeight: root._ctrlH
-
-                        background: Rectangle {
-                            color: "#2A2A2A"
-                            radius: 5
-                            border.color: parent.checked ? "#00FF00" : "#FFFFFF"
-                            border.width: 1
-                        }
-                        contentItem: Text {
-                            text: parent.text
-                            color: "white"
-                            font.family: ScreenTools.normalFontFamily
-                            font.pixelSize: root._ctrlFont
-                            verticalAlignment: Text.AlignVCenter
-                            horizontalAlignment: Text.AlignHCenter
-                            elide: Text.ElideRight
-                        }
 
                         onClicked: {
                             checked = true
@@ -533,7 +417,7 @@ Rectangle {
 
                     Flow {
                         id: categoryFlow
-                        spacing: Math.max(6, root._m * 0.60)
+                        spacing: AzTheme.px(6)
 
                         Layout.row: root._compact ? 2 : 0
                         Layout.column: root._compact ? 0 : 3
@@ -547,30 +431,40 @@ Rectangle {
                         Repeater {
                             model: controller.categories
 
+                            // A chip with the side menu's selected box
                             QGCButton {
+                                id: categoryChip
                                 text: object.name
                                 checked: object == controller.currentCategory
                                 autoExclusive: true
+                                hoverEnabled: true
 
-                                Layout.preferredHeight: root._catH
-                                Layout.minimumHeight: root._catH
-
+                                height: root._catH
                                 width: root._compact
                                        ? Math.max(90,
                                                   Math.floor((categoryFlow.width - categoryFlow.spacing * (categoryFlow.cols - 1)) / categoryFlow.cols))
                                        : implicitWidth
 
                                 background: Rectangle {
-                                    color: "#2A2A2A"
-                                    radius: 5
-                                    border.color: parent.checked ? "#00FF00" : "#FFFFFF"
+                                    radius: AzTheme.px(AzTheme.menuSelectedRadius)
+                                    color: (categoryChip.hovered && !categoryChip.checked) ? Qt.rgba(1, 1, 1, 0.04) : "transparent"
+                                    gradient: categoryChip.checked ? chipGradient : null
                                     border.width: 1
+                                    border.color: categoryChip.checked ? AzTheme.menuSelectedBorder
+                                                                       : (categoryChip.hovered ? AzTheme.cardHoverBorder : AzTheme.groupBorder)
+
+                                    Gradient {
+                                        id: chipGradient
+                                        GradientStop { position: 0; color: AzTheme.menuSelectedTop }
+                                        GradientStop { position: 1; color: AzTheme.menuSelectedBottom }
+                                    }
                                 }
                                 contentItem: Text {
-                                    text: parent.text
-                                    color: "white"
-                                    font.family: ScreenTools.normalFontFamily
-                                    font.pixelSize: root._catFont
+                                    text: categoryChip.text
+                                    color: categoryChip.checked ? AzTheme.textPrimary : AzTheme.textSecondary
+                                    font.family: AzTheme.fontFamily
+                                    font.weight: categoryChip.checked ? Font.Medium : Font.Normal
+                                    font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
                                     verticalAlignment: Text.AlignVCenter
                                     horizontalAlignment: Text.AlignHCenter
                                     elide: Text.ElideRight
@@ -604,16 +498,12 @@ Rectangle {
                                         ? (root._searchFilter ? root._compactParamH : (root._compactGroupH + root._compactParamH + root._m))
                                         : -1
 
-                Rectangle {
+                // ---- Groups: side menu items on a card ----
+                CardBackground {
                     id: groupPanel
                     readonly property bool _hide: root._searchFilter
                     visible: !_hide
                     opacity: _hide ? 0 : 1
-
-                    color: "transparent"
-                    border.color: "#FFFFFF"
-                    border.width: 2
-                    radius: 8
                     clip: true
 
                     Layout.fillWidth: (!_hide && bodyGrid.columns === 1)
@@ -632,7 +522,7 @@ Rectangle {
                     QGCFlickable {
                         id: groupScroll
                         anchors.fill: parent
-                        anchors.margins: 6
+                        anchors.margins: root._cardPad
                         clip: true
                         flickableDirection: Flickable.VerticalFlick
                         contentHeight: groupedColumn.height
@@ -640,21 +530,18 @@ Rectangle {
                         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
                         ScrollBar.horizontal: ScrollBar { policy: ScrollBar.AlwaysOff }
 
-                        Rectangle { anchors.fill: parent; color: "#3D3B3B"; radius: 5 }
-
                         ColumnLayout {
                             id: groupedColumn
                             anchors.left: parent.left
                             anchors.right: parent.right
-                            anchors.margins: 10
-                            spacing: Math.ceil(ScreenTools.defaultFontPixelHeight * 0.25)
+                            spacing: AzTheme.px(6)
 
                             Repeater {
                                 model: controller.categories
 
                                 Column {
                                     Layout.fillWidth: true
-                                    spacing: Math.ceil(ScreenTools.defaultFontPixelHeight * 0.25)
+                                    spacing: AzTheme.px(4)
 
                                     SectionHeader {
                                         anchors.left: parent.left
@@ -675,29 +562,40 @@ Rectangle {
                                     Repeater {
                                         model: (object == controller.currentCategory) ? object.groups : 0
 
+                                        // The side menu's item: the selected box, a faint outline on hover
                                         QGCButton {
+                                            id: groupItem
                                             anchors.left: parent.left
                                             anchors.right: parent.right
                                             text: object.name
-                                            height: ScreenTools.defaultFontPixelHeight * 1.5
+                                            height: AzTheme.px(36)
                                             checked: object == controller.currentGroup
                                             autoExclusive: true
                                             hoverEnabled: true
 
                                             background: Rectangle {
-                                                color: parent.checked ? "#557D55" : (parent.hovered ? "#504E4E" : "#2A2A2A")
-                                                radius: 5
-                                                border.color: parent.checked ? "#00FF00" : "#9D9D9D"
-                                                border.width: parent.hovered ? 2 : 1
+                                                radius: AzTheme.px(AzTheme.menuSelectedRadius)
+                                                color: (groupItem.hovered && !groupItem.checked) ? Qt.rgba(1, 1, 1, 0.04) : "transparent"
+                                                gradient: groupItem.checked ? groupGradient : null
+                                                border.width: (groupItem.checked || groupItem.hovered) ? 1 : 0
+                                                border.color: groupItem.checked ? AzTheme.menuSelectedBorder : AzTheme.panelBorder
+
+                                                Gradient {
+                                                    id: groupGradient
+                                                    GradientStop { position: 0; color: AzTheme.menuSelectedTop }
+                                                    GradientStop { position: 1; color: AzTheme.menuSelectedBottom }
+                                                }
                                             }
 
                                             contentItem: Text {
-                                                text: parent.text
-                                                color: parent.checked ? "#00FF00" : "#FFFFFF"
-                                                font.family: ScreenTools.normalFontFamily
-                                                font.pixelSize: ScreenTools.defaultFontPixelHeight * 0.85
+                                                text: groupItem.text
+                                                color: groupItem.checked ? AzTheme.textPrimary : AzTheme.textCard
+                                                font.family: AzTheme.fontFamily
+                                                font.weight: groupItem.checked ? Font.Medium : Font.Normal
+                                                font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
                                                 verticalAlignment: Text.AlignVCenter
-                                                horizontalAlignment: Text.AlignHCenter
+                                                horizontalAlignment: Text.AlignLeft
+                                                leftPadding: AzTheme.px(12)
                                                 elide: Text.ElideRight
                                             }
 
@@ -713,12 +611,9 @@ Rectangle {
                     }
                 }
 
-                Rectangle {
+                // ---- Parameters: the table on a card ----
+                CardBackground {
                     id: parameterPanel
-                    color: "transparent"
-                    border.color: "#FFFFFF"
-                    border.width: 2
-                    radius: 8
                     clip: true
 
                     Layout.fillWidth: true
@@ -728,9 +623,9 @@ Rectangle {
                     TableView {
                         id: tableView
                         anchors.fill: parent
-                        anchors.margins: 10
-                        columnSpacing: ScreenTools.defaultFontPixelWidth
-                        rowSpacing: ScreenTools.defaultFontPixelHeight / 4
+                        anchors.margins: root._cardPad
+                        columnSpacing: AzTheme.px(16)
+                        rowSpacing: AzTheme.px(10)
                         model: controller.parameters
                         clip: true
                         contentWidth: width
@@ -758,29 +653,29 @@ Rectangle {
                             implicitHeight: label.contentHeight
                             clip: true
 
-
                             QGCLabel {
                                 id: label
                                 width: column == 1 ? ScreenTools.defaultFontPixelWidth * 15 : contentWidth
                                 text: column == 1 ? col1String() : display
 
-                                // ✅ column 0 (ad) həmişə ağ, column 1 (dəyər) default/ağ, dəyişibsə qırmızı
-                                color: column == 1 ? col1Color() : root._textOnBlack
+                                // Ad ağ, təsvir boz; dəyər ağ, dəyişibsə qırmızı.
+                                color: column == 1 ? col1Color() : (column == 0 ? AzTheme.textCard : AzTheme.textSecondary)
 
                                 maximumLineCount: 1
                                 elide: column == 1 ? Text.ElideRight : Text.ElideNone
-                                font.family: "Arial"
-                                font.pixelSize: 15
+                                font.family: AzTheme.fontFamily
+                                font.weight: column == 1 ? Font.Medium : Font.Normal
+                                font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
 
                                 function col1Color() {
                                     // fact yoxdursa fallback
-                                    if (!fact) return root._textOnBlack
+                                    if (!fact) return root._valueColor
 
                                     // ✅ dəyişdirilmiş parametr = defaultValueAvailable && !valueEqualsDefault
                                     if (fact.defaultValueAvailable && !fact.valueEqualsDefault) {
-                                        return root._modifiedOnBlack
+                                        return root._modifiedColor
                                     }
-                                    return root._textOnBlack
+                                    return root._valueColor
                                 }
 
                                 function col1String() {
