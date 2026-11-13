@@ -24,6 +24,12 @@ Item {
     property bool   popped:             false
     property real   _margins:           _az ? AzTheme.px(6) : ScreenTools.defaultFontPixelHeight * 0.5
 
+    // Height of whatever header is shown, so an empty one leaves no gap above the page in
+    // the new design (the page's own top margin is the only one, as on the setup pages).
+    readonly property real _headerHeight: headerLoader.sourceComponent === null
+                                          ? (headingColumn.visible ? headingColumn.height : 0)
+                                          : (headerLoader.visible ? headerLoader.height : 0)
+
     // The new design's look for screens that ask for it by declaring
     // `readonly property bool azInputStyle: true` (see QGCLabel._az).
     readonly property bool _az: typeof azInputStyle !== "undefined" && azInputStyle === true
@@ -32,7 +38,7 @@ Item {
 
     Loader {
         id:                     headerLoader
-        anchors.topMargin:      _margins
+        anchors.topMargin:      _az ? 0 : _margins
         anchors.top:            parent.top
         anchors.left:           parent.left
         anchors.rightMargin:    _margins
@@ -42,7 +48,7 @@ Item {
 
     Column {
         id:                     headingColumn
-        anchors.topMargin:      _margins
+        anchors.topMargin:      _az ? 0 : _margins
         anchors.top:            parent.top
         anchors.left:           parent.left
         anchors.rightMargin:    _margins
@@ -88,7 +94,7 @@ Item {
 
     Item {
         id:                     mainContent
-        anchors.topMargin:      _az ? AzTheme.px(16) : ScreenTools.defaultFontPixelHeight
+        anchors.topMargin:      _az ? (_headerHeight > 0 ? AzTheme.px(16) : 0) : ScreenTools.defaultFontPixelHeight
         anchors.top:            headerLoader.sourceComponent === null ? (headingColumn.visible ? headingColumn.bottom : parent.top) : headerLoader.bottom
         anchors.bottom:         parent.bottom
         anchors.left:           parent.left
@@ -102,7 +108,10 @@ Item {
 
     QGCColoredImage {
         id:                     floatIcon
-        anchors.verticalCenter: headerLoader.visible ? headerLoader.verticalCenter : headingColumn.verticalCenter
+        // The new design pins it level with the page title, also when the page draws its own
+        // header and leaves the shared one empty.
+        anchors.verticalCenter: _az ? undefined : (headerLoader.visible ? headerLoader.verticalCenter : headingColumn.verticalCenter)
+        y:                      _headerHeight > 0 ? 0 : AzTheme.px(20)
         anchors.right:          parent.right
         width:                  ScreenTools.defaultFontPixelHeight * 2
         height:                 width
