@@ -7,8 +7,14 @@ import QGroundControl.FactControls
 import QGroundControl.Controls
 import QGroundControl.GPS.NTRIP
 
+// NTRIP / RTK settings, in the new design: the page header of the setup pages, status cards
+// with group box rows, and the new fields, combo boxes, switches and buttons.
 SettingsPage {
     id: root
+
+    // The fields, combo boxes, switches, labels and buttons take the new design's look
+    // (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // ---- Data ----
     property var  _ntrip:    QGroundControl.settingsManager.ntripSettings
@@ -28,12 +34,14 @@ SettingsPage {
     // ---- Responsive metrics (same idiom as the sibling settings pages) ----
     readonly property bool phone:  ScreenTools.isMobile || width < 720
 
-    readonly property real gap:     Math.max(10, ScreenTools.defaultFontPixelHeight * (phone ? 0.6 : 0.8))
-    readonly property real cardPad: Math.max(14, ScreenTools.defaultFontPixelWidth  * 1.2)
+    readonly property real gap:     AzTheme.px(phone ? 8 : 10)
+    readonly property real cardPad: AzTheme.px(16)
     readonly property real ctrlW:   Math.max(150, Math.min(260, width * 0.22))
 
-    readonly property real labelPx: Math.max(11, ScreenTools.defaultFontPixelHeight * (phone ? 0.90 : 0.95))
-    readonly property real smallPx: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.85)
+    readonly property real titlePx: AzTheme.fontPx(phone ? 18 : 20)
+    readonly property real descPx:  AzTheme.fontPx(13)
+    readonly property real labelPx: AzTheme.fontPx(AzTheme.popupTextSize)
+    readonly property real smallPx: AzTheme.fontPx(12)
 
     // ---- Helpers ----
     function _fmtSize(bytes) {
@@ -61,13 +69,15 @@ SettingsPage {
         default property alias content: rowGrid.data
 
         readonly property bool _narrow: width < 720
-        readonly property real _padX:   Math.max(12, ScreenTools.defaultFontPixelWidth  * 1.2)
-        readonly property real _padY:   Math.max(8,  ScreenTools.defaultFontPixelHeight * 0.6)
-        readonly property real _minH:   Math.max(48, ScreenTools.defaultFontPixelHeight * 2.6)
+        readonly property real _padX:   AzTheme.px(AzTheme.groupPadding)
+        readonly property real _padY:   AzTheme.px(8)
+        readonly property real _minH:   AzTheme.px(AzTheme.groupRowHeight + 4)
 
         Layout.fillWidth: true
-        radius: 10
-        color: "#2A2A2A"
+        radius: AzTheme.px(AzTheme.groupRadius)
+        color: AzTheme.groupFill
+        border.width: 1
+        border.color: AzTheme.groupBorder
         implicitHeight: Math.max(_minH, rowGrid.implicitHeight + _padY * 2)
         height: implicitHeight
 
@@ -79,8 +89,8 @@ SettingsPage {
             anchors.topMargin: rowRoot._padY
             anchors.bottomMargin: rowRoot._padY
             columns: rowRoot._narrow ? 1 : 2
-            columnSpacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
-            rowSpacing: Math.max(6, ScreenTools.defaultFontPixelHeight * 0.35)
+            columnSpacing: AzTheme.px(10)
+            rowSpacing: AzTheme.px(6)
 
             ColumnLayout {
                 Layout.fillWidth: true
@@ -89,8 +99,7 @@ SettingsPage {
 
                 QGCLabel {
                     text: rowRoot.label
-                    color: "white"
-                    font.pixelSize: Math.max(11, ScreenTools.defaultFontPixelHeight * 0.95)
+                    font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                     Layout.minimumWidth: 0
@@ -99,8 +108,8 @@ SettingsPage {
                 QGCLabel {
                     text: rowRoot.hint
                     visible: rowRoot.hint !== ""
-                    color: "#B9B9B9"
-                    font.pixelSize: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                    color: AzTheme.textSecondary
+                    font.pixelSize: AzTheme.fontPx(12)
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                     Layout.minimumWidth: 0
@@ -116,13 +125,16 @@ SettingsPage {
         property string title
         default property alias content: cardLayout.data
 
-        readonly property real _pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+        readonly property real _pad: AzTheme.px(16)
 
         Layout.fillWidth: true
-        color: "#3d3b3b"
-        radius: 16
-        border.color: "white"
-        border.width: 2
+        radius: AzTheme.px(AzTheme.cardRadius)
+        border.width: 1
+        border.color: AzTheme.cardBorder
+        gradient: Gradient {
+            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+        }
         implicitHeight: cardLayout.implicitHeight + _pad * 2
         height: implicitHeight
 
@@ -130,14 +142,15 @@ SettingsPage {
             id: cardLayout
             anchors.fill: parent
             anchors.margins: cardRoot._pad
-            spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+            spacing: AzTheme.px(8)
 
-            QGCLabel {
+            Text {
                 text: cardRoot.title
                 visible: cardRoot.title !== ""
-                color: "white"
-                font.pixelSize: Math.max(15, ScreenTools.defaultFontPixelHeight * 1.05)
-                font.bold: true
+                color: AzTheme.textCard
+                font.family: AzTheme.fontFamily
+                font.weight: Font.Medium
+                font.pixelSize: AzTheme.fontPx(16)
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
                 Layout.minimumWidth: 0
@@ -150,13 +163,15 @@ SettingsPage {
     // =====================================================================
     ColumnLayout {
         Layout.fillWidth: true
-        spacing: Math.max(6, ScreenTools.defaultFontPixelHeight * 0.6)
+        Layout.topMargin: AzTheme.px(20)
+        spacing: AzTheme.px(6)
 
         Text {
             text: qsTr("NTRIP / RTK")
-            color: "white"
-            font.pixelSize: 26
-            font.bold: true
+            color: AzTheme.textCard
+            font.family: AzTheme.fontFamily
+            font.weight: Font.Medium
+            font.pixelSize: root.titlePx
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
             Layout.minimumWidth: 0
@@ -164,19 +179,13 @@ SettingsPage {
 
         Text {
             text: qsTr("Bu bölmə RTK dəqiqliyi üçün NTRIP kaster bağlantısını və RTCM korreksiya axınını idarə edir.")
-            color: "#E8E8E8"
-            font.pixelSize: 16
+            color: AzTheme.textSecondary
+            font.family: AzTheme.fontFamily
+            font.pixelSize: root.descPx
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
             Layout.minimumWidth: 0
         }
-    }
-
-    Rectangle {
-        Layout.fillWidth: true
-        height: 1
-        color: "white"
-        opacity: 0.25
     }
 
     // =====================================================================
@@ -187,33 +196,35 @@ SettingsPage {
 
         Rectangle {
             Layout.fillWidth: true
-            radius: 10
-            color: "#2A2A2A"
-            implicitHeight: Math.max(Math.max(48, ScreenTools.defaultFontPixelHeight * 2.6),
-                                     statusRow.implicitHeight + root.gap)
+            radius: AzTheme.px(AzTheme.groupRadius)
+            color: AzTheme.groupFill
+            border.width: 1
+            border.color: AzTheme.groupBorder
+            implicitHeight: Math.max(AzTheme.px(AzTheme.groupRowHeight + 4),
+                                     statusRow.implicitHeight + root.gap * 2)
             height: implicitHeight
 
             RowLayout {
                 id: statusRow
                 anchors.fill: parent
-                anchors.leftMargin: Math.max(12, ScreenTools.defaultFontPixelWidth * 1.2)
-                anchors.rightMargin: Math.max(12, ScreenTools.defaultFontPixelWidth * 1.2)
-                spacing: Math.max(10, ScreenTools.defaultFontPixelWidth)
+                anchors.leftMargin: AzTheme.px(AzTheme.groupPadding)
+                anchors.rightMargin: AzTheme.px(AzTheme.groupPadding)
+                spacing: AzTheme.px(10)
 
                 Rectangle {
                     id: statusDot
-                    readonly property real _size: Math.max(12, ScreenTools.defaultFontPixelHeight * 0.75)
+                    readonly property real _size: AzTheme.px(12)
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredWidth: statusDot._size
                     Layout.preferredHeight: statusDot._size
                     radius: statusDot._size / 2
                     color: {
                         switch (root._status) {
-                        case NTRIPManager.Connected:    return "#4CAF50"
+                        case NTRIPManager.Connected:    return AzTheme.statusGreen
                         case NTRIPManager.Connecting:
-                        case NTRIPManager.Reconnecting: return "#FF9800"
-                        case NTRIPManager.Error:        return "#F44336"
-                        default:                        return "#9E9E9E"
+                        case NTRIPManager.Reconnecting: return AzTheme.statusOrange
+                        case NTRIPManager.Error:        return AzTheme.statusRed
+                        default:                        return AzTheme.mutedText
                         }
                     }
                 }
@@ -223,7 +234,7 @@ SettingsPage {
                     Layout.minimumWidth: 0
                     text: root._ntripMgr ? (root._ntripMgr.statusMessage || qsTr("Bağlantı yoxdur"))
                                          : qsTr("Əlçatmazdır")
-                    color: "white"
+                    color: AzTheme.textCard
                     font.pixelSize: root.labelPx
                     wrapMode: Text.WordWrap
                 }
@@ -254,7 +265,7 @@ SettingsPage {
 
             QGCLabel {
                 text: root._ntrip.ntripMountpoint.valueString
-                color: "#E8E8E8"
+                color: AzTheme.textSecondary
                 font.pixelSize: root.labelPx
                 Layout.alignment: root.phone ? Qt.AlignLeft : Qt.AlignRight
             }
@@ -266,7 +277,7 @@ SettingsPage {
 
             QGCLabel {
                 text: root._stats ? root._stats.messagesReceived : ""
-                color: "#E8E8E8"
+                color: AzTheme.textSecondary
                 font.pixelSize: root.labelPx
                 Layout.alignment: root.phone ? Qt.AlignLeft : Qt.AlignRight
             }
@@ -279,7 +290,7 @@ SettingsPage {
             QGCLabel {
                 text: root._stats ? (root._fmtSize(root._stats.bytesReceived) + "  ("
                                      + root._fmtRate(root._stats.dataRateBytesPerSec) + ")") : ""
-                color: "#E8E8E8"
+                color: AzTheme.textSecondary
                 font.pixelSize: root.labelPx
                 Layout.alignment: root.phone ? Qt.AlignLeft : Qt.AlignRight
             }
@@ -292,7 +303,7 @@ SettingsPage {
             QGCLabel {
                 text: root._rtcm ? (root._fmtSize(root._rtcm.totalBytesSent) + "  ("
                                     + root._rtcm.bandwidthKBps.toFixed(1) + " KB/s)") : ""
-                color: "#E8E8E8"
+                color: AzTheme.textSecondary
                 font.pixelSize: root.labelPx
                 Layout.alignment: root.phone ? Qt.AlignLeft : Qt.AlignRight
             }
@@ -304,7 +315,7 @@ SettingsPage {
 
             QGCLabel {
                 text: root._ntripMgr ? root._ntripMgr.ggaSource : ""
-                color: "#E8E8E8"
+                color: AzTheme.textSecondary
                 font.pixelSize: root.labelPx
                 Layout.alignment: root.phone ? Qt.AlignLeft : Qt.AlignRight
             }
@@ -316,7 +327,7 @@ SettingsPage {
             Layout.minimumWidth: 0
             visible: root._connected && root._stats && root._stats.dataStale
             text: qsTr("Qoşuludur, lakin son vaxtlar məlumat alınmır.")
-            color: "#FF9800"
+            color: AzTheme.statusOrange
             font.pixelSize: root.smallPx
             wrapMode: Text.WordWrap
         }
@@ -326,7 +337,7 @@ SettingsPage {
             Layout.minimumWidth: 0
             visible: root._connected && root._ntripMgr && root._ntripMgr.securityWarning !== ""
             text: root._ntripMgr ? root._ntripMgr.securityWarning : ""
-            color: "#FF9800"
+            color: AzTheme.statusOrange
             font.pixelSize: root.smallPx
             wrapMode: Text.WordWrap
         }
@@ -337,7 +348,7 @@ SettingsPage {
             visible: root._status === NTRIPManager.Error && root._ntripMgr
                      && root._ntripMgr.statusMessage !== ""
             text: root._ntripMgr ? root._ntripMgr.statusMessage : ""
-            color: "#F44336"
+            color: AzTheme.statusRed
             font.pixelSize: root.smallPx
             wrapMode: Text.WordWrap
         }
@@ -477,7 +488,7 @@ SettingsPage {
             visible: root._ntripMgr
                      && root._ntripMgr.sourceTableController.fetchStatus === NTRIPSourceTableController.InProgress
             text: qsTr("Mountpoint siyahısı alınır…")
-            color: "#FF9800"
+            color: AzTheme.statusOrange
             font.pixelSize: root.smallPx
             wrapMode: Text.WordWrap
         }
@@ -488,7 +499,7 @@ SettingsPage {
             visible: root._ntripMgr
                      && root._ntripMgr.sourceTableController.fetchStatus === NTRIPSourceTableController.Error
             text: root._ntripMgr ? root._ntripMgr.sourceTableController.fetchError : ""
-            color: "#F44336"
+            color: AzTheme.statusRed
             font.pixelSize: root.smallPx
             wrapMode: Text.WordWrap
         }

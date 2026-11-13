@@ -7,10 +7,16 @@ import QGroundControl
 import QGroundControl.FactControls
 import QGroundControl.Controls
 
+// MAVLink and telemetry settings, in the new design: the page header of the setup pages,
+// status cards with group box rows, and the new fields, combo boxes and switches.
 Rectangle {
     id: root
     anchors.fill: parent
-    color: "#000000"
+    color: "transparent"
+
+    // The fields, combo boxes, switches, labels and buttons take the new design's look
+    // (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // ------------------ Data ------------------
     property var    _settingsManager:           QGroundControl.settingsManager
@@ -27,8 +33,8 @@ Rectangle {
     readonly property bool phone:  ScreenTools.isMobile || width < 720
     readonly property bool tablet: width < 1100
 
-    readonly property real sidePadding: Math.max(10, ScreenTools.defaultFontPixelWidth  * (phone ? 0.9 : tablet ? 1.2 : 1.6))
-    readonly property real gap:         Math.max(10, ScreenTools.defaultFontPixelWidth  * (phone ? 0.9 : tablet ? 1.2 : 1.6))
+    readonly property real sidePadding: AzTheme.px(phone ? 12 : 20)
+    readonly property real gap:         AzTheme.px(phone ? 10 : 16)
 
     readonly property real fontScale: {
         var w = Math.max(1, width)
@@ -37,9 +43,9 @@ Rectangle {
         return Math.max(0.90, Math.min(1.0, s))
     }
 
-    readonly property real titleFontPx: Math.max(18, ScreenTools.defaultFontPixelHeight * (phone ? 1.15 : 1.25) * fontScale)
-    readonly property real descFontPx:  Math.max(12, ScreenTools.defaultFontPixelHeight * (phone ? 0.92 : 0.98) * fontScale)
-    readonly property real labelFontPx: Math.max(11, ScreenTools.defaultFontPixelHeight * (phone ? 0.90 : 0.88) * fontScale)
+    readonly property real titleFontPx: AzTheme.fontPx(phone ? 18 : 20)
+    readonly property real descFontPx:  AzTheme.fontPx(13)
+    readonly property real labelFontPx: AzTheme.fontPx(AzTheme.popupTextSize)
 
     readonly property real availableW: Math.max(0, width - 2 * sidePadding)
 
@@ -53,9 +59,9 @@ Rectangle {
                                         ? availableW
                                         : Math.min(maxColW, Math.floor((availableW - gap) / 2))
 
-    readonly property real rowPadX: Math.max(12, ScreenTools.defaultFontPixelWidth * 1.2)
-    readonly property real rowPadY: Math.max(8,  ScreenTools.defaultFontPixelHeight * 0.6)
-    readonly property real rowMinH: Math.max(48, ScreenTools.defaultFontPixelHeight * 2.6)
+    readonly property real rowPadX: AzTheme.px(AzTheme.groupPadding)
+    readonly property real rowPadY: AzTheme.px(8)
+    readonly property real rowMinH: AzTheme.px(AzTheme.groupRowHeight + 4)
 
     // Sətirlərdəki kontrolların sabit eni — bütün bloklarda combobox/textbox eyni ölçüdə
     // və eyni xətt üzrə düzülsün deyə (digər tənzimləmə səhifələri ilə eyni formula).
@@ -102,32 +108,26 @@ Rectangle {
         anchors.top: parent.top
         anchors.leftMargin: sidePadding
         anchors.rightMargin: sidePadding
-        anchors.topMargin: 0
-        spacing: Math.max(6, ScreenTools.defaultFontPixelHeight * 0.6)
+        anchors.topMargin: AzTheme.px(20)
+        spacing: AzTheme.px(6)
 
         Text {
             text: qsTr("MAVLink & Telemetri Tənzimləmələri")
-            color: "white"
-            font.pixelSize: 26
-            font.bold: true
+            color: AzTheme.textCard
+            font.family: AzTheme.fontFamily
+            font.weight: Font.Medium
+            font.pixelSize: root.titleFontPx
             wrapMode: Text.WordWrap
             width: parent.width
         }
 
         Text {
             text: qsTr("Uçuş zamanı MAVLink rabitə parametrlərini, loglamanı və məlumat ötürmə sürətlərini idarə edir.")
-            color: "#E8E8E8"
-            font.pixelSize: 16
+            color: AzTheme.textSecondary
+            font.family: AzTheme.fontFamily
+            font.pixelSize: root.descFontPx
             wrapMode: Text.WordWrap
             width: parent.width
-        }
-
-        Rectangle {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: 1
-            color: "#FFFFFF"
-            opacity: 0.25
         }
     }
 
@@ -138,7 +138,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.topMargin: Math.max(6, ScreenTools.defaultFontPixelHeight * 0.4)
+        anchors.topMargin: AzTheme.px(16)
 
         clip: true
         interactive: true
@@ -178,12 +178,15 @@ Rectangle {
                 Rectangle {
                     id: groundStationPanel
                     width: Math.min(root.panelW, panelFlow.width)
-                    color: "#3D3B3B"
-                    radius: 16
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
 
-                    readonly property real pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+                    readonly property real pad: AzTheme.px(16)
                     readonly property real desiredH: gsLayout.implicitHeight + pad * 2
                     height: (root.columns > 1 && signingPanel && signingPanel.visible) ? root.row1H : desiredH
 
@@ -191,13 +194,14 @@ Rectangle {
                         id: gsLayout
                         anchors.fill: parent
                         anchors.margins: groundStationPanel.pad
-                        spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                        spacing: AzTheme.px(8)
 
                         Text {
                             text: qsTr("Yer stansiyası")
-                            color: "#FFFFFF"
-                            font.pixelSize: Math.max(15, ScreenTools.defaultFontPixelHeight * 1.05 * root.fontScale)
-                            font.bold: true
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(16)
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
                         }
@@ -205,8 +209,10 @@ Rectangle {
                         // MAVLink System ID
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             visible: _mavlinkSettings.gcsMavlinkSystemID.visible
                             implicitHeight: Math.max(root.rowMinH, gsIdGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
@@ -224,7 +230,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("MAVLink Sistem İD")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -242,8 +247,10 @@ Rectangle {
                         // Emit heartbeat
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             visible: _mavlinkSettings.sendGCSHeartbeat.visible
                             implicitHeight: Math.max(root.rowMinH, hbGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
@@ -261,7 +268,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Emit heartbeat")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -282,13 +288,16 @@ Rectangle {
                 Rectangle {
                     id: signingPanel
                     width: Math.min(root.panelW, panelFlow.width)
-                    color: "#3D3B3B"
-                    radius: 16
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
                     visible: _mavlinkSettings.mavlink2SigningKey.visible
 
-                    readonly property real pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+                    readonly property real pad: AzTheme.px(16)
                     readonly property real desiredH: signingLayout.implicitHeight + pad * 2
                     height: (root.columns > 1 && groundStationPanel && groundStationPanel.visible) ? root.row1H : desiredH
 
@@ -296,21 +305,23 @@ Rectangle {
                         id: signingLayout
                         anchors.fill: parent
                         anchors.margins: signingPanel.pad
-                        spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                        spacing: AzTheme.px(8)
 
                         Text {
                             text: qsTr("MAVLink 2 İmzalanması")
-                            color: "#FFFFFF"
-                            font.pixelSize: Math.max(15, ScreenTools.defaultFontPixelHeight * 1.05 * root.fontScale)
-                            font.bold: true
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(16)
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
                         }
 
                         Text {
                             text: qsTr("İmza açarları yalnız təhlükəsiz keçidlər vasitəsilə təyyarəyə göndərilməlidir.")
-                            color: "#CCCCCC"
-                            font.pixelSize: Math.max(12, ScreenTools.defaultFontPixelHeight * 0.92 * root.fontScale)
+                            color: AzTheme.textSecondary
+                            font.family: AzTheme.fontFamily
+                            font.pixelSize: AzTheme.fontPx(13)
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
                         }
@@ -318,8 +329,10 @@ Rectangle {
                         // Signing Key
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, keyGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -336,7 +349,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Açar")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                 }
@@ -354,8 +366,10 @@ Rectangle {
                         // Send button + prompt
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH + 30, sendCol.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -389,7 +403,7 @@ Rectangle {
                                     id: sendToVehiclePrompt
                                     Layout.fillWidth: true
                                     text: qsTr("İmza açarı dəyişdi. Lazım gələrsə, Təyyarə(lər)ə göndərməyi unutmayın.")
-                                    color: "yellow"
+                                    color: AzTheme.statusYellow
                                     visible: false
                                     wrapMode: Text.WordWrap
                                     horizontalAlignment: Text.AlignLeft
@@ -405,12 +419,15 @@ Rectangle {
                 Rectangle {
                     id: forwardingPanel
                     width: Math.min(root.panelW, panelFlow.width)
-                    color: "#3D3B3B"
-                    radius: 16
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
 
-                    readonly property real pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+                    readonly property real pad: AzTheme.px(16)
                     readonly property real desiredH: fwdLayout.implicitHeight + pad * 2
                     height: (root.columns > 1 && loggingPanel && loggingPanel.visible) ? root.row2H : desiredH
 
@@ -418,13 +435,14 @@ Rectangle {
                         id: fwdLayout
                         anchors.fill: parent
                         anchors.margins: forwardingPanel.pad
-                        spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                        spacing: AzTheme.px(8)
 
                         Text {
                             text: qsTr("MAVLink Yönləndirilməsi")
-                            color: "#FFFFFF"
-                            font.pixelSize: Math.max(15, ScreenTools.defaultFontPixelHeight * 1.05 * root.fontScale)
-                            font.bold: true
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(16)
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
                         }
@@ -432,8 +450,10 @@ Rectangle {
                         // Enable Forwarding
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             visible: _mavlinkSettings.forwardMavlink.visible
                             implicitHeight: Math.max(root.rowMinH, fwdOnGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
@@ -451,7 +471,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Aktivləşdirin")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                 }
@@ -466,8 +485,10 @@ Rectangle {
                         // Host Name
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             visible: _mavlinkSettings.forwardMavlinkHostName.visible
                             implicitHeight: Math.max(root.rowMinH, hostGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
@@ -485,7 +506,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Host adı")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                 }
@@ -508,13 +528,16 @@ Rectangle {
                 Rectangle {
                     id: loggingPanel
                     width: Math.min(root.panelW, panelFlow.width)
-                    color: "#3D3B3B"
-                    radius: 16
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
                     visible: !_disableAllDataPersistence
 
-                    readonly property real pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+                    readonly property real pad: AzTheme.px(16)
                     readonly property real desiredH: logLayout.implicitHeight + pad * 2
                     height: (root.columns > 1 && forwardingPanel && forwardingPanel.visible) ? root.row2H : desiredH
 
@@ -522,13 +545,14 @@ Rectangle {
                         id: logLayout
                         anchors.fill: parent
                         anchors.margins: loggingPanel.pad
-                        spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                        spacing: AzTheme.px(8)
 
                         Text {
                             text: qsTr("Logging")
-                            color: "#FFFFFF"
-                            font.pixelSize: Math.max(15, ScreenTools.defaultFontPixelHeight * 1.05 * root.fontScale)
-                            font.bold: true
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(16)
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
                         }
@@ -536,8 +560,10 @@ Rectangle {
                         // Save log after each flight
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             visible: _mavlinkSettings.telemetrySave.visible
                             implicitHeight: Math.max(root.rowMinH, s1Grid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
@@ -555,7 +581,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Hər uçuşdan sonra logu yadda saxlayın")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -571,8 +596,10 @@ Rectangle {
                         // Save logs even if vehicle was not armed
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             visible: _mavlinkSettings.telemetrySaveNotArmed.visible
                             implicitHeight: Math.max(root.rowMinH, s2Grid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
@@ -590,7 +617,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Təyyarə armed olmasa belə, logları qeyd edin")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -607,8 +633,10 @@ Rectangle {
                         // Save CSV log of telemetry data
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             visible: _mavlinkSettings.saveCsvTelemetry.visible
                             implicitHeight: Math.max(root.rowMinH, s3Grid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
@@ -626,7 +654,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Telemetriya məlumatlarının CSV logunu yadda saxlayın")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -647,13 +674,16 @@ Rectangle {
                 Rectangle {
                     id: streamRatesPanel
                     width: Math.min(root.panelW, panelFlow.width)
-                    color: "#3D3B3B"
-                    radius: 16
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
                     visible: _showAPMStreamRates
 
-                    readonly property real pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+                    readonly property real pad: AzTheme.px(16)
                     readonly property real desiredH: srLayout.implicitHeight + pad * 2
                     height: (root.columns > 1 && linkStatusPanel && linkStatusPanel.visible) ? root.row3H : desiredH
 
@@ -661,13 +691,14 @@ Rectangle {
                         id: srLayout
                         anchors.fill: parent
                         anchors.margins: streamRatesPanel.pad
-                        spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                        spacing: AzTheme.px(8)
 
                         Text {
                             text: qsTr("Stream Rates (ArduPilot Only)")
-                            color: "#FFFFFF"
-                            font.pixelSize: Math.max(15, ScreenTools.defaultFontPixelHeight * 1.05 * root.fontScale)
-                            font.bold: true
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(16)
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
                         }
@@ -675,8 +706,10 @@ Rectangle {
                         // Controlled by vehicle
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, srCtlGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -693,7 +726,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Təyyarə tərəfindən idarə olunur")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -714,8 +746,10 @@ Rectangle {
                         // Raw Sensors
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             visible: _settingsManager.apmMavlinkStreamRateSettings.streamRateRawSensors.visible
                             implicitHeight: Math.max(root.rowMinH, srRawGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
@@ -733,7 +767,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Raw Sensorları")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -753,8 +786,10 @@ Rectangle {
                         // Extended Status
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             visible: _settingsManager.apmMavlinkStreamRateSettings.streamRateExtendedStatus.visible
                             implicitHeight: Math.max(root.rowMinH, srExtGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
@@ -772,7 +807,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Extended Status")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -792,8 +826,10 @@ Rectangle {
                         // RC Channels
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             visible: _settingsManager.apmMavlinkStreamRateSettings.streamRateRCChannels.visible
                             implicitHeight: Math.max(root.rowMinH, srRcGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
@@ -811,7 +847,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("RC Kanalları")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -831,8 +866,10 @@ Rectangle {
                         // Position
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             visible: _settingsManager.apmMavlinkStreamRateSettings.streamRatePosition.visible
                             implicitHeight: Math.max(root.rowMinH, srPosGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
@@ -850,7 +887,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Position")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -870,8 +906,10 @@ Rectangle {
                         // Extra 1
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             visible: _settingsManager.apmMavlinkStreamRateSettings.streamRateExtra1.visible
                             implicitHeight: Math.max(root.rowMinH, srE1Grid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
@@ -889,7 +927,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Extra 1")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -909,8 +946,10 @@ Rectangle {
                         // Extra 2
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             visible: _settingsManager.apmMavlinkStreamRateSettings.streamRateExtra2.visible
                             implicitHeight: Math.max(root.rowMinH, srE2Grid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
@@ -928,7 +967,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Extra 2")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -948,8 +986,10 @@ Rectangle {
                         // Extra 3
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             visible: _settingsManager.apmMavlinkStreamRateSettings.streamRateExtra3.visible
                             implicitHeight: Math.max(root.rowMinH, srE3Grid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
@@ -967,7 +1007,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Extra 3")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -992,12 +1031,15 @@ Rectangle {
                 Rectangle {
                     id: linkStatusPanel
                     width: Math.min(root.panelW, panelFlow.width)
-                    color: "#3D3B3B"
-                    radius: 16
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
 
-                    readonly property real pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+                    readonly property real pad: AzTheme.px(16)
                     readonly property real desiredH: lsLayout.implicitHeight + pad * 2
                     height: (root.columns > 1 && streamRatesPanel && streamRatesPanel.visible) ? root.row3H : desiredH
 
@@ -1005,13 +1047,14 @@ Rectangle {
                         id: lsLayout
                         anchors.fill: parent
                         anchors.margins: linkStatusPanel.pad
-                        spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                        spacing: AzTheme.px(8)
 
                         Text {
                             text: qsTr("Link Status (Cari Təyyarə)")
-                            color: "#FFFFFF"
-                            font.pixelSize: Math.max(15, ScreenTools.defaultFontPixelHeight * 1.05 * root.fontScale)
-                            font.bold: true
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(16)
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
                         }
@@ -1019,8 +1062,10 @@ Rectangle {
                         // Total sent
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, ls1Grid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -1037,14 +1082,13 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Göndərilən ümumi mesajlar (hesablanmış)")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
                                 }
                                 QGCLabel {
                                     text: _activeVehicle ? _activeVehicle.mavlinkSentCount : _notConnectedStr
-                                    color: "#CCCCCC"
+                                    color: AzTheme.textSecondary
                                     font.pixelSize: root.labelFontPx
                                     Layout.alignment: root.phone ? Qt.AlignLeft : Qt.AlignRight
                                     wrapMode: Text.WordWrap
@@ -1055,8 +1099,10 @@ Rectangle {
                         // Total received
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, ls2Grid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -1073,14 +1119,13 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Cəmi qəbul edilən mesajlar")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
                                 }
                                 QGCLabel {
                                     text: _activeVehicle ? _activeVehicle.mavlinkReceivedCount : _notConnectedStr
-                                    color: "#CCCCCC"
+                                    color: AzTheme.textSecondary
                                     font.pixelSize: root.labelFontPx
                                     Layout.alignment: root.phone ? Qt.AlignLeft : Qt.AlignRight
                                     wrapMode: Text.WordWrap
@@ -1091,8 +1136,10 @@ Rectangle {
                         // Total loss
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, ls3Grid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -1109,14 +1156,13 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Ümumi mesaj itkisi")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
                                 }
                                 QGCLabel {
                                     text: _activeVehicle ? _activeVehicle.mavlinkLossCount : _notConnectedStr
-                                    color: "#CCCCCC"
+                                    color: AzTheme.textSecondary
                                     font.pixelSize: root.labelFontPx
                                     Layout.alignment: root.phone ? Qt.AlignLeft : Qt.AlignRight
                                     wrapMode: Text.WordWrap
@@ -1127,8 +1173,10 @@ Rectangle {
                         // Loss rate
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, ls4Grid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -1145,13 +1193,12 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Zərər dərəcəsi:")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                 }
                                 QGCLabel {
                                     text: _activeVehicle ? _activeVehicle.mavlinkLossPercent.toFixed(0) + "%" : _notConnectedStr
-                                    color: "#CCCCCC"
+                                    color: AzTheme.textSecondary
                                     font.pixelSize: root.labelFontPx
                                     Layout.alignment: root.phone ? Qt.AlignLeft : Qt.AlignRight
                                 }
@@ -1161,8 +1208,10 @@ Rectangle {
                         // Signing
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, ls5Grid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -1179,13 +1228,12 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("İmzalama:")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                 }
                                 QGCLabel {
                                     text: _activeVehicle ? (_activeVehicle.mavlinkSigning ? qsTr("On") : qsTr("Off")) : _notConnectedStr
-                                    color: "#CCCCCC"
+                                    color: AzTheme.textSecondary
                                     font.pixelSize: root.labelFontPx
                                     Layout.alignment: root.phone ? Qt.AlignLeft : Qt.AlignRight
                                 }
