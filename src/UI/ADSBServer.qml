@@ -6,8 +6,13 @@ import QGroundControl
 import QGroundControl.FactControls
 import QGroundControl.Controls
 
+// ADSB server settings, in the new design: the page header of the setup pages, a status card
+// with group box rows, and the new fields and switch.
 SettingsPage {
     id: root
+
+    // The fields, switch and labels take the new design's look (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // ---- Data ----
     property var  _settingsManager:          QGroundControl.settingsManager
@@ -18,32 +23,32 @@ SettingsPage {
     readonly property bool phone:  ScreenTools.isMobile || width < 720
     readonly property bool tablet: width < 1100
 
-    readonly property real gap:      Math.max(10, ScreenTools.defaultFontPixelHeight * (phone ? 0.6 : 0.8))
-    readonly property real cardPad:  Math.max(14, ScreenTools.defaultFontPixelWidth  * 1.2)
-    readonly property real rowPadX:  Math.max(12, ScreenTools.defaultFontPixelWidth  * 1.2)
-    readonly property real rowPadY:  Math.max(8,  ScreenTools.defaultFontPixelHeight * 0.6)
-    readonly property real rowMinH:  Math.max(48, ScreenTools.defaultFontPixelHeight * 2.6)
+    readonly property real gap:     AzTheme.px(phone ? 8 : 10)
+    readonly property real cardPad: AzTheme.px(16)
+    readonly property real rowPadX: AzTheme.px(AzTheme.groupPadding)
+    readonly property real rowPadY: AzTheme.px(8)
+    readonly property real rowMinH: AzTheme.px(AzTheme.groupRowHeight + 4)
 
-    readonly property real titlePx: Math.max(18, ScreenTools.defaultFontPixelHeight * (phone ? 1.15 : 1.35))
-    readonly property real descPx:  Math.max(12, ScreenTools.defaultFontPixelHeight * (phone ? 0.95 : 1.05))
-    readonly property real labelPx: Math.max(11, ScreenTools.defaultFontPixelHeight * (phone ? 0.90 : 0.95))
+    readonly property real titlePx: AzTheme.fontPx(phone ? 18 : 20)
+    readonly property real descPx:  AzTheme.fontPx(13)
+    readonly property real labelPx: AzTheme.fontPx(AzTheme.popupTextSize)
 
     // Sətirlərdəki kontrolların sabit eni — bütün textbox-lar eyni ölçüdə və
     // eyni xətt üzrə sağa hizalansın (digər tənzimləmə səhifələri ilə eyni).
     readonly property real ctrlW: Math.max(150, Math.min(260, width * 0.22))
 
-    // ---- Header (sol-yuxarıdan, boşluqsuz) ----
-    // Başlıq/alt-başlıq bir Column içində — aralarındakı boşluq digər tənzimləmə
-    // səhifələri (Uzaqdan İD) ilə eyni sıxlıqda olsun deyə.
+    // ---- Header ----
     ColumnLayout {
         Layout.fillWidth: true
-        spacing: Math.max(6, ScreenTools.defaultFontPixelHeight * 0.6)
+        Layout.topMargin: AzTheme.px(20)
+        spacing: AzTheme.px(6)
 
         Text {
             text: qsTr("ADSB Server")
-            color: "white"
-            font.pixelSize: 26
-            font.bold: true
+            color: AzTheme.textCard
+            font.family: AzTheme.fontFamily
+            font.weight: Font.Medium
+            font.pixelSize: root.titlePx
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
             Layout.minimumWidth: 0
@@ -51,28 +56,25 @@ SettingsPage {
 
         Text {
             text: qsTr("Bu bölmə ADSB server bağlantı parametrlərini idarə etmək üçün istifadə olunur.")
-            color: "#E8E8E8"
-            font.pixelSize: 16
+            color: AzTheme.textSecondary
+            font.family: AzTheme.fontFamily
+            font.pixelSize: root.descPx
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
             Layout.minimumWidth: 0
         }
     }
 
-    Rectangle {
-        Layout.fillWidth: true
-        height: 1
-        color: "white"
-        opacity: 0.25
-    }
-
     // ---- Main Card ----
     Rectangle {
         Layout.fillWidth: true
-        color: "#3d3b3b"
-        radius: 16
-        border.color: "white"
-        border.width: 2
+        radius: AzTheme.px(AzTheme.cardRadius)
+        border.width: 1
+        border.color: AzTheme.cardBorder
+        gradient: Gradient {
+            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+        }
 
         implicitHeight: cardLayout.implicitHeight + cardPad * 2
         height: implicitHeight
@@ -86,8 +88,10 @@ SettingsPage {
             // ========== Enable connect ==========
             Rectangle {
                 Layout.fillWidth: true
-                radius: 10
-                color: "#2A2A2A"
+                radius: AzTheme.px(AzTheme.groupRadius)
+                color: AzTheme.groupFill
+                border.width: 1
+                border.color: AzTheme.groupBorder
                 visible: _adsbSettings && _adsbSettings.visible && _adsbServerConnectEnabled && _adsbServerConnectEnabled.visible
                 implicitHeight: Math.max(rowMinH, enableGrid.implicitHeight + rowPadY * 2)
                 height: implicitHeight
@@ -105,7 +109,6 @@ SettingsPage {
 
                     QGCLabel {
                         text: _adsbServerConnectEnabled ? _adsbServerConnectEnabled.shortDescription : ""
-                        color: "white"
                         font.pixelSize: labelPx
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
@@ -124,8 +127,10 @@ SettingsPage {
             // ========== Host address ==========
             Rectangle {
                 Layout.fillWidth: true
-                radius: 10
-                color: "#2A2A2A"
+                radius: AzTheme.px(AzTheme.groupRadius)
+                color: AzTheme.groupFill
+                border.width: 1
+                border.color: AzTheme.groupBorder
                 visible: _adsbSettings && _adsbSettings.adsbServerHostAddress.visible
                 enabled: _adsbServerConnectEnabled ? _adsbServerConnectEnabled.rawValue : false
                 implicitHeight: Math.max(rowMinH, hostGrid.implicitHeight + rowPadY * 2)
@@ -144,7 +149,6 @@ SettingsPage {
 
                     QGCLabel {
                         text: _adsbSettings.adsbServerHostAddress.shortDescription
-                        color: "white"
                         font.pixelSize: labelPx
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
@@ -164,8 +168,10 @@ SettingsPage {
             // ========== Port ==========
             Rectangle {
                 Layout.fillWidth: true
-                radius: 10
-                color: "#2A2A2A"
+                radius: AzTheme.px(AzTheme.groupRadius)
+                color: AzTheme.groupFill
+                border.width: 1
+                border.color: AzTheme.groupBorder
                 visible: _adsbSettings && _adsbSettings.adsbServerPort.visible
                 enabled: _adsbServerConnectEnabled ? _adsbServerConnectEnabled.rawValue : false
                 implicitHeight: Math.max(rowMinH, portGrid.implicitHeight + rowPadY * 2)
@@ -184,7 +190,6 @@ SettingsPage {
 
                     QGCLabel {
                         text: _adsbSettings.adsbServerPort.shortDescription
-                        color: "white"
                         font.pixelSize: labelPx
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true

@@ -6,8 +6,14 @@ import QGroundControl
 import QGroundControl.FactControls
 import QGroundControl.Controls
 
+// Skydroid gimbal settings, in the new design: the page header of the setup pages, status
+// cards with group box rows, the design's status colours, and the new fields, switches and
+// buttons.
 SettingsPage {
     id: root
+
+    // The fields, switches, labels and buttons take the new design's look (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // ---- Data ----
     property var _settingsManager: QGroundControl.settingsManager
@@ -17,13 +23,15 @@ SettingsPage {
     // ---- Responsive metrics (digər tənzimləmə səhifələri ilə eyni) ----
     readonly property bool phone:  ScreenTools.isMobile || width < 720
 
-    readonly property real gap:     Math.max(10, ScreenTools.defaultFontPixelHeight * (phone ? 0.6 : 0.8))
-    readonly property real cardPad: Math.max(14, ScreenTools.defaultFontPixelWidth  * 1.2)
-    readonly property real rowPadX: Math.max(12, ScreenTools.defaultFontPixelWidth  * 1.2)
-    readonly property real rowPadY: Math.max(8,  ScreenTools.defaultFontPixelHeight * 0.6)
-    readonly property real rowMinH: Math.max(48, ScreenTools.defaultFontPixelHeight * 2.6)
+    readonly property real gap:     AzTheme.px(phone ? 8 : 10)
+    readonly property real cardPad: AzTheme.px(16)
+    readonly property real rowPadX: AzTheme.px(AzTheme.groupPadding)
+    readonly property real rowPadY: AzTheme.px(8)
+    readonly property real rowMinH: AzTheme.px(AzTheme.groupRowHeight + 4)
 
-    readonly property real labelPx: Math.max(11, ScreenTools.defaultFontPixelHeight * (phone ? 0.90 : 0.95))
+    readonly property real titlePx: AzTheme.fontPx(phone ? 18 : 20)
+    readonly property real descPx:  AzTheme.fontPx(13)
+    readonly property real labelPx: AzTheme.fontPx(AzTheme.popupTextSize)
     readonly property real ctrlW:   Math.max(150, Math.min(260, width * 0.22))
 
     // Zavod yer stansiyası pod-u +/-30 ilə tərpədir, əl ilə yoxlama üçün də
@@ -40,8 +48,10 @@ SettingsPage {
         property bool rowEnabled: true
 
         Layout.fillWidth: true
-        radius: 10
-        color: "#2A2A2A"
+        radius: AzTheme.px(AzTheme.groupRadius)
+        color: AzTheme.groupFill
+        border.width: 1
+        border.color: AzTheme.groupBorder
         visible: fact && fact.visible
         enabled: rowEnabled
         opacity: enabled ? 1.0 : 0.5
@@ -61,7 +71,6 @@ SettingsPage {
 
             QGCLabel {
                 text: boolRow.fact ? boolRow.fact.shortDescription : ""
-                color: "white"
                 font.pixelSize: root.labelPx
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
@@ -83,8 +92,10 @@ SettingsPage {
         property bool rowEnabled: true
 
         Layout.fillWidth: true
-        radius: 10
-        color: "#2A2A2A"
+        radius: AzTheme.px(AzTheme.groupRadius)
+        color: AzTheme.groupFill
+        border.width: 1
+        border.color: AzTheme.groupBorder
         visible: fact && fact.visible
         enabled: rowEnabled
         opacity: enabled ? 1.0 : 0.5
@@ -104,7 +115,6 @@ SettingsPage {
 
             QGCLabel {
                 text: fieldRow.fact ? fieldRow.fact.shortDescription : ""
-                color: "white"
                 font.pixelSize: root.labelPx
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
@@ -124,13 +134,15 @@ SettingsPage {
     // ---- Header ----
     ColumnLayout {
         Layout.fillWidth: true
-        spacing: Math.max(6, ScreenTools.defaultFontPixelHeight * 0.6)
+        Layout.topMargin: AzTheme.px(20)
+        spacing: AzTheme.px(6)
 
         Text {
             text: qsTr("Gimbal (Skydroid)")
-            color: "white"
-            font.pixelSize: 26
-            font.bold: true
+            color: AzTheme.textCard
+            font.family: AzTheme.fontFamily
+            font.weight: Font.Medium
+            font.pixelSize: root.titlePx
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
             Layout.minimumWidth: 0
@@ -139,28 +151,25 @@ SettingsPage {
         Text {
             text: qsTr("Skydroid C01-C14 kameralarını (C13 daxil) hava blokunun şəbəkəsi üzərindən idarə edir. ") +
                   qsTr("Bu, MAVLink gimbal protokolundan ayrı bir yoldur.")
-            color: "#E8E8E8"
-            font.pixelSize: 16
+            color: AzTheme.textSecondary
+            font.family: AzTheme.fontFamily
+            font.pixelSize: root.descPx
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
             Layout.minimumWidth: 0
         }
     }
 
-    Rectangle {
-        Layout.fillWidth: true
-        height: 1
-        color: "white"
-        opacity: 0.25
-    }
-
     // ---- Bağlantı ----
     Rectangle {
         Layout.fillWidth: true
-        color: "#3d3b3b"
-        radius: 16
-        border.color: "white"
-        border.width: 2
+        radius: AzTheme.px(AzTheme.cardRadius)
+        border.width: 1
+        border.color: AzTheme.cardBorder
+        gradient: Gradient {
+            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+        }
         implicitHeight: linkLayout.implicitHeight + root.cardPad * 2
         height: implicitHeight
 
@@ -170,11 +179,12 @@ SettingsPage {
             anchors.margins: root.cardPad
             spacing: root.gap
 
-            QGCLabel {
+            Text {
                 text: qsTr("Bağlantı")
-                color: "white"
-                font.bold: true
-                font.pixelSize: root.labelPx * 1.15
+                color: AzTheme.textCard
+                font.family: AzTheme.fontFamily
+                font.weight: Font.Medium
+                font.pixelSize: AzTheme.fontPx(16)
             }
 
             BoolRow  { fact: root._gimbal.enabled }
@@ -186,8 +196,10 @@ SettingsPage {
             // Vəziyyət: istifadəçi uçuşa çıxmadan bağlantının işlədiyini görsün.
             Rectangle {
                 Layout.fillWidth: true
-                radius: 10
-                color: "#2A2A2A"
+                radius: AzTheme.px(AzTheme.groupRadius)
+                color: AzTheme.groupFill
+                border.width: 1
+                border.color: AzTheme.groupBorder
                 implicitHeight: Math.max(root.rowMinH, statusGrid.implicitHeight + root.rowPadY * 2)
                 height: implicitHeight
 
@@ -204,7 +216,6 @@ SettingsPage {
 
                     QGCLabel {
                         text: qsTr("Vəziyyət")
-                        color: "white"
                         font.pixelSize: root.labelPx
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
@@ -223,7 +234,7 @@ SettingsPage {
                                    "  ·  pitch " + root._ctl.pitchSpeed +
                                    "  yaw " + root._ctl.yawSpeed
                         }
-                        color: (root._ctl && root._ctl.active) ? "#00C853" : "#E8E8E8"
+                        color: (root._ctl && root._ctl.active) ? AzTheme.statusGreen : AzTheme.textCard
                         font.pixelSize: root.labelPx
                         wrapMode: Text.WordWrap
                         Layout.alignment: root.phone ? Qt.AlignLeft : Qt.AlignRight
@@ -237,10 +248,13 @@ SettingsPage {
     // ---- RC kanalları ----
     Rectangle {
         Layout.fillWidth: true
-        color: "#3d3b3b"
-        radius: 16
-        border.color: "white"
-        border.width: 2
+        radius: AzTheme.px(AzTheme.cardRadius)
+        border.width: 1
+        border.color: AzTheme.cardBorder
+        gradient: Gradient {
+            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+        }
         implicitHeight: rcLayout.implicitHeight + root.cardPad * 2
         height: implicitHeight
 
@@ -250,16 +264,17 @@ SettingsPage {
             anchors.margins: root.cardPad
             spacing: root.gap
 
-            QGCLabel {
+            Text {
                 text: qsTr("RC kanalları")
-                color: "white"
-                font.bold: true
-                font.pixelSize: root.labelPx * 1.15
+                color: AzTheme.textCard
+                font.family: AzTheme.fontFamily
+                font.weight: Font.Medium
+                font.pixelSize: AzTheme.fontPx(16)
             }
 
             QGCLabel {
                 text: qsTr("Kanal nömrələri 1-dən başlayır; 0 həmin oxu söndürür. Dəyərlər uçuş kontrollerinin göndərdiyi RC_CHANNELS-dən oxunur.")
-                color: "#CCCCCC"
+                color: AzTheme.textSecondary
                 font.pixelSize: root.labelPx * 0.92
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
@@ -278,10 +293,10 @@ SettingsPage {
             // gəlmir, yoxsa gəlir amma ölü zonadan çıxmır.
             Rectangle {
                 Layout.fillWidth: true
-                radius: 10
-                color: "#2A2A2A"
+                radius: AzTheme.px(AzTheme.groupRadius)
+                color: AzTheme.groupFill
                 border.width: 1
-                border.color: "#6E6E6E"
+                border.color: AzTheme.groupBorder
                 implicitHeight: rcLiveCol.implicitHeight + root.gap * 1.6
 
                 ColumnLayout {
@@ -295,8 +310,7 @@ SettingsPage {
 
                     QGCLabel {
                         text: qsTr("Canlı RC")
-                        color: "white"
-                        font.bold: true
+                        font.weight: Font.Medium
                         font.pixelSize: root.labelPx
                     }
 
@@ -314,7 +328,7 @@ SettingsPage {
                             default: return qsTr("Mənbə: yoxdur")
                             }
                         }
-                        color: (root._ctl && root._ctl.rcSource !== 0) ? "#00C853" : "#FF8A80"
+                        color: (root._ctl && root._ctl.rcSource !== 0) ? AzTheme.statusGreen : AzTheme.statusRed
                         font.pixelSize: root.labelPx * 0.92
                         font.bold: true
                         wrapMode: Text.WordWrap
@@ -336,8 +350,8 @@ SettingsPage {
                             default: return ""
                             }
                         }
-                        color: (root._ctl && root._ctl.rcInputState === 2) ? "#E8E8E8"
-                             : (root._ctl && root._ctl.rcInputState === 3) ? "#FFB74D" : "#CCCCCC"
+                        color: (root._ctl && root._ctl.rcInputState === 2) ? AzTheme.textCard
+                             : (root._ctl && root._ctl.rcInputState === 3) ? AzTheme.statusOrange : AzTheme.textSecondary
                         font.pixelSize: root.labelPx * 0.85
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
@@ -366,8 +380,8 @@ SettingsPage {
                                    "  ·  " + qsTr("paket: ") + root._ctl.rcUpdateCount
                         }
                         color: {
-                            if (!root._ctl || !root._ctl.rcConnected) return "#FF8A80"
-                            return (root._ctl.rcSource !== 0) ? "#00C853" : "#E8E8E8"
+                            if (!root._ctl || !root._ctl.rcConnected) return AzTheme.statusRed
+                            return (root._ctl.rcSource !== 0) ? AzTheme.statusGreen : AzTheme.textCard
                         }
                         font.pixelSize: root.labelPx * 0.92
                         wrapMode: Text.WordWrap
@@ -390,7 +404,7 @@ SettingsPage {
                             }
                             return qsTr("Bütün kanallar: ") + parts.join("  ·  ")
                         }
-                        color: "#E8E8E8"
+                        color: AzTheme.textCard
                         font.pixelSize: root.labelPx * 0.85
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
@@ -399,7 +413,7 @@ SettingsPage {
 
                     QGCLabel {
                         text: qsTr("-1 = həmin kanal gəlmir. Dəyərlər dəyişir, amma sürət 0 qalırsa, ölü zonanı azaldın və ya kanal aralığını yoxlayın.")
-                        color: "#CCCCCC"
+                        color: AzTheme.textSecondary
                         font.pixelSize: root.labelPx * 0.85
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
@@ -413,10 +427,13 @@ SettingsPage {
     // ---- Tənzimləmə ----
     Rectangle {
         Layout.fillWidth: true
-        color: "#3d3b3b"
-        radius: 16
-        border.color: "white"
-        border.width: 2
+        radius: AzTheme.px(AzTheme.cardRadius)
+        border.width: 1
+        border.color: AzTheme.cardBorder
+        gradient: Gradient {
+            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+        }
         implicitHeight: tuneLayout.implicitHeight + root.cardPad * 2
         height: implicitHeight
 
@@ -426,11 +443,12 @@ SettingsPage {
             anchors.margins: root.cardPad
             spacing: root.gap
 
-            QGCLabel {
+            Text {
                 text: qsTr("Tənzimləmə")
-                color: "white"
-                font.bold: true
-                font.pixelSize: root.labelPx * 1.15
+                color: AzTheme.textCard
+                font.family: AzTheme.fontFamily
+                font.weight: Font.Medium
+                font.pixelSize: AzTheme.fontPx(16)
             }
 
             FieldRow { fact: root._gimbal.maxSpeed;   rowEnabled: root._gimbal.enabled.rawValue }
@@ -443,10 +461,13 @@ SettingsPage {
     // ---- Əl ilə yoxlama ----
     Rectangle {
         Layout.fillWidth: true
-        color: "#3d3b3b"
-        radius: 16
-        border.color: "white"
-        border.width: 2
+        radius: AzTheme.px(AzTheme.cardRadius)
+        border.width: 1
+        border.color: AzTheme.cardBorder
+        gradient: Gradient {
+            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+        }
         implicitHeight: testLayout.implicitHeight + root.cardPad * 2
         height: implicitHeight
 
@@ -456,16 +477,17 @@ SettingsPage {
             anchors.margins: root.cardPad
             spacing: root.gap
 
-            QGCLabel {
+            Text {
                 text: qsTr("Əl ilə yoxlama")
-                color: "white"
-                font.bold: true
-                font.pixelSize: root.labelPx * 1.15
+                color: AzTheme.textCard
+                font.family: AzTheme.fontFamily
+                font.weight: Font.Medium
+                font.pixelSize: AzTheme.fontPx(16)
             }
 
             QGCLabel {
                 text: qsTr("Düymə basılı tutulduqca hərəkət davam edir. Buraxanda dayanır.")
-                color: "#CCCCCC"
+                color: AzTheme.textSecondary
                 font.pixelSize: root.labelPx * 0.92
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
@@ -519,9 +541,8 @@ SettingsPage {
 
             QGCLabel {
                 text: qsTr("Montaj rejimi")
-                color: "white"
-                font.bold: true
-                font.pixelSize: root.labelPx * 1.05
+                font.weight: Font.Medium
+                font.pixelSize: AzTheme.fontPx(14)
                 Layout.topMargin: root.gap * 0.5
             }
 
@@ -529,7 +550,7 @@ SettingsPage {
             // görə gimbal səhv rejimdə qalmış ola bilər. Bərpa yolu buradır.
             QGCLabel {
                 text: qsTr("Pod-un necə quraşdırıldığını bildirir. Əvvəlki versiyada zoom düymələri bu rejimi səhvən dəyişirdi: gimbal tərs dönürsə və ya qəribə hərəkət edirsə, burada düzgün rejimi seçin. Dronun altından asılan pod üçün \"Asılı\" seçilir.")
-                color: "#CCCCCC"
+                color: AzTheme.textSecondary
                 font.pixelSize: root.labelPx * 0.92
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
