@@ -99,10 +99,14 @@ protected:
 
     bool _coaxialMotors = false;
 
-    const QString _guidedFlightMode = tr("Guided");
-    const QString _rtlFlightMode = tr("RTL");
-    const QString _smartRtlFlightMode = tr("Smart RTL");
-    const QString _autoFlightMode = tr("Auto");
+    // Flight mode names stay as the autopilot names them, untranslated in every UI language:
+
+    // they are what the pilot knows from the radio, the FC and its documentation.
+
+    const QString _guidedFlightMode = QStringLiteral("Guided");
+    const QString _rtlFlightMode = QStringLiteral("RTL");
+    const QString _smartRtlFlightMode = QStringLiteral("Smart RTL");
+    const QString _autoFlightMode = QStringLiteral("Auto");
 
 private slots:
     void _artooSocketError(QAbstractSocket::SocketError socketError);

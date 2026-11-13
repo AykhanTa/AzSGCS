@@ -76,32 +76,34 @@ protected:
     uint32_t _convertToCustomFlightModeEnum(uint32_t val) const override;
 
 private:
-    const QString _stabilizeFlightMode = tr("Stabilize");
-    const QString _acroFlightMode = tr("Acro");
-    const QString _altHoldFlightMode = tr("Altitude Hold");
-    const QString _autoFlightMode = tr("Auto");
-    const QString _guidedFlightMode = tr("Guided");
-    const QString _loiterFlightMode = tr("Loiter");
-    const QString _rtlFlightMode = tr("RTL");
-    const QString _circleFlightMode = tr("Circle");
-    const QString _landFlightMode = tr("Land");
-    const QString _driftFlightMode = tr("Drift");
-    const QString _sportFlightMode = tr("Sport");
-    const QString _flipFlightMode = tr("Flip");
-    const QString _autotuneFlightMode = tr("Autotune");
-    const QString _posHoldFlightMode = tr("Position Hold");
-    const QString _brakeFlightMode = tr("Brake");
-    const QString _throwFlightMode = tr("Throw");
-    const QString _avoidADSBFlightMode = tr("Avoid ADSB");
-    const QString _guidedNoGPSFlightMode = tr("Guided No GPS");
-    const QString _smartRtlFlightMode = tr("Smart RTL");
-    const QString _flowHoldFlightMode = tr("Flow Hold");
-    const QString _followFlightMode = tr("Follow");
-    const QString _zigzagFlightMode = tr("ZigZag");
-    const QString _systemIDFlightMode = tr("SystemID");
-    const QString _autoRotateFlightMode = tr("AutoRotate");
-    const QString _autoRTLFlightMode = tr("AutoRTL");
-    const QString _turtleFlightMode = tr("Turtle");
+    // Flight mode names stay as the autopilot names them, untranslated in every UI language:
+    // they are what the pilot knows from the radio, the FC and its documentation.
+    const QString _stabilizeFlightMode = QStringLiteral("Stabilize");
+    const QString _acroFlightMode = QStringLiteral("Acro");
+    const QString _altHoldFlightMode = QStringLiteral("Altitude Hold");
+    const QString _autoFlightMode = QStringLiteral("Auto");
+    const QString _guidedFlightMode = QStringLiteral("Guided");
+    const QString _loiterFlightMode = QStringLiteral("Loiter");
+    const QString _rtlFlightMode = QStringLiteral("RTL");
+    const QString _circleFlightMode = QStringLiteral("Circle");
+    const QString _landFlightMode = QStringLiteral("Land");
+    const QString _driftFlightMode = QStringLiteral("Drift");
+    const QString _sportFlightMode = QStringLiteral("Sport");
+    const QString _flipFlightMode = QStringLiteral("Flip");
+    const QString _autotuneFlightMode = QStringLiteral("Autotune");
+    const QString _posHoldFlightMode = QStringLiteral("Position Hold");
+    const QString _brakeFlightMode = QStringLiteral("Brake");
+    const QString _throwFlightMode = QStringLiteral("Throw");
+    const QString _avoidADSBFlightMode = QStringLiteral("Avoid ADSB");
+    const QString _guidedNoGPSFlightMode = QStringLiteral("Guided No GPS");
+    const QString _smartRtlFlightMode = QStringLiteral("Smart RTL");
+    const QString _flowHoldFlightMode = QStringLiteral("Flow Hold");
+    const QString _followFlightMode = QStringLiteral("Follow");
+    const QString _zigzagFlightMode = QStringLiteral("ZigZag");
+    const QString _systemIDFlightMode = QStringLiteral("SystemID");
+    const QString _autoRotateFlightMode = QStringLiteral("AutoRotate");
+    const QString _autoRTLFlightMode = QStringLiteral("AutoRTL");
+    const QString _turtleFlightMode = QStringLiteral("Turtle");
 
     static bool _remapParamNameIntialized;
     static FirmwarePlugin::remapParamNameMajorVersionMap_t _remapParamName;

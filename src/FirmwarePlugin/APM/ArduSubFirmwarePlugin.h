@@ -124,17 +124,21 @@ public:
 protected:
     uint32_t _convertToCustomFlightModeEnum(uint32_t val) const override;
 
-    const QString _manualFlightMode = tr("Manual");
-    const QString _stabilizeFlightMode = tr("Stabilize");
-    const QString _acroFlightMode = tr("Acro");
-    const QString _altHoldFlightMode = tr("Depth Hold");
-    const QString _autoFlightMode = tr("Auto");
-    const QString _guidedFlightMode = tr("Guided");
-    const QString _circleFlightMode = tr("Circle");
-    const QString _surfaceFlightMode = tr("Surface");
-    const QString _posHoldFlightMode =tr("Position Hold");
-    const QString _motorDetectionFlightMode = tr("Motor Detection");
-    const QString _surftrakFlightMode = tr("Surftrak");
+    // Flight mode names stay as the autopilot names them, untranslated in every UI language:
+
+    // they are what the pilot knows from the radio, the FC and its documentation.
+
+    const QString _manualFlightMode = QStringLiteral("Manual");
+    const QString _stabilizeFlightMode = QStringLiteral("Stabilize");
+    const QString _acroFlightMode = QStringLiteral("Acro");
+    const QString _altHoldFlightMode = QStringLiteral("Depth Hold");
+    const QString _autoFlightMode = QStringLiteral("Auto");
+    const QString _guidedFlightMode = QStringLiteral("Guided");
+    const QString _circleFlightMode = QStringLiteral("Circle");
+    const QString _surfaceFlightMode = QStringLiteral("Surface");
+    const QString _posHoldFlightMode =QStringLiteral("Position Hold");
+    const QString _motorDetectionFlightMode = QStringLiteral("Motor Detection");
+    const QString _surftrakFlightMode = QStringLiteral("Surftrak");
 
 private:
     QVariantList _toolIndicators;

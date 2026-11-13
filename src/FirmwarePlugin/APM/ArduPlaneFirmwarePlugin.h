@@ -64,32 +64,36 @@ public:
 protected:
     uint32_t _convertToCustomFlightModeEnum(uint32_t val) const override;
 
-    const QString _manualFlightMode = tr("Manual");
-    const QString _circleFlightMode = tr("Circle");
-    const QString _stabilizeFlightMode = tr("Stabilize");
-    const QString _trainingFlightMode = tr("Training");
-    const QString _acroFlightMode = tr("Acro");
-    const QString _flyByWireAFlightMode = tr("FBW A");
-    const QString _flyByWireBFlightMode = tr("FBW B");
-    const QString _cruiseFlightMode = tr("Cruise");
-    const QString _autoTuneFlightMode = tr("Autotune");
-    const QString _autoFlightMode = tr("Auto");
-    const QString _rtlFlightMode = tr("RTL");
-    const QString _loiterFlightMode = tr("Loiter");
-    const QString _takeoffFlightMode = tr("Takeoff");
-    const QString _avoidADSBFlightMode = tr("Avoid ADSB");
-    const QString _guidedFlightMode = tr("Guided");
-    const QString _initializingFlightMode = tr("Initializing");
-    const QString _qStabilizeFlightMode = tr("QuadPlane Stabilize");
-    const QString _qHoverFlightMode = tr("QuadPlane Hover");
-    const QString _qLoiterFlightMode = tr("QuadPlane Loiter");
-    const QString _qLandFlightMode = tr("QuadPlane Land");
-    const QString _qRTLFlightMode = tr("QuadPlane RTL");
-    const QString _qAutotuneFlightMode = tr("QuadPlane AutoTune");
-    const QString _qAcroFlightMode = tr("QuadPlane Acro");
-    const QString _thermalFlightMode = tr("Thermal");
-    const QString _loiter2qlandFlightMode = tr("Loiter to QLand");
-    const QString _autolandFlightMode = tr("Autoland");
+    // Flight mode names stay as the autopilot names them, untranslated in every UI language:
+
+    // they are what the pilot knows from the radio, the FC and its documentation.
+
+    const QString _manualFlightMode = QStringLiteral("Manual");
+    const QString _circleFlightMode = QStringLiteral("Circle");
+    const QString _stabilizeFlightMode = QStringLiteral("Stabilize");
+    const QString _trainingFlightMode = QStringLiteral("Training");
+    const QString _acroFlightMode = QStringLiteral("Acro");
+    const QString _flyByWireAFlightMode = QStringLiteral("FBW A");
+    const QString _flyByWireBFlightMode = QStringLiteral("FBW B");
+    const QString _cruiseFlightMode = QStringLiteral("Cruise");
+    const QString _autoTuneFlightMode = QStringLiteral("Autotune");
+    const QString _autoFlightMode = QStringLiteral("Auto");
+    const QString _rtlFlightMode = QStringLiteral("RTL");
+    const QString _loiterFlightMode = QStringLiteral("Loiter");
+    const QString _takeoffFlightMode = QStringLiteral("Takeoff");
+    const QString _avoidADSBFlightMode = QStringLiteral("Avoid ADSB");
+    const QString _guidedFlightMode = QStringLiteral("Guided");
+    const QString _initializingFlightMode = QStringLiteral("Initializing");
+    const QString _qStabilizeFlightMode = QStringLiteral("QuadPlane Stabilize");
+    const QString _qHoverFlightMode = QStringLiteral("QuadPlane Hover");
+    const QString _qLoiterFlightMode = QStringLiteral("QuadPlane Loiter");
+    const QString _qLandFlightMode = QStringLiteral("QuadPlane Land");
+    const QString _qRTLFlightMode = QStringLiteral("QuadPlane RTL");
+    const QString _qAutotuneFlightMode = QStringLiteral("QuadPlane AutoTune");
+    const QString _qAcroFlightMode = QStringLiteral("QuadPlane Acro");
+    const QString _thermalFlightMode = QStringLiteral("Thermal");
+    const QString _loiter2qlandFlightMode = QStringLiteral("Loiter to QLand");
+    const QString _autolandFlightMode = QStringLiteral("Autoland");
 
 private:
     static bool _remapParamNameIntialized;
