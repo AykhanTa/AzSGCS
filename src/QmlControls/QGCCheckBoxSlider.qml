@@ -29,7 +29,8 @@ AbstractButton   {
 
     contentItem: Item {
         implicitWidth:  (label.visible ? label.contentWidth + ScreenTools.defaultFontPixelWidth : 0) + indicator.width 
-        implicitHeight: label.contentHeight
+        // The new design's switch is taller than a text line, so stacked rows must not overlap.
+        implicitHeight: Math.max(label.contentHeight, indicator.height)
 
         QGCLabel { 
             id:             label
