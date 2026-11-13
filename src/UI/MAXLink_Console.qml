@@ -6,9 +6,15 @@ import QtQuick.Window 2.15
 import QGroundControl
 import QGroundControl.Controls
 
+// MAVLink console, in the new design: the page header of the setup pages and the console on
+// a group box inside a status card.
 AnalyzePage {
     id: analyzePage
     anchors.fill: parent
+
+    // The buttons, combo boxes, check boxes, labels and dialogs take the new design's look
+    // (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // ✅ Üstdən/yanlardan AnalyzePage-in default boşluğunu minimuma endir
     anchors.margins: 0
@@ -41,7 +47,7 @@ AnalyzePage {
             height: 750
             visible: false
             title: qsTr("MAVLink Konsol")
-            color: "#000000"
+            color: AzTheme.panelGradientEnd
 
             Loader {
                 anchors.fill: parent
@@ -78,12 +84,11 @@ AnalyzePage {
             readonly property bool _compact: (width < 1050) || (height < 650) || (_hasScreenTools && ScreenTools.isShortScreen)
 
             // ✅ Üst boşluq minimum (0 yox, nazik xəttə yapışmasın deyə çox az)
-            readonly property real _topGap: _compact ? 0 : Math.max(4, _fontH * 0.25)
+            readonly property real _topGap: AzTheme.px(_compact ? 12 : 20)
 
-            // ✅ Kartın ümumi margin-ləri bir az “sıx”
-            readonly property real _outer: Math.max(8, _fontH * (_compact ? 0.45 : 0.60))
-            readonly property real _pad:   Math.max(8, _fontH * (_compact ? 0.45 : 0.65))
-            readonly property real _gap:   Math.max(8, _fontH * (_compact ? 0.40 : 0.60))
+            readonly property real _outer: AzTheme.px(_compact ? 12 : 20)
+            readonly property real _pad:   AzTheme.px(_compact ? 12 : 16)
+            readonly property real _gap:   AzTheme.px(_compact ? 10 : 16)
 
             // ✅ Sağdan eni azaltmaq üçün: ikon üçün yer saxla (yalnız böyük ekranda)
             readonly property real _rightReserve: (_compact || !analyzePage.allowPopout) ? 0 : Math.max(28, _fontH * 2.2)
@@ -173,44 +178,34 @@ AnalyzePage {
                 anchors.rightMargin:  root._outer + root._rightReserve
                 anchors.bottomMargin: root._outer
 
-                color: "#2b2b2b"
-                radius: 14
-                border.width: 2
-                border.color: "#444"
-                clip: true
+                color: "transparent"
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: root._pad
                     spacing: root._gap
 
-                    // ===== Title + Description
+                    // ===== Header
                     ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: Math.max(4, root._fontH * 0.25)
+                        spacing: AzTheme.px(6)
 
-                        QGCLabel {
+                        Text {
                             text: qsTr("MAVLink Konsol")
-                            font.bold: true
-                            font.pixelSize: Math.round(Math.max(root._compact ? 15 : 20,
-                                                                root._fontH * (root._compact ? 1.05 : 1.30)))
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(root._compact ? 18 : 20)
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
                         }
 
-                        QGCLabel {
+                        Text {
                             text: qsTr("Təyyarənin sistem qabığı ilə əlaqəni təmin edir.")
-                            color: "#E8E8E8"
-                            font.pixelSize: Math.round(Math.max(10, root._fontH * (root._compact ? 0.82 : 0.95)))
+                            color: AzTheme.textSecondary
+                            font.family: AzTheme.fontFamily
+                            font.pixelSize: AzTheme.fontPx(13)
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
-                        }
-
-                        Rectangle {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 1
-                            color: "#FFFFFF"
-                            opacity: 0.12
                         }
                     }
 
@@ -219,16 +214,19 @@ AnalyzePage {
                         id: consoleFrame
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        color: "#242424"
-                        radius: 10
+                        radius: AzTheme.px(AzTheme.cardRadius)
                         border.width: 1
-                        border.color: "#3a3a3a"
+                        border.color: AzTheme.cardBorder
+                        gradient: Gradient {
+                            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                        }
                         clip: true
 
                         QGCFlickable {
                             id: consoleFlick
                             anchors.fill: parent
-                            anchors.margins: Math.max(6, root._fontH * 0.40)
+                            anchors.margins: root._pad
 
                             contentWidth: textConsole.width
                             contentHeight: textConsole.height
@@ -248,14 +246,20 @@ AnalyzePage {
                                 text: "> "
                                 focus: true
 
-                                color: qgcPal.text
-                                selectedTextColor: qgcPal.windowShade
-                                selectionColor: qgcPal.text
+                                color: AzTheme.textCard
+                                selectedTextColor: AzTheme.textPrimary
+                                selectionColor: AzTheme.statusBlue
 
                                 font.pointSize: ScreenTools.defaultFontPointSize
                                 font.family: ScreenTools.fixedFontFamily
 
-                                background: Rectangle { color: qgcPal.windowShade }
+                                padding: AzTheme.px(AzTheme.groupPadding)
+                                background: Rectangle {
+                                    radius: AzTheme.px(AzTheme.groupRadius)
+                                    color: AzTheme.groupFill
+                                    border.width: 1
+                                    border.color: AzTheme.groupBorder
+                                }
 
                                 Component.onCompleted: {
                                     root.isLoaded = true
@@ -378,6 +382,7 @@ AnalyzePage {
 
                         QGCButton {
                             text: qsTr("Göndər")
+                            primary: true
                             Layout.preferredWidth: Math.round(Math.max(90, root._fontW * 10))
                             onClicked: commandInput.sendCommand()
                         }

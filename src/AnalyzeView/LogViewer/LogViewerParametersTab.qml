@@ -33,6 +33,10 @@ ColumnLayout {
 
     QGCPalette { id: qgcPal }
 
+    // The new design's look for screens that ask for it by declaring
+    // `readonly property bool azInputStyle: true` (see QGCLabel._az).
+    readonly property bool _az: typeof azInputStyle !== "undefined" && azInputStyle === true
+
     // -------------------------------------------------------------------------
     // Public API
     // -------------------------------------------------------------------------
@@ -86,8 +90,9 @@ ColumnLayout {
         QGCTextField {
             id: _parameterSearchField
             Layout.fillWidth: true
-            textColor: qgcPal.textFieldText
-            placeholderTextColor: Qt.rgba(qgcPal.textFieldText.r, qgcPal.textFieldText.g, qgcPal.textFieldText.b, 0.7)
+            textColor: _az ? AzTheme.textCard : qgcPal.textFieldText
+            placeholderTextColor: _az ? AzTheme.mutedText
+                                      : Qt.rgba(qgcPal.textFieldText.r, qgcPal.textFieldText.g, qgcPal.textFieldText.b, 0.7)
             placeholderText: qsTr("Parametrlərdə axtar")
 
             onTextChanged: {
@@ -134,7 +139,8 @@ ColumnLayout {
             delegate: Rectangle {
                 width: ListView.view.width
                 height: _paramRow.implicitHeight + ScreenTools.defaultFontPixelHeight * 0.4
-                color: index % 2 === 0 ? qgcPal.windowShade : qgcPal.windowShadeDark
+                color: _az ? (index % 2 === 0 ? AzTheme.groupFill : AzTheme.pillTop)
+                   : (index % 2 === 0 ? qgcPal.windowShade : qgcPal.windowShadeDark)
                 radius: 2
 
                 // Format value: use metadata decimalPlaces when available,
@@ -198,7 +204,7 @@ ColumnLayout {
                         width: ScreenTools.defaultFontPixelHeight * 0.5
                         height: width
                         radius: width / 2
-                        color: qgcPal.colorOrange
+                        color: _az ? AzTheme.statusOrange : qgcPal.colorOrange
                         Layout.alignment: Qt.AlignVCenter
                     }
 

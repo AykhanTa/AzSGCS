@@ -9,9 +9,16 @@ import QGroundControl.Controls
 import QGroundControl.FlightMap
 import QGroundControl.LogViewer
 
+// Log analysis, in the new design: the page header of the setup pages (AnalyzePage._az),
+// the chart on a status card, and the shared buttons, tabs, sliders and combo boxes.
 AnalyzePage {
     id: logViewerPage
     pageComponent: pageComponent
+    pageName: qsTr("Log Analizi")
+
+    // The buttons, tabs, sliders, combo boxes, labels and log viewer panels take the new
+    // design's look (see QGCLabel._az).
+    readonly property bool azInputStyle: true
     pageDescription: qsTr("DataFlash (.bin), PX4 ULog (.ulg) və telemetriya (.tlog) loglarını vahid iş axınında açır və təhlil edir.")
     allowPopout: true
 
@@ -39,7 +46,7 @@ AnalyzePage {
         ColumnLayout {
             width: availableWidth
             height: availableHeight
-            spacing: ScreenTools.defaultFontPixelHeight
+            spacing: AzTheme.px(12)
 
             property string pendingBinFile: ""
 
@@ -221,12 +228,30 @@ AnalyzePage {
                     text: qsTr("Yüklənir...")
                 }
 
-                QGCSlider {
+                // A dark rounded track with a green fill
+                ProgressBar {
+                    id: parseProgressBar
                     Layout.fillWidth: true
                     from: 0
                     to: 1
                     value: logParser.parseProgress
-                    enabled: false
+
+                    background: Rectangle {
+                        implicitHeight: AzTheme.px(8)
+                        radius:         height / 2
+                        color:          AzTheme.slotEmpty
+                    }
+
+                    contentItem: Item {
+                        implicitHeight: AzTheme.px(8)
+
+                        Rectangle {
+                            width:  parseProgressBar.visualPosition * parent.width
+                            height: parent.height
+                            radius: height / 2
+                            color:  AzTheme.statusGreen
+                        }
+                    }
                 }
             }
 
@@ -259,7 +284,7 @@ AnalyzePage {
 
                 QGCLabel { text: replayController.playheadTime }
 
-                Slider {
+                QGCSlider {
                     id: _replaySlider
                     Layout.fillWidth: true
                     from: 0
@@ -318,12 +343,17 @@ AnalyzePage {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        color: qgcPal.windowShadeDark
-                        radius: ScreenTools.defaultFontPixelWidth * 0.5
+                        radius: AzTheme.px(AzTheme.cardRadius)
+                        border.width: 1
+                        border.color: AzTheme.cardBorder
+                        gradient: Gradient {
+                            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                        }
 
                         ColumnLayout {
                             anchors.fill: parent
-                            anchors.margins: ScreenTools.defaultFontPixelWidth
+                            anchors.margins: AzTheme.px(12)
                             spacing: ScreenTools.defaultFontPixelHeight * 0.5
 
                             LogViewerChart {
@@ -415,7 +445,7 @@ AnalyzePage {
 
                                 MapPolyline {
                                     line.width: 3
-                                    line.color: QGroundControl.globalPalette.colorRed
+                                    line.color: AzTheme.statusRed
                                     path: _flightMap._path
                                 }
 
@@ -433,8 +463,8 @@ AnalyzePage {
                                         width: ScreenTools.defaultFontPixelHeight * 1.2
                                         height: width
                                         radius: width / 2
-                                        color: QGroundControl.globalPalette.colorYellow
-                                        border.color: "white"
+                                        color: AzTheme.statusYellow
+                                        border.color: AzTheme.textPrimary
                                         border.width: 2
                                     }
                                 }

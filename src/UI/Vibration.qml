@@ -7,10 +7,17 @@ import QGroundControl
 import QGroundControl.FactControls
 import QGroundControl.Controls
 
+// Vibration, in the new design: the page header of the setup pages, the levels and clip
+// counters on status cards, and the design's status colours for the bars and counters.
 AnalyzePage {
     id:              vibrationPage
     anchors.fill:    parent
     anchors.margins: 0
+    anchors.topMargin: AzTheme.px(20)
+
+    // The buttons, combo boxes, check boxes, labels and dialogs take the new design's look
+    // (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     headerComponent: headerComponent
     pageComponent:   pageComponent
@@ -37,8 +44,8 @@ AnalyzePage {
 
     readonly property bool _compact: ScreenTools.isMobile || availableWidth < 900 || availableHeight < 700
 
-    readonly property real _sidePad: Math.max(10, _fontW * (_compact ? 1.0 : 1.6))
-    readonly property real _gap:     Math.max(8,  _fontH * (_compact ? 0.55 : 0.85))
+    readonly property real _sidePad: AzTheme.px(_compact ? 12 : 20)
+    readonly property real _gap:     AzTheme.px(_compact ? 10 : 16)
 
     readonly property real _titlePt: _compact ? 16 : 20
     readonly property real _descPt:  _compact ? 10 : 12
@@ -69,7 +76,7 @@ AnalyzePage {
             height:  620
             visible: false
             title:   qsTr("Vibrasiya")
-            color:   "#000000"
+            color:   AzTheme.panelGradientEnd
 
             Loader {
                 anchors.fill: parent
@@ -101,32 +108,25 @@ AnalyzePage {
                 anchors.rightMargin:  vibrationPage._sidePad
                 anchors.topMargin:    0
                 anchors.bottomMargin: Math.max(6, vibrationPage._gap * 0.5)
-                spacing:              Math.max(4, vibrationPage._fontH * 0.22)
+                spacing:              AzTheme.px(6)
 
-                QGCLabel {
-                    text:                qsTr("Vibrasiya")
-                    color:               "white"
-                    font.bold:           true
-                    font.pointSize:      vibrationPage._titlePt
-                    wrapMode:            Text.WordWrap
-                    Layout.fillWidth:    true
-                    Layout.minimumWidth: 0
-                }
-
-                QGCLabel {
-                    text:                qsTr("Təyyarənizin akselerometr vibrasiya səviyyələrini və klip sayğaclarını izləyin.")
-                    color:               "#CCCCCC"
-                    font.pointSize:      vibrationPage._descPt
-                    wrapMode:            Text.WordWrap
-                    Layout.fillWidth:    true
-                    Layout.minimumWidth: 0
-                }
-
-                Rectangle {
+                Text {
+                    text: qsTr("Vibrasiya")
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
+                    font.pixelSize: AzTheme.fontPx(vibrationPage._compact ? 18 : 20)
+                    wrapMode: Text.WordWrap
                     Layout.fillWidth: true
-                    height:  1
-                    color:   "white"
-                    opacity: 0.18
+                }
+
+                Text {
+                    text: qsTr("Təyyarənizin akselerometr vibrasiya səviyyələrini və klip sayğaclarını izləyin.")
+                    color: AzTheme.textSecondary
+                    font.family: AzTheme.fontFamily
+                    font.pixelSize: AzTheme.fontPx(13)
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
                 }
             }
         }
@@ -146,17 +146,17 @@ AnalyzePage {
         spacing: Math.max(6, ScreenTools.defaultFontPixelHeight * 0.35)
 
         // Səviyyəyə görə rəng: 30-a qədər normal, 60-a qədər xəbərdarlıq, sonra kritik
-        readonly property color barColor: value >= vibrationPage._barBadValue ? "#E53935"
-                                          : (value >= vibrationPage._barMidValue ? "#FFB300" : "#00C853")
+        readonly property color barColor: value >= vibrationPage._barBadValue ? AzTheme.statusRed
+                                          : (value >= vibrationPage._barMidValue ? AzTheme.statusOrange : AzTheme.statusGreen)
 
         Rectangle {
             Layout.alignment:       Qt.AlignHCenter
             Layout.preferredWidth:  vbar.barW
             Layout.preferredHeight: vbar.barH
-            radius:       6
-            color:        "#2A2A2A"
+            radius:       AzTheme.px(6)
+            color:        AzTheme.groupFill
             border.width: 1
-            border.color: "#4A4A4A"
+            border.color: AzTheme.groupBorder
             clip:         true
 
             // Dolum
@@ -184,7 +184,7 @@ AnalyzePage {
                                    (1.0 - ((vibrationPage._barBadValue - vibrationPage._barMinimum) /
                                            (vibrationPage._barMaximum - vibrationPage._barMinimum)))
                 height:  1
-                color:   "#E53935"
+                color:   AzTheme.statusRed
                 opacity: 0.85
             }
 
@@ -197,7 +197,7 @@ AnalyzePage {
                                    (1.0 - ((vibrationPage._barMidValue - vibrationPage._barMinimum) /
                                            (vibrationPage._barMaximum - vibrationPage._barMinimum)))
                 height:  1
-                color:   "#FFB300"
+                color:   AzTheme.statusOrange
                 opacity: 0.75
             }
         }
@@ -205,7 +205,7 @@ AnalyzePage {
         QGCLabel {
             Layout.alignment: Qt.AlignHCenter
             text:             vbar.axisName
-            color:            "#B9B9B9"
+            color:            AzTheme.textSecondary
         }
 
         QGCLabel {
@@ -244,10 +244,13 @@ AnalyzePage {
                 Rectangle {
                     Layout.fillWidth:       true
                     Layout.preferredHeight: levelCol.implicitHeight + vibrationPage._gap * 2
-                    radius:       12
-                    color:        "#3D3B3B"
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
 
                     ColumnLayout {
                         id: levelCol
@@ -260,8 +263,10 @@ AnalyzePage {
                         QGCLabel {
                             Layout.fillWidth: true
                             text:             qsTr("Vibrasiya Səviyyələri")
-                            color:            "white"
-                            font.bold:        true
+                            color:            AzTheme.textCard
+                            font.family:      AzTheme.fontFamily
+                            font.weight:      Font.Medium
+                            font.pixelSize:   AzTheme.fontPx(16)
                         }
 
                         RowLayout {
@@ -298,9 +303,9 @@ AnalyzePage {
 
                             Repeater {
                                 model: [
-                                    { c: "#00C853", t: qsTr("Normal (< 30)")      },
-                                    { c: "#FFB300", t: qsTr("Xəbərdarlıq (30-60)") },
-                                    { c: "#E53935", t: qsTr("Kritik (> 60)")      }
+                                    { c: AzTheme.statusGreen, t: qsTr("Normal (< 30)")      },
+                                    { c: AzTheme.statusOrange, t: qsTr("Xəbərdarlıq (30-60)") },
+                                    { c: AzTheme.statusRed, t: qsTr("Kritik (> 60)")      }
                                 ]
 
                                 RowLayout {
@@ -316,7 +321,7 @@ AnalyzePage {
 
                                     QGCLabel {
                                         text:             modelData.t
-                                        color:            "#B9B9B9"
+                                        color:            AzTheme.textSecondary
                                         font.pointSize:   vibrationPage._descPt
                                         Layout.alignment: Qt.AlignVCenter
                                     }
@@ -331,10 +336,13 @@ AnalyzePage {
                     Layout.fillWidth:       true
                     Layout.preferredHeight: clipCol.implicitHeight + vibrationPage._gap * 2
                     Layout.alignment:       Qt.AlignTop
-                    radius:       12
-                    color:        "#3D3B3B"
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
 
                     ColumnLayout {
                         id: clipCol
@@ -347,14 +355,16 @@ AnalyzePage {
                         QGCLabel {
                             Layout.fillWidth: true
                             text:             qsTr("Klip Sayğacları")
-                            color:            "white"
-                            font.bold:        true
+                            color:            AzTheme.textCard
+                            font.family:      AzTheme.fontFamily
+                            font.weight:      Font.Medium
+                            font.pixelSize:   AzTheme.fontPx(16)
                         }
 
                         QGCLabel {
                             Layout.fillWidth: true
                             text:      qsTr("Klip hadisələri akselerometrin ölçmə həddini aşdığını göstərir. Sıfırdan böyük dəyərlər mexaniki izolyasiyanın yaxşılaşdırılmasını tələb edir.")
-                            color:     "#B9B9B9"
+                            color:     AzTheme.textSecondary
                             wrapMode:  Text.WordWrap
                             font.pointSize: vibrationPage._descPt
                         }
@@ -369,15 +379,17 @@ AnalyzePage {
                             Rectangle {
                                 Layout.fillWidth:       true
                                 Layout.preferredHeight: Math.max(40, vibrationPage._fontH * 2.2)
-                                radius: 8
-                                color:  "#2A2A2A"
+                                radius: AzTheme.px(AzTheme.groupRadius)
+                                color: AzTheme.groupFill
+                                border.width: 1
+                                border.color: AzTheme.groupBorder
 
                                 QGCLabel {
                                     anchors.left:           parent.left
                                     anchors.leftMargin:     vibrationPage._gap
                                     anchors.verticalCenter: parent.verticalCenter
                                     text:                   modelData.n
-                                    color:                  "#FFFFFF"
+                                    color:                  AzTheme.textCard
                                 }
 
                                 QGCLabel {
@@ -385,7 +397,7 @@ AnalyzePage {
                                     anchors.rightMargin:    vibrationPage._gap
                                     anchors.verticalCenter: parent.verticalCenter
                                     text:                   modelData.v
-                                    color:                  modelData.v > 0 ? "#FFB300" : "#00C853"
+                                    color:                  modelData.v > 0 ? AzTheme.statusOrange : AzTheme.statusGreen
                                     font.bold:              true
                                 }
                             }
@@ -397,7 +409,7 @@ AnalyzePage {
             // ---------------- Məlumat yoxdur ----------------
             Rectangle {
                 anchors.fill: parent
-                color:        "#000000"
+                color:        AzTheme.panelGradientEnd
                 opacity:      0.72
                 visible:      !vibrationPage._available
 
@@ -413,7 +425,7 @@ AnalyzePage {
                     width:               parent.width * 0.7
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode:            Text.WordWrap
-                    color:               "#E4E4E4"
+                    color:               AzTheme.textCard
                     font.bold:           true
                     text:                qsTr("Vibrasiya məlumatı mövcud deyil")
                 }

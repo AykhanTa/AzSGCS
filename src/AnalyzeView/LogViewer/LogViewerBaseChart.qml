@@ -184,6 +184,10 @@ Item {
     // -------------------------------------------------------------------------
     QGCPalette { id: qgcPal }
 
+    // The new design's look for screens that ask for it by declaring
+    // `readonly property bool azInputStyle: true` (see QGCLabel._az).
+    readonly property bool _az: typeof azInputStyle !== "undefined" && azInputStyle === true
+
     GraphsView {
         id: _chart
         anchors.fill: parent
@@ -194,14 +198,14 @@ Item {
 
         theme: GraphsTheme {
             colorScheme: qgcPal.globalTheme === QGCPalette.Light ? GraphsTheme.ColorScheme.Light : GraphsTheme.ColorScheme.Dark
-            backgroundColor: qgcPal.windowShadeDark
+            backgroundColor: _az ? AzTheme.groupFill : qgcPal.windowShadeDark
             backgroundVisible: true
-            plotAreaBackgroundColor: qgcPal.windowShadeDark
+            plotAreaBackgroundColor: _az ? AzTheme.groupFill : qgcPal.windowShadeDark
             grid.mainColor: Qt.rgba(qgcPal.text.r, qgcPal.text.g, qgcPal.text.b, 0.25)
             grid.subColor: Qt.rgba(qgcPal.text.r, qgcPal.text.g, qgcPal.text.b, 0.12)
             grid.mainWidth: 1
             labelBackgroundVisible: false
-            labelTextColor: qgcPal.text
+            labelTextColor: _az ? AzTheme.textSecondary : qgcPal.text
             axisXLabelFont.family: ScreenTools.fixedFontFamily
             axisXLabelFont.pointSize: ScreenTools.smallFontPointSize
             axisYLabelFont.family: ScreenTools.fixedFontFamily
@@ -275,7 +279,7 @@ Item {
         id: _zoomRect
         visible: false
         color: Qt.rgba(1, 1, 1, 0.2)
-        border.color: qgcPal.buttonHighlight
+        border.color: _az ? AzTheme.statusBlue : qgcPal.buttonHighlight
         border.width: 1
         z: 10
     }
@@ -362,7 +366,7 @@ Item {
         y: _chart.plotArea.y
         width: 1
         height: _chart.plotArea.height
-        color: qgcPal.text
+        color: _az ? AzTheme.textCard : qgcPal.text
         z: 12
     }
 

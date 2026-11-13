@@ -5,9 +5,15 @@ import QtQuick.Layouts 1.15
 import QGroundControl
 import QGroundControl.Controls
 
+// GeoTag images, in the new design: the page header of the setup pages and a status card
+// with the file pickers, a green progress bar and the start button.
 Item {
     id: root
     anchors.fill: parent
+
+    // The buttons, combo boxes, check boxes, labels and dialogs take the new design's look
+    // (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // =========================
     // Controller resolve (kritik fix)
@@ -86,18 +92,14 @@ Item {
     readonly property real _fontW: _hasScreenTools ? ScreenTools.defaultFontPixelWidth  : 8
     readonly property bool _compact: (width < 1050) || (height < 650) || (_hasScreenTools && ScreenTools.isShortScreen)
 
-    readonly property real _outer: Math.max(8,  _fontH * (_compact ? 0.45 : 0.75))
-    readonly property real _pad:   Math.max(8,  _fontH * (_compact ? 0.42 : 0.70))
-    readonly property real _gap:   Math.max(8,  _fontH * (_compact ? 0.32 : 0.65))
+    readonly property real _outer: AzTheme.px(_compact ? 12 : 20)
+    readonly property real _pad:   AzTheme.px(_compact ? 12 : 16)
+    readonly property real _gap:   AzTheme.px(_compact ? 10 : 16)
 
-    // Böyük ekranda üst xəttdən az aralı
-    readonly property real _topGap: _compact ? 0 : Math.max(10, _fontH * 0.60)
+    readonly property real _topGap: AzTheme.px(_compact ? 12 : 20)
 
-    readonly property real _titlePx: Math.round(Math.max(_compact ? 15 : 18, _fontH * (_compact ? 1.05 : 1.30)))
-    readonly property real _descPx:  Math.round(Math.max(_compact ? 10 : 12, _fontH * (_compact ? 0.78 : 0.95)))
-
-    readonly property real _btnH:      Math.round(Math.max(_compact ? 30 : 36, _fontH * (_compact ? 1.85 : 2.20)))
-    readonly property real _btnFontPx: Math.round(Math.max(10, _fontH * (_compact ? 0.82 : 0.95)))
+    readonly property real _titlePx: AzTheme.fontPx(_compact ? 18 : 20)
+    readonly property real _descPx:  AzTheme.fontPx(13)
 
     // QGC GeoTagPage-dəki min/max eni məntiqi
     readonly property real _minBtnW: Math.round(Math.max(160, _fontW * 20))
@@ -123,11 +125,7 @@ Item {
         anchors.rightMargin: _outer
         anchors.bottomMargin: _outer
 
-        color: "#2b2b2b"
-        radius: 14
-        border.width: 2
-        border.color: "#444"
-        clip: true
+        color: "transparent"
 
         // -------- Header (Title + Description)
         Item {
@@ -137,36 +135,30 @@ Item {
             anchors.top: parent.top
             height: headerCol.implicitHeight + _pad
 
-            Column {
+            ColumnLayout {
                 id: headerCol
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.leftMargin: _pad
-                anchors.rightMargin: _pad
-                anchors.topMargin: _pad * 0.7
-                spacing: Math.max(4, _fontH * (_compact ? 0.18 : 0.30))
+                spacing: AzTheme.px(6)
 
-                QGCLabel {
+                Text {
                     text: qsTr("GeoTag Şəkillər")
-                    color: "white"
-                    font.bold: true
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
                     font.pixelSize: _titlePx
                     wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
                 }
 
-                QGCLabel {
+                Text {
                     text: qsTr("GPS koordinatları ilə sorğu missiyasından bir sıra şəkilləri etiketləmək üçün istifadə olunur. Siz uçuşdan ikili jurnalı, həmçinin etiketlənəcək şəkilləri ehtiva edən kataloqu təqdim etməlisiniz.")
-                    color: "#E8E8E8"
+                    color: AzTheme.textSecondary
+                    font.family: AzTheme.fontFamily
                     font.pixelSize: _descPx
                     wrapMode: Text.WordWrap
-                }
-
-                Rectangle {
-                    width: parent.width
-                    height: 1
-                    color: "#FFFFFF"
-                    opacity: 0.12
+                    Layout.fillWidth: true
                 }
             }
         }
@@ -178,7 +170,7 @@ Item {
             anchors.right: parent.right
             anchors.top: header.bottom
             anchors.bottom: parent.bottom
-            anchors.margins: _pad
+            anchors.topMargin: AzTheme.px(10)
             clip: true
 
             contentWidth: width
@@ -195,20 +187,23 @@ Item {
 
                 Rectangle {
                     width: parent.width
-                    radius: 10
-                    color: "#242424"
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#3a3a3a"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
                     clip: true
 
-                    implicitHeight: contentGrid.implicitHeight + Math.max(16, _pad * 0.9)
+                    implicitHeight: contentGrid.implicitHeight + _pad * 2
 
                     GridLayout {
                         id: contentGrid
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.top: parent.top
-                        anchors.margins: Math.max(10, _pad * 0.7)
+                        anchors.margins: _pad
 
                         columns: _compact ? 1 : 2
                         columnSpacing: _gap
@@ -228,12 +223,29 @@ Item {
                             }
 
                             ProgressBar {
+                                id: tagProgress
                                 to: 100
                                 value: geo ? geo.progress : 0
                                 opacity: (geo && geo.progress > 0) ? 1 : 0.25
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: _progressH
                                 Layout.alignment: Qt.AlignVCenter
+
+                                background: Rectangle {
+                                    implicitHeight: AzTheme.px(8)
+                                    radius:         height / 2
+                                    color:          AzTheme.slotEmpty
+                                }
+
+                                contentItem: Item {
+                                    implicitHeight: AzTheme.px(8)
+
+                                    Rectangle {
+                                        width:  tagProgress.visualPosition * parent.width
+                                        height: parent.height
+                                        radius: height / 2
+                                        color:  AzTheme.statusGreen
+                                    }
+                                }
                             }
                         }
 
@@ -243,8 +255,8 @@ Item {
                             Layout.fillWidth: true
                             text: geo ? (geo.errorMessage || "") : ""
                             visible: geo && !!geo.errorMessage
-                            color: "red"
-                            font.bold: true
+                            color: AzTheme.statusRed
+                            font.weight: Font.Medium
                             wrapMode: Text.WordWrap
                             horizontalAlignment: Text.AlignHCenter
                         }
@@ -253,8 +265,6 @@ Item {
                         QGCButton {
                             text: qsTr("Log faylı seçin")
                             Layout.fillWidth: true
-                            Layout.preferredHeight: _btnH
-                            font.pixelSize: _btnFontPx
                             Layout.minimumWidth: _compact ? 0 : _minBtnW
                             Layout.maximumWidth: _compact ? 999999 : _maxBtnW
                             enabled: !!geo && !geo.inProgress
@@ -277,15 +287,13 @@ Item {
                             text: geo ? (geo.logFile || qsTr("Seçilməyib")) : qsTr("Seçilməyib")
                             elide: Text.ElideLeft
                             Layout.alignment: Qt.AlignVCenter
-                            color: "#E8E8E8"
+                            color: AzTheme.textSecondary
                         }
 
                         // --- Select image directory
                         QGCButton {
                             text: qsTr("Şəkil kataloqunu seçin")
                             Layout.fillWidth: true
-                            Layout.preferredHeight: _btnH
-                            font.pixelSize: _btnFontPx
                             Layout.minimumWidth: _compact ? 0 : _minBtnW
                             Layout.maximumWidth: _compact ? 999999 : _maxBtnW
                             enabled: !!geo && !geo.inProgress
@@ -307,15 +315,13 @@ Item {
                             text: geo ? (geo.imageDirectory || qsTr("Seçilməyib")) : qsTr("Seçilməyib")
                             elide: Text.ElideLeft
                             Layout.alignment: Qt.AlignVCenter
-                            color: "#E8E8E8"
+                            color: AzTheme.textSecondary
                         }
 
                         // --- Select save directory (optional)
                         QGCButton {
                             text: qsTr("(İstəyə görə) Saxlama qovluğunu seçin")
                             Layout.fillWidth: true
-                            Layout.preferredHeight: _btnH
-                            font.pixelSize: _btnFontPx
                             Layout.minimumWidth: _compact ? 0 : _minBtnW
                             Layout.maximumWidth: _compact ? 999999 : _maxBtnW
                             enabled: !!geo && !geo.inProgress
@@ -337,28 +343,26 @@ Item {
                             text: _saveDirText()
                             elide: Text.ElideLeft
                             Layout.alignment: Qt.AlignVCenter
-                            color: "#E8E8E8"
+                            color: AzTheme.textSecondary
                         }
 
                         Rectangle {
                             Layout.columnSpan: contentGrid.columns
                             Layout.fillWidth: true
                             Layout.preferredHeight: 1
-                            color: "#FFFFFF"
-                            opacity: 0.10
+                            color: AzTheme.groupBorder
                         }
 
                         // --- Start / Cancel
                         QGCButton {
                             Layout.columnSpan: contentGrid.columns
                             Layout.alignment: Qt.AlignHCenter
-                            Layout.preferredHeight: _btnH
-                            font.pixelSize: _btnFontPx
 
                             Layout.minimumWidth: _compact ? 0 : _minBtnW
                             Layout.maximumWidth: _compact ? 999999 : _maxBtnW
                             Layout.fillWidth: _compact
 
+                            primary: !(geo && geo.inProgress)
                             text: (geo && geo.inProgress) ? qsTr("Etiketləməni ləğv et") : qsTr("Etiketləməni başlat")
                             enabled: geo && ((geo.imageDirectory && geo.logFile) || geo.inProgress)
 
@@ -375,7 +379,7 @@ Item {
                             Layout.fillWidth: true
                             visible: !geo && !!_geoResolveError
                             text: qsTr("GeoTagController yaradıla bilmədi: ") + _geoResolveError
-                            color: "#D0B000"
+                            color: AzTheme.statusYellow
                             wrapMode: Text.WordWrap
                             horizontalAlignment: Text.AlignHCenter
                         }

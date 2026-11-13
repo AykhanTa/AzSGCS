@@ -36,13 +36,17 @@ Rectangle {
     // -------------------------------------------------------------------------
     readonly property real _margin: ScreenTools.defaultFontPixelWidth / 2
 
-    color: qgcPal.windowShade
-    border.color: qgcPal.windowShadeDark
-    radius: ScreenTools.defaultFontPixelWidth * 0.3
+    color: _az ? AzTheme.cardGradientEnd : qgcPal.windowShade
+    border.color: _az ? AzTheme.cardBorder : qgcPal.windowShadeDark
+    radius: _az ? AzTheme.px(8) : ScreenTools.defaultFontPixelWidth * 0.3
     implicitWidth: _mainColumn.implicitWidth  + _margin * 2
     implicitHeight: _mainColumn.implicitHeight + _margin * 2
 
     QGCPalette { id: qgcPal }
+
+    // The new design's look for screens that ask for it by declaring
+    // `readonly property bool azInputStyle: true` (see QGCLabel._az).
+    readonly property bool _az: typeof azInputStyle !== "undefined" && azInputStyle === true
 
     // -------------------------------------------------------------------------
     // Content

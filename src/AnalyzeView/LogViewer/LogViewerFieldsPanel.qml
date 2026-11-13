@@ -17,8 +17,10 @@ Rectangle {
 
     property bool xAxisShowLocalTime: QGroundControl.settingsManager.logViewerSettings.xAxisShowLocalTime.rawValue
 
-    color: qgcPal.windowShade
-    radius: ScreenTools.defaultFontPixelWidth * 0.5
+    color: _az ? AzTheme.cardGradientEnd : qgcPal.windowShade
+    radius: _az ? AzTheme.px(AzTheme.cardRadius) : ScreenTools.defaultFontPixelWidth * 0.5
+    border.width: _az ? 1 : 0
+    border.color: AzTheme.cardBorder
     Layout.preferredWidth: mainLayout.implicitWidth + (mainLayout.anchors.margins * 2)
 
     // -------------------------------------------------------------------------
@@ -33,6 +35,10 @@ Rectangle {
                                         || logViewerController.sourceType === LogViewerController.ULog
 
     QGCPalette { id: qgcPal }
+
+    // The new design's look for screens that ask for it by declaring
+    // `readonly property bool azInputStyle: true` (see QGCLabel._az).
+    readonly property bool _az: typeof azInputStyle !== "undefined" && azInputStyle === true
 
     // -------------------------------------------------------------------------
     // Public API
@@ -138,7 +144,7 @@ Rectangle {
                     Layout.preferredWidth: _groupLabel.height * 0.5
                     Layout.preferredHeight: _groupLabel.height * 0.5
                     source: "/qmlimages/arrow-down.png"
-                    color: qgcPal.text
+                    color: control._az ? AzTheme.textCard : qgcPal.text
                     fillMode: Image.PreserveAspectFit
                     rotation: (String(control._fieldSearchText).trim().length > 0 || control._isGroupExpanded(rowData.group)) ? 0 : -90
                 }
@@ -225,8 +231,9 @@ Rectangle {
             QGCTextField {
                 id: _fieldSearchField
                 Layout.fillWidth: true
-                textColor: qgcPal.textFieldText
-                placeholderTextColor: Qt.rgba(qgcPal.textFieldText.r, qgcPal.textFieldText.g, qgcPal.textFieldText.b, 0.7)
+                textColor: control._az ? AzTheme.textCard : qgcPal.textFieldText
+                placeholderTextColor: control._az ? AzTheme.mutedText
+                                                  : Qt.rgba(qgcPal.textFieldText.r, qgcPal.textFieldText.g, qgcPal.textFieldText.b, 0.7)
                 placeholderText: qsTr("Sahələrdə axtar")
 
                 onTextChanged: {

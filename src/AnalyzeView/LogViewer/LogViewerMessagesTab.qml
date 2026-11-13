@@ -15,6 +15,10 @@ ScrollView {
 
     QGCPalette { id: qgcPal }
 
+    // The new design's look for screens that ask for it by declaring
+    // `readonly property bool azInputStyle: true` (see QGCLabel._az).
+    readonly property bool _az: typeof azInputStyle !== "undefined" && azInputStyle === true
+
     ListView {
         anchors.fill: parent
         model: logParser.messages
@@ -25,7 +29,8 @@ ScrollView {
         delegate: Rectangle {
             width: ListView.view.width
             height: _msgRow.implicitHeight + ScreenTools.defaultFontPixelHeight * 0.4
-            color: index % 2 === 0 ? qgcPal.windowShade : qgcPal.windowShadeDark
+            color: _az ? (index % 2 === 0 ? AzTheme.groupFill : AzTheme.pillTop)
+                   : (index % 2 === 0 ? qgcPal.windowShade : qgcPal.windowShadeDark)
             radius: 2
 
             RowLayout {

@@ -7,10 +7,17 @@ import QtCharts
 import QGroundControl
 import QGroundControl.Controls
 
+// MAVLink inspector, in the new design: the page header of the setup pages, the message
+// list and the message details on status cards, and a waiting card without a vehicle.
 AnalyzePage {
     id: root
     anchors.fill: parent
-    anchors.topMargin: 0
+    anchors.margins: 0
+    anchors.topMargin: AzTheme.px(20)
+
+    // The buttons, combo boxes, check boxes, labels and dialogs take the new design's look
+    // (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     headerComponent:    headerComponent
     pageComponent:      pageComponent
@@ -28,8 +35,8 @@ AnalyzePage {
     readonly property bool _compact: ScreenTools.isMobile || availableWidth < 900 || availableHeight < 760
     readonly property bool _tiny:    availableWidth < 560
 
-    readonly property real _sidePad: Math.max(10, _fontW * (_compact ? 1.0 : 1.6))
-    readonly property real _gap:     Math.max(8,  _fontH * (_compact ? 0.55 : 0.85))
+    readonly property real _sidePad: AzTheme.px(_compact ? 12 : 20)
+    readonly property real _gap:     AzTheme.px(_compact ? 10 : 16)
 
     readonly property real _titlePt: _compact ? 16 : 20
     readonly property real _descPt:  _compact ? 10 : 12
@@ -71,7 +78,7 @@ AnalyzePage {
             height:  800
             visible: false
             title:   qsTr("MAVLink Inspector")
-            color:   "#000000"
+            color:   AzTheme.panelGradientEnd
 
             Loader {
                 anchors.fill: parent
@@ -128,32 +135,25 @@ AnalyzePage {
 
                 ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: Math.max(4, root._fontH * 0.22)
+                    spacing: AzTheme.px(6)
 
-                    QGCLabel {
+                    Text {
                         text: qsTr("MAVLink Inspector")
-                        color: "white"
-                        font.bold: true
-                        font.pointSize: root._titlePt
+                        color: AzTheme.textCard
+                        font.family: AzTheme.fontFamily
+                        font.weight: Font.Medium
+                        font.pixelSize: AzTheme.fontPx(root._compact ? 18 : 20)
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
-                        Layout.minimumWidth: 0
                     }
 
-                    QGCLabel {
+                    Text {
                         text: qsTr("Real vaxt MAVLink mesajlarını yoxlayın.")
-                        color: "#CCCCCC"
-                        font.pointSize: root._descPt
+                        color: AzTheme.textSecondary
+                        font.family: AzTheme.fontFamily
+                        font.pixelSize: AzTheme.fontPx(13)
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
-                        Layout.minimumWidth: 0
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        height: 1
-                        color: "white"
-                        opacity: 0.18
                     }
                 }
 
@@ -232,21 +232,46 @@ AnalyzePage {
                 anchors.top: parent.top
                 anchors.leftMargin: root._sidePad
                 anchors.rightMargin: root._sidePad
-                height: 220
-                radius: 16
-                color: "#3D3B3B"
+                height: AzTheme.px(200)
+                radius: AzTheme.px(AzTheme.cardRadius)
                 border.width: 1
-                border.color: "#9D9D9D"
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
 
-                Text {
+                Column {
                     anchors.centerIn: parent
                     width: parent.width - (root._sidePad * 2)
-                    text: qsTr("Aktiv aparat yoxdur.\nQoşulduqdan sonra MAVLink mesajları görünəcək.")
-                    color: "#FFFFFF"
-                    font.pixelSize: Math.max(16, root._fontH * 0.95)
-                    font.bold: true
-                    horizontalAlignment: Text.AlignHCenter
-                    wrapMode: Text.WordWrap
+                    spacing: AzTheme.px(10)
+
+                    Rectangle {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        width: AzTheme.px(12); height: width; radius: width / 2
+                        color: AzTheme.mutedText
+                    }
+
+                    Text {
+                        width: parent.width
+                        text: qsTr("Aktiv aparat yoxdur")
+                        color: AzTheme.textCard
+                        font.family: AzTheme.fontFamily
+                        font.weight: Font.Medium
+                        font.pixelSize: AzTheme.fontPx(17)
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.WordWrap
+                    }
+
+                    Text {
+                        width: parent.width
+                        text: qsTr("Qoşulduqdan sonra MAVLink mesajları görünəcək.")
+                        color: AzTheme.textSecondary
+                        font.family: AzTheme.fontFamily
+                        font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.WordWrap
+                    }
                 }
             }
         }
@@ -274,77 +299,99 @@ AnalyzePage {
                     columnSpacing: root._gap
                     rowSpacing: root._gap
 
-                    QGCFlickable {
-                        id: buttonGrid
-                        flickableDirection: Flickable.VerticalFlick
-                        clip: true
-
+                    Rectangle {
                         Layout.preferredWidth: root._buttonPaneW
                         Layout.minimumWidth:  root._minButtonW
                         Layout.fillHeight: true
+                        radius: AzTheme.px(AzTheme.cardRadius)
+                        border.width: 1
+                        border.color: AzTheme.cardBorder
+                        gradient: Gradient {
+                            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                        }
 
-                        contentWidth:  width
-                        contentHeight: buttonCol.implicitHeight
-                        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                        QGCFlickable {
+                            id: buttonGrid
+                            anchors.fill: parent
+                            anchors.margins: AzTheme.px(10)
+                            flickableDirection: Flickable.VerticalFlick
+                            clip: true
 
-                        ColumnLayout {
-                            id: buttonCol
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            spacing: root._fontH * 0.25
+                            contentWidth:  width
+                            contentHeight: buttonCol.implicitHeight
+                            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
-                            Repeater {
-                                model: curSystem ? curSystem.messages : []
-                                delegate: MAVLinkMessageButton {
-                                    Layout.fillWidth: true
-                                    text:      (object && object.name !== undefined) ? (String(object.name) + (object.fieldSelected ? " *" : "")) : ""
-                                    compID:    object ? object.compId : 0
-                                    checked:   curSystem ? (curSystem.selected === index) : false
-                                    messageHz: object ? object.actualRateHz : 0
-                                    visible:   (curCompID === 0) || (curCompID === compID)
+                            ColumnLayout {
+                                id: buttonCol
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                spacing: root._fontH * 0.25
 
-                                    Component.onCompleted: root.maxButtonWidth = Math.max(root.maxButtonWidth, implicitWidth)
-                                    onImplicitWidthChanged: root.maxButtonWidth = Math.max(root.maxButtonWidth, implicitWidth)
+                                Repeater {
+                                    model: curSystem ? curSystem.messages : []
+                                    delegate: MAVLinkMessageButton {
+                                        Layout.fillWidth: true
+                                        text:      (object && object.name !== undefined) ? (String(object.name) + (object.fieldSelected ? " *" : "")) : ""
+                                        compID:    object ? object.compId : 0
+                                        checked:   curSystem ? (curSystem.selected === index) : false
+                                        messageHz: object ? object.actualRateHz : 0
+                                        visible:   (curCompID === 0) || (curCompID === compID)
 
-                                    onClicked: { if (curSystem) curSystem.selected = index }
+                                        Component.onCompleted: root.maxButtonWidth = Math.max(root.maxButtonWidth, implicitWidth)
+                                        onImplicitWidthChanged: root.maxButtonWidth = Math.max(root.maxButtonWidth, implicitWidth)
+
+                                        onClicked: { if (curSystem) curSystem.selected = index }
+                                    }
                                 }
                             }
                         }
                     }
 
-                    QGCFlickable {
-                        id: messageGrid
-                        flickableDirection: Flickable.VerticalFlick
-                        clip: true
-
+                    Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         Layout.minimumWidth: 0
-
-                        contentWidth:  width
-                        contentHeight: messageCol.implicitHeight
-                        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
-
-                        QGCLabel {
-                            anchors.centerIn: parent
-                            visible: !(curMessage && (curCompID === 0 || curCompID === curMessage.compId))
-                            text: qsTr("Zəhmət olmasa soldan bir mesaj seçin.")
-                            color: "#BDBDBD"
-                            wrapMode: Text.WordWrap
-                            horizontalAlignment: Text.AlignHCenter
-                            width: parent.width * 0.9
+                        radius: AzTheme.px(AzTheme.cardRadius)
+                        border.width: 1
+                        border.color: AzTheme.cardBorder
+                        gradient: Gradient {
+                            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
                         }
 
-                        Column {
-                            id: messageCol
-                            width: parent.width
-                            spacing: root._fontH * 0.25
-                            visible: (curMessage !== null) && (curCompID === 0 || curCompID === curMessage.compId)
+                        QGCFlickable {
+                            id: messageGrid
+                            anchors.fill: parent
+                            anchors.margins: AzTheme.px(14)
+                            flickableDirection: Flickable.VerticalFlick
+                            clip: true
 
-                            Loader {
+                            contentWidth:  width
+                            contentHeight: messageCol.implicitHeight
+                            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+                            QGCLabel {
+                                anchors.centerIn: parent
+                                visible: !(curMessage && (curCompID === 0 || curCompID === curMessage.compId))
+                                text: qsTr("Zəhmət olmasa soldan bir mesaj seçin.")
+                                color: AzTheme.textSecondary
+                                wrapMode: Text.WordWrap
+                                horizontalAlignment: Text.AlignHCenter
+                                width: parent.width * 0.9
+                            }
+
+                            Column {
+                                id: messageCol
                                 width: parent.width
-                                sourceComponent: messageDetailsContent
-                                onLoaded: if (item) item.width = width
+                                spacing: root._fontH * 0.25
+                                visible: (curMessage !== null) && (curCompID === 0 || curCompID === curMessage.compId)
+
+                                Loader {
+                                    width: parent.width
+                                    sourceComponent: messageDetailsContent
+                                    onLoaded: if (item) item.width = width
+                                }
                             }
                         }
                     }
@@ -396,10 +443,13 @@ AnalyzePage {
 
                         Rectangle {
                             width: parent.width
-                            radius: 10
-                            color: "#242424"
+                            radius: AzTheme.px(AzTheme.cardRadius)
                             border.width: 1
-                            border.color: "#3a3a3a"
+                            border.color: AzTheme.cardBorder
+                            gradient: Gradient {
+                                GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                                GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                            }
                             clip: true
 
                             Column {
@@ -410,9 +460,9 @@ AnalyzePage {
 
                                 QGCLabel {
                                     text: qsTr("Mesajlar")
-                                    font.bold: true
-                                    font.pointSize: root._rowPt + 1
-                                    color: "white"
+                                    font.weight: Font.Medium
+                                    font.pixelSize: AzTheme.fontPx(16)
+                                    color: AzTheme.textCard
                                     width: parent.width
                                     wrapMode: Text.WordWrap
                                 }
@@ -443,10 +493,13 @@ AnalyzePage {
 
                         Rectangle {
                             width: parent.width
-                            radius: 10
-                            color: "#242424"
+                            radius: AzTheme.px(AzTheme.cardRadius)
                             border.width: 1
-                            border.color: "#3a3a3a"
+                            border.color: AzTheme.cardBorder
+                            gradient: Gradient {
+                                GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                                GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                            }
                             clip: true
 
                             Column {
@@ -458,7 +511,7 @@ AnalyzePage {
                                 QGCLabel {
                                     visible: !(curMessage && (curCompID === 0 || curCompID === curMessage.compId))
                                     text: qsTr("Zəhmət olmasa yuxarıdan bir mesaj seçin.")
-                                    color: "#BDBDBD"
+                                    color: AzTheme.textSecondary
                                     wrapMode: Text.WordWrap
                                     horizontalAlignment: Text.AlignHCenter
                                     width: parent.width
@@ -500,7 +553,7 @@ AnalyzePage {
 
                 QGCLabel { text: qsTr("Mesaj:"); font.pointSize: root._rowPt; Layout.minimumWidth: root._fontW * 18 }
                 QGCLabel {
-                    color: qgcPal.buttonHighlight
+                    color: AzTheme.statusBlue
                     font.pointSize: root._rowPt
                     text: curMessage ? (String(curMessage.name) + " (" + String(curMessage.id) + ")") : ""
                     wrapMode: Text.NoWrap
@@ -593,8 +646,7 @@ AnalyzePage {
                             Layout.columnSpan: 5
                             Layout.fillWidth: true
                             height: 1
-                            color: qgcPal.text
-                            opacity: 0.8
+                            color: AzTheme.groupBorder
                         }
 
                         Repeater {

@@ -5,9 +5,14 @@ import QtQuick.Layouts 1.15
 import QGroundControl
 import QGroundControl.Controls
 
+// Log download, in the new design: the page header of the setup pages, the log table on a
+// status card with a group box header row, and AzButton actions.
 Item {
     id: root
     anchors.fill: parent
+
+    // The check boxes, labels and dialogs take the new design's look (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // QGC singleton controller (yaratmırıq!)
     readonly property var logController: LogDownloadController
@@ -19,18 +24,16 @@ Item {
     readonly property bool _compact: (width < 1050) || (height < 650) || (_hasScreenTools && ScreenTools.isShortScreen)
 
     // spacing/padding
-    readonly property real _outer: Math.max(8,  _fontH * (_compact ? 0.45 : 0.75))
-    readonly property real _pad:   Math.max(8,  _fontH * (_compact ? 0.42 : 0.70))
-    readonly property real _gap:   Math.max(8,  _fontH * (_compact ? 0.32 : 0.65))
+    readonly property real _outer: AzTheme.px(_compact ? 12 : 20)
+    readonly property real _pad:   AzTheme.px(_compact ? 12 : 16)
+    readonly property real _gap:   AzTheme.px(_compact ? 10 : 16)
 
-    // ✅ Böyük ekranda üst xəttdən ayrılmaq üçün az boşluq
-    readonly property real _topGap: _compact ? 0 : Math.max(10, _fontH * 0.60)
+    readonly property real _topGap: AzTheme.px(_compact ? 12 : 20)
 
-    // ✅ Kiçik ekranda title/desc daha balaca olsun
-    readonly property real _titlePx: Math.round(Math.max(_compact ? 15 : 18, _fontH * (_compact ? 1.05 : 1.30)))
-    readonly property real _descPx:  Math.round(Math.max(_compact ? 10 : 12, _fontH * (_compact ? 0.78 : 0.95)))
+    readonly property real _titlePx: AzTheme.fontPx(_compact ? 18 : 20)
+    readonly property real _descPx:  AzTheme.fontPx(13)
 
-    readonly property real _rowH:    Math.round(Math.max(_compact ? 30 : 34, _fontH * (_compact ? 2.00 : 2.25)))
+    readonly property real _rowH:    AzTheme.px(_compact ? 34 : 38)
     readonly property real _cellPad: Math.round(Math.max(6,  _fontW * (_compact ? 0.90 : 1.20)))
 
     // Sütun enləri (min). Ekran daralarsa horizontal scroll açılacaq.
@@ -42,10 +45,6 @@ Item {
     readonly property real _tableMinW: _checkW + _idW + _dateMinW + _sizeW + _statusW + (_cellPad * 2)
 
     readonly property real _actionW: Math.round(Math.max(170, _fontW * 17))
-
-    // ✅ Button ölçüləri (kiçik ekranda daha balaca)
-    readonly property real _btnH:       Math.round(Math.max(_compact ? 28 : 34, _fontH * (_compact ? 1.85 : 2.20)))
-    readonly property real _btnFontPx:  Math.round(Math.max(10, _fontH * (_compact ? 0.82 : 0.95)))
 
     // -------------------- BLOCK BACKGROUND MAP INPUT (Wheel + Pinch) --------------------
     function _clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)) }
@@ -215,45 +214,34 @@ Item {
         anchors.rightMargin: _outer
         anchors.bottomMargin: _outer
 
-        color: "#2b2b2b"
-        radius: 14
-        border.width: 2
-        border.color: "#444"
-        clip: true
+        color: "transparent"
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: _pad
             spacing: _gap
 
-            // ===== Title + description (compactda daha balaca)
+            // ===== Header
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: Math.max(4, _fontH * (_compact ? 0.18 : 0.30))
+                spacing: AzTheme.px(6)
 
-                QGCLabel {
+                Text {
                     text: qsTr("Log Yükləmə")
-                    font.bold: true
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
                     font.pixelSize: _titlePx
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
-                    verticalAlignment: Text.AlignVCenter
                 }
 
-                QGCLabel {
+                Text {
                     text: qsTr("Log Yükləmə sizə təyyarənizdən ikili jurnal fayllarını endirməyə imkan verir. Mövcud qeydlərin siyahısını əldə etmək üçün Yenilə klikləyin.")
-                    color: "#E8E8E8"
+                    color: AzTheme.textSecondary
+                    font.family: AzTheme.fontFamily
                     font.pixelSize: _descPx
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
-                    verticalAlignment: Text.AlignVCenter
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 1
-                    color: "#FFFFFF"
-                    opacity: 0.12
                 }
             }
 
@@ -296,10 +284,13 @@ Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
 
-                    color: "#242424"
-                    radius: 10
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#3a3a3a"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
                     clip: true
 
                     Flickable {
@@ -329,8 +320,10 @@ Item {
                                 y: 0
                                 width: parent.width
                                 height: _rowH
-                                color: "#3D3B3B"
-                                radius: 6
+                                radius: AzTheme.px(AzTheme.groupRadius)
+                                color: AzTheme.groupFill
+                                border.width: 1
+                                border.color: AzTheme.groupBorder
 
                                 RowLayout {
                                     anchors.fill: parent
@@ -351,7 +344,7 @@ Item {
 
                                     QGCLabel {
                                         text: qsTr("Id")
-                                        font.bold: true
+                                        font.weight: Font.Medium
                                         Layout.preferredWidth: _idW
                                         Layout.alignment: Qt.AlignVCenter
                                         verticalAlignment: Text.AlignVCenter
@@ -360,7 +353,7 @@ Item {
 
                                     QGCLabel {
                                         text: qsTr("Tarix")
-                                        font.bold: true
+                                        font.weight: Font.Medium
                                         Layout.fillWidth: true
                                         Layout.alignment: Qt.AlignVCenter
                                         verticalAlignment: Text.AlignVCenter
@@ -369,7 +362,7 @@ Item {
 
                                     QGCLabel {
                                         text: qsTr("Ölçü")
-                                        font.bold: true
+                                        font.weight: Font.Medium
                                         Layout.preferredWidth: _sizeW
                                         Layout.alignment: Qt.AlignVCenter
                                         verticalAlignment: Text.AlignVCenter
@@ -378,7 +371,7 @@ Item {
 
                                     QGCLabel {
                                         text: qsTr("Status")
-                                        font.bold: true
+                                        font.weight: Font.Medium
                                         Layout.preferredWidth: _statusW
                                         Layout.alignment: Qt.AlignVCenter
                                         verticalAlignment: Text.AlignVCenter
@@ -409,8 +402,8 @@ Item {
                                 delegate: Rectangle {
                                     width: tableContent.width
                                     height: _rowH
-                                    radius: 6
-                                    color: (index % 2 === 0) ? "#2f2f2f" : "#2a2a2a"
+                                    radius: AzTheme.px(6)
+                                    color: (index % 2 === 0) ? "transparent" : AzTheme.pillTop
 
                                     RowLayout {
                                         anchors.fill: parent
@@ -467,7 +460,7 @@ Item {
                                 anchors.centerIn: parent
                                 visible: logController && logController.model && logController.model.count === 0
                                 text: qsTr("Siyahı boşdur. Logları görmək üçün “Yenilə” klikləyin.")
-                                color: "#BDBDBD"
+                                color: AzTheme.textSecondary
                                 wrapMode: Text.WordWrap
                                 horizontalAlignment: Text.AlignHCenter
                             }
@@ -483,21 +476,23 @@ Item {
         id: wideActions
         ColumnLayout {
             implicitHeight: childrenRect.height
-            spacing: Math.max(6, _fontH * 0.45)
+            spacing: AzTheme.px(8)
 
-            QGCButton { Layout.fillWidth: true; Layout.preferredHeight: _btnH; font.pixelSize: _btnFontPx;
+            AzButton { Layout.fillWidth: true
                 enabled: !logController.requestingList && !logController.downloadingLogs
                 text: qsTr("Yenilə"); onClicked: doRefresh()
             }
-            QGCButton { Layout.fillWidth: true; Layout.preferredHeight: _btnH; font.pixelSize: _btnFontPx;
+            AzButton { Layout.fillWidth: true
                 enabled: !logController.requestingList && !logController.downloadingLogs
+                positive: true
                 text: qsTr("Yüklə"); onClicked: doDownload()
             }
-            QGCButton { Layout.fillWidth: true; Layout.preferredHeight: _btnH; font.pixelSize: _btnFontPx;
+            AzButton { Layout.fillWidth: true
                 enabled: !logController.requestingList && !logController.downloadingLogs && (logController.model.count > 0)
+                danger: true
                 text: qsTr("Hamısını Sil"); onClicked: doEraseAll()
             }
-            QGCButton { Layout.fillWidth: true; Layout.preferredHeight: _btnH; font.pixelSize: _btnFontPx;
+            AzButton { Layout.fillWidth: true
                 enabled: logController.requestingList || logController.downloadingLogs
                 text: qsTr("Ləğv et"); onClicked: doCancel()
             }
@@ -513,21 +508,23 @@ Item {
             columns: 2
             implicitHeight: childrenRect.height
             columnSpacing: _gap
-            rowSpacing: Math.max(6, _fontH * 0.40)
+            rowSpacing: AzTheme.px(8)
 
-            QGCButton { Layout.fillWidth: true; Layout.preferredHeight: _btnH; font.pixelSize: _btnFontPx;
+            AzButton { Layout.fillWidth: true
                 enabled: !logController.requestingList && !logController.downloadingLogs
                 text: qsTr("Yenilə"); onClicked: doRefresh()
             }
-            QGCButton { Layout.fillWidth: true; Layout.preferredHeight: _btnH; font.pixelSize: _btnFontPx;
+            AzButton { Layout.fillWidth: true
                 enabled: !logController.requestingList && !logController.downloadingLogs
+                positive: true
                 text: qsTr("Yüklə"); onClicked: doDownload()
             }
-            QGCButton { Layout.fillWidth: true; Layout.preferredHeight: _btnH; font.pixelSize: _btnFontPx;
+            AzButton { Layout.fillWidth: true
                 enabled: !logController.requestingList && !logController.downloadingLogs && (logController.model.count > 0)
+                danger: true
                 text: qsTr("Hamısını Sil"); onClicked: doEraseAll()
             }
-            QGCButton { Layout.fillWidth: true; Layout.preferredHeight: _btnH; font.pixelSize: _btnFontPx;
+            AzButton { Layout.fillWidth: true
                 enabled: logController.requestingList || logController.downloadingLogs
                 text: qsTr("Ləğv et"); onClicked: doCancel()
             }
