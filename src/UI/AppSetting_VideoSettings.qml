@@ -8,8 +8,13 @@ import QGroundControl
 import QGroundControl.FactControls
 import QGroundControl.Controls
 
+// Video settings, in the new design: the page header of the setup pages, status cards with
+// group box rows, and the new combo boxes, fields and switches.
 SettingsPage {
     id: root
+
+    // The combo boxes, fields and labels take the new design's look (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // ------------------ Data ------------------
     property var    _settingsManager:            QGroundControl.settingsManager
@@ -32,18 +37,19 @@ SettingsPage {
     readonly property bool tablet: width < 1100
     readonly property bool tiny:   width < 560
 
-    readonly property real sidePad: Math.max(12, ScreenTools.defaultFontPixelWidth * (phone ? 1.0 : 1.6))
-    readonly property real gap:     Math.max(10, ScreenTools.defaultFontPixelHeight * (phone ? 0.65 : 0.90))
+    readonly property real sidePad: AzTheme.px(phone ? 12 : 20)
+    readonly property real gap:     AzTheme.px(phone ? 10 : 16)
+    readonly property real cardPad: AzTheme.px(16)
 
-    readonly property real titlePx: Math.max(18, ScreenTools.defaultFontPixelHeight * (phone ? 1.15 : 1.45))
-    readonly property real descPx:  Math.max(12, ScreenTools.defaultFontPixelHeight * (phone ? 0.95 : 1.05))
+    readonly property real titlePx: AzTheme.fontPx(phone ? 18 : 20)
+    readonly property real descPx:  AzTheme.fontPx(13)
 
-    readonly property real sectionPx: Math.max(14, ScreenTools.defaultFontPixelHeight * (tiny ? 0.92 : phone ? 0.98 : 1.10))
-    readonly property real labelPx:   Math.max(10, ScreenTools.defaultFontPixelHeight * (tiny ? 0.78 : phone ? 0.88 : 1.00))
+    readonly property real sectionPx: AzTheme.fontPx(16)
+    readonly property real labelPx:   AzTheme.fontPx(AzTheme.popupTextSize)
 
-    readonly property real rowPadX: Math.max(12, ScreenTools.defaultFontPixelWidth  * 1.2)
-    readonly property real rowPadY: Math.max(8,  ScreenTools.defaultFontPixelHeight * 0.6)
-    readonly property real rowMinH: Math.max(48, ScreenTools.defaultFontPixelHeight * 2.6)
+    readonly property real rowPadX: AzTheme.px(AzTheme.groupPadding)
+    readonly property real rowPadY: AzTheme.px(8)
+    readonly property real rowMinH: AzTheme.px(AzTheme.groupRowHeight + 4)
 
     readonly property real availableW: Math.max(0, width - 2 * sidePad)
     readonly property real cardW: availableW
@@ -93,33 +99,28 @@ SettingsPage {
     // ================== Header ==================
     ColumnLayout {
         Layout.fillWidth: true
-        spacing: Math.max(6, ScreenTools.defaultFontPixelHeight * 0.6)
+        Layout.topMargin: AzTheme.px(20)
+        spacing: AzTheme.px(6)
 
-        QGCLabel {
+        Text {
             text: qsTr("Video Ayarları")
-            color: "white"
-            font.pixelSize: 26
-            font.bold: true
+            color: AzTheme.textCard
+            font.family: AzTheme.fontFamily
+            font.weight: Font.Medium
+            font.pixelSize: root.titlePx
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
             Layout.minimumWidth: 0
         }
 
-        QGCLabel {
+        Text {
             text: qsTr("Video mənbəyi və qeyd parametrləri")
-            color: "#E8E8E8"
-            font.pixelSize: 16
-            font.bold: false
+            color: AzTheme.textSecondary
+            font.family: AzTheme.fontFamily
+            font.pixelSize: root.descPx
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
             Layout.minimumWidth: 0
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            height: 1
-            color: "white"
-            opacity: 0.25
         }
     }
 
@@ -151,33 +152,39 @@ SettingsPage {
             Rectangle {
                 id: videoSourcePanel
                 width: Math.min(root.panelW, panelFlow.width)
-                color: "#3D3B3B"
-                radius: 12
-                border.color: "#FFFFFF"
-                border.width: 2
+                radius: AzTheme.px(AzTheme.cardRadius)
+                border.width: 1
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
 
-                readonly property real desiredH: videoSourceGroup.implicitHeight + 28
+                readonly property real desiredH: videoSourceGroup.implicitHeight + root.cardPad * 2
                 height: desiredH
 
                 ColumnLayout {
                     id: videoSourceGroup
                     anchors.fill: parent
-                    anchors.margins: 14
-                    spacing: gap
+                    anchors.margins: root.cardPad
+                    spacing: AzTheme.px(8)
 
                     QGCLabel {
                         text: qsTr("Video Mənbə")
-                        color: "white"
+                        color: AzTheme.textCard
+                        font.family: AzTheme.fontFamily
+                        font.weight: Font.Medium
                         font.pixelSize: sectionPx
-                        font.bold: true
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _videoSettings.videoSource.visible
                         implicitHeight: Math.max(rowMinH, srcGrid.implicitHeight + rowPadY * 2)
                         height: implicitHeight
@@ -195,9 +202,7 @@ SettingsPage {
 
                             QGCLabel {
                                 text: qsTr("Mənbə")
-                                color: "white"
                                 font.pixelSize: labelPx
-                                font.bold: true
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                                 Layout.minimumWidth: 0
@@ -221,34 +226,40 @@ SettingsPage {
             Rectangle {
                 id: connectionPanel
                 width: Math.min(root.panelW, panelFlow.width)
-                color: "#3D3B3B"
-                radius: 12
-                border.color: "#FFFFFF"
-                border.width: 2
+                radius: AzTheme.px(AzTheme.cardRadius)
+                border.width: 1
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
                 visible: !_videoSourceDisabled && !_videoAutoStreamConfig && (_isTCP || _isRTSP || _requiresUDPUrl)
 
-                readonly property real desiredH: connectionGroup.implicitHeight + 28
+                readonly property real desiredH: connectionGroup.implicitHeight + root.cardPad * 2
                 height: desiredH
 
                 ColumnLayout {
                     id: connectionGroup
                     anchors.fill: parent
-                    anchors.margins: 14
-                    spacing: gap
+                    anchors.margins: root.cardPad
+                    spacing: AzTheme.px(8)
 
                     QGCLabel {
                         text: qsTr("Əlaqə")
-                        color: "white"
+                        color: AzTheme.textCard
+                        font.family: AzTheme.fontFamily
+                        font.weight: Font.Medium
                         font.pixelSize: sectionPx
-                        font.bold: true
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _isRTSP && _videoSettings.rtspUrl.visible
                         implicitHeight: Math.max(rowMinH, rtspGrid.implicitHeight + rowPadY * 2)
                         height: implicitHeight
@@ -266,9 +277,7 @@ SettingsPage {
 
                             QGCLabel {
                                 text: qsTr("RTSP URL")
-                                color: "white"
                                 font.pixelSize: labelPx
-                                font.bold: true
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                                 Layout.minimumWidth: 0
@@ -286,8 +295,10 @@ SettingsPage {
 
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _isTCP && _videoSettings.tcpUrl.visible
                         implicitHeight: Math.max(rowMinH, tcpGrid.implicitHeight + rowPadY * 2)
                         height: implicitHeight
@@ -305,9 +316,7 @@ SettingsPage {
 
                             QGCLabel {
                                 text: qsTr("TCP URL")
-                                color: "white"
                                 font.pixelSize: labelPx
-                                font.bold: true
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                                 Layout.minimumWidth: 0
@@ -325,8 +334,10 @@ SettingsPage {
 
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _requiresUDPUrl && _videoSettings.udpUrl.visible
                         implicitHeight: Math.max(rowMinH, udpGrid.implicitHeight + rowPadY * 2)
                         height: implicitHeight
@@ -344,9 +355,7 @@ SettingsPage {
 
                             QGCLabel {
                                 text: qsTr("UDP URL")
-                                color: "white"
                                 font.pixelSize: labelPx
-                                font.bold: true
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                                 Layout.minimumWidth: 0
@@ -368,34 +377,40 @@ SettingsPage {
             Rectangle {
                 id: settingsPanel
                 width: Math.min(root.panelW, panelFlow.width)
-                color: "#3D3B3B"
-                radius: 12
-                border.color: "#FFFFFF"
-                border.width: 2
+                radius: AzTheme.px(AzTheme.cardRadius)
+                border.width: 1
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
                 visible: !_videoSourceDisabled
 
-                readonly property real desiredH: settingsGroup.implicitHeight + 28
+                readonly property real desiredH: settingsGroup.implicitHeight + root.cardPad * 2
                 height: desiredH
 
                 ColumnLayout {
                     id: settingsGroup
                     anchors.fill: parent
-                    anchors.margins: 14
-                    spacing: gap
+                    anchors.margins: root.cardPad
+                    spacing: AzTheme.px(8)
 
                     QGCLabel {
                         text: qsTr("Parametrlər")
-                        color: "white"
+                        color: AzTheme.textCard
+                        font.family: AzTheme.fontFamily
+                        font.weight: Font.Medium
                         font.pixelSize: sectionPx
-                        font.bold: true
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: !_videoAutoStreamConfig && _isStreamSource && _videoSettings.aspectRatio.visible
                         implicitHeight: Math.max(rowMinH, arGrid.implicitHeight + rowPadY * 2)
                         height: implicitHeight
@@ -413,9 +428,7 @@ SettingsPage {
 
                             QGCLabel {
                                 text: qsTr("Aspekt nisbəti")
-                                color: "white"
                                 font.pixelSize: labelPx
-                                font.bold: true
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                                 Layout.minimumWidth: 0
@@ -433,8 +446,10 @@ SettingsPage {
 
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: !_videoAutoStreamConfig && _isStreamSource && _videoSettings.disableWhenDisarmed.visible
                         implicitHeight: Math.max(rowMinH, disarmGrid.implicitHeight + rowPadY * 2)
                         height: implicitHeight
@@ -452,45 +467,26 @@ SettingsPage {
 
                             QGCLabel {
                                 text: qsTr("Disarm zaman qeydi dayandırın")
-                                color: "white"
                                 font.pixelSize: labelPx
-                                font.bold: true
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                                 Layout.minimumWidth: 0
                             }
 
-                            Rectangle {
-                                width: 55
-                                height: 20
-                                radius: 15
-                                color: _videoSettings.disableWhenDisarmed.value ? "#4CAF50" : "#666666"
-                                border.color: "#FFFFFF"
-                                border.width: 2
+                            AzSwitch {
+                                checked: _videoSettings.disableWhenDisarmed.value
                                 Layout.alignment: phone ? Qt.AlignLeft : Qt.AlignRight
-
-                                Rectangle {
-                                    x: _videoSettings.disableWhenDisarmed.value ? parent.width - width - 4 : 4
-                                    y: 4
-                                    width: 13
-                                    height: 13
-                                    radius: 6.5
-                                    color: "white"
-                                    Behavior on x { NumberAnimation { duration: 200 } }
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    onClicked: _videoSettings.disableWhenDisarmed.value = !_videoSettings.disableWhenDisarmed.value
-                                }
+                                onClicked: _videoSettings.disableWhenDisarmed.value = !_videoSettings.disableWhenDisarmed.value
                             }
                         }
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: !_videoAutoStreamConfig && _isStreamSource && _videoSettings.lowLatencyMode.visible && _isGST
                         implicitHeight: Math.max(rowMinH, llGrid.implicitHeight + rowPadY * 2)
                         height: implicitHeight
@@ -508,45 +504,26 @@ SettingsPage {
 
                             QGCLabel {
                                 text: qsTr("Low Latency rejimi")
-                                color: "white"
                                 font.pixelSize: labelPx
-                                font.bold: true
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                                 Layout.minimumWidth: 0
                             }
 
-                            Rectangle {
-                                width: 55
-                                height: 20
-                                radius: 15
-                                color: _videoSettings.lowLatencyMode.value ? "#4CAF50" : "#666666"
-                                border.color: "#FFFFFF"
-                                border.width: 2
+                            AzSwitch {
+                                checked: _videoSettings.lowLatencyMode.value
                                 Layout.alignment: phone ? Qt.AlignLeft : Qt.AlignRight
-
-                                Rectangle {
-                                    x: _videoSettings.lowLatencyMode.value ? parent.width - width - 4 : 4
-                                    y: 4
-                                    width: 13
-                                    height: 13
-                                    radius: 6.5
-                                    color: "white"
-                                    Behavior on x { NumberAnimation { duration: 200 } }
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    onClicked: _videoSettings.lowLatencyMode.value = !_videoSettings.lowLatencyMode.value
-                                }
+                                onClicked: _videoSettings.lowLatencyMode.value = !_videoSettings.lowLatencyMode.value
                             }
                         }
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _videoSettings.forceVideoDecoder.visible
                         implicitHeight: Math.max(rowMinH, decGrid.implicitHeight + rowPadY * 2)
                         height: implicitHeight
@@ -564,9 +541,7 @@ SettingsPage {
 
                             QGCLabel {
                                 text: qsTr("Videonun deşifrə prioriteti")
-                                color: "white"
                                 font.pixelSize: labelPx
-                                font.bold: true
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                                 Layout.minimumWidth: 0
@@ -590,33 +565,39 @@ SettingsPage {
             Rectangle {
                 id: storagePanel
                 width: Math.min(root.panelW, panelFlow.width)
-                color: "#3D3B3B"
-                radius: 12
-                border.color: "#FFFFFF"
-                border.width: 2
+                radius: AzTheme.px(AzTheme.cardRadius)
+                border.width: 1
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
 
-                readonly property real desiredH: storageGroup.implicitHeight + 28
+                readonly property real desiredH: storageGroup.implicitHeight + root.cardPad * 2
                 height: desiredH
 
                 ColumnLayout {
                     id: storageGroup
                     anchors.fill: parent
-                    anchors.margins: 14
-                    spacing: gap
+                    anchors.margins: root.cardPad
+                    spacing: AzTheme.px(8)
 
                     QGCLabel {
                         text: qsTr("Yerli Video Yaddaşı")
-                        color: "white"
+                        color: AzTheme.textCard
+                        font.family: AzTheme.fontFamily
+                        font.weight: Font.Medium
                         font.pixelSize: sectionPx
-                        font.bold: true
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _videoSettings.recordingFormat.visible
                         implicitHeight: Math.max(rowMinH, fmtGrid.implicitHeight + rowPadY * 2)
                         height: implicitHeight
@@ -634,9 +615,7 @@ SettingsPage {
 
                             QGCLabel {
                                 text: qsTr("Qeyd Fayl Formatı")
-                                color: "white"
                                 font.pixelSize: labelPx
-                                font.bold: true
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                                 Layout.minimumWidth: 0
@@ -656,8 +635,10 @@ SettingsPage {
 
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _videoSettings.enableStorageLimit.visible
                         implicitHeight: Math.max(rowMinH, delGrid.implicitHeight + rowPadY * 2)
                         height: implicitHeight
@@ -675,45 +656,26 @@ SettingsPage {
 
                             QGCLabel {
                                 text: qsTr("Saxlanılan qeydləri avtomatik silmək")
-                                color: "white"
                                 font.pixelSize: labelPx
-                                font.bold: true
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                                 Layout.minimumWidth: 0
                             }
 
-                            Rectangle {
-                                width: 55
-                                height: 20
-                                radius: 15
-                                color: _videoSettings.enableStorageLimit.value ? "#4CAF50" : "#666666"
-                                border.color: "#FFFFFF"
-                                border.width: 2
+                            AzSwitch {
+                                checked: _videoSettings.enableStorageLimit.value
                                 Layout.alignment: phone ? Qt.AlignLeft : Qt.AlignRight
-
-                                Rectangle {
-                                    x: _videoSettings.enableStorageLimit.value ? parent.width - width - 4 : 4
-                                    y: 4
-                                    width: 13
-                                    height: 13
-                                    radius: 6.5
-                                    color: "white"
-                                    Behavior on x { NumberAnimation { duration: 200 } }
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    onClicked: _videoSettings.enableStorageLimit.value = !_videoSettings.enableStorageLimit.value
-                                }
+                                onClicked: _videoSettings.enableStorageLimit.value = !_videoSettings.enableStorageLimit.value
                             }
                         }
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _videoSettings.maxVideoSize.visible
                         implicitHeight: Math.max(rowMinH, maxGrid.implicitHeight + rowPadY * 2)
                         height: implicitHeight
@@ -731,9 +693,7 @@ SettingsPage {
 
                             QGCLabel {
                                 text: qsTr("Maksimum Yaddaş İstifadəsi")
-                                color: "white"
                                 font.pixelSize: labelPx
-                                font.bold: true
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                                 Layout.minimumWidth: 0

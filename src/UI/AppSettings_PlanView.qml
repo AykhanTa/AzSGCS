@@ -7,8 +7,13 @@ import QGroundControl
 import QGroundControl.FactControls
 import QGroundControl.Controls
 
+// Plan view settings, in the new design: the page header of the setup pages, a status card
+// with group box rows, and the new fields and switches.
 SettingsPage {
     id: root
+
+    // The fields, switches and labels take the new design's look (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // ------------------ Data ------------------
     property var _settingsManager:  QGroundControl.settingsManager
@@ -19,32 +24,28 @@ SettingsPage {
     readonly property bool tablet: width < 1100
     readonly property bool tiny:   width < 560     // ✅ çox dar ekranlarda daha kiçik font
 
-    readonly property real gap:      Math.max(10, ScreenTools.defaultFontPixelHeight * (phone ? 0.6 : 0.85))
-    readonly property real cardPad:  Math.max(14, ScreenTools.defaultFontPixelWidth  * 1.2)
-    readonly property real rowPadX:  Math.max(12, ScreenTools.defaultFontPixelWidth  * 1.2)
-    readonly property real rowPadY:  Math.max(8,  ScreenTools.defaultFontPixelHeight * 0.6)
-    readonly property real rowMinH:  Math.max(48, ScreenTools.defaultFontPixelHeight * 2.6)
+    readonly property real gap:      AzTheme.px(phone ? 8 : 10)
+    readonly property real cardPad:  AzTheme.px(16)
+    readonly property real rowPadX:  AzTheme.px(AzTheme.groupPadding)
+    readonly property real rowPadY:  AzTheme.px(8)
+    readonly property real rowMinH:  AzTheme.px(AzTheme.groupRowHeight + 4)
 
-    readonly property real titlePx: Math.max(18, ScreenTools.defaultFontPixelHeight * (phone ? 1.15 : 1.45))
-    readonly property real descPx:  Math.max(12, ScreenTools.defaultFontPixelHeight * (phone ? 0.95 : 1.05))
-
-    // ✅ Burada kiçildirik (label yazıları: “Defolt missiya hündürlüyü”, “VTOL keçid məsafəsi” və s.)
-    readonly property real labelPx: Math.max(10,
-        ScreenTools.defaultFontPixelHeight * (tiny ? 0.78 : phone ? 0.88 : 1.00)
-    )
+    readonly property real titlePx: AzTheme.fontPx(phone ? 18 : 20)
+    readonly property real descPx:  AzTheme.fontPx(13)
+    readonly property real labelPx: AzTheme.fontPx(AzTheme.popupTextSize)
 
     // ================== Header ==================
-    // Başlıq/alt-başlıq/ayırıcı bir Column içində — aralarındakı boşluq sıx və
-    // digər tənzimləmə səhifələri (Uzaqdan İD) ilə eyni olsun deyə.
     ColumnLayout {
         Layout.fillWidth: true
-        spacing: Math.max(6, ScreenTools.defaultFontPixelHeight * 0.6)
+        Layout.topMargin: AzTheme.px(20)
+        spacing: AzTheme.px(6)
 
         Text {
             text: qsTr("Missiya Parametrləri")
-            color: "white"
-            font.pixelSize: 26
-            font.bold: true
+            color: AzTheme.textCard
+            font.family: AzTheme.fontFamily
+            font.weight: Font.Medium
+            font.pixelSize: root.titlePx
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
             Layout.minimumWidth: 0
@@ -52,18 +53,12 @@ SettingsPage {
 
         Text {
             text: qsTr("Drone'un missiya planlama, uçuş rotası və görev parametrlərinin ayarları")
-            color: "#E8E8E8"
-            font.pixelSize: 16
+            color: AzTheme.textSecondary
+            font.family: AzTheme.fontFamily
+            font.pixelSize: root.descPx
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
             Layout.minimumWidth: 0
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            height: 1
-            color: "white"
-            opacity: 0.25
         }
     }
 
@@ -71,10 +66,13 @@ SettingsPage {
     Rectangle {
         id: missionCard
         Layout.fillWidth: true
-        color: "#3D3B3B"
-        radius: 16
-        border.color: "white"
-        border.width: 2
+        radius: AzTheme.px(AzTheme.cardRadius)
+        border.width: 1
+        border.color: AzTheme.cardBorder
+        gradient: Gradient {
+            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+        }
 
         implicitHeight: cardLayout.implicitHeight + cardPad * 2
         height: implicitHeight
@@ -88,8 +86,10 @@ SettingsPage {
             // ---------- Default Mission Altitude ----------
             Rectangle {
                 Layout.fillWidth: true
-                radius: 10
-                color: "#2A2A2A"
+                radius: AzTheme.px(AzTheme.groupRadius)
+                color: AzTheme.groupFill
+                border.width: 1
+                border.color: AzTheme.groupBorder
                 visible: _settingsManager.appSettings.defaultMissionItemAltitude.visible
                 implicitHeight: Math.max(rowMinH, altGrid.implicitHeight + rowPadY * 2)
                 height: implicitHeight
@@ -107,9 +107,7 @@ SettingsPage {
 
                     QGCLabel {
                         text: qsTr("Defolt Missiya Hündürlüyü")
-                        color: "white"
                         font.pixelSize: labelPx
-                        font.bold: true
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
@@ -128,8 +126,10 @@ SettingsPage {
             // ---------- VTOL Transition Distance ----------
             Rectangle {
                 Layout.fillWidth: true
-                radius: 10
-                color: "#2A2A2A"
+                radius: AzTheme.px(AzTheme.groupRadius)
+                color: AzTheme.groupFill
+                border.width: 1
+                border.color: AzTheme.groupBorder
                 visible: _planViewSettings.vtolTransitionDistance.visible
                 implicitHeight: Math.max(rowMinH, vtolGrid.implicitHeight + rowPadY * 2)
                 height: implicitHeight
@@ -147,9 +147,7 @@ SettingsPage {
 
                     QGCLabel {
                         text: qsTr("VTOL keçid məsafəsi")
-                        color: "white"
                         font.pixelSize: labelPx
-                        font.bold: true
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
@@ -168,8 +166,10 @@ SettingsPage {
             // ---------- Use Condition Gate ----------
             Rectangle {
                 Layout.fillWidth: true
-                radius: 10
-                color: "#2A2A2A"
+                radius: AzTheme.px(AzTheme.groupRadius)
+                color: AzTheme.groupFill
+                border.width: 1
+                border.color: AzTheme.groupBorder
                 visible: _planViewSettings.useConditionGate.visible
                 implicitHeight: Math.max(rowMinH, gateGrid.implicitHeight + rowPadY * 2)
                 height: implicitHeight
@@ -187,9 +187,7 @@ SettingsPage {
 
                     QGCLabel {
                         text: qsTr("Nümunə yaratmaq üçün MAV_CMD_CONDITION_GATE istifadə edin")
-                        color: "white"
                         font.pixelSize: labelPx
-                        font.bold: true
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
@@ -205,8 +203,10 @@ SettingsPage {
             // ---------- Takeoff Item Not Required ----------
             Rectangle {
                 Layout.fillWidth: true
-                radius: 10
-                color: "#2A2A2A"
+                radius: AzTheme.px(AzTheme.groupRadius)
+                color: AzTheme.groupFill
+                border.width: 1
+                border.color: AzTheme.groupBorder
                 visible: _planViewSettings.takeoffItemNotRequired.visible
                 implicitHeight: Math.max(rowMinH, takeoffGrid.implicitHeight + rowPadY * 2)
                 height: implicitHeight
@@ -224,9 +224,7 @@ SettingsPage {
 
                     QGCLabel {
                         text: qsTr("Missiyalar uçuş elementini tələb etmir")
-                        color: "white"
                         font.pixelSize: labelPx
-                        font.bold: true
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
@@ -242,8 +240,10 @@ SettingsPage {
             // ---------- Allow Multiple Landing Patterns ----------
             Rectangle {
                 Layout.fillWidth: true
-                radius: 10
-                color: "#2A2A2A"
+                radius: AzTheme.px(AzTheme.groupRadius)
+                color: AzTheme.groupFill
+                border.width: 1
+                border.color: AzTheme.groupBorder
                 visible: _planViewSettings.allowMultipleLandingPatterns.visible
                 implicitHeight: Math.max(rowMinH, landGrid.implicitHeight + rowPadY * 2)
                 height: implicitHeight
@@ -261,9 +261,7 @@ SettingsPage {
 
                     QGCLabel {
                         text: qsTr("Çoxlu eniş ardıcıllığını konfiqurasiya etməyə icazə verin")
-                        color: "white"
                         font.pixelSize: labelPx
-                        font.bold: true
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                         Layout.minimumWidth: 0
