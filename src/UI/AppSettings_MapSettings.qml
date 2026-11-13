@@ -8,9 +8,15 @@ import QGroundControl.FactControls
 import QGroundControl.Controls
 import QGroundControl.QGCMapEngineManager
 
+// Map settings, in the new design: the page header of the setup pages, status cards with
+// group box rows, and the new combo boxes, fields and buttons.
 Item {
     id: root
     anchors.fill: parent
+
+    // The combo boxes, fields, labels, buttons and dialogs take the new design's look
+    // (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // ---------------- Settings refs ----------------
     property var    _settingsManager:               QGroundControl.settingsManager
@@ -35,8 +41,8 @@ Item {
     readonly property bool phone:  ScreenTools.isMobile || width < 800
     readonly property bool tablet: width < 1200
 
-    readonly property real sidePadding: Math.max(10, ScreenTools.defaultFontPixelWidth  * (phone ? 1.0 : tablet ? 1.35 : 1.8))
-    readonly property real gap:         Math.max(10, ScreenTools.defaultFontPixelWidth  * (phone ? 1.0 : tablet ? 1.35 : 1.8))
+    readonly property real sidePadding: AzTheme.px(phone ? 12 : 20)
+    readonly property real gap:         AzTheme.px(phone ? 10 : 16)
 
     readonly property real fontScale: {
         var w = Math.max(1, width)
@@ -45,10 +51,10 @@ Item {
         return Math.max(0.90, Math.min(1.0, s))
     }
 
-    readonly property real titleFontPx:   Math.max(18, ScreenTools.defaultFontPixelHeight * 1.25 * fontScale)
-    readonly property real descFontPx:    Math.max(12, ScreenTools.defaultFontPixelHeight * 0.95 * fontScale)
-    readonly property real sectionFontPx: Math.max(14, ScreenTools.defaultFontPixelHeight * 1.00 * fontScale)
-    readonly property real rowFontPx:     Math.max(11, ScreenTools.defaultFontPixelHeight * 0.90 * fontScale)
+    readonly property real titleFontPx:   AzTheme.fontPx(phone ? 18 : 20)
+    readonly property real descFontPx:    AzTheme.fontPx(13)
+    readonly property real sectionFontPx: AzTheme.fontPx(16)
+    readonly property real rowFontPx:     AzTheme.fontPx(AzTheme.popupTextSize)
     readonly property real smallPoint:    ScreenTools.smallFontPointSize * fontScale
 
     readonly property real contentW: Math.max(0, width - 2 * sidePadding)
@@ -67,9 +73,9 @@ Item {
     readonly property real panelW: colW
 
     // row sizes
-    readonly property real rowPadX: Math.max(12, ScreenTools.defaultFontPixelWidth * 1.2)
-    readonly property real rowPadY: Math.max(8,  ScreenTools.defaultFontPixelHeight * 0.6)
-    readonly property real rowMinH: Math.max(48, ScreenTools.defaultFontPixelHeight * 2.6)
+    readonly property real rowPadX: AzTheme.px(AzTheme.groupPadding)
+    readonly property real rowPadY: AzTheme.px(8)
+    readonly property real rowMinH: AzTheme.px(AzTheme.groupRowHeight + 4)
 
     // general control widths (token textfields etc.)
     // Kontrol enləri də Uçuş Görünüşü ilə eyni formuladır
@@ -112,8 +118,6 @@ Item {
         grabPermissions: PointerHandler.CanTakeOverFromAnything
     }
 
-    Rectangle { anchors.fill: parent; color: "#000000" }
-
     // ---------------- Header ----------------
     Column {
         id: headerArea
@@ -122,30 +126,26 @@ Item {
         anchors.top: parent.top
         anchors.leftMargin: sidePadding
         anchors.rightMargin: sidePadding
-        anchors.topMargin: 0
-        spacing: Math.max(6, ScreenTools.defaultFontPixelHeight * 0.6)
+        anchors.topMargin: AzTheme.px(20)
+        spacing: AzTheme.px(6)
 
-        QGCLabel {
+        Text {
+            width: parent.width
             text: qsTr("Xəritə Parametrləri")
-            color: "white"
-            font.pixelSize: 26
-            font.bold: true
+            color: AzTheme.textCard
+            font.family: AzTheme.fontFamily
+            font.weight: Font.Medium
+            font.pixelSize: root.titleFontPx
             wrapMode: Text.WordWrap
         }
 
-        QGCLabel {
+        Text {
+            width: parent.width
             text: qsTr("Xəritə və oflayn xəritə parametrləri")
-            color: "#E8E8E8"
-            font.pixelSize: 16
+            color: AzTheme.textSecondary
+            font.family: AzTheme.fontFamily
+            font.pixelSize: root.descFontPx
             wrapMode: Text.WordWrap
-        }
-
-        Rectangle {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: 1
-            color: "#FFFFFF"
-            opacity: 0.25
         }
     }
 
@@ -156,7 +156,7 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.topMargin: Math.max(8, ScreenTools.defaultFontPixelHeight * 0.8)
+        anchors.topMargin: AzTheme.px(16)
 
         clip: true
         flickableDirection: Flickable.VerticalFlick
@@ -190,12 +190,15 @@ Item {
             Rectangle {
                 id: providerPanel
                 width: parent.width
-                color: "#3D3B3B"
-                radius: 16
+                radius: AzTheme.px(AzTheme.cardRadius)
                 border.width: 1
-                border.color: "#9D9D9D"
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
 
-                readonly property real pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+                readonly property real pad: AzTheme.px(16)
                 readonly property real desiredH: providerLayout.implicitHeight + pad * 2
                 height: desiredH
 
@@ -204,13 +207,14 @@ Item {
                     x: providerPanel.pad
                     y: providerPanel.pad
                     width: providerPanel.width - 2 * providerPanel.pad
-                    spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                    spacing: AzTheme.px(8)
 
-                    QGCLabel {
+                    Text {
                         text: qsTr("Xəritə Provayderi")
-                        color: "white"
+                        color: AzTheme.textCard
+                        font.family: AzTheme.fontFamily
+                        font.weight: Font.Medium
                         font.pixelSize: sectionFontPx
-                        font.bold: true
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                     }
@@ -218,8 +222,10 @@ Item {
                     // ✅ Provayder (HƏMİŞƏ eyni row)
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _mapProviderFact.visible
                         implicitHeight: Math.max(root.rowMinH, provRow.implicitHeight + root.rowPadY * 2)
 
@@ -234,9 +240,7 @@ Item {
 
                             QGCLabel {
                                 text: qsTr("Provayder")
-                                color: "white"
                                 font.pixelSize: root.rowFontPx
-                                font.bold: true
                                 Layout.fillWidth: true
                                 Layout.alignment: Qt.AlignVCenter
                                 elide: Text.ElideRight
@@ -247,7 +251,6 @@ Item {
                                 id: providerCombo
                                 Layout.preferredWidth: root.rightControlW
                                 Layout.minimumWidth: 0
-                                Layout.preferredHeight: 35
                                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                                 sizeToContents: false
                                 model: _mapEngineManager.mapProviderList
@@ -269,8 +272,10 @@ Item {
                     // ✅ Növ (HƏMİŞƏ eyni row)
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _mapTypeFact.visible
                         implicitHeight: Math.max(root.rowMinH, typeRow.implicitHeight + root.rowPadY * 2)
 
@@ -285,9 +290,7 @@ Item {
 
                             QGCLabel {
                                 text: qsTr("Növ")
-                                color: "white"
                                 font.pixelSize: root.rowFontPx
-                                font.bold: true
                                 Layout.fillWidth: true
                                 Layout.alignment: Qt.AlignVCenter
                                 elide: Text.ElideRight
@@ -298,7 +301,6 @@ Item {
                                 id: typeCombo
                                 Layout.preferredWidth: root.rightControlW
                                 Layout.minimumWidth: 0
-                                Layout.preferredHeight: 35
                                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                                 sizeToContents: false
                                 model: _mapEngineManager.mapTypeList(_mapProviderFact.rawValue)
@@ -319,8 +321,10 @@ Item {
                     // ✅ Yüksəklik Təchizatçısı (HƏMİŞƏ eyni row)
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _elevationProviderFact.visible
                         implicitHeight: Math.max(root.rowMinH, elevRow.implicitHeight + root.rowPadY * 2)
 
@@ -335,9 +339,7 @@ Item {
 
                             QGCLabel {
                                 text: qsTr("Yüksəklik Təchizatçısı")
-                                color: "white"
                                 font.pixelSize: root.rowFontPx
-                                font.bold: true
                                 Layout.fillWidth: true
                                 Layout.alignment: Qt.AlignVCenter
                                 elide: Text.ElideRight
@@ -348,7 +350,6 @@ Item {
                                 id: elevCombo
                                 Layout.preferredWidth: root.rightControlW
                                 Layout.minimumWidth: 0
-                                Layout.preferredHeight: 35
                                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                                 sizeToContents: false
                                 model: _mapEngineManager.elevationProviderList
@@ -372,12 +373,15 @@ Item {
             Rectangle {
                 id: offlinePanel
                 width: parent.width
-                color: "#3D3B3B"
-                radius: 16
+                radius: AzTheme.px(AzTheme.cardRadius)
                 border.width: 1
-                border.color: "#9D9D9D"
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
 
-                readonly property real pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+                readonly property real pad: AzTheme.px(16)
                 readonly property real desiredH: offlineLayout.implicitHeight + pad * 2
                 height: desiredH
 
@@ -386,13 +390,14 @@ Item {
                     x: offlinePanel.pad
                     y: offlinePanel.pad
                     width: offlinePanel.width - 2 * offlinePanel.pad
-                    spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                    spacing: AzTheme.px(8)
 
-                    QGCLabel {
+                    Text {
                         text: qsTr("Oflayn Xəritələr")
-                        color: "white"
+                        color: AzTheme.textCard
+                        font.family: AzTheme.fontFamily
+                        font.weight: Font.Medium
                         font.pixelSize: sectionFontPx
-                        font.bold: true
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                     }
@@ -411,8 +416,10 @@ Item {
                     // ✅ Yeni dəst (button HƏMİŞƏ eyni row)
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         implicitHeight: Math.max(root.rowMinH, addRow.implicitHeight + root.rowPadY * 2)
 
                         RowLayout {
@@ -426,9 +433,7 @@ Item {
 
                             QGCLabel {
                                 text: qsTr("Yeni Dəst əlavə edin")
-                                color: "white"
                                 font.pixelSize: root.rowFontPx
-                                font.bold: true
                                 Layout.fillWidth: true
                                 Layout.alignment: Qt.AlignVCenter
                                 elide: Text.ElideRight
@@ -449,8 +454,10 @@ Item {
                     // ✅ Import (button HƏMİŞƏ eyni row)
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: QGroundControl.corePlugin.options.showOfflineMapImport
                         implicitHeight: Math.max(root.rowMinH, impRow.implicitHeight + root.rowPadY * 2)
 
@@ -465,9 +472,7 @@ Item {
 
                             QGCLabel {
                                 text: qsTr("Map Tiles daxil edin")
-                                color: "white"
                                 font.pixelSize: root.rowFontPx
-                                font.bold: true
                                 Layout.fillWidth: true
                                 Layout.alignment: Qt.AlignVCenter
                                 elide: Text.ElideRight
@@ -491,8 +496,10 @@ Item {
                     // ✅ Export (button HƏMİŞƏ eyni row)
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: QGroundControl.corePlugin.options.showOfflineMapExport
                         implicitHeight: Math.max(root.rowMinH, expRow.implicitHeight + root.rowPadY * 2)
 
@@ -507,9 +514,7 @@ Item {
 
                             QGCLabel {
                                 text: qsTr("Map Tiles xaric edin")
-                                color: "white"
                                 font.pixelSize: root.rowFontPx
-                                font.bold: true
                                 Layout.fillWidth: true
                                 Layout.alignment: Qt.AlignVCenter
                                 elide: Text.ElideRight
@@ -530,8 +535,10 @@ Item {
                     // Progress (istəsən bunu da always-row saxlayırıq)
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _currentlyImportOrExporting
                         implicitHeight: Math.max(root.rowMinH, progRow.implicitHeight + root.rowPadY * 2)
 
@@ -546,9 +553,7 @@ Item {
 
                             QGCLabel {
                                 text: _mapEngineManager.importAction === QGCMapEngineManager.ImportAction.ActionExporting ? qsTr("Xaric edilir") : qsTr("Daxil edilir")
-                                color: "white"
                                 font.pixelSize: root.rowFontPx
-                                font.bold: true
                                 Layout.fillWidth: true
                                 Layout.alignment: Qt.AlignVCenter
                                 elide: Text.ElideRight
@@ -556,13 +561,30 @@ Item {
                             }
 
                             ProgressBar {
+                                id: tileProgress
                                 Layout.preferredWidth: root.rightControlW
                                 Layout.minimumWidth: 150
                                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                                Layout.preferredHeight: 20
                                 from: 0
                                 to: 100
                                 value: _mapEngineManager.actionProgress
+
+                                background: Rectangle {
+                                    implicitHeight: AzTheme.px(8)
+                                    radius:         height / 2
+                                    color:          AzTheme.slotEmpty
+                                }
+
+                                contentItem: Item {
+                                    implicitHeight: AzTheme.px(8)
+
+                                    Rectangle {
+                                        width:  tileProgress.visualPosition * parent.width
+                                        height: parent.height
+                                        radius: height / 2
+                                        color:  AzTheme.statusGreen
+                                    }
+                                }
                             }
                         }
                     }
@@ -582,12 +604,15 @@ Item {
             Rectangle {
                 id: tokensPanel
                 width: parent.width
-                color: "#3D3B3B"
-                radius: 16
+                radius: AzTheme.px(AzTheme.cardRadius)
                 border.width: 1
-                border.color: "#9D9D9D"
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
 
-                readonly property real pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+                readonly property real pad: AzTheme.px(16)
                 readonly property real desiredH: tokensLayout.implicitHeight + pad * 2
                 height: desiredH
 
@@ -596,13 +621,14 @@ Item {
                     x: tokensPanel.pad
                     y: tokensPanel.pad
                     width: tokensPanel.width - 2 * tokensPanel.pad
-                    spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                    spacing: AzTheme.px(8)
 
-                    QGCLabel {
+                    Text {
                         text: qsTr("Tokenlər")
-                        color: "white"
+                        color: AzTheme.textCard
+                        font.family: AzTheme.fontFamily
+                        font.weight: Font.Medium
                         font.pixelSize: sectionFontPx
-                        font.bold: true
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                     }
@@ -610,8 +636,10 @@ Item {
                     // Mapbox
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _appSettings.mapboxToken.visible
                         implicitHeight: Math.max(root.rowMinH, mapboxTokGrid.implicitHeight + root.rowPadY * 2)
 
@@ -628,9 +656,7 @@ Item {
 
                             QGCLabel {
                                 text: qsTr("Mapbox")
-                                color: "white"
                                 font.pixelSize: root.rowFontPx
-                                font.bold: true
                                 Layout.fillWidth: true
                             }
 
@@ -639,7 +665,6 @@ Item {
                                 Layout.minimumWidth: 0
                                 Layout.fillWidth: root.phone
                                 Layout.alignment: root.phone ? Qt.AlignLeft : (Qt.AlignRight | Qt.AlignVCenter)
-                                Layout.preferredHeight: 35
                                 fact: _appSettings.mapboxToken
                             }
                         }
@@ -648,8 +673,10 @@ Item {
                     // Esri
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _appSettings.esriToken.visible
                         implicitHeight: Math.max(root.rowMinH, esriTokGrid.implicitHeight + root.rowPadY * 2)
 
@@ -666,9 +693,7 @@ Item {
 
                             QGCLabel {
                                 text: qsTr("Esri")
-                                color: "white"
                                 font.pixelSize: root.rowFontPx
-                                font.bold: true
                                 Layout.fillWidth: true
                             }
 
@@ -677,7 +702,6 @@ Item {
                                 Layout.minimumWidth: 0
                                 Layout.fillWidth: root.phone
                                 Layout.alignment: root.phone ? Qt.AlignLeft : (Qt.AlignRight | Qt.AlignVCenter)
-                                Layout.preferredHeight: 35
                                 fact: _appSettings.esriToken
                             }
                         }
@@ -686,8 +710,10 @@ Item {
                     // VWorld
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _appSettings.vworldToken.visible
                         implicitHeight: Math.max(root.rowMinH, vworldTokGrid.implicitHeight + root.rowPadY * 2)
 
@@ -704,9 +730,7 @@ Item {
 
                             QGCLabel {
                                 text: qsTr("VWorld")
-                                color: "white"
                                 font.pixelSize: root.rowFontPx
-                                font.bold: true
                                 Layout.fillWidth: true
                             }
 
@@ -715,7 +739,6 @@ Item {
                                 Layout.minimumWidth: 0
                                 Layout.fillWidth: root.phone
                                 Layout.alignment: root.phone ? Qt.AlignLeft : (Qt.AlignRight | Qt.AlignVCenter)
-                                Layout.preferredHeight: 35
                                 fact: _appSettings.vworldToken
                             }
                         }
@@ -727,12 +750,15 @@ Item {
             Rectangle {
                 id: mapboxPanel
                 width: parent.width
-                color: "#3D3B3B"
-                radius: 16
+                radius: AzTheme.px(AzTheme.cardRadius)
                 border.width: 1
-                border.color: "#9D9D9D"
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
 
-                readonly property real pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+                readonly property real pad: AzTheme.px(16)
                 readonly property real desiredH: mapboxLayout.implicitHeight + pad * 2
                 height: desiredH
 
@@ -741,21 +767,24 @@ Item {
                     x: mapboxPanel.pad
                     y: mapboxPanel.pad
                     width: mapboxPanel.width - 2 * mapboxPanel.pad
-                    spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                    spacing: AzTheme.px(8)
 
-                    QGCLabel {
+                    Text {
                         text: qsTr("Mapbox Giriş")
-                        color: "white"
+                        color: AzTheme.textCard
+                        font.family: AzTheme.fontFamily
+                        font.weight: Font.Medium
                         font.pixelSize: sectionFontPx
-                        font.bold: true
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _appSettings.mapboxAccount.visible
                         implicitHeight: Math.max(root.rowMinH, mapAccGrid.implicitHeight + root.rowPadY * 2)
 
@@ -772,9 +801,7 @@ Item {
 
                             QGCLabel {
                                 text: qsTr("Hesab")
-                                color: "white"
                                 font.pixelSize: root.rowFontPx
-                                font.bold: true
                                 Layout.fillWidth: true
                             }
 
@@ -783,7 +810,6 @@ Item {
                                 Layout.minimumWidth: 0
                                 Layout.fillWidth: root.phone
                                 Layout.alignment: root.phone ? Qt.AlignLeft : (Qt.AlignRight | Qt.AlignVCenter)
-                                Layout.preferredHeight: 35
                                 fact: _appSettings.mapboxAccount
                             }
                         }
@@ -791,8 +817,10 @@ Item {
 
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _appSettings.mapboxStyle.visible
                         implicitHeight: Math.max(root.rowMinH, mapStyleGrid.implicitHeight + root.rowPadY * 2)
 
@@ -809,9 +837,7 @@ Item {
 
                             QGCLabel {
                                 text: qsTr("Xəritə üslubu")
-                                color: "white"
                                 font.pixelSize: root.rowFontPx
-                                font.bold: true
                                 Layout.fillWidth: true
                             }
 
@@ -820,7 +846,6 @@ Item {
                                 Layout.minimumWidth: 0
                                 Layout.fillWidth: root.phone
                                 Layout.alignment: root.phone ? Qt.AlignLeft : (Qt.AlignRight | Qt.AlignVCenter)
-                                Layout.preferredHeight: 35
                                 fact: _appSettings.mapboxStyle
                             }
                         }
@@ -832,12 +857,15 @@ Item {
             Rectangle {
                 id: customUrlPanel
                 width: parent.width
-                color: "#3D3B3B"
-                radius: 16
+                radius: AzTheme.px(AzTheme.cardRadius)
                 border.width: 1
-                border.color: "#9D9D9D"
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
 
-                readonly property real pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+                readonly property real pad: AzTheme.px(16)
                 readonly property real desiredH: customUrlLayout.implicitHeight + pad * 2
                 height: desiredH
 
@@ -846,21 +874,24 @@ Item {
                     x: customUrlPanel.pad
                     y: customUrlPanel.pad
                     width: customUrlPanel.width - 2 * customUrlPanel.pad
-                    spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                    spacing: AzTheme.px(8)
 
-                    QGCLabel {
+                    Text {
                         text: qsTr("Fərdi Xəritə URL-i")
-                        color: "white"
+                        color: AzTheme.textCard
+                        font.family: AzTheme.fontFamily
+                        font.weight: Font.Medium
                         font.pixelSize: sectionFontPx
-                        font.bold: true
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _appSettings.customURL.visible
                         implicitHeight: Math.max(root.rowMinH, customGrid.implicitHeight + root.rowPadY * 2)
 
@@ -877,9 +908,7 @@ Item {
 
                             QGCLabel {
                                 text: qsTr("Server URL")
-                                color: "white"
                                 font.pixelSize: root.rowFontPx
-                                font.bold: true
                                 Layout.fillWidth: true
                             }
 
@@ -888,7 +917,6 @@ Item {
                                 Layout.minimumWidth: 0
                                 Layout.fillWidth: root.phone
                                 Layout.alignment: root.phone ? Qt.AlignLeft : (Qt.AlignRight | Qt.AlignVCenter)
-                                Layout.preferredHeight: 35
                                 fact: _appSettings.customURL
                             }
                         }
@@ -900,12 +928,15 @@ Item {
             Rectangle {
                 id: cachePanel
                 width: parent.width
-                color: "#3D3B3B"
-                radius: 16
+                radius: AzTheme.px(AzTheme.cardRadius)
                 border.width: 1
-                border.color: "#9D9D9D"
+                border.color: AzTheme.cardBorder
+                gradient: Gradient {
+                    GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                    GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                }
 
-                readonly property real pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+                readonly property real pad: AzTheme.px(16)
                 readonly property real desiredH: cacheLayout.implicitHeight + pad * 2
                 height: desiredH
 
@@ -914,21 +945,24 @@ Item {
                     x: cachePanel.pad
                     y: cachePanel.pad
                     width: cachePanel.width - 2 * cachePanel.pad
-                    spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                    spacing: AzTheme.px(8)
 
-                    QGCLabel {
+                    Text {
                         text: qsTr("Tile Keş")
-                        color: "white"
+                        color: AzTheme.textCard
+                        font.family: AzTheme.fontFamily
+                        font.weight: Font.Medium
                         font.pixelSize: sectionFontPx
-                        font.bold: true
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _mapsSettings.maxCacheDiskSize.visible
                         implicitHeight: Math.max(root.rowMinH, diskGrid.implicitHeight + root.rowPadY * 2)
 
@@ -945,9 +979,7 @@ Item {
 
                             QGCLabel {
                                 text: qsTr("Maksimum Keş Disk Ölçüsü")
-                                color: "white"
                                 font.pixelSize: root.rowFontPx
-                                font.bold: true
                                 Layout.fillWidth: true
                                 elide: Text.ElideRight
                                 wrapMode: Text.NoWrap
@@ -958,7 +990,6 @@ Item {
                                 Layout.minimumWidth: 0
                                 Layout.fillWidth: root.phone
                                 Layout.alignment: root.phone ? Qt.AlignLeft : (Qt.AlignRight | Qt.AlignVCenter)
-                                Layout.preferredHeight: 35
                                 fact: _mapsSettings.maxCacheDiskSize
                             }
                         }
@@ -966,8 +997,10 @@ Item {
 
                     Rectangle {
                         Layout.fillWidth: true
-                        radius: 10
-                        color: "#2A2A2A"
+                        radius: AzTheme.px(AzTheme.groupRadius)
+                        color: AzTheme.groupFill
+                        border.width: 1
+                        border.color: AzTheme.groupBorder
                         visible: _mapsSettings.maxCacheMemorySize.visible
                         implicitHeight: Math.max(root.rowMinH, memGrid.implicitHeight + root.rowPadY * 2)
 
@@ -984,9 +1017,7 @@ Item {
 
                             QGCLabel {
                                 text: qsTr("Maksimum Keş Yaddaş Ölçüsü")
-                                color: "white"
                                 font.pixelSize: root.rowFontPx
-                                font.bold: true
                                 Layout.fillWidth: true
                                 elide: Text.ElideRight
                                 wrapMode: Text.NoWrap
@@ -997,7 +1028,6 @@ Item {
                                 Layout.minimumWidth: 0
                                 Layout.fillWidth: root.phone
                                 Layout.alignment: root.phone ? Qt.AlignLeft : (Qt.AlignRight | Qt.AlignVCenter)
-                                Layout.preferredHeight: 35
                                 fact: _mapsSettings.maxCacheMemorySize
                             }
                         }
