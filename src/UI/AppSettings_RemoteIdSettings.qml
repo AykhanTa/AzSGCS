@@ -1,7 +1,7 @@
 // AppSettings_RemoteIdSettings.qml
 // Uzaqdan İD (Remote ID) tənzimləmələri.
 // Kontent: src/UI/AppSettings/RemoteIDSettings.qml (upstream, real Fact-lar)
-// Dizayn : Fly_ViewSettings.qml ilə eyni blok/panel sistemi (responsiv 1–2 sütun masonry)
+// Dizayn : yeni dizaynın kartları və qrup qutuları, Fly_ViewSettings.qml ilə eyni (responsiv 1–2 sütun masonry)
 
 import QtQuick
 import QtQuick.Controls
@@ -15,7 +15,11 @@ import QGroundControl.Controls
 Rectangle {
     id: root
     anchors.fill: parent
-    color: "#000000"
+    color: "transparent"
+
+    // The fields, combo boxes, switches and labels take the new design's look
+    // (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // ===================== Fact / vəziyyət =====================
     property var  _settingsManager:  QGroundControl.settingsManager
@@ -41,8 +45,6 @@ Rectangle {
     property string gpsDisabled: "Disabled"
     property string gpsUdpPort:  "UDP Port"
 
-    QGCPalette { id: qgcPal }
-
     // Region dəyişəndə upstream məntiqi
     Connections {
         target: regionFact
@@ -59,8 +61,8 @@ Rectangle {
     readonly property bool phone:  ScreenTools.isMobile || width < 720
     readonly property bool tablet: width < 1100
 
-    readonly property real sidePadding: Math.max(10, ScreenTools.defaultFontPixelWidth * (phone ? 0.9 : tablet ? 1.2 : 1.6))
-    readonly property real gap:         Math.max(10, ScreenTools.defaultFontPixelWidth * (phone ? 0.9 : tablet ? 1.2 : 1.6))
+    readonly property real sidePadding: AzTheme.px(phone ? 12 : 20)
+    readonly property real gap:         AzTheme.px(phone ? 10 : 16)
 
     readonly property real fontScale: {
         var w = Math.max(1, width)
@@ -69,11 +71,13 @@ Rectangle {
         return Math.max(0.90, Math.min(1.0, s))
     }
 
-    readonly property real labelFontPx: Math.max(11, ScreenTools.defaultFontPixelHeight * (phone ? 0.90 : 0.88) * fontScale)
+    readonly property real titleFontPx: AzTheme.fontPx(phone ? 18 : 20)
+    readonly property real descFontPx:  AzTheme.fontPx(13)
+    readonly property real labelFontPx: AzTheme.fontPx(AzTheme.popupTextSize)
 
-    readonly property real rowPadX: Math.max(12, ScreenTools.defaultFontPixelWidth * 1.2)
-    readonly property real rowPadY: Math.max(8,  ScreenTools.defaultFontPixelHeight * 0.6)
-    readonly property real rowMinH: Math.max(48, ScreenTools.defaultFontPixelHeight * 2.6)
+    readonly property real rowPadX: AzTheme.px(AzTheme.groupPadding)
+    readonly property real rowPadY: AzTheme.px(8)
+    readonly property real rowMinH: AzTheme.px(AzTheme.groupRowHeight + 4)
 
     readonly property real contentW: Math.max(0, flick.width - 2 * sidePadding)
     readonly property real minColW:  (tablet ? 520 : 700)
@@ -83,21 +87,59 @@ Rectangle {
                                                      : Math.min(maxColW, Math.floor((contentW - gap) / 2))
     readonly property real ctrlW:    Math.max(150, Math.min(280, colW * (phone ? 0.60 : 0.44)))
 
-    readonly property real flagW: Math.max(120, ScreenTools.defaultFontPixelWidth * 14)
-    readonly property real flagH: Math.max(44,  ScreenTools.defaultFontPixelHeight * 2.4)
-
     // ===================== Panel stili =====================
     QtObject {
         id: panelStyle
-        readonly property color panelBg:   "#3D3B3B"
-        readonly property color rowBg:     "#2A2A2A"
-        readonly property color border:    "#9D9D9D"
-        readonly property real  radius:    16
-        readonly property real  rowRadius: 10
-        readonly property real  pad:       Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
-        readonly property real  titlePx: {
-            var v = Math.max(15, ScreenTools.defaultFontPixelHeight * 1.02 * (root.fontScale || 1))
-            return isFinite(v) ? v : 15
+        // The status card: linear-gradient(145deg, #25272A, #181B1E), 1 px #353A3F, radius 14
+        readonly property Gradient cardGradient: Gradient {
+            GradientStop { position: 0; color: AzTheme.cardGradientStart }
+            GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+        }
+        // A group box row: #191D20, 1 px #353A3F, radius 8
+        readonly property color rowBg:     AzTheme.groupFill
+        readonly property color rowBorder: AzTheme.groupBorder
+        readonly property color border:    AzTheme.cardBorder
+        readonly property real  radius:    AzTheme.px(AzTheme.cardRadius)
+        readonly property real  rowRadius: AzTheme.px(AzTheme.groupRadius)
+        readonly property real  pad:       AzTheme.px(16)
+        readonly property real  titlePx:   AzTheme.fontPx(16)
+    }
+
+    // A status flag: a group box with a coloured outline, dot and text; grey without a vehicle.
+    component StatusFlag: Rectangle {
+        id: flag
+
+        property string text
+        property bool   good:  false
+        property bool   known: false
+
+        readonly property color _tone: known ? (good ? AzTheme.statusGreen : AzTheme.statusRed) : AzTheme.mutedText
+
+        width:        AzTheme.px(132)
+        height:       AzTheme.px(40)
+        radius:       AzTheme.px(AzTheme.groupRadius)
+        color:        AzTheme.groupFill
+        border.width: 1
+        border.color: flag._tone
+
+        Row {
+            anchors.centerIn: parent
+            spacing: AzTheme.px(8)
+
+            Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                width: AzTheme.px(8); height: width; radius: width / 2
+                color: flag._tone
+            }
+
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: flag.text
+                color: AzTheme.textCard
+                font.family: AzTheme.fontFamily
+                font.weight: Font.Medium
+                font.pixelSize: AzTheme.fontPx(12)
+            }
         }
     }
 
@@ -109,32 +151,26 @@ Rectangle {
         anchors.top: parent.top
         anchors.leftMargin: sidePadding
         anchors.rightMargin: sidePadding
-        anchors.topMargin: 0
-        spacing: Math.max(6, ScreenTools.defaultFontPixelHeight * 0.6)
+        anchors.topMargin: AzTheme.px(20)
+        spacing: AzTheme.px(6)
 
         Text {
             text: qsTr("Remote ID Tənzimləmələri")
-            color: "white"
-            font.pixelSize: 26
-            font.bold: true
+            color: AzTheme.textCard
+            font.family: AzTheme.fontFamily
+            font.weight: Font.Medium
+            font.pixelSize: root.titleFontPx
             wrapMode: Text.WordWrap
             width: parent.width
         }
 
         Text {
             text: qsTr("Remote ID yayımını konfiqurasiya edin: region, Basic ID, Operator ID, Self ID və yer stansiyasının mövqeyi.")
-            color: "#E8E8E8"
-            font.pixelSize: 16
+            color: AzTheme.textSecondary
+            font.family: AzTheme.fontFamily
+            font.pixelSize: root.descFontPx
             wrapMode: Text.WordWrap
             width: parent.width
-        }
-
-        Rectangle {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: 1
-            color: "#FFFFFF"
-            opacity: 0.25
         }
     }
 
@@ -145,7 +181,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.topMargin: Math.max(6, ScreenTools.defaultFontPixelHeight * 0.5)
+        anchors.topMargin: AzTheme.px(16)
 
         clip: true
         flickableDirection: Flickable.VerticalFlick
@@ -171,7 +207,7 @@ Rectangle {
                 Rectangle {
                     id: statusPanel
                     width: parent.width
-                    color: panelStyle.panelBg
+                    gradient: panelStyle.cardGradient
                     radius: panelStyle.radius
                     border.width: 1
                     border.color: panelStyle.border
@@ -185,9 +221,10 @@ Rectangle {
 
                         Text {
                             text: qsTr("Vəziyyət")
-                            color: "white"
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
                             font.pixelSize: panelStyle.titlePx
-                            font.bold: true
                             Layout.fillWidth: true
                         }
 
@@ -195,42 +232,36 @@ Rectangle {
                             Layout.fillWidth: true
                             spacing: root.gap
 
-                            Rectangle {
-                                width: root.flagW; height: root.flagH; radius: 8
+                            StatusFlag {
                                 visible: root.commsGood
-                                color: root._activeRID ? (root._remoteIDManager.armStatusGood ? qgcPal.colorGreen : qgcPal.colorRed) : qgcPal.colorGrey
-                                QGCLabel { anchors.fill: parent; text: qsTr("ARM STATUS"); wrapMode: Text.WordWrap; font.bold: true
-                                           horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                text: qsTr("ARM STATUS")
+                                known: !!root._activeRID
+                                good: known && root._remoteIDManager.armStatusGood
                             }
-                            Rectangle {
-                                width: root.flagW; height: root.flagH; radius: 8
-                                color: root._activeRID ? (root._remoteIDManager.commsGood ? qgcPal.colorGreen : qgcPal.colorRed) : qgcPal.colorGrey
-                                QGCLabel { anchors.fill: parent; font.bold: true; wrapMode: Text.WordWrap
-                                           text: (root._activeRID && root._remoteIDManager.commsGood) ? qsTr("RID COMMS") : qsTr("QOŞULMAYIB")
-                                           horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                            StatusFlag {
+                                text: (root._activeRID && root._remoteIDManager.commsGood) ? qsTr("RID COMMS") : qsTr("QOŞULMAYIB")
+                                known: !!root._activeRID
+                                good: known && root._remoteIDManager.commsGood
                             }
-                            Rectangle {
-                                width: root.flagW; height: root.flagH; radius: 8
+                            StatusFlag {
                                 visible: root.commsGood
-                                color: root._activeRID ? (root._remoteIDManager.gcsGPSGood ? qgcPal.colorGreen : qgcPal.colorRed) : qgcPal.colorGrey
-                                QGCLabel { anchors.fill: parent; text: qsTr("GCS GPS"); wrapMode: Text.WordWrap; font.bold: true
-                                           horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                text: qsTr("GCS GPS")
+                                known: !!root._activeRID
+                                good: known && root._remoteIDManager.gcsGPSGood
                             }
-                            Rectangle {
-                                width: root.flagW; height: root.flagH; radius: 8
+                            StatusFlag {
                                 visible: root.commsGood
-                                color: root._activeRID ? (root._remoteIDManager.basicIDGood ? qgcPal.colorGreen : qgcPal.colorRed) : qgcPal.colorGrey
-                                QGCLabel { anchors.fill: parent; text: qsTr("BASIC ID"); wrapMode: Text.WordWrap; font.bold: true
-                                           horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                text: qsTr("BASIC ID")
+                                known: !!root._activeRID
+                                good: known && root._remoteIDManager.basicIDGood
                             }
-                            Rectangle {
-                                width: root.flagW; height: root.flagH; radius: 8
+                            StatusFlag {
                                 visible: (root.commsGood && root._activeRID)
                                          ? (root.remoteIDSettings.sendOperatorID.value || root._regionOperation === RemoteIDSettings.RegionOperation.EU)
                                          : false
-                                color: root._activeRID ? (root._remoteIDManager.operatorIDGood ? qgcPal.colorGreen : qgcPal.colorRed) : qgcPal.colorGrey
-                                QGCLabel { anchors.fill: parent; text: qsTr("OPERATOR ID"); wrapMode: Text.WordWrap; font.bold: true
-                                           horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                text: qsTr("OPERATOR ID")
+                                known: !!root._activeRID
+                                good: known && root._remoteIDManager.operatorIDGood
                             }
                         }
                     }
@@ -311,7 +342,7 @@ Rectangle {
 
         Rectangle {
             width: parent ? parent.width : root.colW
-            color: panelStyle.panelBg
+            gradient: panelStyle.cardGradient
             radius: panelStyle.radius
             border.width: 1
             border.color: panelStyle.border
@@ -327,7 +358,7 @@ Rectangle {
 
                 Text {
                     text: qsTr("Region")
-                    color: "white"; font.pixelSize: panelStyle.titlePx; font.bold: true
+                    color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.weight: Font.Medium; font.pixelSize: panelStyle.titlePx
                     Layout.fillWidth: true
                 }
 
@@ -335,6 +366,8 @@ Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
+                    border.width: 1
+                    border.color: panelStyle.rowBorder
                     visible: root.regionFact.visible
                     implicitHeight: Math.max(root.rowMinH, r1.implicitHeight + root.rowPadY * 2)
                     RowLayout {
@@ -343,7 +376,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: root.regionFact.shortDescription; color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: root.regionFact.shortDescription; font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactComboBox { fact: root.regionFact; indexModel: false; Layout.preferredWidth: root.ctrlW }
                     }
@@ -355,7 +388,7 @@ Rectangle {
                     radius: panelStyle.rowRadius
                     color: panelStyle.rowBg
                     border.width: 1
-                    border.color: root._activeRID ? (root._remoteIDManager.armStatusGood ? panelStyle.rowBg : qgcPal.colorRed) : panelStyle.rowBg
+                    border.color: root._activeRID ? (root._remoteIDManager.armStatusGood ? panelStyle.rowBorder : AzTheme.statusRed) : panelStyle.rowBorder
                     visible: armText.text !== ""
                     implicitHeight: Math.max(root.rowMinH, r2.implicitHeight + root.rowPadY * 2)
                     RowLayout {
@@ -364,12 +397,12 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: qsTr("Arm Status xətası"); color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: qsTr("Arm Status xətası"); font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         QGCLabel {
                             id: armText
                             text: root._remoteIDManager ? root._remoteIDManager.armStatusError : qsTr("Aparat qoşulmayıb")
-                            color: "#E8E8E8"; font.pixelSize: root.labelFontPx
+                            color: AzTheme.textCard; font.pixelSize: root.labelFontPx
                             wrapMode: Text.WordWrap
                             Layout.preferredWidth: root.ctrlW
                         }
@@ -385,10 +418,10 @@ Rectangle {
 
         Rectangle {
             width: root.colW
-            color: panelStyle.panelBg
+            gradient: panelStyle.cardGradient
             radius: panelStyle.radius
             border.width: 1
-            border.color: root._activeRID ? (root._remoteIDManager.basicIDGood ? panelStyle.border : qgcPal.colorRed) : panelStyle.border
+            border.color: root._activeRID ? (root._remoteIDManager.basicIDGood ? panelStyle.border : AzTheme.statusRed) : panelStyle.border
             height: lay.implicitHeight + panelStyle.pad * 2
 
             ColumnLayout {
@@ -399,18 +432,19 @@ Rectangle {
 
                 Text {
                     text: qsTr("Basic ID")
-                    color: "white"; font.pixelSize: panelStyle.titlePx; font.bold: true
+                    color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.weight: Font.Medium; font.pixelSize: panelStyle.titlePx
                     Layout.fillWidth: true
                 }
                 Text {
                     text: qsTr("Basic ID artıq RID cihazında təyin olunubsa, bu Basic ID 2 kimi qeyd olunacaq.")
-                    color: "#B8B8B8"; font.pixelSize: root.labelFontPx
+                    color: AzTheme.textSecondary; font.family: AzTheme.fontFamily; font.pixelSize: root.labelFontPx
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                 }
 
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     visible: root.remoteIDSettings.sendBasicID.visible
                     implicitHeight: Math.max(root.rowMinH, rb.implicitHeight + root.rowPadY * 2)
                     RowLayout {
@@ -419,7 +453,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: qsTr("Yayımla"); color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: qsTr("Yayımla"); font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactCheckBoxSlider { fact: root.remoteIDSettings.sendBasicID }
                     }
@@ -428,6 +462,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     visible: root.remoteIDSettings.basicIDType.visible
                     implicitHeight: Math.max(root.rowMinH, rt.implicitHeight + root.rowPadY * 2)
                     RowLayout {
@@ -436,7 +471,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: root.remoteIDSettings.basicIDType.shortDescription; color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: root.remoteIDSettings.basicIDType.shortDescription; font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactComboBox { fact: root.remoteIDSettings.basicIDType; indexModel: false
                                        enabled: root.remoteIDSettings.sendBasicID.rawValue
@@ -447,6 +482,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     visible: root.remoteIDSettings.basicIDUaType.visible
                     implicitHeight: Math.max(root.rowMinH, ru.implicitHeight + root.rowPadY * 2)
                     RowLayout {
@@ -455,7 +491,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: root.remoteIDSettings.basicIDUaType.shortDescription; color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: root.remoteIDSettings.basicIDUaType.shortDescription; font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactComboBox { fact: root.remoteIDSettings.basicIDUaType; indexModel: false
                                        enabled: root.remoteIDSettings.sendBasicID.rawValue
@@ -466,6 +502,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     visible: root.remoteIDSettings.basicID.visible
                     implicitHeight: Math.max(root.rowMinH, ri.implicitHeight + root.rowPadY * 2)
                     RowLayout {
@@ -474,7 +511,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: root.remoteIDSettings.basicID.shortDescription; color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: root.remoteIDSettings.basicID.shortDescription; font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactTextField { fact: root.remoteIDSettings.basicID; maximumLength: 20
                                         enabled: root.remoteIDSettings.sendBasicID.rawValue
@@ -491,7 +528,7 @@ Rectangle {
 
         Rectangle {
             width: parent ? parent.width : root.colW
-            color: panelStyle.panelBg
+            gradient: panelStyle.cardGradient
             radius: panelStyle.radius
             border.width: 1
             border.color: panelStyle.border
@@ -507,13 +544,14 @@ Rectangle {
 
                 Text {
                     text: qsTr("Operator ID")
-                    color: "white"; font.pixelSize: panelStyle.titlePx; font.bold: true
+                    color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.weight: Font.Medium; font.pixelSize: panelStyle.titlePx
                     Layout.fillWidth: true
                 }
 
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     visible: root.sendOperatorIdFact.visible
                     implicitHeight: Math.max(root.rowMinH, ob.implicitHeight + root.rowPadY * 2)
                     RowLayout {
@@ -523,7 +561,7 @@ Rectangle {
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
                         QGCLabel { text: qsTr("Yayımla%1").arg(root.isEURegion ? qsTr(" (EU tələb edir)") : "")
-                                   color: "white"; font.pixelSize: root.labelFontPx
+                                   font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactCheckBoxSlider { fact: root.sendOperatorIdFact; enabled: root.isFAARegion }
                     }
@@ -532,6 +570,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     visible: root.remoteIDSettings.operatorIDType.visible
                     implicitHeight: Math.max(root.rowMinH, ot.implicitHeight + root.rowPadY * 2)
                     RowLayout {
@@ -540,7 +579,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: root.remoteIDSettings.operatorIDType.shortDescription; color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: root.remoteIDSettings.operatorIDType.shortDescription; font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactComboBox { fact: root.remoteIDSettings.operatorIDType; indexModel: false
                                        Layout.preferredWidth: root.ctrlW }
@@ -550,6 +589,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     visible: root.operatorIDFact.visible
                     implicitHeight: Math.max(root.rowMinH, ov.implicitHeight + root.rowPadY * 2)
                     RowLayout {
@@ -558,7 +598,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: root.operatorIDFact.shortDescription; color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: root.operatorIDFact.shortDescription; font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         QGCTextField {
                             id: operatorIDTextField
@@ -604,7 +644,7 @@ Rectangle {
 
         Rectangle {
             width: parent ? parent.width : root.colW
-            color: panelStyle.panelBg
+            gradient: panelStyle.cardGradient
             radius: panelStyle.radius
             border.width: 1
             border.color: panelStyle.border
@@ -620,18 +660,19 @@ Rectangle {
 
                 Text {
                     text: qsTr("Self ID")
-                    color: "white"; font.pixelSize: panelStyle.titlePx; font.bold: true
+                    color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.weight: Font.Medium; font.pixelSize: panelStyle.titlePx
                     Layout.fillWidth: true
                 }
                 Text {
                     text: qsTr("Fövqəladə hal elan olunarsa, «Yayımla» sönülü olsa belə fövqəladə mətn yayımlanacaq.")
-                    color: "#B8B8B8"; font.pixelSize: root.labelFontPx
+                    color: AzTheme.textSecondary; font.family: AzTheme.fontFamily; font.pixelSize: root.labelFontPx
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                 }
 
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     visible: root.remoteIDSettings.sendSelfID.visible
                     implicitHeight: Math.max(root.rowMinH, sb.implicitHeight + root.rowPadY * 2)
                     RowLayout {
@@ -640,7 +681,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: qsTr("Yayımla"); color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: qsTr("Yayımla"); font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactCheckBoxSlider { fact: root.remoteIDSettings.sendSelfID }
                     }
@@ -649,6 +690,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     visible: root.remoteIDSettings.selfIDType.visible
                     implicitHeight: Math.max(root.rowMinH, st.implicitHeight + root.rowPadY * 2)
                     RowLayout {
@@ -657,7 +699,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: qsTr("Yayım mesajı"); color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: qsTr("Yayım mesajı"); font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactComboBox { fact: root.remoteIDSettings.selfIDType; indexModel: false
                                        enabled: root.remoteIDSettings.sendSelfID.rawValue
@@ -668,6 +710,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     visible: root.remoteIDSettings.selfIDFree.visible
                     implicitHeight: Math.max(root.rowMinH, sf.implicitHeight + root.rowPadY * 2)
                     RowLayout {
@@ -676,7 +719,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: root.remoteIDSettings.selfIDFree.shortDescription; color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: root.remoteIDSettings.selfIDFree.shortDescription; font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactTextField { fact: root.remoteIDSettings.selfIDFree; maximumLength: 23
                                         enabled: root.remoteIDSettings.sendSelfID.rawValue
@@ -687,6 +730,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     visible: root.remoteIDSettings.selfIDExtended.visible
                     implicitHeight: Math.max(root.rowMinH, se.implicitHeight + root.rowPadY * 2)
                     RowLayout {
@@ -695,7 +739,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: root.remoteIDSettings.selfIDExtended.shortDescription; color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: root.remoteIDSettings.selfIDExtended.shortDescription; font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactTextField { fact: root.remoteIDSettings.selfIDExtended; maximumLength: 23
                                         enabled: root.remoteIDSettings.sendSelfID.rawValue
@@ -706,6 +750,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     visible: root.remoteIDSettings.selfIDEmergency.visible
                     implicitHeight: Math.max(root.rowMinH, sm.implicitHeight + root.rowPadY * 2)
                     RowLayout {
@@ -714,7 +759,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: root.remoteIDSettings.selfIDEmergency.shortDescription; color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: root.remoteIDSettings.selfIDEmergency.shortDescription; font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactTextField { fact: root.remoteIDSettings.selfIDEmergency; maximumLength: 23
                                         Layout.preferredWidth: root.ctrlW }
@@ -730,10 +775,10 @@ Rectangle {
 
         Rectangle {
             width: root.colW
-            color: panelStyle.panelBg
+            gradient: panelStyle.cardGradient
             radius: panelStyle.radius
             border.width: 1
-            border.color: root._activeRID ? (root._remoteIDManager.gcsGPSGood ? panelStyle.border : qgcPal.colorRed) : panelStyle.border
+            border.color: root._activeRID ? (root._remoteIDManager.gcsGPSGood ? panelStyle.border : AzTheme.statusRed) : panelStyle.border
             height: lay.implicitHeight + panelStyle.pad * 2
 
             ColumnLayout {
@@ -744,13 +789,14 @@ Rectangle {
 
                 Text {
                     text: qsTr("Yer Stansiyasının Mövqeyi")
-                    color: "white"; font.pixelSize: panelStyle.titlePx; font.bold: true
+                    color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.weight: Font.Medium; font.pixelSize: panelStyle.titlePx
                     Layout.fillWidth: true
                 }
 
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     implicitHeight: Math.max(root.rowMinH, lt.implicitHeight + root.rowPadY * 2)
                     RowLayout {
                         id: lt
@@ -758,7 +804,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: root.locationTypeFact.shortDescription; color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: root.locationTypeFact.shortDescription; font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactComboBox { fact: root.locationTypeFact; indexModel: false; Layout.preferredWidth: root.ctrlW }
                     }
@@ -767,6 +813,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     implicitHeight: Math.max(root.rowMinH, gl1.implicitHeight + root.rowPadY * 2)
                     RowLayout {
                         id: gl1
@@ -774,7 +821,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: root.remoteIDSettings.latitudeFixed.shortDescription; color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: root.remoteIDSettings.latitudeFixed.shortDescription; font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactTextField { fact: root.remoteIDSettings.latitudeFixed; maximumLength: 20
                                         enabled: root._locationFixed; Layout.preferredWidth: root.ctrlW }
@@ -784,6 +831,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     implicitHeight: Math.max(root.rowMinH, gl2.implicitHeight + root.rowPadY * 2)
                     RowLayout {
                         id: gl2
@@ -791,7 +839,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: root.remoteIDSettings.longitudeFixed.shortDescription; color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: root.remoteIDSettings.longitudeFixed.shortDescription; font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactTextField { fact: root.remoteIDSettings.longitudeFixed; maximumLength: 20
                                         enabled: root._locationFixed; Layout.preferredWidth: root.ctrlW }
@@ -801,6 +849,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     implicitHeight: Math.max(root.rowMinH, gl3.implicitHeight + root.rowPadY * 2)
                     RowLayout {
                         id: gl3
@@ -808,7 +857,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: root.remoteIDSettings.altitudeFixed.shortDescription; color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: root.remoteIDSettings.altitudeFixed.shortDescription; font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactTextField { fact: root.remoteIDSettings.altitudeFixed; maximumLength: 20
                                         enabled: root._locationFixed; Layout.preferredWidth: root.ctrlW }
@@ -819,6 +868,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     visible: !ScreenTools.isMobile
                              && QGroundControl.settingsManager.autoConnectSettings.autoConnectNmeaPort.visible
                              && root._locationType !== RemoteIDSettings.LocationType.TAKEOFF
@@ -829,7 +879,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: qsTr("NMEA xarici GPS cihazı"); color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: qsTr("NMEA xarici GPS cihazı"); font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         QGCComboBox {
                             id: nmeaPortCombo
@@ -859,6 +909,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     visible: !ScreenTools.isMobile
                              && QGroundControl.settingsManager.autoConnectSettings.autoConnectNmeaBaud.visible
                              && root._locationType !== RemoteIDSettings.LocationType.TAKEOFF
@@ -871,7 +922,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: qsTr("NMEA GPS Baudrate"); color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: qsTr("NMEA GPS Baudrate"); font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         QGCComboBox {
                             id: nmeaBaudCombo
@@ -893,6 +944,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     visible: nmeaPortCombo.currentText === root.gpsUdpPort
                              && root._locationType !== RemoteIDSettings.LocationType.TAKEOFF
                     implicitHeight: Math.max(root.rowMinH, nm3.implicitHeight + root.rowPadY * 2)
@@ -902,7 +954,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: qsTr("NMEA axını UDP portu"); color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: qsTr("NMEA axını UDP portu"); font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactTextField { fact: QGroundControl.settingsManager.autoConnectSettings.nmeaUdpPort
                                         Layout.preferredWidth: root.ctrlW }
@@ -918,7 +970,7 @@ Rectangle {
 
         Rectangle {
             width: parent ? parent.width : root.colW
-            color: panelStyle.panelBg
+            gradient: panelStyle.cardGradient
             radius: panelStyle.radius
             border.width: 1
             border.color: panelStyle.border
@@ -934,13 +986,14 @@ Rectangle {
 
                 Text {
                     text: qsTr("EU Aparat Məlumatı")
-                    color: "white"; font.pixelSize: panelStyle.titlePx; font.bold: true
+                    color: AzTheme.textCard; font.family: AzTheme.fontFamily; font.weight: Font.Medium; font.pixelSize: panelStyle.titlePx
                     Layout.fillWidth: true
                 }
 
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     visible: root.remoteIDSettings.classificationType.visible
                     implicitHeight: Math.max(root.rowMinH, eu1.implicitHeight + root.rowPadY * 2)
                     RowLayout {
@@ -949,7 +1002,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: qsTr("Məlumat təqdim et"); color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: qsTr("Məlumat təqdim et"); font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         QGCCheckBoxSlider {
                             id: euProvideInfoSlider
@@ -962,6 +1015,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     visible: root.remoteIDSettings.categoryEU.visible
                     implicitHeight: Math.max(root.rowMinH, eu2.implicitHeight + root.rowPadY * 2)
                     RowLayout {
@@ -970,7 +1024,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: root.remoteIDSettings.categoryEU.shortDescription; color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: root.remoteIDSettings.categoryEU.shortDescription; font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactComboBox { fact: root.remoteIDSettings.categoryEU; indexModel: false
                                        enabled: euProvideInfoSlider.checked; Layout.preferredWidth: root.ctrlW }
@@ -980,6 +1034,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     radius: panelStyle.rowRadius; color: panelStyle.rowBg
+                    border.width: 1; border.color: panelStyle.rowBorder
                     visible: root.remoteIDSettings.classEU.visible
                     implicitHeight: Math.max(root.rowMinH, eu3.implicitHeight + root.rowPadY * 2)
                     RowLayout {
@@ -988,7 +1043,7 @@ Rectangle {
                         anchors.leftMargin: root.rowPadX; anchors.rightMargin: root.rowPadX
                         anchors.topMargin: root.rowPadY;  anchors.bottomMargin: root.rowPadY
                         spacing: root.gap
-                        QGCLabel { text: root.remoteIDSettings.classEU.shortDescription; color: "white"; font.pixelSize: root.labelFontPx
+                        QGCLabel { text: root.remoteIDSettings.classEU.shortDescription; font.pixelSize: root.labelFontPx
                                    elide: Text.ElideRight; Layout.fillWidth: true }
                         FactComboBox { fact: root.remoteIDSettings.classEU; indexModel: false
                                        enabled: euProvideInfoSlider.checked; Layout.preferredWidth: root.ctrlW }

@@ -3,71 +3,121 @@ import QtQuick.Layouts
 import QGroundControl
 import QGroundControl.Controls
 
-Rectangle {
+// Support page, in the new design: the page header of the setup pages and a status card with
+// the version on a group box row. No external links are shown until the support pages exist.
+Item {
     id: root
-    color: "#2a2a2a"
+    anchors.fill: parent
 
-    anchors.top: parent.top
-    anchors.topMargin: 50
-    anchors.left: parent.left
-    anchors.leftMargin: 50
-    anchors.bottom: parent.bottom
-    anchors.bottomMargin: 70
-    anchors.right: parent.right
-    anchors.rightMargin: 100
+    // The labels take the new design's look (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
-    radius: 16
-    border.width: 2
-    border.color: "white"
+    readonly property bool phone:   ScreenTools.isMobile || width < 720
+    readonly property real sidePad: AzTheme.px(phone ? 12 : 20)
 
-    Text {
-        text: qsTr("%1 Dəstək").arg(QGroundControl.appName)
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-        anchors.topMargin: 20
-        font.pixelSize: 26
-        font.bold: true
-        color: "white"
-    }
-
-    // Dəstək səhifələri hazır olana qədər burada heç bir xarici link göstərilmir.
     ColumnLayout {
-        anchors.fill: parent
-        anchors.topMargin: 90
-        anchors.leftMargin: 30
-        anchors.rightMargin: 30
-        anchors.bottomMargin: 30
-        spacing: 14
+        x:       root.sidePad
+        y:       AzTheme.px(20)
+        width:   Math.max(0, root.width - 2 * root.sidePad)
+        spacing: AzTheme.px(16)
 
-        GridLayout {
+        // Header
+        ColumnLayout {
             Layout.fillWidth: true
-            columns: 2
-            columnSpacing: 40
-            rowSpacing: 14
+            spacing: AzTheme.px(6)
 
-            QGCLabel {
-                text: qsTr("Versiya")
-                color: "white"
-                font.pixelSize: 18
-                font.bold: true
-            }
-            QGCLabel {
-                text: QGroundControl.qgcVersion
-                color: "#E8E8E8"
-                font.pixelSize: 18
-                wrapMode: Text.WrapAnywhere
+            Text {
                 Layout.fillWidth: true
+                text: qsTr("%1 Dəstək").arg(QGroundControl.appName)
+                color: AzTheme.textCard
+                font.family: AzTheme.fontFamily
+                font.weight: Font.Medium
+                font.pixelSize: AzTheme.fontPx(root.phone ? 18 : 20)
+                wrapMode: Text.WordWrap
+            }
+
+            Text {
+                Layout.fillWidth: true
+                text: qsTr("Proqram versiyası və dəstək məlumatları")
+                color: AzTheme.textSecondary
+                font.family: AzTheme.fontFamily
+                font.pixelSize: AzTheme.fontPx(13)
+                wrapMode: Text.WordWrap
             }
         }
 
-        QGCLabel {
-            text: qsTr("Dəstək əlaqə məlumatları sonradan əlavə olunacaq.")
-            color: "#E8E8E8"
-            font.pixelSize: 16
-            wrapMode: Text.Wrap
+        // The status card
+        Rectangle {
+            id: infoCard
             Layout.fillWidth: true
-        }
+            Layout.maximumWidth: AzTheme.px(820)
+            implicitHeight: infoLayout.implicitHeight + pad * 2
+            radius: AzTheme.px(AzTheme.cardRadius)
+            border.width: 1
+            border.color: AzTheme.cardBorder
+            gradient: Gradient {
+                GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+            }
 
-        Item { Layout.fillHeight: true }
+            readonly property real pad: AzTheme.px(16)
+
+            ColumnLayout {
+                id: infoLayout
+                x: infoCard.pad
+                y: infoCard.pad
+                width: infoCard.width - 2 * infoCard.pad
+                spacing: AzTheme.px(8)
+
+                Text {
+                    Layout.fillWidth: true
+                    text: qsTr("Proqram haqqında")
+                    color: AzTheme.textCard
+                    font.family: AzTheme.fontFamily
+                    font.weight: Font.Medium
+                    font.pixelSize: AzTheme.fontPx(16)
+                    wrapMode: Text.WordWrap
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: Math.max(AzTheme.px(AzTheme.groupRowHeight + 4), versionRow.implicitHeight + AzTheme.px(16))
+                    radius: AzTheme.px(AzTheme.groupRadius)
+                    color: AzTheme.groupFill
+                    border.width: 1
+                    border.color: AzTheme.groupBorder
+
+                    RowLayout {
+                        id: versionRow
+                        anchors.fill: parent
+                        anchors.leftMargin: AzTheme.px(AzTheme.groupPadding)
+                        anchors.rightMargin: AzTheme.px(AzTheme.groupPadding)
+                        spacing: AzTheme.px(16)
+
+                        QGCLabel {
+                            text: qsTr("Versiya")
+                            font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
+                        }
+
+                        QGCLabel {
+                            Layout.fillWidth: true
+                            text: QGroundControl.qgcVersion
+                            color: AzTheme.textSecondary
+                            font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
+                            horizontalAlignment: Text.AlignRight
+                            wrapMode: Text.WrapAnywhere
+                        }
+                    }
+                }
+
+                QGCLabel {
+                    Layout.fillWidth: true
+                    text: qsTr("Dəstək əlaqə məlumatları sonradan əlavə olunacaq.")
+                    color: AzTheme.textSecondary
+                    font.pixelSize: AzTheme.fontPx(12)
+                    wrapMode: Text.Wrap
+                }
+            }
+        }
     }
 }

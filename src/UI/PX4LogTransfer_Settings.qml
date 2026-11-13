@@ -7,10 +7,17 @@ import QGroundControl
 import QGroundControl.FactControls
 import QGroundControl.Controls
 
+// PX4 log transfer and MAVLink logging, in the new design: the page header of the setup
+// pages, status cards with group box rows, and the new fields, combo boxes, switches and
+// buttons.
 Rectangle {
     id: root
     anchors.fill: parent
-    color: "#000000"
+    color: "transparent"
+
+    // The fields, combo boxes, switches, labels and buttons take the new design's look
+    // (see QGCLabel._az).
+    readonly property bool azInputStyle: true
 
     // ------------------ Data ------------------
     property var  _activeVehicle:               QGroundControl.multiVehicleManager.activeVehicle
@@ -26,8 +33,8 @@ Rectangle {
     readonly property bool phone:  ScreenTools.isMobile || width < 720
     readonly property bool tablet: width < 1100
 
-    readonly property real sidePadding: Math.max(10, ScreenTools.defaultFontPixelWidth  * (phone ? 0.9 : tablet ? 1.2 : 1.6))
-    readonly property real gap:         Math.max(10, ScreenTools.defaultFontPixelWidth  * (phone ? 0.9 : tablet ? 1.2 : 1.6))
+    readonly property real sidePadding: AzTheme.px(phone ? 12 : 20)
+    readonly property real gap:         AzTheme.px(phone ? 10 : 16)
 
     readonly property real fontScale: {
         var w = Math.max(1, width)
@@ -36,9 +43,9 @@ Rectangle {
         return Math.max(0.90, Math.min(1.0, s))
     }
 
-    readonly property real titleFontPx: Math.max(18, ScreenTools.defaultFontPixelHeight * (phone ? 1.15 : 1.25) * fontScale)
-    readonly property real descFontPx:  Math.max(12, ScreenTools.defaultFontPixelHeight * (phone ? 0.92 : 0.98) * fontScale)
-    readonly property real labelFontPx: Math.max(11, ScreenTools.defaultFontPixelHeight * (phone ? 0.90 : 0.88) * fontScale)
+    readonly property real titleFontPx: AzTheme.fontPx(phone ? 18 : 20)
+    readonly property real descFontPx:  AzTheme.fontPx(13)
+    readonly property real labelFontPx: AzTheme.fontPx(AzTheme.popupTextSize)
 
     readonly property real availableW: Math.max(0, width - 2 * sidePadding)
     readonly property real minPanelW:  phone ? 320 : tablet ? 520 : 720
@@ -51,9 +58,9 @@ Rectangle {
                                         ? availableW
                                         : Math.min(maxPanelW, Math.floor((availableW - gap * (columns - 1)) / columns))
 
-    readonly property real rowPadX: Math.max(12, ScreenTools.defaultFontPixelWidth * 1.2)
-    readonly property real rowPadY: Math.max(8,  ScreenTools.defaultFontPixelHeight * 0.6)
-    readonly property real rowMinH: Math.max(48, ScreenTools.defaultFontPixelHeight * 2.6)
+    readonly property real rowPadX: AzTheme.px(AzTheme.groupPadding)
+    readonly property real rowPadY: AzTheme.px(8)
+    readonly property real rowMinH: AzTheme.px(AzTheme.groupRowHeight + 4)
 
     readonly property real wheelStepPx: Math.max(60, ScreenTools.defaultFontPixelHeight * 3.2)
     readonly property real listH: Math.max(200, Math.min(420, height * (phone ? 0.34 : 0.38)))
@@ -172,32 +179,26 @@ Rectangle {
         anchors.top: parent.top
         anchors.leftMargin: sidePadding
         anchors.rightMargin: sidePadding
-        anchors.topMargin: sidePadding
-        spacing: Math.max(6, ScreenTools.defaultFontPixelHeight * 0.6)
+        anchors.topMargin: AzTheme.px(20)
+        spacing: AzTheme.px(6)
 
         Text {
             text: qsTr("PX4 Log Transfer & MAVLink Logging")
-            color: "white"
-            font.pixelSize: titleFontPx
-            font.bold: true
+            color: AzTheme.textCard
+            font.family: AzTheme.fontFamily
+            font.weight: Font.Medium
+            font.pixelSize: root.titleFontPx
             wrapMode: Text.WordWrap
             width: parent.width
         }
 
         Text {
             text: qsTr("PX4 jurnal fayllarını idarə edin, MAVLink qeyd parametrlərini konfiqurasiya edin və log yükləmə əməliyyatlarına nəzarət edin.")
-            color: "#CCCCCC"
-            font.pixelSize: descFontPx
+            color: AzTheme.textSecondary
+            font.family: AzTheme.fontFamily
+            font.pixelSize: root.descFontPx
             wrapMode: Text.WordWrap
             width: parent.width
-        }
-
-        Rectangle {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: 1
-            color: "#FFFFFF"
-            opacity: 0.25
         }
     }
 
@@ -208,7 +209,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.topMargin: Math.max(6, ScreenTools.defaultFontPixelHeight * 0.4)
+        anchors.topMargin: AzTheme.px(16)
 
         clip: true
         interactive: true
@@ -245,13 +246,16 @@ Rectangle {
                 Rectangle {
                     id: loggingPanel
                     width: panelFlow.width
-                    color: "#3D3B3B"
-                    radius: 16
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
                     visible: _showMavlinkLog && _isPX4
 
-                    readonly property real pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+                    readonly property real pad: AzTheme.px(16)
                     readonly property real desiredH: loggingLayout.implicitHeight + pad * 2
 
                     height: (root.columns > 1 && uploadsPanel && uploadsPanel.visible) ? root.row1H : desiredH
@@ -260,21 +264,24 @@ Rectangle {
                         id: loggingLayout
                         anchors.fill: parent
                         anchors.margins: loggingPanel.pad
-                        spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                        spacing: AzTheme.px(8)
 
                         Text {
                             text: qsTr("MAVLink 2.0 Logging (PX4 Pro Only)")
-                            color: "white"
-                            font.pixelSize: Math.max(15, ScreenTools.defaultFontPixelHeight * 1.05 * root.fontScale)
-                            font.bold: true
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(16)
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
                         }
 
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, manualGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -291,7 +298,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Manual Start/Stop:")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     Layout.alignment: Qt.AlignVCenter
@@ -320,8 +326,10 @@ Rectangle {
 
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, autoGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -338,7 +346,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Avtomatik qeydi aktivləşdirin")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -365,13 +372,16 @@ Rectangle {
                 Rectangle {
                     id: uploadsPanel
                     width: panelFlow.width
-                    color: "#3D3B3B"
-                    radius: 16
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
                     visible: _showMavlinkLog && _isPX4
 
-                    readonly property real pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+                    readonly property real pad: AzTheme.px(16)
                     readonly property real desiredH: uploadsLayout.implicitHeight + pad * 2
 
                     height: (root.columns > 1 && loggingPanel && loggingPanel.visible) ? root.row1H : desiredH
@@ -380,21 +390,24 @@ Rectangle {
                         id: uploadsLayout
                         anchors.fill: parent
                         anchors.margins: uploadsPanel.pad
-                        spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                        spacing: AzTheme.px(8)
 
                         Text {
                             text: qsTr("MAVLink 2.0 Log Uploads (PX4 Pro Only)")
-                            color: "white"
-                            font.pixelSize: Math.max(15, ScreenTools.defaultFontPixelHeight * 1.05 * root.fontScale)
-                            font.bold: true
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(16)
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
                         }
 
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, emailGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -411,7 +424,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Log Upload üçün e-poçt ünvanı:")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -431,8 +443,10 @@ Rectangle {
 
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, descGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -449,7 +463,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Defolt Təsvir:")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     Layout.preferredWidth: root.phone ? -1 : 260
@@ -467,8 +480,10 @@ Rectangle {
 
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, urlGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -485,7 +500,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Defolt Yükləmə URL:")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     Layout.preferredWidth: root.phone ? -1 : 260
@@ -508,13 +522,16 @@ Rectangle {
                 Rectangle {
                     id: additionalPanel
                     width: panelFlow.width
-                    color: "#3D3B3B"
-                    radius: 16
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
                     visible: _showMavlinkLog && _isPX4
 
-                    readonly property real pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+                    readonly property real pad: AzTheme.px(16)
                     readonly property real desiredH: additionalLayout.implicitHeight + pad * 2
 
                     height: (root.columns > 1 && logsPanel && logsPanel.visible) ? root.row2H : desiredH
@@ -523,21 +540,24 @@ Rectangle {
                         id: additionalLayout
                         anchors.fill: parent
                         anchors.margins: additionalPanel.pad
-                        spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                        spacing: AzTheme.px(8)
 
                         Text {
                             text: qsTr("Əlavə Parametrlər")
-                            color: "white"
-                            font.pixelSize: Math.max(15, ScreenTools.defaultFontPixelHeight * 1.05 * root.fontScale)
-                            font.bold: true
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(16)
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
                         }
 
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, vurlGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -554,7 +574,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Video URL:")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     Layout.preferredWidth: root.phone ? -1 : 220
@@ -573,8 +592,10 @@ Rectangle {
 
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, windGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -591,7 +612,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Küləyin sürəti:")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     Layout.preferredWidth: root.phone ? -1 : 220
@@ -632,8 +652,10 @@ Rectangle {
 
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, rateGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -650,7 +672,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Uçuş Reytinqi:")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     Layout.preferredWidth: root.phone ? -1 : 220
@@ -692,8 +713,10 @@ Rectangle {
 
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(140, fbCol.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -708,7 +731,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Əlavə geridönüş:")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                 }
@@ -719,8 +741,15 @@ Rectangle {
                                     Layout.fillHeight: true
                                     text: _mavlinkLogManager ? _mavlinkLogManager.feedback : ""
                                     enabled: !_disableDataPersistence
-                                    color: "white"
-                                    background: Rectangle { color: "#1A1A1A"; radius: 6 }
+                                    color: AzTheme.textCard
+                                    font.family: AzTheme.fontFamily
+                                    font.pixelSize: root.labelFontPx
+                                    background: Rectangle {
+                                        color:        AzTheme.pillBottom
+                                        radius:       AzTheme.px(8)
+                                        border.width: 1
+                                        border.color: feedbackTextArea.activeFocus ? AzTheme.activeBorder : AzTheme.panelBorder
+                                    }
                                     onTextChanged: {
                                         if (_mavlinkLogManager) {
                                             _mavlinkLogManager.feedback = text
@@ -733,8 +762,10 @@ Rectangle {
                         // Public log
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, pubGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -751,7 +782,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Bu jurnalı hamı üçün əlçatan edin")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -773,8 +803,10 @@ Rectangle {
                         // Auto upload
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, auGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -791,7 +823,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Avtomatik log yükləmələrini aktivləşdirin")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -816,8 +847,10 @@ Rectangle {
                         // Delete after upload
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             implicitHeight: Math.max(root.rowMinH, delGrid.implicitHeight + root.rowPadY * 2)
                             height: implicitHeight
 
@@ -834,7 +867,6 @@ Rectangle {
 
                                 QGCLabel {
                                     text: qsTr("Yüklədikdən sonra log faylını silin")
-                                    color: "white"
                                     font.pixelSize: root.labelFontPx
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -859,13 +891,16 @@ Rectangle {
                 Rectangle {
                     id: logsPanel
                     width: panelFlow.width
-                    color: "#3D3B3B"
-                    radius: 16
+                    radius: AzTheme.px(AzTheme.cardRadius)
                     border.width: 1
-                    border.color: "#9D9D9D"
+                    border.color: AzTheme.cardBorder
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: AzTheme.cardGradientStart }
+                        GradientStop { position: 1; color: AzTheme.cardGradientEnd }
+                    }
                     visible: _showMavlinkLog
 
-                    readonly property real pad: Math.max(14, ScreenTools.defaultFontPixelWidth * 1.2)
+                    readonly property real pad: AzTheme.px(16)
                     readonly property real desiredH: logsLayout.implicitHeight + pad * 2
 
                     height: (root.columns > 1 && additionalPanel && additionalPanel.visible) ? root.row2H : desiredH
@@ -874,13 +909,14 @@ Rectangle {
                         id: logsLayout
                         anchors.fill: parent
                         anchors.margins: logsPanel.pad
-                        spacing: Math.max(10, ScreenTools.defaultFontPixelHeight * 0.8)
+                        spacing: AzTheme.px(8)
 
                         Text {
                             text: qsTr("Saxlanmış Log Faylları")
-                            color: "white"
-                            font.pixelSize: Math.max(15, ScreenTools.defaultFontPixelHeight * 1.05 * root.fontScale)
-                            font.bold: true
+                            color: AzTheme.textCard
+                            font.family: AzTheme.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: AzTheme.fontPx(16)
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
                         }
@@ -888,8 +924,10 @@ Rectangle {
                         Rectangle {
                             id: logsListContainer
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             height: root.listH
                             clip: true
 
@@ -908,9 +946,9 @@ Rectangle {
 
                                 delegate: Rectangle {
                                     width: logListView.width
-                                    height: 42
-                                    radius: 6
-                                    color: index % 2 === 0 ? "#2A2A2A" : "#333333"
+                                    height: AzTheme.px(42)
+                                    radius: AzTheme.px(6)
+                                    color: index % 2 === 0 ? "transparent" : AzTheme.pillTop
 
                                     RowLayout {
                                         anchors.fill: parent
@@ -925,7 +963,7 @@ Rectangle {
 
                                         QGCLabel {
                                             text: object.name
-                                            color: object.writing ? "orange" : (object.uploading ? "yellow" : "white")
+                                            color: object.writing ? AzTheme.statusOrange : (object.uploading ? AzTheme.statusYellow : AzTheme.textCard)
                                             Layout.fillWidth: true
                                             elide: Text.ElideMiddle
                                         }
@@ -933,17 +971,35 @@ Rectangle {
                                         QGCLabel {
                                             text: object.uploaded ? qsTr("Yükləndi") :
                                                   (object.uploading ? "" : Number(object.size).toLocaleString(Qt.locale(), 'f', 0))
-                                            color: object.uploaded ? "lightgreen" : "white"
+                                            color: object.uploaded ? AzTheme.statusGreen : AzTheme.textSecondary
                                             Layout.preferredWidth: 110
                                             horizontalAlignment: Text.AlignRight
                                         }
 
                                         ProgressBar {
+                                            id: uploadProgress
                                             visible: object.uploading && !object.uploaded
                                             Layout.preferredWidth: 120
                                             from: 0
                                             to: 100
                                             value: object.progress * 100.0
+
+                                            background: Rectangle {
+                                                implicitHeight: AzTheme.px(8)
+                                                radius:         height / 2
+                                                color:          AzTheme.slotEmpty
+                                            }
+
+                                            contentItem: Item {
+                                                implicitHeight: AzTheme.px(8)
+
+                                                Rectangle {
+                                                    width:  uploadProgress.visualPosition * parent.width
+                                                    height: parent.height
+                                                    radius: height / 2
+                                                    color:  AzTheme.statusGreen
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -955,8 +1011,8 @@ Rectangle {
                                 anchors.margins: 20
                                 visible: !root._logsReady
                                 text: root._logsStatusText
-                                color: "#CCCCCC"
-                                font.pixelSize: Math.max(14, ScreenTools.defaultFontPixelHeight * 1.0 * root.fontScale)
+                                color: AzTheme.textSecondary
+                                font.pixelSize: root.labelFontPx
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
                                 wrapMode: Text.WordWrap
@@ -1063,8 +1119,10 @@ Rectangle {
 
                         Rectangle {
                             Layout.fillWidth: true
-                            radius: 10
-                            color: "#2A2A2A"
+                            radius: AzTheme.px(AzTheme.groupRadius)
+                            color: AzTheme.groupFill
+                            border.width: 1
+                            border.color: AzTheme.groupBorder
                             height: 40
                             visible: root._logsReady && _selectedCount > 0
 
@@ -1072,8 +1130,8 @@ Rectangle {
                             QGCLabel {
                                 anchors.centerIn: parent
                                 text: qsTr("%1 log fayl(lar)ı seçildi").arg(_selectedCount)
-                                color: "white"
-                                font.bold: true
+                                color: AzTheme.textCard
+                                font.weight: Font.Medium
                             }
                         }
 
