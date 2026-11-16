@@ -115,6 +115,22 @@ Rectangle {
         console.log("openMenuByIdx: idx tapılmadı:", menuIdx)
     }
 
+    // A page binds its parameter controller to the vehicle it finds when it opens, so one
+    // opened while the vehicle was away or still loading its parameters stays empty. Reopen
+    // it once they are ready; not the firmware page, which reconnects the vehicle mid-upgrade.
+    readonly property bool _parametersReady: {
+        var v = QGroundControl.multiVehicleManager.activeVehicle
+        return !!(v && v.parameterManager && v.parameterManager.parametersReady)
+    }
+
+    on_ParametersReadyChanged: {
+        var page = rightPanelLoader.source.toString()
+        if (_parametersReady && page !== "" && !page.endsWith("Side_Proqram_Teminati.qml")) {
+            rightPanelLoader.source = ""
+            openMenuByIdx(selectedIndex)
+        }
+    }
+
     function closeThis() {
         // overlay bağla
         if (typeof sideMenuLoader !== "undefined") sideMenuLoader.source = ""
