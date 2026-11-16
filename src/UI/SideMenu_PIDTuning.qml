@@ -203,9 +203,13 @@ Rectangle {
                     unit:  st.tab === 0 ? "deg/s" : "deg"
                     chartDisplaySec: st.tab === 0 ? 3 : 8
 
-                    axis: st.tab === 0
-                          ? [ bodyCol.axisRateRoll, bodyCol.axisRatePitch, bodyCol.axisRateYaw ]
-                          : [ bodyCol.axisAttRoll, bodyCol.axisAttPitch ]
+                    axis: bodyCol.fixedWingGains
+                          ? (st.tab === 0
+                             ? [ bodyCol.axisRateRoll, bodyCol.axisRatePitch, bodyCol.axisRateYaw ]
+                             : [ bodyCol.axisAttRoll, bodyCol.axisAttPitch ])
+                          : (st.tab === 0
+                             ? [ bodyCol.axisMcRateRoll, bodyCol.axisMcRatePitch, bodyCol.axisMcRateYaw ]
+                             : [ bodyCol.axisMcAttRoll, bodyCol.axisMcAttPitch, bodyCol.axisMcAttYaw ])
 
                     showAutoModeChange: true
                     showAutoTuning:     true
@@ -237,6 +241,83 @@ Rectangle {
 
             // Axis data — bodyCol-un içində, ona görə yalnız Loader aktiv olduqda
             // (yəni avtopilot qoşulduqda) yaradılır.
+
+            // The fixed-wing gains (FW_*) for a plane, or a VTOL flying as one, and the
+            // multicopter gains (MC_*) otherwise, as PX4TuningComponent picks its page.
+            readonly property bool fixedWingGains: globals.activeVehicle.fixedWing
+                                                   || (globals.activeVehicle.vtol && globals.activeVehicle.vtolInFwdFlight)
+
+            property var axisMcRateRoll: QtObject {
+                property string name: qsTr("Roll")
+                property var plot: [
+                    { name: "Response", value: globals.activeVehicle.rollRate.value },
+                    { name: "Setpoint", value: globals.activeVehicle.setpoint.rollRate.value }
+                ]
+                property var params: ListModel {
+                    ListElement { title: qsTr("Overall Multiplier (MC_ROLLRATE_K)"); description: qsTr("Multiplier for P, I and D gains: increase for more responsiveness, reduce if the rates overshoot (and increasing D does not help)."); param: "MC_ROLLRATE_K"; min: 0.3; max: 3; step: 0.05 }
+                    ListElement { title: qsTr("Differential Gain (MC_ROLLRATE_D)"); description: qsTr("Damping: increase to reduce overshoots and oscillations, but not higher than really needed."); param: "MC_ROLLRATE_D"; min: 0.0004; max: 0.01; step: 0.0002 }
+                    ListElement { title: qsTr("Integral Gain (MC_ROLLRATE_I)"); description: qsTr("Generally does not need much adjustment, reduce this when seeing slow oscillations."); param: "MC_ROLLRATE_I"; min: 0.1; max: 0.5; step: 0.025 }
+                }
+            }
+
+            property var axisMcRatePitch: QtObject {
+                property string name: qsTr("Pitch")
+                property var plot: [
+                    { name: "Response", value: globals.activeVehicle.pitchRate.value },
+                    { name: "Setpoint", value: globals.activeVehicle.setpoint.pitchRate.value }
+                ]
+                property var params: ListModel {
+                    ListElement { title: qsTr("Overall Multiplier (MC_PITCHRATE_K)"); description: qsTr("Multiplier for P, I and D gains: increase for more responsiveness, reduce if the rates overshoot (and increasing D does not help)."); param: "MC_PITCHRATE_K"; min: 0.3; max: 3; step: 0.05 }
+                    ListElement { title: qsTr("Differential Gain (MC_PITCHRATE_D)"); description: qsTr("Damping: increase to reduce overshoots and oscillations, but not higher than really needed."); param: "MC_PITCHRATE_D"; min: 0.0004; max: 0.01; step: 0.0002 }
+                    ListElement { title: qsTr("Integral Gain (MC_PITCHRATE_I)"); description: qsTr("Generally does not need much adjustment, reduce this when seeing slow oscillations."); param: "MC_PITCHRATE_I"; min: 0.1; max: 0.5; step: 0.025 }
+                }
+            }
+
+            property var axisMcRateYaw: QtObject {
+                property string name: qsTr("Yaw")
+                property var plot: [
+                    { name: "Response", value: globals.activeVehicle.yawRate.value },
+                    { name: "Setpoint", value: globals.activeVehicle.setpoint.yawRate.value }
+                ]
+                property var params: ListModel {
+                    ListElement { title: qsTr("Overall Multiplier (MC_YAWRATE_K)"); description: qsTr("Multiplier for P, I and D gains: increase for more responsiveness, reduce if the rates overshoot (and increasing D does not help)."); param: "MC_YAWRATE_K"; min: 0.3; max: 3; step: 0.05 }
+                    ListElement { title: qsTr("Integral Gain (MC_YAWRATE_I)"); description: qsTr("Generally does not need much adjustment, reduce this when seeing slow oscillations."); param: "MC_YAWRATE_I"; min: 0.04; max: 0.4; step: 0.02 }
+                }
+            }
+
+            property var axisMcAttRoll: QtObject {
+                property string name: qsTr("Roll")
+                property var plot: [
+                    { name: "Response", value: globals.activeVehicle.roll.value },
+                    { name: "Setpoint", value: globals.activeVehicle.setpoint.roll.value }
+                ]
+                property var params: ListModel {
+                    ListElement { title: qsTr("Proportional Gain (MC_ROLL_P)"); description: qsTr("Increase for more responsiveness, reduce if the attitude overshoots."); param: "MC_ROLL_P"; min: 1; max: 14; step: 0.5 }
+                }
+            }
+
+            property var axisMcAttPitch: QtObject {
+                property string name: qsTr("Pitch")
+                property var plot: [
+                    { name: "Response", value: globals.activeVehicle.pitch.value },
+                    { name: "Setpoint", value: globals.activeVehicle.setpoint.pitch.value }
+                ]
+                property var params: ListModel {
+                    ListElement { title: qsTr("Proportional Gain (MC_PITCH_P)"); description: qsTr("Increase for more responsiveness, reduce if the attitude overshoots."); param: "MC_PITCH_P"; min: 1; max: 14; step: 0.5 }
+                }
+            }
+
+            property var axisMcAttYaw: QtObject {
+                property string name: qsTr("Yaw")
+                property var plot: [
+                    { name: "Response", value: globals.activeVehicle.heading.value },
+                    { name: "Setpoint", value: globals.activeVehicle.setpoint.yaw.value }
+                ]
+                property var params: ListModel {
+                    ListElement { title: qsTr("Proportional Gain (MC_YAW_P)"); description: qsTr("Increase for more responsiveness, reduce if the attitude overshoots (there is only a setpoint when yaw is fixed, i.e. when centering the stick)."); param: "MC_YAW_P"; min: 1; max: 5; step: 0.1 }
+                }
+            }
+
             property var axisRateRoll: QtObject {
                 property string name: qsTr("Roll")
                 property var plot: [
