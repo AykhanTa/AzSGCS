@@ -725,23 +725,29 @@ FlightMap {
 
         DropPanel {
             id: roiEditDropPanel
+            panelColor:  AzTheme.menuSelectedBottom
+            panelBorder: AzTheme.panelBorder
 
             sourceComponent: Component {
                 ColumnLayout {
-                    spacing: ScreenTools.defaultFontPixelWidth / 2
+                    spacing: AzTheme.px(8)
 
-                    QGCButton {
-                        Layout.fillWidth:   true
-                        text:               qsTr("Cancel ROI")
+                    AzButton {
+                        Layout.fillWidth:       true
+                        Layout.minimumWidth:    AzTheme.px(220)
+                        Layout.preferredHeight: AzTheme.px(38)
+                        text:                   qsTr("Cancel ROI")
                         onClicked: {
                             _activeVehicle.stopGuidedModeROI()
                             roiEditDropPanel.close()
                         }
                     }
 
-                    QGCButton {
-                        Layout.fillWidth:   true
-                        text:               qsTr("Edit Position")
+                    AzButton {
+                        Layout.fillWidth:       true
+                        Layout.minimumWidth:    AzTheme.px(220)
+                        Layout.preferredHeight: AzTheme.px(38)
+                        text:                   qsTr("Edit Position")
                         onClicked: {         
                             roiEditPositionDialogComponent.createObject(mainWindow, { showSetPositionFromVehicle: false }).open()
                             roiEditDropPanel.close()
@@ -757,17 +763,21 @@ FlightMap {
 
         DropPanel {
             id: mapClickDropPanel
+            panelColor:  AzTheme.menuSelectedBottom
+            panelBorder: AzTheme.panelBorder
 
             property var mapClickCoord
 
             sourceComponent: Component {
                 ColumnLayout {
-                    spacing: ScreenTools.defaultFontPixelWidth / 2
+                    spacing: AzTheme.px(8)
 
-                    QGCButton {
-                        Layout.fillWidth:   true
-                        text:               qsTr("Go to location")
-                        visible:            globals.guidedControllerFlyView.showGotoLocation
+                    AzButton {
+                        Layout.fillWidth:       true
+                        Layout.minimumWidth:    AzTheme.px(220)
+                        Layout.preferredHeight: AzTheme.px(38)
+                        text:                   qsTr("Go to location")
+                        visible:                globals.guidedControllerFlyView.showGotoLocation
                         onClicked: {
                             mapClickDropPanel.close()
                             gotoLocationItem.show(mapClickCoord)
@@ -776,10 +786,12 @@ FlightMap {
                         }
                     }
 
-                    QGCButton {
-                        Layout.fillWidth:   true
-                        text:               qsTr("Orbit at location")
-                        visible:            globals.guidedControllerFlyView.showOrbit
+                    AzButton {
+                        Layout.fillWidth:       true
+                        Layout.minimumWidth:    AzTheme.px(220)
+                        Layout.preferredHeight: AzTheme.px(38)
+                        text:                   qsTr("Orbit at location")
+                        visible:                globals.guidedControllerFlyView.showOrbit
                         onClicked: {
                             mapClickDropPanel.close()
                             orbitMapCircle.show(mapClickCoord)
@@ -787,50 +799,68 @@ FlightMap {
                         }
                     }
 
-                    QGCButton {
-                        Layout.fillWidth:   true
-                        text:               qsTr("ROI at location")
-                        visible:            globals.guidedControllerFlyView.showROI
+                    AzButton {
+                        Layout.fillWidth:       true
+                        Layout.minimumWidth:    AzTheme.px(220)
+                        Layout.preferredHeight: AzTheme.px(38)
+                        text:                   qsTr("ROI at location")
+                        visible:                globals.guidedControllerFlyView.showROI
                         onClicked: {
                             mapClickDropPanel.close()
                             globals.guidedControllerFlyView.executeAction(globals.guidedControllerFlyView.actionROI, mapClickCoord, 0, false)
                         }
                     }
 
-                    QGCButton {
-                        Layout.fillWidth:   true
-                        text:               qsTr("Set home here")
-                        visible:            globals.guidedControllerFlyView.showSetHome
+                    AzButton {
+                        Layout.fillWidth:       true
+                        Layout.minimumWidth:    AzTheme.px(220)
+                        Layout.preferredHeight: AzTheme.px(38)
+                        text:                   qsTr("Set home here")
+                        visible:                globals.guidedControllerFlyView.showSetHome
                         onClicked: {
                             mapClickDropPanel.close()
                             globals.guidedControllerFlyView.confirmAction(globals.guidedControllerFlyView.actionSetHome, mapClickCoord)
                         }
                     }
 
-                    QGCButton {
-                        Layout.fillWidth:   true
-                        text:               qsTr("Set Estimator Origin")
-                        visible:            globals.guidedControllerFlyView.showSetEstimatorOrigin
+                    AzButton {
+                        Layout.fillWidth:       true
+                        Layout.minimumWidth:    AzTheme.px(220)
+                        Layout.preferredHeight: AzTheme.px(38)
+                        text:                   qsTr("Set Estimator Origin")
+                        visible:                globals.guidedControllerFlyView.showSetEstimatorOrigin
                         onClicked: {
                             mapClickDropPanel.close()
                             globals.guidedControllerFlyView.confirmAction(globals.guidedControllerFlyView.actionSetEstimatorOrigin, mapClickCoord)
                         }
                     }
 
-                    QGCButton {
-                        Layout.fillWidth:   true
-                        text:               qsTr("Set Heading")
-                        visible:            globals.guidedControllerFlyView.showChangeHeading
+                    AzButton {
+                        Layout.fillWidth:       true
+                        Layout.minimumWidth:    AzTheme.px(220)
+                        Layout.preferredHeight: AzTheme.px(38)
+                        text:                   qsTr("Set Heading")
+                        visible:                globals.guidedControllerFlyView.showChangeHeading
                         onClicked: {
                             mapClickDropPanel.close()
                             globals.guidedControllerFlyView.confirmAction(globals.guidedControllerFlyView.actionChangeHeading, mapClickCoord)
                         }
                     }
 
-                    ColumnLayout {
-                        spacing: 0
-                        QGCLabel { text: qsTr("Lat: %1").arg(mapClickCoord.latitude.toFixed(6)) }
-                        QGCLabel { text: qsTr("Lon: %1").arg(mapClickCoord.longitude.toFixed(6)) }
+                    Rectangle {
+                        Layout.fillWidth:       true
+                        Layout.preferredHeight: 1
+                        Layout.topMargin:       AzTheme.px(2)
+                        color:                  AzTheme.panelBorder
+                    }
+
+                    Text {
+                        Layout.fillWidth:   true
+                        text:               qsTr("Lat: %1\nLon: %2").arg(mapClickCoord.latitude.toFixed(6)).arg(mapClickCoord.longitude.toFixed(6))
+                        color:              AzTheme.textSecondary
+                        font.family:        AzTheme.fontFamily
+                        font.pixelSize:     AzTheme.fontPx(12)
+                        lineHeight:         1.2
                     }
                 }
             }
