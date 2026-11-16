@@ -517,7 +517,7 @@ Rectangle {
                                         ActuatorSlider {
                                             channel: actuators.actuatorTest.allMotorsActuator
                                             rightPadding: ScreenTools.defaultFontPixelWidth * 3
-                                            onActuatorValueChanged: {
+                                            onActuatorValueChanged: (value, sliderValue) => {
                                                 stopTimer();
                                                 for (var channelIdx=0; channelIdx<sliderRepeater.count; channelIdx++) {
                                                     var channelSlider = sliderRepeater.itemAt(channelIdx);
