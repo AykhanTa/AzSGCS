@@ -16,7 +16,7 @@ import QGroundControl.Controls
 /// Görünüş Yüksəklik/Sürət panelləri ilədir (dizayn kartı, Poppins, AzButton).
 Item {
     id:         root
-    width:      Math.min(AzTheme.px(400), parent ? parent.width * 0.9 : AzTheme.px(400))
+    width:      Math.min(AzTheme.px(340), parent ? parent.width * 0.9 : AzTheme.px(340))
     height:     mainLayout.implicitHeight + (_margins * 2)
     visible:    false
 
@@ -33,7 +33,9 @@ Item {
     readonly property var   _vehicle:           QGroundControl.multiVehicleManager.activeVehicle
     readonly property var   _flyViewSettings:   QGroundControl.settingsManager.flyViewSettings
     readonly property var   _units:             QGroundControl.unitsConversion
-    readonly property real  _margins:           AzTheme.px(20)
+    readonly property real  _margins:           AzTheme.px(16)
+    // A size under the design's popups, so the panel covers less of the map.
+    readonly property real  _rowHeight:         AzTheme.px(34)
     readonly property bool  _fwdFlight:         _vehicle ? _vehicle.inFwdFlight : false
 
     /// Hədəf hündürlük yalnız ev nöqtəsinin hündürlüyü məlum olanda göndərilə bilər.
@@ -178,7 +180,7 @@ Item {
     component PanelText: Text {
         color:          AzTheme.textCard
         font.family:    AzTheme.fontFamily
-        font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
+        font.pixelSize: AzTheme.fontPx(13)
     }
 
     /// Small grey note under a setting.
@@ -186,7 +188,7 @@ Item {
         wrapMode:       Text.WordWrap
         color:          AzTheme.textSecondary
         font.family:    AzTheme.fontFamily
-        font.pixelSize: AzTheme.fontPx(12)
+        font.pixelSize: AzTheme.fontPx(11)
     }
 
     // − / sahə / + sətri. Dəyər metrlə gəlir; sahədə tətbiqin vahidində göstərilir.
@@ -203,7 +205,7 @@ Item {
 
         signal changed(real newValueM)
 
-        spacing: AzTheme.px(8)
+        spacing: AzTheme.px(6)
 
         // Sahə metr dəyərindən yazılır. İstifadəçi yazanda binding qırılır, ona görə bağlama
         // əvəzinə dəyər dəyişəndə açıq yazılır.
@@ -213,17 +215,17 @@ Item {
 
         AzButton {
             text:                   "−"
-            textSize:               22
-            minimumWidth:           AzTheme.px(40)
-            Layout.preferredWidth:  AzTheme.px(40)
-            Layout.preferredHeight: AzTheme.px(40)
+            textSize:               18
+            minimumWidth:           AzTheme.px(34)
+            Layout.preferredWidth:  AzTheme.px(34)
+            Layout.preferredHeight: AzTheme.px(34)
             onClicked:              stepRow.changed(stepRow.valueM - stepRow.stepM)
         }
 
         // Value and unit in a pill; red while out of range.
         Rectangle {
             Layout.fillWidth:       true
-            Layout.preferredHeight: AzTheme.px(40)
+            Layout.preferredHeight: AzTheme.px(34)
             radius:                 AzTheme.px(8)
             border.width:           1
             border.color:           !stepRow.valid ? AzTheme.statusRed
@@ -245,7 +247,7 @@ Item {
                     selectByMouse:       true
                     color:               stepRow.valid ? AzTheme.textCard : AzTheme.statusRed
                     font.family:         AzTheme.fontFamily
-                    font.pixelSize:      AzTheme.fontPx(AzTheme.popupTextSize)
+                    font.pixelSize:      AzTheme.fontPx(13)
 
                     onEditingFinished: {
                         var entered = parseFloat(text.replace(",", "."))
@@ -261,17 +263,17 @@ Item {
                     text:           stepRow.unitText
                     color:          AzTheme.textCard
                     font.family:    AzTheme.fontFamily
-                    font.pixelSize: AzTheme.fontPx(AzTheme.popupTextSize)
+                    font.pixelSize: AzTheme.fontPx(13)
                 }
             }
         }
 
         AzButton {
             text:                   "+"
-            textSize:               22
-            minimumWidth:           AzTheme.px(40)
-            Layout.preferredWidth:  AzTheme.px(40)
-            Layout.preferredHeight: AzTheme.px(40)
+            textSize:               18
+            minimumWidth:           AzTheme.px(34)
+            Layout.preferredWidth:  AzTheme.px(34)
+            Layout.preferredHeight: AzTheme.px(34)
             onClicked:              stepRow.changed(stepRow.valueM + stepRow.stepM)
         }
     }
@@ -282,20 +284,20 @@ Item {
         anchors.right:      parent.right
         anchors.top:        parent.top
         anchors.margins:    root._margins
-        spacing:            AzTheme.px(12)
+        spacing:            AzTheme.px(8)
 
         PanelText {
             Layout.fillWidth:   true
             text:               qsTr("Mövqeyə uç")
             font.weight:        Font.Medium
-            font.pixelSize:     AzTheme.fontPx(18)
+            font.pixelSize:     AzTheme.fontPx(16)
         }
 
         GridLayout {
             Layout.fillWidth:   true
             columns:            2
             columnSpacing:      root._margins
-            rowSpacing:         AzTheme.px(6)
+            rowSpacing:         AzTheme.px(4)
 
             PanelText { text: qsTr("Məsafə"); color: AzTheme.textSecondary }
             PanelText {
@@ -402,17 +404,19 @@ Item {
         RowLayout {
             Layout.fillWidth:   true
             Layout.topMargin:   AzTheme.px(4)
-            spacing:            AzTheme.px(12)
+            spacing:            AzTheme.px(10)
 
             AzButton {
-                Layout.fillWidth:   true
-                text:               qsTr("Ləğv et")
+                Layout.fillWidth:       true
+                Layout.preferredHeight: root._rowHeight
+                text:                   qsTr("Ləğv et")
                 onClicked:          root.cancel()
             }
 
             AzButton {
-                Layout.fillWidth:   true
-                text:               qsTr("Təsdiq et")
+                Layout.fillWidth:       true
+                Layout.preferredHeight: root._rowHeight
+                text:                   qsTr("Təsdiq et")
                 enabled:            root._canConfirm
                 onClicked:          root.confirm()
             }
