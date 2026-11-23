@@ -51,17 +51,17 @@ JoystickConfigController::~JoystickConfigController()
 /// @brief Returns the state machine entry for the specified state.
 const JoystickConfigController::stateMachineEntry* JoystickConfigController::_getStateMachineEntry(int step)
 {
-    static constexpr const char* msgBegin =               "Bütün idarəetmə qollarını şəkildə göstərildiyi kimi mərkəzi vəziyyətə gətirin.\n'Sonrakı' düyməsinə basın.";
-    static constexpr const char* msgThrottleUp =          "Sürət qolunu tam irəli itələyin və bu vəziyyətdə saxlayın...";
-    static constexpr const char* msgThrottleDown =        "Sürət qolunu tam aşağı itələyin və bu vəziyyətdə saxlayın...";
-    static constexpr const char* msgYawLeft =             "Yaw (fırlanma) qolunu tam sola çevirin və bu vəziyyətdə saxlayın..";
-    static constexpr const char* msgYawRight =            "Yaw (fırlanma) qolunu tam sağa çevirin və bu vəziyyətdə saxlayın...";
-    static constexpr const char* msgRollLeft =            "Roll (yan fırlanma) qolunu tam sola çevirin və bu vəziyyətdə saxlayın...";
-    static constexpr const char* msgRollRight =           "Roll (yan fırlanma) qolunu tam sağa çevirin və bu vəziyyətdə saxlayın...";
-    static constexpr const char* msgPitchDown =           "Pitch (meyil) qolunu tam aşağı itələyin və bu vəziyyətdə saxlayın...";
-    static constexpr const char* msgPitchUp =             "Pitch (meyil) qolunu tam yuxarı itələyin və bu vəziyyətdə saxlayın...";
-    static constexpr const char* msgPitchCenter =         "Pitch (meyil) qolunun mərkəzə qayıtmasına icazə verin...";
-    static constexpr const char* msgComplete =            "Bütün parametrlər qeydə alındı.\nJoysticki aktivləşdirmək üçün 'Sonrakı' düyməsinə basın.";
+    static constexpr const char* msgBegin =               QT_TR_NOOP("Bütün idarəetmə qollarını şəkildə göstərildiyi kimi mərkəzi vəziyyətə gətirin.\n'Sonrakı' düyməsinə basın.");
+    static constexpr const char* msgThrottleUp =          QT_TR_NOOP("Sürət qolunu tam irəli itələyin və bu vəziyyətdə saxlayın...");
+    static constexpr const char* msgThrottleDown =        QT_TR_NOOP("Sürət qolunu tam aşağı itələyin və bu vəziyyətdə saxlayın...");
+    static constexpr const char* msgYawLeft =             QT_TR_NOOP("Yaw (fırlanma) qolunu tam sola çevirin və bu vəziyyətdə saxlayın..");
+    static constexpr const char* msgYawRight =            QT_TR_NOOP("Yaw (fırlanma) qolunu tam sağa çevirin və bu vəziyyətdə saxlayın...");
+    static constexpr const char* msgRollLeft =            QT_TR_NOOP("Roll (yan fırlanma) qolunu tam sola çevirin və bu vəziyyətdə saxlayın...");
+    static constexpr const char* msgRollRight =           QT_TR_NOOP("Roll (yan fırlanma) qolunu tam sağa çevirin və bu vəziyyətdə saxlayın...");
+    static constexpr const char* msgPitchDown =           QT_TR_NOOP("Pitch (meyil) qolunu tam aşağı itələyin və bu vəziyyətdə saxlayın...");
+    static constexpr const char* msgPitchUp =             QT_TR_NOOP("Pitch (meyil) qolunu tam yuxarı itələyin və bu vəziyyətdə saxlayın...");
+    static constexpr const char* msgPitchCenter =         QT_TR_NOOP("Pitch (meyil) qolunun mərkəzə qayıtmasına icazə verin...");
+    static constexpr const char* msgComplete =            QT_TR_NOOP("Bütün parametrlər qeydə alındı.\nJoysticki aktivləşdirmək üçün 'Sonrakı' düyməsinə basın.");
 
     static const stateMachineEntry rgStateMachine[] = {
         //Function
@@ -110,7 +110,7 @@ bool JoystickConfigController::skipEnabled()
 void JoystickConfigController::_setupCurrentState()
 {
     const stateMachineEntry* state = _getStateMachineEntry(_currentStep);
-    _setStatusText(state->instructions);
+    _setStatusText(tr(state->instructions));
     _stickDetectAxis = _axisNoAxis;
     _stickDetectSettleStarted = false;
     _calSaveCurrentValues();

@@ -28,7 +28,7 @@ void ExternalPositionWorker::start()
                            QAbstractSocket::ShareAddress))
     {
         emit statusChanged(false,
-                           QString("Port %1 bind uğursuz: %2")
+                           tr("Port %1 bind uğursuz: %2")
                                .arg(_port)
                                .arg(_socket->errorString()));
         return;
@@ -46,7 +46,7 @@ void ExternalPositionWorker::start()
 
     // Bind = yalnız dinləmə; hələ data yoxdur. "Aktiv" (xəritədə marker/trayektoriya)
     // yalnız real data gələndə (_onReadyRead) true olur, timeout-da yenidən false.
-    emit statusChanged(false, QString("Port %1 dinlənilir").arg(_port));
+    emit statusChanged(false, tr("Port %1 dinlənilir").arg(_port));
 }
 
 void ExternalPositionWorker::stop()
@@ -62,7 +62,7 @@ void ExternalPositionWorker::stop()
         _socket = nullptr;
     }
     _active = false;
-    emit statusChanged(false, "Dayandırıldı");
+    emit statusChanged(false, tr("Dayandırıldı"));
 }
 
 void ExternalPositionWorker::_onReadyRead()
@@ -95,7 +95,7 @@ void ExternalPositionWorker::_onReadyRead()
 
         if (!_active) {
             _active = true;
-            emit statusChanged(true, "Məlumat gəlir");
+            emit statusChanged(true, tr("Məlumat gəlir"));
         }
 
         emit positionReceived(pos);
@@ -106,6 +106,6 @@ void ExternalPositionWorker::_onTimeout()
 {
     if (_active) {
         _active = false;
-        emit statusChanged(false, "Məlumat kəsildi — timeout 3s");
+        emit statusChanged(false, tr("Məlumat kəsildi — timeout 3s"));
     }
 }

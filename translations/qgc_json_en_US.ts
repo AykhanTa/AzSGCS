@@ -375,6 +375,10 @@
       <source>Şəkillər çəkin,Videonu qeyd edin,Fotoşəkil sorğu rejimi</source>
       <translation>Take photos,Record video,Photo survey mode</translation>
     </message>
+    <message>
+      <source>Əmr</source>
+      <translation>Command</translation>
+    </message>
 </context>
 <context>
     <name>RemoteID.SettingsGroup.json</name>

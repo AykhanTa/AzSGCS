@@ -271,7 +271,7 @@ void ExternalPositionManager::_sendMavlinkIntercept()
 
     if (!_vehicle->sendMessageOnLinkThreadSafe(sharedLink.get(), msg)) {
         emit mavlinkSendError(
-            QStringLiteral("INTERCEPT göndərilməsi uğursuz oldu"));
+            tr("INTERCEPT göndərilməsi uğursuz oldu"));
     }
 
     // qDebug() << "[ExternalPos] INTERCEPT göndərildi:"

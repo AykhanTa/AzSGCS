@@ -113,7 +113,14 @@ Rectangle {
             Repeater {
                 model: rallyPoint ? rallyPoint.textFieldFacts : 0
                 QGCLabel {
-                    text: modelData.name + ":"
+                    // The fact names are identifiers, kept as they are; their labels translate.
+                    readonly property var _labels: ({
+                        "Enlik":            qsTr("Enlik"),
+                        "Uzunluq":          qsTr("Uzunluq"),
+                        "Nisbi Hündürlük":  qsTr("Nisbi Hündürlük")
+                    })
+
+                    text: (_labels[modelData.name] || modelData.name) + ":"
                 }
             }
 

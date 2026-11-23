@@ -296,7 +296,7 @@ void FirmwareUpgradeController::_foundBoardInfo(int bootloaderVersion, int board
 ///         machine to the appropriate error state.
 void FirmwareUpgradeController::_bootloaderSyncFailed(void)
 {
-    _errorCancel("Yükləyici ilə sinxronizasiya etmək mümkün deyil.");
+    _errorCancel(tr("Yükləyici ilə sinxronizasiya etmək mümkün deyil."));
 }
 
 QHash<FirmwareUpgradeController::FirmwareIdentifier, QString>* FirmwareUpgradeController::_firmwareHashForBoardId(int boardId)
@@ -441,7 +441,7 @@ void FirmwareUpgradeController::_error(const QString& errorString)
     delete _image;
     _image = nullptr;
 
-    _errorCancel(QString("Xəta: %1").arg(errorString));
+    _errorCancel(tr("Xəta: %1").arg(errorString));
 }
 
 void FirmwareUpgradeController::_status(const QString& statusString)

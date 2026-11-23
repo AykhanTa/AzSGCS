@@ -116,7 +116,8 @@ DECLARE_SETTINGSFACT_NO_FUNC(UnitsSettings, speedUnits)
         // Distance/Area/Speed units settings can't be loaded from json since it creates an infinite loop of meta data loading.
         QStringList     enumStrings;
         QVariantList    enumValues;
-        enumStrings << "Fut/saniyə" << "Metr/saniyə" << "Mil/saat" << "Kilometr/saat" << UnitsSettings::tr("Düyünlər");
+        enumStrings << UnitsSettings::tr("Fut/saniyə") << UnitsSettings::tr("Metr/saniyə") << UnitsSettings::tr("Mil/saat")
+                    << UnitsSettings::tr("Kilometr/saat") << UnitsSettings::tr("Düyünlər");
         enumValues <<
             QVariant::fromValue(static_cast<uint32_t>(SpeedUnitsFeetPerSecond)) <<
             QVariant::fromValue(static_cast<uint32_t>(SpeedUnitsMetersPerSecond)) <<

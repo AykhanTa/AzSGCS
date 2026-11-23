@@ -68,6 +68,79 @@
     </message>
 </context>
 <context>
+    <name>AmmoLauncherController</name>
+    <message>
+      <location filename="../src/AmmoLauncher/AmmoLauncherController.cc"/>
+      <source>Əlaqə yoxdur</source>
+      <translation>No link</translation>
+    </message>
+    <message>
+      <location filename="../src/AmmoLauncher/AmmoLauncherController.cc"/>
+      <source>Qoşulmayıb</source>
+      <translation>Not connected</translation>
+    </message>
+    <message>
+      <location filename="../src/AmmoLauncher/AmmoLauncherController.cc"/>
+      <source>ARM edilir…</source>
+      <translation>Arming…</translation>
+    </message>
+    <message>
+      <location filename="../src/AmmoLauncher/AmmoLauncherController.cc"/>
+      <source>DISARM edilir…</source>
+      <translation>Disarming…</translation>
+    </message>
+    <message>
+      <location filename="../src/AmmoLauncher/AmmoLauncherController.cc"/>
+      <source>Atılır…</source>
+      <translation>Firing…</translation>
+    </message>
+    <message>
+      <location filename="../src/AmmoLauncher/AmmoLauncherController.cc"/>
+      <source>Buraxıcı qoşulmayıb.</source>
+      <translation>Launcher not connected.</translation>
+    </message>
+    <message>
+      <location filename="../src/AmmoLauncher/AmmoLauncherController.cc"/>
+      <source>Atış üçün buraxıcı ARM edilməlidir.</source>
+      <translation>The launcher must be armed to fire.</translation>
+    </message>
+    <message>
+      <location filename="../src/AmmoLauncher/AmmoLauncherController.cc"/>
+      <source>Buraxıcı ilə əlaqə itdi.</source>
+      <translation>Link to the launcher lost.</translation>
+    </message>
+    <message>
+      <location filename="../src/AmmoLauncher/AmmoLauncherController.cc"/>
+      <source>toplu atış</source>
+      <translation>salvo</translation>
+    </message>
+    <message>
+      <location filename="../src/AmmoLauncher/AmmoLauncherController.cc"/>
+      <source>Buraxıcı %1 komandasını rədd etdi.</source>
+      <translation>The launcher rejected the %1 command.</translation>
+    </message>
+    <message>
+      <location filename="../src/AmmoLauncher/AmmoLauncherController.cc"/>
+      <source>Buraxıcı %1 komandasına cavab vermədi.</source>
+      <translation>The launcher did not respond to the %1 command.</translation>
+    </message>
+    <message>
+      <location filename="../src/AmmoLauncher/AmmoLauncherController.cc"/>
+      <source>%1: FC hazırda komandanı qəbul edə bilmir (mexanizm portu bağlıdır və ya növbə doludur).</source>
+      <translation>%1: the FC cannot accept the command right now (the mechanism port is closed or the queue is full).</translation>
+    </message>
+    <message>
+      <location filename="../src/AmmoLauncher/AmmoLauncherController.cc"/>
+      <source>%1: FC bu komandanı dəstəkləmir.</source>
+      <translation>%1: the FC does not support this command.</translation>
+    </message>
+    <message>
+      <location filename="../src/AmmoLauncher/AmmoLauncherController.cc"/>
+      <source>%1: FC cavab vermədi.</source>
+      <translation>%1: the FC did not respond.</translation>
+    </message>
+</context>
+<context>
     <name>AppHelp</name>
     <message>
       <location filename="../src/UI/AppHelp.qml"/>
@@ -83,6 +156,31 @@
       <location filename="../src/UI/AppHelp.qml"/>
       <source>PX4 İstifadəçiləri Müzakirə Forumu</source>
       <translation>PX4 Users Discussion Forum</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/AppHelp.qml"/>
+      <source>%1 Dəstək</source>
+      <translation>%1 Support</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/AppHelp.qml"/>
+      <source>Proqram versiyası və dəstək məlumatları</source>
+      <translation>Application version and support information</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/AppHelp.qml"/>
+      <source>Proqram haqqında</source>
+      <translation>About</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/AppHelp.qml"/>
+      <source>Versiya</source>
+      <translation>Version</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/AppHelp.qml"/>
+      <source>Dəstək əlaqə məlumatları sonradan əlavə olunacaq.</source>
+      <translation>Support contact details will be added later.</translation>
     </message>
 </context>
 <context>
@@ -475,6 +573,21 @@
       <source>Hamısını Seç</source>
       <translation>Select All</translation>
     </message>
+    <message>
+      <location filename="../src/UI/BottomCenterStatusPanel.qml"/>
+      <source>Qoşulmayıb</source>
+      <translation>Not connected</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/BottomCenterStatusPanel.qml"/>
+      <source>Buraxıcı qoşulmayıb</source>
+      <translation>Launcher not connected</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/BottomCenterStatusPanel.qml"/>
+      <source>Atma</source>
+      <translation>Fire</translation>
+    </message>
 </context>
 <context>
     <name>CameraCalc</name>
@@ -622,6 +735,11 @@
       <source>Əlavə et</source>
       <translation>Add</translation>
     </message>
+    <message>
+      <location filename="../src/UI/Comm_links.qml"/>
+      <source>Bu bölüm drone ilə %1 arasında bağlantı ayarlarını idarə etmək üçün istifadə olunur.</source>
+      <translation>This section is used to manage the connection settings between the drone and %1.</translation>
+    </message>
 </context>
 <context>
     <name>Console</name>
@@ -745,6 +863,42 @@
       <location filename="../src/QmlControls/EditPositionDialog.qml"/>
       <source>Təyyarənin yeri</source>
       <translation>Vehicle location</translation>
+    </message>
+</context>
+<context>
+    <name>ExternalPositionManager</name>
+    <message>
+      <location filename="../src/Comms/ExternalPositionManager.cpp"/>
+      <source>INTERCEPT göndərilməsi uğursuz oldu</source>
+      <translation>Sending INTERCEPT failed</translation>
+    </message>
+</context>
+<context>
+    <name>ExternalPositionWorker</name>
+    <message>
+      <location filename="../src/Comms/ExternalPositionWorker.cpp"/>
+      <source>Port %1 bind uğursuz: %2</source>
+      <translation>Port %1 bind failed: %2</translation>
+    </message>
+    <message>
+      <location filename="../src/Comms/ExternalPositionWorker.cpp"/>
+      <source>Port %1 dinlənilir</source>
+      <translation>Listening on port %1</translation>
+    </message>
+    <message>
+      <location filename="../src/Comms/ExternalPositionWorker.cpp"/>
+      <source>Dayandırıldı</source>
+      <translation>Stopped</translation>
+    </message>
+    <message>
+      <location filename="../src/Comms/ExternalPositionWorker.cpp"/>
+      <source>Məlumat gəlir</source>
+      <translation>Receiving data</translation>
+    </message>
+    <message>
+      <location filename="../src/Comms/ExternalPositionWorker.cpp"/>
+      <source>Məlumat kəsildi — timeout 3s</source>
+      <translation>Data lost — timeout 3s</translation>
     </message>
 </context>
 <context>
@@ -956,6 +1110,26 @@
       <source>Şəklin yüklənməsi alınmadı</source>
       <translation>Failed to load the image</translation>
     </message>
+    <message>
+      <location filename="../src/Vehicle/VehicleSetup/FirmwareUpgradeController.cc"/>
+      <source>  Versiya: %1</source>
+      <translation>  Version: %1</translation>
+    </message>
+    <message>
+      <location filename="../src/Vehicle/VehicleSetup/FirmwareUpgradeController.cc"/>
+      <source>Yükləyici ilə sinxronizasiya etmək mümkün deyil.</source>
+      <translation>Unable to sync with the bootloader.</translation>
+    </message>
+    <message>
+      <location filename="../src/Vehicle/VehicleSetup/FirmwareUpgradeController.cc"/>
+      <source> Buradan: %1</source>
+      <translation> From: %1</translation>
+    </message>
+    <message>
+      <location filename="../src/Vehicle/VehicleSetup/FirmwareUpgradeController.cc"/>
+      <source>Xəta: %1</source>
+      <translation>Error: %1</translation>
+    </message>
 </context>
 <context>
     <name>FixedWingChecklist</name>
@@ -1067,6 +1241,29 @@
     </message>
 </context>
 <context>
+    <name>FlyViewActionFlyout</name>
+    <message>
+      <location filename="../src/FlightDisplay/FlyViewActionFlyout.qml"/>
+      <source>Son tətbiq olunan: %1 %2</source>
+      <translation>Last applied: %1 %2</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/FlyViewActionFlyout.qml"/>
+      <source>Saxla</source>
+      <translation>Save</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/FlyViewActionFlyout.qml"/>
+      <source>Hündürlük</source>
+      <translation>Altitude</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/FlyViewActionFlyout.qml"/>
+      <source>Sürət</source>
+      <translation>Speed</translation>
+    </message>
+</context>
+<context>
     <name>FlyViewPreFlightChecklistPopup</name>
     <message>
       <location filename="../src/FlightDisplay/FlyViewPreFlightChecklistPopup.qml"/>
@@ -1090,6 +1287,34 @@
       <location filename="../src/FlightDisplay/FlyViewToolStrip.qml"/>
       <source>Sürət:</source>
       <translation>Speed:</translation>
+    </message>
+</context>
+<context>
+    <name>FlyViewToolStripActionList</name>
+    <message>
+      <location filename="../src/FlightDisplay/FlyViewToolStripActionList.qml"/>
+      <source>Qalxış</source>
+      <translation>Takeoff</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/FlyViewToolStripActionList.qml"/>
+      <source>Eniş</source>
+      <translation>Land</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/FlyViewToolStripActionList.qml"/>
+      <source>Qayıt</source>
+      <translation>Return</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/FlyViewToolStripActionList.qml"/>
+      <source>Yüksəklik</source>
+      <translation>Altitude</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/FlyViewToolStripActionList.qml"/>
+      <source>Sürət</source>
+      <translation>Speed</translation>
     </message>
 </context>
 <context>
@@ -1268,6 +1493,11 @@
       <location filename="../src/UI/Fly_ViewSettings.qml"/>
       <source>İrəli Uçuş Rəhbəri Modunda Loiter Radiusu</source>
       <translation>Loiter Radius In Guided Mode Forward Flight</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Fly_ViewSettings.qml"/>
+      <source>Mərmi: Aparat Yerdə Olarkən ARM-a İcazə Ver (stend testi)</source>
+      <translation>Ammo: Allow Arming While the Vehicle Is on the Ground (bench test)</translation>
     </message>
 </context>
 <context>
@@ -1460,6 +1690,272 @@
     </message>
 </context>
 <context>
+    <name>Gimbal_Settings</name>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Skydroid C01-C14 kameralarını (C13 daxil) hava blokunun şəbəkəsi üzərindən idarə edir. </source>
+      <translation>Controls Skydroid C01-C14 cameras (including C13) over the air unit's network. </translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Bu, MAVLink gimbal protokolundan ayrı bir yoldur.</source>
+      <translation>This is a path separate from the MAVLink gimbal protocol.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Bağlantı</source>
+      <translation>Connection</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Vəziyyət</source>
+      <translation>Status</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>mövcud deyil</source>
+      <translation>not available</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>sönülü</source>
+      <translation>off</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>cavab verir</source>
+      <translation>responding</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>cavab yoxdur</source>
+      <translation>no response</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>göndərilən: </source>
+      <translation>sent: </translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>RC kanalları</source>
+      <translation>RC channels</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Kanal nömrələri 1-dən başlayır; 0 həmin oxu söndürür. Dəyərlər uçuş kontrollerinin göndərdiyi RC_CHANNELS-dən oxunur.</source>
+      <translation>Channel numbers start at 1; 0 disables that axis. Values are read from RC_CHANNELS sent by the flight controller.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Canlı RC</source>
+      <translation>Live RC</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Mənbə: pultun özü (Skydroid SDK)</source>
+      <translation>Source: the remote controller itself (Skydroid SDK)</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Mənbə: uçuş kontrolleri (RC_CHANNELS)</source>
+      <translation>Source: flight controller (RC_CHANNELS)</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Mənbə: yoxdur</source>
+      <translation>Source: none</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Pult: oxunmur — gimbal və ya RC idarəsi söndürülüb.</source>
+      <translation>Remote: not read — gimbal or RC control is disabled.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Pult: qoşulur…</source>
+      <translation>Remote: connecting…</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Pult: qoşuludur.</source>
+      <translation>Remote: connected.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Pult: qoşulmaq alınmadı (%1). Skydroid köməkçi tətbiqi açıqdırsa, bağlayın — hər 5 saniyədən bir yenidən cəhd edilir.</source>
+      <translation>Remote: connection failed (%1). Close the Skydroid helper app if it is open — retrying every 5 seconds.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>idarəedici mövcud deyil</source>
+      <translation>controller not available</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Kanal mənbəyi yoxdur: pult oxunmur və uçuş kontrolleri qoşulu deyil.</source>
+      <translation>No channel source: the remote is not read and the flight controller is not connected.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Mənbə var, amma hələ bir dənə də kanal paketi gəlməyib.</source>
+      <translation>There is a source, but no channel packet has arrived yet.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>kanal sayı: </source>
+      <translation>channel count: </translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>hesablanan sürət:</source>
+      <translation>computed speed:</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>paket: </source>
+      <translation>packets: </translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Bütün kanallar: </source>
+      <translation>All channels: </translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>-1 = həmin kanal gəlmir. Dəyərlər dəyişir, amma sürət 0 qalırsa, ölü zonanı azaldın və ya kanal aralığını yoxlayın.</source>
+      <translation>-1 = that channel is not received. If the values change but the speed stays 0, reduce the deadband or check the channel range.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Tənzimləmə</source>
+      <translation>Settings</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Əl ilə yoxlama</source>
+      <translation>Manual test</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Düymə basılı tutulduqca hərəkət davam edir. Buraxanda dayanır.</source>
+      <translation>Movement continues while the button is held. It stops on release.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Yuxarı</source>
+      <translation>Up</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Aşağı</source>
+      <translation>Down</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Sola</source>
+      <translation>Left</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Sağa</source>
+      <translation>Right</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Montaj rejimi</source>
+      <translation>Mount mode</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Pod-un necə quraşdırıldığını bildirir. Əvvəlki versiyada zoom düymələri bu rejimi səhvən dəyişirdi: gimbal tərs dönürsə və ya qəribə hərəkət edirsə, burada düzgün rejimi seçin. Dronun altından asılan pod üçün &quot;Asılı&quot; seçilir.</source>
+      <translation>Tells how the pod is mounted. In the previous version the zoom buttons changed this mode by mistake: if the gimbal turns the wrong way or moves strangely, choose the correct mode here. Choose &quot;Hanging&quot; for a pod hanging under the drone.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Asılı (normal)</source>
+      <translation>Hanging (normal)</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Gimbal_Settings.qml"/>
+      <source>Tərs (üstdə)</source>
+      <translation>Inverted (on top)</translation>
+    </message>
+</context>
+<context>
+    <name>GoToLocationPanel</name>
+    <message>
+      <location filename="../src/FlightDisplay/GoToLocationPanel.qml"/>
+      <source>%1 dəq %2 san</source>
+      <translation>%1 min %2 s</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/GoToLocationPanel.qml"/>
+      <source>%1 san</source>
+      <translation>%1 s</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/GoToLocationPanel.qml"/>
+      <source>Mövqeyə uç</source>
+      <translation>Fly to Location</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/GoToLocationPanel.qml"/>
+      <source>Məsafə</source>
+      <translation>Distance</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/GoToLocationPanel.qml"/>
+      <source>Hündürlük dəyişimi</source>
+      <translation>Altitude change</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/GoToLocationPanel.qml"/>
+      <source>Təxmini vaxt</source>
+      <translation>Estimated time</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/GoToLocationPanel.qml"/>
+      <source>Hündürlük (evdən)</source>
+      <translation>Altitude (from home)</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/GoToLocationPanel.qml"/>
+      <source>Aralıq: %1 – %2</source>
+      <translation>Range: %1 – %2</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/GoToLocationPanel.qml"/>
+      <source>Ev nöqtəsinin hündürlüyü bilinmir: aparat indiki hündürlüyündə uçacaq.</source>
+      <translation>Home altitude is unknown: the vehicle will fly at its current altitude.</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/GoToLocationPanel.qml"/>
+      <source>Hava sürətini təyin et</source>
+      <translation>Set airspeed</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/GoToLocationPanel.qml"/>
+      <source>Yer sürətini təyin et</source>
+      <translation>Set ground speed</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/GoToLocationPanel.qml"/>
+      <source>Söndürülü: aparat öz sürəti ilə uçur.</source>
+      <translation>Off: the vehicle flies at its own speed.</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/GoToLocationPanel.qml"/>
+      <source>Ləğv et</source>
+      <translation>Cancel</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/GoToLocationPanel.qml"/>
+      <source>Təsdiq et</source>
+      <translation>Confirm</translation>
+    </message>
+</context>
+<context>
     <name>GuidedActionConfirm</name>
     <message>
       <location filename="../src/FlightDisplay/GuidedActionConfirm.qml"/>
@@ -1475,6 +1971,11 @@
       <location filename="../src/FlightDisplay/GuidedActionConfirm.qml"/>
       <source>Xeyr</source>
       <translation>No</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/GuidedActionConfirm.qml"/>
+      <source>Klaviatura: [B] Bəli, [X] Xeyr, [Esc] Ləğv</source>
+      <translation>Keyboard: [B] Yes, [X] No, [Esc] Cancel</translation>
     </message>
 </context>
 <context>
@@ -1561,11 +2062,81 @@
     </message>
 </context>
 <context>
+    <name>Joystick</name>
+    <message>
+      <location filename="../src/Joystick/Joystick.h"/>
+      <source>Fəaliyyət yoxdur</source>
+      <translation>No action</translation>
+    </message>
+</context>
+<context>
     <name>JoystickConfig</name>
     <message>
       <location filename="../src/Vehicle/VehicleSetup/JoystickConfig.qml"/>
       <source>Joystick</source>
       <translation>Joystick</translation>
+    </message>
+</context>
+<context>
+    <name>JoystickConfigController</name>
+    <message>
+      <location filename="../src/Vehicle/VehicleSetup/JoystickConfigController.cc"/>
+      <source>Bütün idarəetmə qollarını şəkildə göstərildiyi kimi mərkəzi vəziyyətə gətirin.
+'Sonrakı' düyməsinə basın.</source>
+      <translation>Center all sticks as shown in the image.
+Press 'Next'.</translation>
+    </message>
+    <message>
+      <location filename="../src/Vehicle/VehicleSetup/JoystickConfigController.cc"/>
+      <source>Sürət qolunu tam irəli itələyin və bu vəziyyətdə saxlayın...</source>
+      <translation>Move the throttle stick all the way up and hold it there...</translation>
+    </message>
+    <message>
+      <location filename="../src/Vehicle/VehicleSetup/JoystickConfigController.cc"/>
+      <source>Sürət qolunu tam aşağı itələyin və bu vəziyyətdə saxlayın...</source>
+      <translation>Move the throttle stick all the way down and hold it there...</translation>
+    </message>
+    <message>
+      <location filename="../src/Vehicle/VehicleSetup/JoystickConfigController.cc"/>
+      <source>Yaw (fırlanma) qolunu tam sola çevirin və bu vəziyyətdə saxlayın..</source>
+      <translation>Move the yaw stick all the way to the left and hold it there...</translation>
+    </message>
+    <message>
+      <location filename="../src/Vehicle/VehicleSetup/JoystickConfigController.cc"/>
+      <source>Yaw (fırlanma) qolunu tam sağa çevirin və bu vəziyyətdə saxlayın...</source>
+      <translation>Move the yaw stick all the way to the right and hold it there...</translation>
+    </message>
+    <message>
+      <location filename="../src/Vehicle/VehicleSetup/JoystickConfigController.cc"/>
+      <source>Roll (yan fırlanma) qolunu tam sola çevirin və bu vəziyyətdə saxlayın...</source>
+      <translation>Move the roll stick all the way to the left and hold it there...</translation>
+    </message>
+    <message>
+      <location filename="../src/Vehicle/VehicleSetup/JoystickConfigController.cc"/>
+      <source>Roll (yan fırlanma) qolunu tam sağa çevirin və bu vəziyyətdə saxlayın...</source>
+      <translation>Move the roll stick all the way to the right and hold it there...</translation>
+    </message>
+    <message>
+      <location filename="../src/Vehicle/VehicleSetup/JoystickConfigController.cc"/>
+      <source>Pitch (meyil) qolunu tam aşağı itələyin və bu vəziyyətdə saxlayın...</source>
+      <translation>Move the pitch stick all the way down and hold it there...</translation>
+    </message>
+    <message>
+      <location filename="../src/Vehicle/VehicleSetup/JoystickConfigController.cc"/>
+      <source>Pitch (meyil) qolunu tam yuxarı itələyin və bu vəziyyətdə saxlayın...</source>
+      <translation>Move the pitch stick all the way up and hold it there...</translation>
+    </message>
+    <message>
+      <location filename="../src/Vehicle/VehicleSetup/JoystickConfigController.cc"/>
+      <source>Pitch (meyil) qolunun mərkəzə qayıtmasına icazə verin...</source>
+      <translation>Allow the pitch stick to move back to center...</translation>
+    </message>
+    <message>
+      <location filename="../src/Vehicle/VehicleSetup/JoystickConfigController.cc"/>
+      <source>Bütün parametrlər qeydə alındı.
+Joysticki aktivləşdirmək üçün 'Sonrakı' düyməsinə basın.</source>
+      <translation>All settings have been captured.
+Press 'Next' to enable the joystick.</translation>
     </message>
 </context>
 <context>
@@ -1607,6 +2178,292 @@
       <location filename="../src/AnalyzeView/LogDownloadPage.qml"/>
       <source>Status</source>
       <translation>Status</translation>
+    </message>
+</context>
+<context>
+    <name>LogViewerAltChart</name>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerAltChart.qml"/>
+      <source>Hünd (m)</source>
+      <translation>Alt (m)</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerAltChart.qml"/>
+      <source>Cari</source>
+      <translation>Current</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerAltChart.qml"/>
+      <source>Maks</source>
+      <translation>Max</translation>
+    </message>
+</context>
+<context>
+    <name>LogViewerBaseChart</name>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerBaseChart.qml"/>
+      <source>Vaxt (yerli)</source>
+      <translation>Time (local)</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerBaseChart.qml"/>
+      <source>Keçən vaxt</source>
+      <translation>Elapsed time</translation>
+    </message>
+</context>
+<context>
+    <name>LogViewerChart</name>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerChart.qml"/>
+      <source>Rejim</source>
+      <translation>Mode</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerChart.qml"/>
+      <source>Hadisə</source>
+      <translation>Event</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerChart.qml"/>
+      <source>Xəta</source>
+      <translation>Error</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerChart.qml"/>
+      <source>Xəbərdarlıq</source>
+      <translation>Warning</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerChart.qml"/>
+      <source>Rejimlər</source>
+      <translation>Modes</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerChart.qml"/>
+      <source>İtkilər</source>
+      <translation>Dropouts</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerChart.qml"/>
+      <source>Hadisələr</source>
+      <translation>Events</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerChart.qml"/>
+      <source>Dəyər</source>
+      <translation>Value</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerChart.qml"/>
+      <source>Rejim:</source>
+      <translation>Mode:</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerChart.qml"/>
+      <source>Cari</source>
+      <translation>Current</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerChart.qml"/>
+      <source>Maks</source>
+      <translation>Max</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerChart.qml"/>
+      <source>Rejimlər:</source>
+      <translation>Modes:</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerChart.qml"/>
+      <source>Hadisələr:</source>
+      <translation>Events:</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerChart.qml"/>
+      <source>Kursoru qoymaq üçün klikləyin. Shift+sürüşdürmə kursoru daşıyır. Sürüşdürmə X oxunu yaxınlaşdırır. İkiqat klik miqyası sıfırlayır.</source>
+      <translation>Click to place the cursor. Shift+drag moves the cursor. Scrolling zooms the X axis. Double-click resets the zoom.</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerChart.qml"/>
+      <source>Miqyası sıfırla</source>
+      <translation>Reset zoom</translation>
+    </message>
+</context>
+<context>
+    <name>LogViewerCursorPopup</name>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerCursorPopup.qml"/>
+      <source> (yerli)  /  </source>
+      <translation> (local)  /  </translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerCursorPopup.qml"/>
+      <source> (keçən)</source>
+      <translation> (elapsed)</translation>
+    </message>
+</context>
+<context>
+    <name>LogViewerFieldsPanel</name>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerFieldsPanel.qml"/>
+      <source>Digər</source>
+      <translation>Other</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerFieldsPanel.qml"/>
+      <source>Sahələr: %1  Parametrlər: %2  Hadisələr: %3</source>
+      <translation>Fields: %1  Parameters: %2  Events: %3</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerFieldsPanel.qml"/>
+      <source>X oxu:</source>
+      <translation>X axis:</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerFieldsPanel.qml"/>
+      <source>Keçən vaxt</source>
+      <translation>Elapsed time</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerFieldsPanel.qml"/>
+      <source>Yerli vaxt</source>
+      <translation>Local time</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerFieldsPanel.qml"/>
+      <source>Sahələr</source>
+      <translation>Fields</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerFieldsPanel.qml"/>
+      <source>Sahələrdə axtar</source>
+      <translation>Search fields</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerFieldsPanel.qml"/>
+      <source>Seçimi təmizlə</source>
+      <translation>Clear selection</translation>
+    </message>
+</context>
+<context>
+    <name>LogViewerParametersTab</name>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerParametersTab.qml"/>
+      <source>Parametrlərdə axtar</source>
+      <translation>Search parameters</translation>
+    </message>
+    <message>
+      <location filename="../src/AnalyzeView/LogViewer/LogViewerParametersTab.qml"/>
+      <source>Yalnız dəyişənlər</source>
+      <translation>Changed only</translation>
+    </message>
+</context>
+<context>
+    <name>LogViewer_Page</name>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>Log Analizi</source>
+      <translation>Log Analysis</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>DataFlash (.bin), PX4 ULog (.ulg) və telemetriya (.tlog) loglarını vahid iş axınında açır və təhlil edir.</source>
+      <translation>Opens and analyzes DataFlash (.bin), PX4 ULog (.ulg) and telemetry (.tlog) logs in a single workflow.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>.bin aç</source>
+      <translation>Open .bin</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>.ulg aç</source>
+      <translation>Open .ulg</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>.tlog aç</source>
+      <translation>Open .tlog</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>Telemetriya təkrar oynatmasından əvvəl aktiv aparat bağlantılarını kəsin.</source>
+      <translation>Disconnect active vehicle links before telemetry replay.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>Təmizlə</source>
+      <translation>Clear</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>Log seçilməyib</source>
+      <translation>No log selected</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>Başlama vaxtı:</source>
+      <translation>Start time:</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>Aparat:</source>
+      <translation>Vehicle:</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>Yüklənir...</source>
+      <translation>Loading...</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>Dayandır</source>
+      <translation>Stop</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>Oynat</source>
+      <translation>Play</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>Qrafik</source>
+      <translation>Chart</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>Xəritə</source>
+      <translation>Map</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>Parametrlər</source>
+      <translation>Parameters</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>Mesajlar</source>
+      <translation>Messages</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>Bu logda GPS məlumatı tapılmadı</source>
+      <translation>No GPS data found in this log</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>Uçuş marşrutunu görmək üçün log faylı yükləyin</source>
+      <translation>Load a log file to see the flight path</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>Log faylını seçin</source>
+      <translation>Select a log file</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/LogViewer_Page.qml"/>
+      <source>Seçilmiş .tlog faylı üçün telemetriya təkrar oynatması başladıla bilmədi.</source>
+      <translation>Could not start telemetry replay for the selected .tlog file.</translation>
     </message>
 </context>
 <context>
@@ -1777,6 +2634,16 @@
       <source>Zəhmət olmasa yuxarıdan bir mesaj seçin.</source>
       <translation>Please select a message above.</translation>
     </message>
+    <message>
+      <location filename="../src/UI/MAXLink_Inspector.qml"/>
+      <source>Aktiv aparat yoxdur</source>
+      <translation>No active vehicle</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/MAXLink_Inspector.qml"/>
+      <source>Qoşulduqdan sonra MAVLink mesajları görünəcək.</source>
+      <translation>MAVLink messages will appear once connected.</translation>
+    </message>
 </context>
 <context>
     <name>MainStatusIndicator</name>
@@ -1799,6 +2666,16 @@
       <location filename="../src/QmlControls/MainStatusIndicator.qml"/>
       <source>Əlaqələr İtirildi</source>
       <translation>Communication Lost</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/MainStatusIndicator.qml"/>
+      <source>Uçuşda</source>
+      <translation>Flying</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/MainStatusIndicator.qml"/>
+      <source>Eniş</source>
+      <translation>Land</translation>
     </message>
 </context>
 <context>
@@ -1867,6 +2744,16 @@
       <location filename="../src/UI/MainWindow.qml"/>
       <source>Əlaqəni qur</source>
       <translation>Connect</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/MainWindow.qml"/>
+      <source>Bağlantı yoxdur. &quot;Konfiqurasiya&quot; ilə yeni bağlantı əlavə edin.</source>
+      <translation>No links. Add a new link with &quot;Configure&quot;.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/MainWindow.qml"/>
+      <source>Əlavə xətalar var: toxunun və siyahıya baxın</source>
+      <translation>There are more errors: tap to see the list</translation>
     </message>
 </context>
 <context>
@@ -2009,6 +2896,239 @@
       <location filename="../src/QmlControls/MissionStats.qml"/>
       <source>Ümumi Missiya</source>
       <translation>Total Mission</translation>
+    </message>
+</context>
+<context>
+    <name>NTRIP_Settings</name>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Bu bölmə RTK dəqiqliyi üçün NTRIP kaster bağlantısını və RTCM korreksiya axınını idarə edir.</source>
+      <translation>This section manages the NTRIP caster connection and the RTCM correction stream for RTK accuracy.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Bağlantı</source>
+      <translation>Connection</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Bağlantı yoxdur</source>
+      <translation>No connection</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Əlçatmazdır</source>
+      <translation>Unavailable</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Qoşulur…</source>
+      <translation>Connecting…</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Yenidən qoşulur…</source>
+      <translation>Reconnecting…</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Ayır</source>
+      <translation>Disconnect</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Qoşul</source>
+      <translation>Connect</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Alınan mesajlar</source>
+      <translation>Messages received</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Alınan məlumat</source>
+      <translation>Data received</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Təyyarəyə göndərilən</source>
+      <translation>Sent to vehicle</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>GGA mənbəyi</source>
+      <translation>GGA source</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Qoşuludur, lakin son vaxtlar məlumat alınmır.</source>
+      <translation>Connected, but no data received recently.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Kaster Serveri</source>
+      <translation>Caster Server</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Host ünvanı</source>
+      <translation>Host address</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>İstifadəçi adı</source>
+      <translation>Username</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Şifrə</source>
+      <translation>Password</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Gizlə</source>
+      <translation>Hide</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Göstər</source>
+      <translation>Show</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>TLS şifrələmə</source>
+      <translation>TLS encryption</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Bəzi kasterlər üçün tələb olunur (adətən port 2102).</source>
+      <translation>Required by some casters (usually port 2102).</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Öz-imzalı sertifikatı qəbul et</source>
+      <translation>Accept self-signed certificate</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Yalnız öz-imzalı zəncir buraxılır; digər bütün TLS xətaları ölümcül qalır.</source>
+      <translation>Only a self-signed chain is allowed; all other TLS errors remain fatal.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Mountpoint adı</source>
+      <translation>Mountpoint name</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Boş buraxılsa, TCP üzərindən xam RTCM dinlənilir.</source>
+      <translation>If left empty, raw RTCM is received over TCP.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Axtar</source>
+      <translation>Search</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Mountpoint siyahısı alınır…</source>
+      <translation>Fetching mountpoint list…</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>GGA Mövqe Bildirişi</source>
+      <translation>GGA Position Reporting</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Mövqe mənbəyi</source>
+      <translation>Position source</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Avto rejim mövcud ən yaxşı mənbəni seçir.</source>
+      <translation>Auto mode picks the best available source.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Göndərmə intervalı</source>
+      <translation>Send interval</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>VRS mountpoint-ləri adətən 1-10 saniyə tələb edir.</source>
+      <translation>VRS mountpoints usually require 1-10 seconds.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>RTCM Mesaj Filtri</source>
+      <translation>RTCM Message Filter</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Buraxılan mesaj İD-ləri</source>
+      <translation>Allowed message IDs</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Vergüllə ayrılmış siyahı, məsələn 1005,1077,1087. Boş buraxılsa hamısı ötürülür.</source>
+      <translation>Comma-separated list, e.g. 1005,1077,1087. If left empty, all are forwarded.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>UDP Yönləndirmə</source>
+      <translation>UDP Forwarding</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>RTCM-i UDP ilə yönləndir</source>
+      <translation>Forward RTCM over UDP</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Alınan korreksiyaları başqa tətbiqə ötürür.</source>
+      <translation>Forwards received corrections to another application.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Hədəf ünvanı</source>
+      <translation>Target address</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Hədəf portu</source>
+      <translation>Target port</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>UDP RTCM Girişi</source>
+      <translation>UDP RTCM Input</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>UDP RTCM girişini aktivləşdir</source>
+      <translation>Enable UDP RTCM input</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Xarici mənbədən gələn RTCM3 axınını təyyarəyə ötürür.</source>
+      <translation>Forwards an RTCM3 stream from an external source to the vehicle.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Dinlənilən port</source>
+      <translation>Listening port</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>Məlumatı yoxla</source>
+      <translation>Validate data</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/NTRIP_Settings.qml"/>
+      <source>RTCM kadrlarını CRC ilə yoxlayır və zibil məlumatı atır.</source>
+      <translation>Checks RTCM frames with CRC and discards garbage data.</translation>
     </message>
 </context>
 <context>
@@ -2307,6 +3427,11 @@
       <source>Xəbərdarlıq: Təyyarənin uçuşda olduğu zaman dəyərlərin dəyişdirilməsi təyyarənin qeyri-sabitliyinə və mümkün təyyarə itkisinə səbəb ola bilər. </source>
       <translation>Warning: Changing values while the vehicle is in flight can lead to vehicle instability and possible loss of the vehicle. </translation>
     </message>
+    <message>
+      <location filename="../src/QmlControls/ParameterEditorDialog.qml"/>
+      <source>Defolt</source>
+      <translation>Default</translation>
+    </message>
 </context>
 <context>
     <name>PlanToolBarIndicators</name>
@@ -2389,6 +3514,51 @@
       <location filename="../src/QmlControls/PlanToolBarIndicators.qml"/>
       <source>və ya ROI-ni ləğv edin</source>
       <translation>or cancel the ROI</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/PlanToolBarIndicators.qml"/>
+      <source>Plan `%1`-də yadda saxlanıldı</source>
+      <translation>Plan saved to `%1`</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/PlanToolBarIndicators.qml"/>
+      <source>Waypoint əlavə etmək üçün xəritəyə klikləyin</source>
+      <translation>Click on the map to add a waypoint</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/PlanToolBarIndicators.qml"/>
+      <source>Rally Point əlavə etmək üçün xəritəyə klikləyin</source>
+      <translation>Click on the map to add a rally point</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/PlanToolBarIndicators.qml"/>
+      <source>ROI əlavə etmək üçün %1</source>
+      <translation>%1 to add an ROI</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/PlanToolBarIndicators.qml"/>
+      <source>basıb saxlayın</source>
+      <translation>Press and hold</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/PlanToolBarIndicators.qml"/>
+      <source>sağ klikləyin</source>
+      <translation>Right-click</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/PlanToolBarIndicators.qml"/>
+      <source> və ya ROI-ni ləğv edin</source>
+      <translation> or cancel the ROI</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/PlanToolBarIndicators.qml"/>
+      <source>KML kimi yadda saxla</source>
+      <translation>Save as KML</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/PlanToolBarIndicators.qml"/>
+      <source>Təyyarədən endir</source>
+      <translation>Download from vehicle</translation>
     </message>
 </context>
 <context>
@@ -2548,6 +3718,59 @@
       <source>Yeni hündürlük tətbiq edin</source>
       <translation>Apply new altitude</translation>
     </message>
+    <message>
+      <location filename="../src/QmlControls/PlanView.qml"/>
+      <source>Relyef profili</source>
+      <translation>Terrain profile</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/PlanView.qml"/>
+      <source>Missiya statistikası</source>
+      <translation>Mission statistics</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/PlanView.qml"/>
+      <source>Gizlət</source>
+      <translation>Hide</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/PlanView.qml"/>
+      <source>KML kimi yadda saxla...</source>
+      <translation>Save as KML...</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/PlanView.qml"/>
+      <source>KML yaratmaq üçün ən azı bir missiya elementi lazımdır.</source>
+      <translation>At least one mission item is needed to create a KML.</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/PlanView.qml"/>
+      <source>Təyyarə</source>
+      <translation>Vehicle</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/PlanView.qml"/>
+      <source>Təyyarəyə yüklə</source>
+      <translation>Upload to vehicle</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/PlanView.qml"/>
+      <source>Təyyarədən endir</source>
+      <translation>Download from vehicle</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/PlanView.qml"/>
+      <source>Təyyarədən təmizlə</source>
+      <translation>Clear from vehicle</translation>
+    </message>
+</context>
+<context>
+    <name>PlanViewToolBar</name>
+    <message>
+      <location filename="../src/QmlControls/PlanViewToolBar.qml"/>
+      <source>Ana Səhifə</source>
+      <translation>Home</translation>
+    </message>
 </context>
 <context>
     <name>PreFlightBatteryCheck</name>
@@ -2583,6 +3806,11 @@
       <location filename="../src/FlightDisplay/PreFlightCheckList.qml"/>
       <source>Davam edir</source>
       <translation>In progress</translation>
+    </message>
+    <message>
+      <location filename="../src/FlightDisplay/PreFlightCheckList.qml"/>
+      <source>Keçdi</source>
+      <translation>Passed</translation>
     </message>
 </context>
 <context>
@@ -2670,6 +3898,11 @@
       <location filename="../src/QGCApplication.cc"/>
       <source>Proqram proqramında parametrlər yoxdur. Siz tam dəstəklənməyən mikroproqram versiyasını işlədirsiniz və ya proqram təminatınızda səhv var. Çatışmayan parametrlər: %1</source>
       <translation>The firmware is missing parameters. You are either running a firmware version which is not fully supported or there is a bug in your firmware. Missing parameters: %1</translation>
+    </message>
+    <message>
+      <location filename="../src/QGCApplication.cc"/>
+      <source>The format for %1 saved settings has been modified. Yadda saxladığınız parametrlər defoltlara sıfırlandı.</source>
+      <translation>The format for %1 saved settings has been modified. Your saved settings have been reset to defaults.</translation>
     </message>
 </context>
 <context>
@@ -2942,6 +4175,11 @@
       <source>Vibrasiya</source>
       <translation>Vibration</translation>
     </message>
+    <message>
+      <location filename="../src/UI/Qeyd_Analizi.qml"/>
+      <source>Log Analizi</source>
+      <translation>Log Analysis</translation>
+    </message>
 </context>
 <context>
     <name>QmlTest</name>
@@ -2975,6 +4213,24 @@
       <location filename="../src/QmlControls/RallyPointEditorHeader.qml"/>
       <source>Rally Points, Return to Launch (RTL) yerinə yetirərkən alternativ enmə nöqtələri təmin edir.</source>
       <translation>Rally Points provide alternate landing points when performing a Return to Launch (RTL).</translation>
+    </message>
+</context>
+<context>
+    <name>RallyPointItemEditor</name>
+    <message>
+      <location filename="../src/QmlControls/RallyPointItemEditor.qml"/>
+      <source>Enlik</source>
+      <translation>Latitude</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/RallyPointItemEditor.qml"/>
+      <source>Uzunluq</source>
+      <translation>Longitude</translation>
+    </message>
+    <message>
+      <location filename="../src/QmlControls/RallyPointItemEditor.qml"/>
+      <source>Nisbi Hündürlük</source>
+      <translation>Relative Altitude</translation>
     </message>
 </context>
 <context>
@@ -3145,6 +4401,16 @@
       <source>Uçuş paneli</source>
       <translation>Flight panel</translation>
     </message>
+    <message>
+      <location filename="../src/UI/SideMenu.qml"/>
+      <source>Ana Səhifə</source>
+      <translation>Home</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu.qml"/>
+      <source>Uçuş Paneli</source>
+      <translation>Flight Panel</translation>
+    </message>
 </context>
 <context>
     <name>SideMenu_AparatQurgusu</name>
@@ -3242,6 +4508,31 @@ Waiting for autopilot connection</translation>
       <location filename="../src/UI/SideMenu_Cercive.qml"/>
       <source>Çərçivə Konfiqurasiyası</source>
       <translation>Airframe Configuration</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Cercive.qml"/>
+      <source>Parametrlər yüklənir...</source>
+      <translation>Loading parameters...</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Cercive.qml"/>
+      <source>Aktiv aparat yoxdur</source>
+      <translation>No active vehicle</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Cercive.qml"/>
+      <source>Avtopilot bağlantısını gözləyin</source>
+      <translation>Waiting for autopilot connection</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Cercive.qml"/>
+      <source>Qoşulduqdan sonra çərçivə seçilə bilər.</source>
+      <translation>The frame can be selected once connected.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Cercive.qml"/>
+      <source>'Tətbiq et' düyməsini klikləməklə, hava gövdəsi konfiqurasiyanızda etdiyiniz dəyişikliklər yadda saxlanılacaq&lt;br&gt;&lt;br&gt;Radio Kalibrləmədən başqa bütün təyyarə parametrləri sıfırlanacaq.&lt;br&gt;&lt;br&gt;Prosesi başa çatdırmaq üçün təyyarəniz də yenidən işə salınacaq.</source>
+      <translation>Clicking 'Apply' will save the changes you have made to your airframe configuration.&lt;br&gt;&lt;br&gt;All vehicle parameters other than Radio Calibration will be reset.&lt;br&gt;&lt;br&gt;Your vehicle will also be restarted in order to complete the process.</translation>
     </message>
 </context>
 <context>
@@ -3457,6 +4748,41 @@ Waiting for autopilot connection</translation>
       <location filename="../src/UI/SideMenu_Enerji.qml"/>
       <source>Əgər aparatın göndərdiyi cərəyan dəyəri ampermetrlə kənardan ölçdüyünüz dəyərdən xeyli fərqlənirsə, bunu düzəltmək üçün “volt başına amper” parametrini tənzimləyə bilərsiniz. Yeni dəyərin hesablanması üçün “Hesabla” düyməsinə klikləyin.</source>
       <translation>If the current reported by the vehicle differs significantly from the value you measure externally with an ammeter, you can adjust the amps per volt setting to correct this. Click Calculate to compute the new value.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Enerji.qml"/>
+      <source>Aktiv aparat yoxdur</source>
+      <translation>No active vehicle</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Enerji.qml"/>
+      <source>Avtopilot bağlantısını gözləyin</source>
+      <translation>Waiting for autopilot connection</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Enerji.qml"/>
+      <source>Qoşulduqdan sonra batareya parametrləri görünəcək.</source>
+      <translation>Battery parameters will appear once connected.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Enerji.qml"/>
+      <source>Batareya</source>
+      <translation>Battery</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Enerji.qml"/>
+      <source>Max Batareya</source>
+      <translation>Max Battery</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Enerji.qml"/>
+      <source>Min Batareya</source>
+      <translation>Min Battery</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Enerji.qml"/>
+      <source>Hesabla</source>
+      <translation>Calculate</translation>
     </message>
 </context>
 <context>
@@ -3709,6 +5035,36 @@ Waiting for autopilot connection</translation>
       <source>⚠️ Bir və ya bir neçə aktuator hələ də çıxışa təyin edilməyib.</source>
       <translation>⚠️ One or more actuators are still not assigned to an output.</translation>
     </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Motors.qml"/>
+      <source>Parametrlər yüklənir...</source>
+      <translation>Loading parameters...</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Motors.qml"/>
+      <source>Aktiv aparat yoxdur</source>
+      <translation>No active vehicle</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Motors.qml"/>
+      <source>Avtopilot bağlantısını gözləyin</source>
+      <translation>Waiting for autopilot connection</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Motors.qml"/>
+      <source>Qoşulduqdan sonra aktuatorlar görünəcək.</source>
+      <translation>Actuators will appear once connected.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Motors.qml"/>
+      <source>Aktuator çıxışları</source>
+      <translation>Actuator outputs</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Motors.qml"/>
+      <source>Bir və ya bir neçə aktuator hələ də çıxışa təyin edilməyib.</source>
+      <translation>One or more actuators are still not assigned to an output.</translation>
+    </message>
 </context>
 <context>
     <name>SideMenu_PIDTuning</name>
@@ -3728,6 +5084,26 @@ Waiting for autopilot connection</translation>
       <location filename="../src/UI/SideMenu_PIDTuning.qml"/>
       <source>Uçuşun stabilliyini və reaksiya sürətini yaxşılaşdırmaq üçün Rate və Attitude nəzarətçilərinin PID parametrlərini tənzimləyin. Qrafikdə Response/Setpoint davranışını izləyin.</source>
       <translation>Tune the PID parameters of the Rate and Attitude controllers to improve flight stability and response. Watch the Response/Setpoint behaviour in the chart.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_PIDTuning.qml"/>
+      <source>Parametrlər yüklənir...</source>
+      <translation>Loading parameters...</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_PIDTuning.qml"/>
+      <source>Aktiv aparat yoxdur</source>
+      <translation>No active vehicle</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_PIDTuning.qml"/>
+      <source>Avtopilot bağlantısını gözləyin</source>
+      <translation>Waiting for autopilot connection</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_PIDTuning.qml"/>
+      <source>Qoşulduqdan sonra PID parametrləri görünəcək.</source>
+      <translation>PID parameters will appear once connected.</translation>
     </message>
 </context>
 <context>
@@ -4066,6 +5442,36 @@ Waiting for autopilot connection</translation>
       <source>XƏBƏRDARLIQ: Təyyarəniz uçuşdan əvvəl quraşdırma tələb edir. Zəhmət olmasa, soldakı menyudan istifadə edərək qırmızı ilə işarələnmiş elementləri həll edin.</source>
       <translation>WARNING: Your vehicle requires setup before flight. Please resolve the items marked in red using the menu on the left.</translation>
     </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Summary.qml"/>
+      <source>Parametrlər yüklənir...</source>
+      <translation>Loading parameters...</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Summary.qml"/>
+      <source>Aktiv aparat yoxdur</source>
+      <translation>No active vehicle</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Summary.qml"/>
+      <source>Avtopilot bağlantısını gözləyin</source>
+      <translation>Waiting for autopilot connection</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Summary.qml"/>
+      <source>Qoşulduqdan sonra xülasə görünəcək.</source>
+      <translation>The summary will appear once connected.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Summary.qml"/>
+      <source>Hazırdır</source>
+      <translation>Ready</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Summary.qml"/>
+      <source>Quraşdırılmayıb</source>
+      <translation>Not set up</translation>
+    </message>
 </context>
 <context>
     <name>SideMenu_Tehlukesizlik</name>
@@ -4268,6 +5674,26 @@ Waiting for autopilot connection</translation>
       <source>Xəbərdarlıq səviyyəsi:</source>
       <translation>Warning level:</translation>
     </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Tehlukesizlik.qml"/>
+      <source>Parametrlər yüklənir...</source>
+      <translation>Loading parameters...</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Tehlukesizlik.qml"/>
+      <source>Aktiv aparat yoxdur</source>
+      <translation>No active vehicle</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Tehlukesizlik.qml"/>
+      <source>Avtopilot bağlantısını gözləyin</source>
+      <translation>Waiting for autopilot connection</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/SideMenu_Tehlukesizlik.qml"/>
+      <source>Qoşulduqdan sonra parametrlər görünəcək.</source>
+      <translation>Parameters will appear once connected.</translation>
+    </message>
 </context>
 <context>
     <name>Side_Parameter</name>
@@ -4374,6 +5800,39 @@ Note that this will also completely reset everything, including UAVCAN nodes, al
       <location filename="../src/UI/Side_Parameter.qml"/>
       <source>Yeniləyin</source>
       <translation>Refresh</translation>
+    </message>
+</context>
+<context>
+    <name>Side_ParameterPage</name>
+    <message>
+      <location filename="../src/UI/Side_ParameterPage.qml"/>
+      <source>Parametrlər</source>
+      <translation>Parameters</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Side_ParameterPage.qml"/>
+      <source>Parametrləri axtarın, kateqoriya və qruplara görə seçin.</source>
+      <translation>Search parameters, and select them by category and group.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Side_ParameterPage.qml"/>
+      <source>Parametrlər yüklənir...</source>
+      <translation>Loading parameters...</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Side_ParameterPage.qml"/>
+      <source>Aktiv aparat yoxdur</source>
+      <translation>No active vehicle</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Side_ParameterPage.qml"/>
+      <source>Avtopilot bağlantısını gözləyin</source>
+      <translation>Waiting for autopilot connection</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/Side_ParameterPage.qml"/>
+      <source>Qoşulduqdan sonra parametrlər görünəcək.</source>
+      <translation>Parameters will appear once connected.</translation>
     </message>
 </context>
 <context>
@@ -5046,6 +6505,46 @@ Note that this will also completely reset everything, including UAVCAN nodes, al
       <source>Ümumi Vəziyyət</source>
       <translation>Overall Status</translation>
     </message>
+    <message>
+      <location filename="../src/UI/TopStatusMessage.qml"/>
+      <source>Xəta</source>
+      <translation>Error</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusMessage.qml"/>
+      <source>Söndürülüb</source>
+      <translation>Disabled</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusMessage.qml"/>
+      <source>Naməlum</source>
+      <translation>Unknown</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusMessage.qml"/>
+      <source>Aparat qoşulmayıb.</source>
+      <translation>Vehicle not connected.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusMessage.qml"/>
+      <source>Motorlar aktivdir.</source>
+      <translation>Motors are armed.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusMessage.qml"/>
+      <source>Uçuş üçün motorları aktivləşdirin.</source>
+      <translation>Arm the motors to fly.</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusMessage.qml"/>
+      <source>Aparat mesajları</source>
+      <translation>Vehicle messages</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusMessage.qml"/>
+      <source>Heç bir aparat qoşulmayıb</source>
+      <translation>No vehicle connected</translation>
+    </message>
 </context>
 <context>
     <name>TopStatusPanel</name>
@@ -5189,6 +6688,54 @@ Note that this will also completely reset everything, including UAVCAN nodes, al
       <source>Əlaqələr İtirildi</source>
       <translation>Communication Lost</translation>
     </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel.qml"/>
+      <source>Bağlantı Yoxdur</source>
+      <translation>Not Connected</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel.qml"/>
+      <source>Uçuşda</source>
+      <translation>Flying</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel.qml"/>
+      <source>Əlaqə yoxdur</source>
+      <translation>No link</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel.qml"/>
+      <source>Çıxış</source>
+      <translation>Exit</translation>
+    </message>
+</context>
+<context>
+    <name>TopStatusPanel_Battery</name>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Battery.qml"/>
+      <source>Batareya</source>
+      <translation>Battery</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Battery.qml"/>
+      <source>Doldurma vəziyyəti</source>
+      <translation>Charge state</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Battery.qml"/>
+      <source>Qalan</source>
+      <translation>Remaining</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Battery.qml"/>
+      <source>Gərginlik</source>
+      <translation>Voltage</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Battery.qml"/>
+      <source>İstifadə olunub</source>
+      <translation>Consumed</translation>
+    </message>
 </context>
 <context>
     <name>TopStatusPanel_Battery_Settings</name>
@@ -5264,6 +6811,14 @@ Note that this will also completely reset everything, including UAVCAN nodes, al
     </message>
 </context>
 <context>
+    <name>TopStatusPanel_Checklist</name>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Checklist.qml"/>
+      <source>Uçuşdan əvvəl yoxlama</source>
+      <translation>Preflight checklist</translation>
+    </message>
+</context>
+<context>
     <name>TopStatusPanel_GPS</name>
     <message>
       <location filename="../src/UI/TopStatusPanel_GPS.qml"/>
@@ -5274,6 +6829,152 @@ Note that this will also completely reset everything, including UAVCAN nodes, al
       <location filename="../src/UI/TopStatusPanel_GPS.qml"/>
       <source>Status</source>
       <translation>Status</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS.qml"/>
+      <source>Aparatın GPS vəziyyəti</source>
+      <translation>Vehicle GPS status</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS.qml"/>
+      <source>Aparat qoşulmayıb</source>
+      <translation>Vehicle not connected</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS.qml"/>
+      <source>Peyklər</source>
+      <translation>Satellites</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS.qml"/>
+      <source>GPS kilidi</source>
+      <translation>GPS lock</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS.qml"/>
+      <source>Yer üzrə istiqamət</source>
+      <translation>Course over ground</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS.qml"/>
+      <source>RTK GPS vəziyyəti</source>
+      <translation>RTK GPS status</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS.qml"/>
+      <source>Vəziyyət</source>
+      <translation>Status</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS.qml"/>
+      <source>Survey-in aktivdir</source>
+      <translation>Survey-in active</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS.qml"/>
+      <source>RTK yayımlanır</source>
+      <translation>RTK streaming</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS.qml"/>
+      <source>Müddət</source>
+      <translation>Duration</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS.qml"/>
+      <source>Dəqiqlik</source>
+      <translation>Accuracy</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS.qml"/>
+      <source>Cari dəqiqlik</source>
+      <translation>Current accuracy</translation>
+    </message>
+</context>
+<context>
+    <name>TopStatusPanel_GPS_Settings</name>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS_Settings.qml"/>
+      <source>RTK GPS Tənzimləmələri</source>
+      <translation>RTK GPS Settings</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS_Settings.qml"/>
+      <source>Avtomatik qoşulma</source>
+      <translation>Auto connect</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS_Settings.qml"/>
+      <source>Göstərilən tənzimləmələr</source>
+      <translation>Specified settings</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS_Settings.qml"/>
+      <source>Mövqeyi göstər</source>
+      <translation>Show position</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS_Settings.qml"/>
+      <source>Dəqiqlik</source>
+      <translation>Accuracy</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS_Settings.qml"/>
+      <source>Minimum müddət</source>
+      <translation>Minimum duration</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS_Settings.qml"/>
+      <source>Cari baza mövqeyi</source>
+      <translation>Current base position</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS_Settings.qml"/>
+      <source>Yadda saxla</source>
+      <translation>Save</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_GPS_Settings.qml"/>
+      <source>Hələ etibarlı deyil</source>
+      <translation>Not valid yet</translation>
+    </message>
+</context>
+<context>
+    <name>TopStatusPanel_RCSignal</name>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_RCSignal.qml"/>
+      <source>RC Siqnalı</source>
+      <translation>RC Signal</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_RCSignal.qml"/>
+      <source>Vəziyyət</source>
+      <translation>Status</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_RCSignal.qml"/>
+      <source>Qoşulub</source>
+      <translation>Connected</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_RCSignal.qml"/>
+      <source>Qoşulmayıb</source>
+      <translation>Not connected</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_RCSignal.qml"/>
+      <source>Bəli</source>
+      <translation>Yes</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_RCSignal.qml"/>
+      <source>Xeyr</source>
+      <translation>No</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_RCSignal.qml"/>
+      <source>Kanallar</source>
+      <translation>Channels</translation>
     </message>
 </context>
 <context>
@@ -5353,6 +7054,81 @@ Note that this will also completely reset everything, including UAVCAN nodes, al
       <source>Əla Siqnal</source>
       <translation>Excellent Signal</translation>
     </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Telemetry.qml"/>
+      <source>Telemetriya</source>
+      <translation>Telemetry</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Telemetry.qml"/>
+      <source>Aparat yoxdur</source>
+      <translation>No vehicle</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Telemetry.qml"/>
+      <source>Əlaqə yoxdur</source>
+      <translation>No link</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Telemetry.qml"/>
+      <source>Yerli RSSI</source>
+      <translation>Local RSSI</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Telemetry.qml"/>
+      <source>Uzaq RSSI</source>
+      <translation>Remote RSSI</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Telemetry.qml"/>
+      <source>RX səhvləri</source>
+      <translation>RX errors</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Telemetry.qml"/>
+      <source>Düzəldilən səhvlər</source>
+      <translation>Corrected errors</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Telemetry.qml"/>
+      <source>TX bufer</source>
+      <translation>TX buffer</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Telemetry.qml"/>
+      <source>Yerli səs-küy</source>
+      <translation>Local noise</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Telemetry.qml"/>
+      <source>Uzaq səs-küy</source>
+      <translation>Remote noise</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Telemetry.qml"/>
+      <source>Telemetriya yoxdur</source>
+      <translation>No telemetry</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Telemetry.qml"/>
+      <source>Əla siqnal</source>
+      <translation>Excellent signal</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Telemetry.qml"/>
+      <source>Yaxşı siqnal</source>
+      <translation>Good signal</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Telemetry.qml"/>
+      <source>Orta siqnal</source>
+      <translation>Fair signal</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_Telemetry.qml"/>
+      <source>Zəif siqnal</source>
+      <translation>Weak signal</translation>
+    </message>
 </context>
 <context>
     <name>TopStatusPanel_UDPPosition</name>
@@ -5415,6 +7191,41 @@ Note that this will also completely reset everything, including UAVCAN nodes, al
       <location filename="../src/UI/TopStatusPanel_UDPPosition.qml"/>
       <source>Sürət</source>
       <translation>Speed</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_UDPPosition.qml"/>
+      <source>UDP Xarici Pozisiya</source>
+      <translation>UDP External Position</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_UDPPosition.qml"/>
+      <source>Vəziyyət</source>
+      <translation>Status</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_UDPPosition.qml"/>
+      <source>Passiv</source>
+      <translation>Passive</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_UDPPosition.qml"/>
+      <source>Aktiv port: %1</source>
+      <translation>Active port: %1</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_UDPPosition.qml"/>
+      <source>Məlumat</source>
+      <translation>Data</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_UDPPosition.qml"/>
+      <source>Enlik</source>
+      <translation>Latitude</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_UDPPosition.qml"/>
+      <source>Uzunluq</source>
+      <translation>Longitude</translation>
     </message>
 </context>
 <context>
@@ -5494,6 +7305,21 @@ Note that this will also completely reset everything, including UAVCAN nodes, al
       <location filename="../src/UI/TopStatusPanel_VehicleSelector.qml"/>
       <source>Qoşulu aparat yoxdur</source>
       <translation>No vehicle connected</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_VehicleSelector.qml"/>
+      <source>Aparat %1</source>
+      <translation>Vehicle %1</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_VehicleSelector.qml"/>
+      <source>Aktiv</source>
+      <translation>Active</translation>
+    </message>
+    <message>
+      <location filename="../src/UI/TopStatusPanel_VehicleSelector.qml"/>
+      <source>Keçmək üçün aparata basın.</source>
+      <translation>Tap a vehicle to switch to it.</translation>
     </message>
 </context>
 <context>
@@ -5649,6 +7475,17 @@ Note that this will also completely reset everything, including UAVCAN nodes, al
     </message>
 </context>
 <context>
+    <name>UDPWorker</name>
+    <message>
+      <source>Məlumatı Oxumaq Mümkün olmadı - Əlaqə kəsildi!</source>
+      <translation>Could Not Read Data - Connection lost!</translation>
+    </message>
+    <message>
+      <source>Məlumatı Oxumaq Mümkün olmadı - Məlumat yoxdur!</source>
+      <translation>Could Not Read Data - No data!</translation>
+    </message>
+</context>
+<context>
     <name>UnitsSettings</name>
     <message>
       <location filename="../src/Settings/UnitsSettings.cc"/>
@@ -5674,6 +7511,76 @@ Note that this will also completely reset everything, including UAVCAN nodes, al
       <location filename="../src/Settings/UnitsSettings.cc"/>
       <source>Şaquli məsafə</source>
       <translation>Vertical Distance</translation>
+    </message>
+    <message>
+      <location filename="../src/Settings/UnitsSettings.cc"/>
+      <source>Metr</source>
+      <translation>Meters</translation>
+    </message>
+    <message>
+      <location filename="../src/Settings/UnitsSettings.cc"/>
+      <source>Kvadrat Fut</source>
+      <translation>Square Feet</translation>
+    </message>
+    <message>
+      <location filename="../src/Settings/UnitsSettings.cc"/>
+      <source>Kvadrat Metr</source>
+      <translation>Square Meters</translation>
+    </message>
+    <message>
+      <location filename="../src/Settings/UnitsSettings.cc"/>
+      <source>Kvadrat Kilometr</source>
+      <translation>Square Kilometers</translation>
+    </message>
+    <message>
+      <location filename="../src/Settings/UnitsSettings.cc"/>
+      <source>Hektar</source>
+      <translation>Hectares</translation>
+    </message>
+    <message>
+      <location filename="../src/Settings/UnitsSettings.cc"/>
+      <source>Akr</source>
+      <translation>Acres</translation>
+    </message>
+    <message>
+      <location filename="../src/Settings/UnitsSettings.cc"/>
+      <source>Kvadrat Mil</source>
+      <translation>Square Miles</translation>
+    </message>
+    <message>
+      <location filename="../src/Settings/UnitsSettings.cc"/>
+      <source>Fut/saniyə</source>
+      <translation>Feet/second</translation>
+    </message>
+    <message>
+      <location filename="../src/Settings/UnitsSettings.cc"/>
+      <source>Metr/saniyə</source>
+      <translation>Meters/second</translation>
+    </message>
+    <message>
+      <location filename="../src/Settings/UnitsSettings.cc"/>
+      <source>Mil/saat</source>
+      <translation>Miles/hour</translation>
+    </message>
+    <message>
+      <location filename="../src/Settings/UnitsSettings.cc"/>
+      <source>Kilometr/saat</source>
+      <translation>Kilometers/hour</translation>
+    </message>
+    <message>
+      <location filename="../src/Settings/UnitsSettings.cc"/>
+      <source>Selsi</source>
+      <translation>Celsius</translation>
+    </message>
+    <message>
+      <location filename="../src/Settings/UnitsSettings.cc"/>
+      <source>Farenheyt</source>
+      <translation>Fahrenheit</translation>
+    </message>
+    <message>
+      <location filename="../src/Settings/UnitsSettings.cc"/>
+      <source>Temperatur</source>
+      <translation>Temperature</translation>
     </message>
 </context>
 <context>
