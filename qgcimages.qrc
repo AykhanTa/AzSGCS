@@ -1,6 +1,18 @@
 <RCC>
     <qresource prefix="/qmlimages">
         <file alias="adsbVehicle.svg">src/FlightMap/Images/adsbVehicle.svg</file>
+        <file alias="Calibration/Arrow-2/VehicleDown.png">src/AutoPilotPlugins/PX4/Images/Calibration/Arrow-2/VehicleDown.png</file>
+        <file alias="Calibration/Arrow-2/VehicleDownRotate.png">src/AutoPilotPlugins/PX4/Images/Calibration/Arrow-2/VehicleDownRotate.png</file>
+        <file alias="Calibration/Arrow-2/VehicleLeft.png">src/AutoPilotPlugins/PX4/Images/Calibration/Arrow-2/VehicleLeft.png</file>
+        <file alias="Calibration/Arrow-2/VehicleLeftRotate.png">src/AutoPilotPlugins/PX4/Images/Calibration/Arrow-2/VehicleLeftRotate.png</file>
+        <file alias="Calibration/Arrow-2/VehicleNoseDown.png">src/AutoPilotPlugins/PX4/Images/Calibration/Arrow-2/VehicleNoseDown.png</file>
+        <file alias="Calibration/Arrow-2/VehicleNoseDownRotate.png">src/AutoPilotPlugins/PX4/Images/Calibration/Arrow-2/VehicleNoseDownRotate.png</file>
+        <file alias="Calibration/Arrow-2/VehicleRight.png">src/AutoPilotPlugins/PX4/Images/Calibration/Arrow-2/VehicleRight.png</file>
+        <file alias="Calibration/Arrow-2/VehicleRightRotate.png">src/AutoPilotPlugins/PX4/Images/Calibration/Arrow-2/VehicleRightRotate.png</file>
+        <file alias="Calibration/Arrow-2/VehicleTailDown.png">src/AutoPilotPlugins/PX4/Images/Calibration/Arrow-2/VehicleTailDown.png</file>
+        <file alias="Calibration/Arrow-2/VehicleTailDownRotate.png">src/AutoPilotPlugins/PX4/Images/Calibration/Arrow-2/VehicleTailDownRotate.png</file>
+        <file alias="Calibration/Arrow-2/VehicleUpsideDown.png">src/AutoPilotPlugins/PX4/Images/Calibration/Arrow-2/VehicleUpsideDown.png</file>
+        <file alias="Calibration/Arrow-2/VehicleUpsideDownRotate.png">src/AutoPilotPlugins/PX4/Images/Calibration/Arrow-2/VehicleUpsideDownRotate.png</file>
         <file alias="Airframe/AirframeSimulation.svg">src/AutoPilotPlugins/Common/Images/AirframeSimulation.svg</file>
         <file alias="Airframe/AirframeUnknown.svg">src/AutoPilotPlugins/Common/Images/AirframeUnknown.svg</file>
         <file alias="Airframe/Airship.svg">src/AutoPilotPlugins/Common/Images/Airship.svg</file>

@@ -54,6 +54,24 @@ Item {
         return ap.findKnownVehicleComponent(AutoPilotPlugin.KnownSensorsVehicleComponent)
     }
 
+    // The orientation artwork follows the airframe card picked on the Frame page; a card
+    // without its own set shows the stock one. Only PX4 has those cards.
+    Instantiator {
+        id:     airframeInstantiator
+        active: !!_root._activeVehicle && _root._activeVehicle.px4Firmware
+                && !!_root._activeVehicle.parameterManager && _root._activeVehicle.parameterManager.parametersReady
+
+        delegate: AirframeComponentController { }
+    }
+
+    /// Airframe card name -> its folder under :/qmlimages/Calibration
+    readonly property var _calImageSets: ({ "Arrow-2": "Calibration/Arrow-2/" })
+    readonly property string _calImageDir: {
+        var airframe = airframeInstantiator.object
+        var imageSet = airframe ? _calImageSets[airframe.currentAirframeType] : undefined
+        return "qrc:///qmlimages/" + (imageSet || "")
+    }
+
     readonly property real _m:            AzTheme.px(_compact ? 12 : 16)
     readonly property real _side:         AzTheme.px(_stacked ? 12 : 20)
     readonly property real _top:          AzTheme.px(20)
@@ -762,7 +780,7 @@ Item {
                                                     calValid:           controller.orientationCalDownSideDone
                                                     calInProgress:      controller.orientationCalDownSideInProgress
                                                     calInProgressText:  controller.orientationCalDownSideRotate ? qsTr("Çevirin") : qsTr("Hələ tutun")
-                                                    imageSource:        controller.orientationCalDownSideRotate ? "qrc:///qmlimages/VehicleDownRotate.png" : "qrc:///qmlimages/VehicleDown.png"
+                                                    imageSource:        controller.orientationCalDownSideRotate ? _root._calImageDir + "VehicleDownRotate.png" : _root._calImageDir + "VehicleDown.png"
                                                 }
                                                 VehicleRotationCal {
                                                     width:              calGridArea.indicatorSize
@@ -771,7 +789,7 @@ Item {
                                                     calValid:           controller.orientationCalUpsideDownSideDone
                                                     calInProgress:      controller.orientationCalUpsideDownSideInProgress
                                                     calInProgressText:  controller.orientationCalUpsideDownSideRotate ? qsTr("Çevirin") : qsTr("Hələ tutun")
-                                                    imageSource:        controller.orientationCalUpsideDownSideRotate ? "qrc:///qmlimages/VehicleUpsideDownRotate.png" : "qrc:///qmlimages/VehicleUpsideDown.png"
+                                                    imageSource:        controller.orientationCalUpsideDownSideRotate ? _root._calImageDir + "VehicleUpsideDownRotate.png" : _root._calImageDir + "VehicleUpsideDown.png"
                                                 }
                                                 VehicleRotationCal {
                                                     width:              calGridArea.indicatorSize
@@ -780,7 +798,7 @@ Item {
                                                     calValid:           controller.orientationCalNoseDownSideDone
                                                     calInProgress:      controller.orientationCalNoseDownSideInProgress
                                                     calInProgressText:  controller.orientationCalNoseDownSideRotate ? qsTr("Çevirin") : qsTr("Hələ tutun")
-                                                    imageSource:        controller.orientationCalNoseDownSideRotate ? "qrc:///qmlimages/VehicleNoseDownRotate.png" : "qrc:///qmlimages/VehicleNoseDown.png"
+                                                    imageSource:        controller.orientationCalNoseDownSideRotate ? _root._calImageDir + "VehicleNoseDownRotate.png" : _root._calImageDir + "VehicleNoseDown.png"
                                                 }
                                                 VehicleRotationCal {
                                                     width:              calGridArea.indicatorSize
@@ -789,7 +807,7 @@ Item {
                                                     calValid:           controller.orientationCalTailDownSideDone
                                                     calInProgress:      controller.orientationCalTailDownSideInProgress
                                                     calInProgressText:  controller.orientationCalTailDownSideRotate ? qsTr("Çevirin") : qsTr("Hələ tutun")
-                                                    imageSource:        controller.orientationCalTailDownSideRotate ? "qrc:///qmlimages/VehicleTailDownRotate.png" : "qrc:///qmlimages/VehicleTailDown.png"
+                                                    imageSource:        controller.orientationCalTailDownSideRotate ? _root._calImageDir + "VehicleTailDownRotate.png" : _root._calImageDir + "VehicleTailDown.png"
                                                 }
                                                 VehicleRotationCal {
                                                     width:              calGridArea.indicatorSize
@@ -798,7 +816,7 @@ Item {
                                                     calValid:           controller.orientationCalLeftSideDone
                                                     calInProgress:      controller.orientationCalLeftSideInProgress
                                                     calInProgressText:  controller.orientationCalLeftSideRotate ? qsTr("Çevirin") : qsTr("Hələ tutun")
-                                                    imageSource:        controller.orientationCalLeftSideRotate ? "qrc:///qmlimages/VehicleLeftRotate.png" : "qrc:///qmlimages/VehicleLeft.png"
+                                                    imageSource:        controller.orientationCalLeftSideRotate ? _root._calImageDir + "VehicleLeftRotate.png" : _root._calImageDir + "VehicleLeft.png"
                                                 }
                                                 VehicleRotationCal {
                                                     width:              calGridArea.indicatorSize
@@ -807,7 +825,7 @@ Item {
                                                     calValid:           controller.orientationCalRightSideDone
                                                     calInProgress:      controller.orientationCalRightSideInProgress
                                                     calInProgressText:  controller.orientationCalRightSideRotate ? qsTr("Çevirin") : qsTr("Hələ tutun")
-                                                    imageSource:        controller.orientationCalRightSideRotate ? "qrc:///qmlimages/VehicleRightRotate.png" : "qrc:///qmlimages/VehicleRight.png"
+                                                    imageSource:        controller.orientationCalRightSideRotate ? _root._calImageDir + "VehicleRightRotate.png" : _root._calImageDir + "VehicleRight.png"
                                                 }
                                             }
                                         }
